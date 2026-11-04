@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, TestBed, fakeAsync, tick
+} from '@angular/core/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -7,7 +9,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { provideHttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
+import { createMock } from '@golevelup/ts-jest';
+import { AppLogoDto } from '@studio-lite-lib/api-dto';
 import { environment } from '../../../../../environments/environment';
 import { AppLogoComponent } from './app-logo.component';
 import { BackendService as ReadBackendService } from '../../../../services/backend.service';
@@ -71,26 +75,36 @@ describe('AppLogoComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+  // Saving replaces the stored logo and colours; a form without them would offer empty ones (#1969).
+  describe('the form before and after logo and colours are loaded', () => {
+    const notLoaded = (): HTMLElement | null => fixture.nativeElement
+      .querySelector('[data-cy="admin-app-logo-not-loaded"]');
+    const save = (): HTMLElement | null => fixture.nativeElement
+      .querySelector('[data-cy="admin-app-logo-save-button"]');
 
-  it('should initialize form with empty values', () => {
-    expect(component.configForm).toBeDefined();
-    expect(component.configForm.get('bodyBackground')).toBeDefined();
-    expect(component.configForm.get('boxBackground')).toBeDefined();
-  });
+    it('should be shown only once logo and colours have arrived', () => {
+      const appLogo = new Subject<AppLogoDto | null | false>();
+      readBackendService.getAppLogo.mockReturnValue(appLogo);
+      component.updateFormFields();
+      fixture.detectChanges();
 
-  it('should initialize imageError as empty string', () => {
-    expect(component.imageError).toBe('');
-  });
+      expect(save()).toBeNull();
+      expect(notLoaded()).toBeNull();
 
-  it('should load logo data on init', done => {
-    fixture.detectChanges();
-    setTimeout(() => {
-      expect(readBackendService.getAppLogo).toHaveBeenCalled();
-      done();
-    }, 100);
+      appLogo.next(null);
+      fixture.detectChanges();
+
+      expect(save()).not.toBeNull();
+    });
+
+    it('should give way to a hint when logo and colours could not be loaded', () => {
+      readBackendService.getAppLogo.mockReturnValue(of(false));
+      component.updateFormFields();
+      fixture.detectChanges();
+
+      expect(notLoaded()).not.toBeNull();
+      expect(save()).toBeNull();
+    });
   });
 
   it('should update form fields with loaded data', done => {
@@ -198,6 +212,47 @@ describe('AppLogoComponent', () => {
     expect(translateSpy).toHaveBeenCalledWith('logo.allowed-image-types', expect.any(Object));
   });
 
+  // An image beyond only one of the two limits was taken (#1964).
+  describe('the size of a logo image', () => {
+    const dataUrl = 'data:image/png;base64,logo';
+
+    afterEach(() => jest.restoreAllMocks());
+
+    const chooseImage = (width: number, height: number): void => {
+      const reader = createMock<FileReader>();
+      reader.readAsDataURL.mockImplementation(() => reader.onload?.call(
+        reader,
+        createMock<ProgressEvent<FileReader>>({ target: createMock<FileReader>({ result: dataUrl }) })
+      ));
+      jest.spyOn(window, 'FileReader').mockReturnValue(reader);
+      const image = createMock<HTMLImageElement>();
+      jest.spyOn(window, 'Image').mockReturnValue(image);
+      const file = new File(['logo'], 'logo.png', { type: 'image/png' });
+
+      component.imgFileChange(createMock<Event>({
+        target: createMock<HTMLInputElement>({ files: createMock<FileList>({ 0: file, length: 1 }) })
+      }));
+      image.onload?.call(image, createMock<Event>({ currentTarget: createMock<HTMLImageElement>({ width, height }) }));
+    };
+
+    it.each([
+      ['too wide', 30000, 100],
+      ['too high', 100, 20000]
+    ])('should refuse an image only %s', (_, width, height) => {
+      chooseImage(width, height);
+
+      expect(component.imageError).toBe('logo.not-allowed-image-size');
+      expect(component.logoImageBase64).not.toBe(dataUrl);
+    });
+
+    it('should take an image within both limits', () => {
+      chooseImage(100, 100);
+
+      expect(component.imageError).toBeNull();
+      expect(component.logoImageBase64).toBe(dataUrl);
+    });
+  });
+
   it('should handle empty file input', () => {
     const event = {
       target: {
@@ -209,4 +264,20 @@ describe('AppLogoComponent', () => {
     component.imgFileChange(event);
     expect(component.imageError).toBeNull();
   });
+
+  // #2094: what is entered while the save is under way was not sent, and a second save waits
+  it('keeps an entry made while saving unsaved and does not save twice meanwhile', fakeAsync(() => {
+    const answer = new Subject<boolean>();
+    writeBackendService.setAppLogo.mockReturnValue(answer);
+    fixture.detectChanges();
+    tick(100);
+    component.configForm.get('bodyBackground')?.setValue('#000000');
+    component.saveData();
+    component.logoImageBase64 = 'data:image/png;base64,danach';
+    component.saveData();
+    answer.next(true);
+
+    expect(writeBackendService.setAppLogo).toHaveBeenCalledTimes(1);
+    expect(component.dataChanged).toBe(true);
+  }));
 });

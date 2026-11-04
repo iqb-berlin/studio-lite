@@ -26,7 +26,6 @@ class MockBookletConfigEditComponent {
 }
 
 describe('ReviewConfigComponent', () => {
-  let component: ReviewConfigComponent;
   let fixture: ComponentFixture<ReviewConfigComponent>;
 
   beforeEach(async () => {
@@ -44,12 +43,7 @@ describe('ReviewConfigComponent', () => {
       .compileComponents();
 
     fixture = TestBed.createComponent(ReviewConfigComponent);
-    component = fixture.componentInstance;
     fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
   });
 
   describe('of a selected review', () => {
@@ -83,12 +77,5 @@ describe('ReviewConfigComponent', () => {
       expect(inputs().every(input => input.disabled)).toBe(true);
       expect(editComponents().every(edit => edit.disabled)).toBe(true);
     });
-  });
-
-  it('should handle name change', () => {
-    const emitSpy = jest.spyOn(component.nameChange, 'emit');
-    component.name = 'new name';
-    component.nameChange.emit('new name');
-    expect(emitSpy).toHaveBeenCalledWith('new name');
   });
 });

@@ -47,10 +47,6 @@ describe('CopyReviewLinkButtonComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('copies the review link and shows a snackbar', () => {
     component.copyLinkToClipboard();
 

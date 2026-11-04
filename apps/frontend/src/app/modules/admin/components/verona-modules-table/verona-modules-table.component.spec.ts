@@ -106,10 +106,6 @@ describe('VeronaModulesTableComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should set modules and update datasource', done => {
     component.modules = {
       m1: new VeronaModuleClass({
@@ -154,13 +150,5 @@ describe('VeronaModulesTableComponent', () => {
     // Deselect all
     component.masterToggleSelection();
     expect(component.tableSelectionCheckboxes.selected.length).toBe(0);
-  });
-
-  it('should download module', () => {
-    // We need to mock saveAs? Or just check service call.
-    // saveAs is imported from file-saver-es. Mocking it might be hard without jest.mock.
-    // But we can check backend service call.
-    component.downloadModule('m1', 'id1', '1.0');
-    expect(mockBackendService.downloadModule).toHaveBeenCalledWith('m1');
   });
 });

@@ -158,6 +158,15 @@ describe('SelectUnitDirective', () => {
     );
   });
 
+  it('navigates to the unit without a tab while none is selected', async () => {
+    jest.spyOn(RoutingHelperService, 'getSecondaryOutlet').mockReturnValue('');
+    directive.selectedRouterLink = -1;
+
+    await directive.selectUnit(12);
+
+    expect(routerMock.navigate).toHaveBeenCalledWith(['12'], { relativeTo: routeMock.parent });
+  });
+
   it('navigates to the workspace when no unit id is provided', async () => {
     await directive.selectUnit();
 

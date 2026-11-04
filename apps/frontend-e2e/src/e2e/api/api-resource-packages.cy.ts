@@ -29,7 +29,6 @@ describe('Admin settings API tests', () => {
           });
       });
   });
-  // after(() => cy.resetDb());
   describe('108. POST /api/admin/resource-packages', () => {
     // It is skipped because it results in [vite] http proxy error: /api/admin/resource-packages
     // it.skip('500 negative test: should not add a resource package a false user', () => {
@@ -88,21 +87,6 @@ describe('Admin settings API tests', () => {
     it('200 positive test: should allow an authorized administrator to successfully delete a resource package', () => {
       cy.deletePackageAPI(Cypress.expose(`token_${Cypress.expose('username')}`), '1')
         .then(resp => {
-          expect(resp.status).to.equal(200);
-        });
-    });
-  });
-
-  describe('Erase the database', () => {
-    it('Deletes users', () => {
-      cy.deleteUsersAPI([Cypress.expose(`id_${user2.username}`)], Cypress.expose(`token_${Cypress.expose('username')}`))
-        .then(resp => {
-          expect(resp.status).to.equal(200);
-        });
-      cy.deleteUsersAPI([Cypress.expose(`id_${Cypress.expose('username')}`)],
-        Cypress.expose(`token_${Cypress.expose('username')}`))
-        .then(resp => {
-          Cypress.expose('token_admin', '');
           expect(resp.status).to.equal(200);
         });
     });

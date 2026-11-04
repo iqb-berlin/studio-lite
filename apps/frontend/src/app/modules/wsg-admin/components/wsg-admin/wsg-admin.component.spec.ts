@@ -16,6 +16,7 @@ describe('WsgAdminComponent', () => {
     selectedWorkspaceGroupName: BehaviorSubject<string>;
     selectedWorkspaceGroupSettings: BehaviorSubject<WorkspaceGroupSettingsDto>;
     settingsChanged: boolean; // Adding missing property if needed
+    setSettingsLoad: jest.Mock;
   };
   let mockBackendService: {
     getWorkspaceGroupData: jest.Mock;
@@ -33,7 +34,8 @@ describe('WsgAdminComponent', () => {
         defaultPlayer: '',
         defaultSchemer: ''
       }),
-      settingsChanged: false
+      settingsChanged: false,
+      setSettingsLoad: jest.fn()
     };
     mockBackendService = {
       getWorkspaceGroupData: jest.fn().mockReturnValue(of({
@@ -77,5 +79,18 @@ describe('WsgAdminComponent', () => {
     expect(mockWsgAdminService.selectedWorkspaceGroupName.value).toBe('Group 1');
     expect(mockAppService.appConfig.setPageTitle).toHaveBeenCalled();
     expect(mockWsgAdminService.selectedWorkspaceGroupSettings.value).toEqual({ defaultEditor: 'e' });
+    expect(mockWsgAdminService.setSettingsLoad).toHaveBeenLastCalledWith('loaded');
+  });
+
+  // Substitutes with empty default modules were offered for saving, and the API lays them over the stored
+  // settings (#2010).
+  it('should offer no substitute settings after the group failed to load', () => {
+    const settingsBefore = mockWsgAdminService.selectedWorkspaceGroupSettings.value;
+    mockBackendService.getWorkspaceGroupData.mockReturnValue(of(null));
+
+    fixture.detectChanges();
+
+    expect(mockWsgAdminService.setSettingsLoad).toHaveBeenLastCalledWith('failed');
+    expect(mockWsgAdminService.selectedWorkspaceGroupSettings.value).toBe(settingsBefore);
   });
 });

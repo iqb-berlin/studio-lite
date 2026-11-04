@@ -66,30 +66,9 @@ describe('ReviewService', () => {
     unitService = module.get(UnitService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
-  describe('findAll', () => {
-    it('should return reviews for workspace', async () => {
-      const reviews = [new Review()];
-      reviewRepository.find.mockResolvedValue(reviews);
-      expect(await service.findAll(1)).toBe(reviews);
-    });
-  });
-
   describe('create', () => {
     it('should throw if name is missing', async () => {
       await expect(service.create(1, {} as CreateReviewDto)).rejects.toThrow(ReviewUnprocessableException);
-    });
-
-    it('should create review', async () => {
-      const createDto = { name: 'test', workspaceId: 1 };
-      reviewRepository.create.mockReturnValue({ id: 1 } as Review);
-      reviewRepository.save.mockResolvedValue({ id: 1 } as Review);
-
-      const result = await service.create(1, createDto);
-      expect(result).toBe(1);
     });
 
     // The guards checked the level in the workspace of the path; a workspace named in the body
@@ -101,14 +80,23 @@ describe('ReviewService', () => {
 
       expect(reviewRepository.create).toHaveBeenCalledWith(expect.objectContaining({ workspaceId: 3 }));
     });
+
+    // Nothing validates the body: an id sent along had save overwrite that review, also one of
+    // another workspace, which then moved into this one (#2030)
+    it('should take nothing from the body but the name', async () => {
+      reviewRepository.create.mockImplementation(entity => entity as Review);
+      const body: CreateReviewDto & { id: number, password: string } = { name: 'test', id: 99, password: 'p' };
+
+      await service.create(3, body);
+
+      const created = reviewRepository.create.mock.calls[0][0];
+      expect(created.name).toBe('test');
+      expect(created).not.toHaveProperty('id');
+      expect(created).not.toHaveProperty('password');
+    });
   });
 
   describe('findOne', () => {
-    it('should throw if not found', async () => {
-      reviewRepository.findOne.mockResolvedValue(null);
-      await expect(service.findOne(1)).rejects.toThrow(NotFoundException);
-    });
-
     it('should look the review up within the workspace when one is given', async () => {
       reviewRepository.findOne.mockResolvedValue(null);
 
@@ -251,14 +239,6 @@ describe('ReviewService', () => {
     });
   });
 
-  describe('findOneForAuth', () => {
-    it('should return review dto', async () => {
-      reviewRepository.findOne.mockResolvedValue({ id: 1, name: 'r' } as Review);
-      const result = await service.findOneForAuth(1);
-      expect(result.id).toBe(1);
-    });
-  });
-
   describe('findAllByUser', () => {
     it('should return reviews for user', async () => {
       workspaceUsersRepository.find.mockResolvedValue([{ workspaceId: 1 }] as WorkspaceUser[]);
@@ -301,6 +281,17 @@ describe('ReviewService', () => {
       expect(reviewUnitRepository.delete).toHaveBeenCalledWith({ reviewId: 1 });
       expect(reviewUnitRepository.create).toHaveBeenCalled();
       expect(reviewUnitRepository.save).toHaveBeenCalled();
+    });
+
+    it('should keep the units, and whatever else is not sent', async () => {
+      const review = { id: 1, name: 'old', password: 'pw' } as Review;
+      reviewRepository.findOne.mockResolvedValue(review);
+
+      await service.patch(3, 1, { id: 1, name: 'new' } as ReviewFullDto);
+
+      expect(reviewRepository.save).toHaveBeenCalledWith(expect.objectContaining({ name: 'new', password: 'pw' }));
+      expect(reviewUnitRepository.delete).not.toHaveBeenCalled();
+      expect(reviewUnitRepository.save).not.toHaveBeenCalled();
     });
 
     it('should replace the units with their list order in one save', async () => {

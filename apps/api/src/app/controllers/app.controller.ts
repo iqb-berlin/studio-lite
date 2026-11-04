@@ -69,7 +69,10 @@ export class AppController {
   @Post('refresh')
   @ApiTags('auth')
   @ApiCreatedResponse({ description: 'Token successfully refreshed.' })
-  @ApiUnauthorizedResponse({ description: 'Invalid or expired refresh token.' })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or expired refresh token. A token used again more than 30 seconds after its ' +
+      'exchange also ends the session it belongs to.'
+  })
   async refresh(@Body() body: { refreshToken: string }) {
     const tokens = await this.authService.refreshAccessToken(body.refreshToken);
     if (!tokens) throw new UnauthorizedException();
@@ -158,14 +161,22 @@ export class AppController {
     };
   }
 
+  /**
+   * A changed password ends every session of the account, the one it was changed in as well: a
+   * copy of that session's refresh token would otherwise outlive the old password (#1901). The
+   * access tokens already issued go with their sessions (#2115).
+   */
   @Patch('password')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Password successfully updated.' }) // TODO: Exception & Return Value entfernen
+  // TODO: Exception & Return Value entfernen
+  @ApiOkResponse({ description: 'Password successfully updated. Ends every session of the account.' })
   @ApiUnauthorizedResponse({ description: 'User is not authorized to update password.' })
   @ApiTags('auth')
   async setPassword(@Request() req, @Body() passwords: ChangePasswordDto): Promise<boolean> {
-    return this.userService.setPassword(req.user.id, passwords.oldPassword, passwords.newPassword);
+    const changed = await this.userService.setPassword(req.user.id, passwords.oldPassword, passwords.newPassword);
+    if (changed) await this.authService.logout(req.user.id);
+    return changed;
   }
 
   @Get('my-data')

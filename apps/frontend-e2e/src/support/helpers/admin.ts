@@ -33,22 +33,6 @@ export function addFirstUser(): void {
 }
 
 /**
- * Deletes the first admin user and leaves the browser logged out, on the login form. There is no
- * logout request: the session goes with the deleted user.
- * @example
- * deleteFirstUser();
- */
-export function deleteFirstUser(): void {
-  deleteUser(Cypress.expose('username'));
-  // The deleted admin would otherwise stay in the browser: its tokens in localStorage and its auth
-  // data in the running app. Clearing the storage alone is not enough, and visiting '/' from
-  // '/#/admin/...' only changes the hash, so the app is reloaded to start from nothing (#1754).
-  cy.clearLocalStorage();
-  cy.reload();
-  cy.get('[data-cy="home-user-name"]').should('be.visible');
-}
-
-/**
  * @param newUser - User data including username, password, email, etc.
  * @example
  * createNewUser({
@@ -138,6 +122,33 @@ export function deleteGroup(group: string): void {
 }
 
 /**
+ * Renames a workspace group in the admin area
+ * @param group - Current group name
+ * @param newName - New group name
+ * @example
+ * renameGroup('Mathematics', 'Mathematik');
+ */
+export function renameGroup(group: string, newName: string): void {
+  cy.visit('/');
+  cy.findAdminSettings().click();
+  clickIndexTabAdmin('workspace-groups');
+  cy.contains('mat-row', group).click();
+  cy.get('[data-cy="admin-workspace-groups-rename-group"]').click({ force: true });
+  cy.translate(Cypress.expose('locale')).then(json => {
+    cy.get(`input[placeholder="${json.admin['group-name']}"]`)
+      .should('be.visible')
+      .clear()
+      .type(newName);
+    cy.intercept('PATCH', '/api/admin/workspace-groups/*').as('patchGroup');
+    cy.get('mat-dialog-actions button')
+      .contains(json.save)
+      .click({ force: true });
+    waitForSuccess('@patchGroup');
+  });
+  cy.contains('mat-row', newName).should('exist');
+}
+
+/**
  * Makes users admins of a workspace group
  * @param group - Group name
  * @param admins - Array of usernames to make admins
@@ -150,14 +161,21 @@ export function makeAdminOfGroup(group: string, admins: string[]): void {
   clickIndexTabAdmin('workspace-groups');
   cy.get(`mat-row:contains("${group}")`)
     .click();
+  // The checks stay locked until the admins of the group are in; a click before would be reset
+  // by them (#2056).
   admins.forEach(user => {
+    cy.get(`mat-checkbox:contains((${user}))`)
+      .find('input[type="checkbox"]')
+      .should('be.enabled');
     cy.get(`mat-checkbox:contains((${user}))`)
       .find('label')
       .click();
   });
+  cy.intercept('PATCH', '/api/admin/workspace-groups/*/admins').as('setGroupAdmins');
   cy.get('[data-cy="admin-workspace-groups-save-button"]')
     .should('not.be.disabled')
     .click();
+  waitForSuccess('@setGroupAdmins');
 }
 
 // ---------------------------------------------------------------------------
@@ -172,6 +190,9 @@ export function goToSettings(): void {
   cy.findAdminSettings().click();
   clickIndexTabAdmin('settings');
   cy.wait('@getMissingsProfiles');
+  // The logo card shows its form, and with it a save button, only once logo and colours are in
+  // (#1969). saveAndExpect finds the save buttons by their index.
+  cy.get('[data-cy="admin-app-logo-save-button"], [data-cy="admin-app-logo-not-loaded"]').should('exist');
 }
 
 // ---------------------------------------------------------------------------

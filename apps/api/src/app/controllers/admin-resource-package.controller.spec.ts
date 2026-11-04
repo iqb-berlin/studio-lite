@@ -1,56 +1,14 @@
-import { Express } from 'express';
-import { Test, TestingModule } from '@nestjs/testing';
-import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { AdminResourcePackageController } from './admin-resource-package.controller';
-import { ResourcePackageService } from '../services/resource-package.service';
 import { IsAdminGuard } from '../guards/is-admin.guard';
-import { AuthService } from '../services/auth.service';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
 describe('AdminResourcePackageController', () => {
-  let controller: AdminResourcePackageController;
-  let resourcePackageService: DeepMocked<ResourcePackageService>;
-
-  beforeEach(async () => {
-    resourcePackageService = createMock<ResourcePackageService>();
-
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [AdminResourcePackageController],
-      providers: [
-        { provide: ResourcePackageService, useValue: resourcePackageService },
-        { provide: IsAdminGuard, useValue: { canActivate: jest.fn(() => true) } },
-        { provide: AuthService, useValue: createMock<AuthService>() }
-      ]
-    }).compile();
-
-    controller = module.get<AdminResourcePackageController>(
-      AdminResourcePackageController
-    );
-  });
-
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
-  describe('removeIds', () => {
-    it('should call service removeResourcePackages', async () => {
-      const ids = [1, 2];
-      resourcePackageService.removeResourcePackages.mockResolvedValue(undefined);
-
-      await controller.removeIds(ids);
-
-      expect(resourcePackageService.removeResourcePackages).toHaveBeenCalledWith(ids);
-    });
-  });
-
-  describe('create', () => {
-    it('should call service create and return the new id', async () => {
-      const mockFile = { originalname: 'test.zip' } as Express.Multer.File;
-      resourcePackageService.create.mockResolvedValue(123);
-
-      const result = await controller.create(mockFile);
-
-      expect(result).toBe(123);
-      expect(resourcePackageService.create).toHaveBeenCalledWith(mockFile);
-    });
-  });
+  // The guards are the authorisation of each method; no other unit test sees them (#1953).
+  it.each(['removeIds', 'create'] as const)(
+    'should let only administrators reach %s',
+    method => {
+      expect(Reflect.getMetadata('__guards__', AdminResourcePackageController.prototype[method]))
+        .toEqual([JwtAuthGuard, IsAdminGuard]);
+    }
+  );
 });

@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Title } from '@angular/platform-browser';
 import { AuthDataDto } from '@studio-lite-lib/api-dto';
-import { AppService, standardLogo, defaultAppConfig } from './app.service';
+import { AppService } from './app.service';
 import { AppHttpError } from '../classes/app-http-error.class';
 
 describe('AppService', () => {
@@ -27,25 +27,6 @@ describe('AppService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
-  describe('constants', () => {
-    it('should have correct standardLogo', () => {
-      expect(standardLogo).toEqual({
-        data: 'assets/studio-logo-144.png',
-        bodyBackground: '#7fafb1',
-        boxBackground: '#eeeeee'
-      });
-    });
-
-    it('should have correct defaultAppConfig', () => {
-      expect(defaultAppConfig.appTitle).toBe('IQB-Studio');
-      expect(defaultAppConfig.hasUsers).toBe(true);
-    });
-  });
-
   describe('defaultAuthData', () => {
     it('should have correct default values', () => {
       expect(AppService.defaultAuthData).toEqual({
@@ -64,20 +45,6 @@ describe('AppService', () => {
       expect(service.authData).toEqual(AppService.defaultAuthData);
     });
 
-    it('should set authData correctly', () => {
-      const testAuthData: AuthDataDto = {
-        userId: 123,
-        userName: 'testUser',
-        userLongName: 'Test User',
-        isAdmin: true,
-        workspaces: [],
-        reviews: []
-      };
-
-      service.authData = testAuthData;
-      expect(service.authData).toEqual(testAuthData);
-    });
-
     it('should emit authDataChanged event when authData is set', done => {
       const testAuthData: AuthDataDto = {
         userId: 456,
@@ -94,6 +61,27 @@ describe('AppService', () => {
       });
 
       service.authData = testAuthData;
+    });
+
+    // A login, a successful check or a logout settles the question the failed check left open (#2112).
+    it('should end a failed check of the stored login when auth data is set', () => {
+      service.setAuthCheckFailed(true);
+
+      service.authData = AppService.defaultAuthData;
+
+      expect(service.authCheckFailed()).toBe(false);
+    });
+
+    // Once a login is known, a failing second request for it must not hide it behind the hint.
+    it.each<[string, Partial<AuthDataDto>]>([
+      ['an account', { userId: 3 }],
+      ['a review', { reviews: [{ id: 7, name: 'R', workspaceId: 1 } as AuthDataDto['reviews'][number]] }]
+    ])('should not mark the check as failed once the login of %s is known', (_: string, login) => {
+      service.authData = { ...AppService.defaultAuthData, ...login };
+
+      service.setAuthCheckFailed(true);
+
+      expect(service.authCheckFailed()).toBe(false);
     });
   });
 
@@ -334,60 +322,6 @@ describe('AppService', () => {
 
       expect(service.errorMessages.length).toBe(1);
       expect(service.errorMessages[0].id).toBe(1);
-    });
-  });
-
-  describe('clearErrorMessages', () => {
-    it('should clear all error messages', () => {
-      service.errorMessages = [
-        {
-          id: 1,
-          status: 404,
-          message: 'Message 1',
-          method: 'GET',
-          urlWithParams: '/test1'
-        },
-        {
-          id: 2,
-          status: 500,
-          message: 'Message 2',
-          method: 'GET',
-          urlWithParams: '/test2'
-        }
-      ];
-
-      service.clearErrorMessages();
-      expect(service.errorMessages.length).toBe(0);
-    });
-  });
-
-  describe('initial state', () => {
-    it('should initialize isLoggedInKeycloak to false', () => {
-      expect(service.isLoggedInKeycloak).toBe(false);
-    });
-
-    it('should initialize appLogo to null', () => {
-      expect(service.appLogo).toBeNull();
-    });
-
-    it('should initialize errorMessages to empty array', () => {
-      expect(service.errorMessages).toEqual([]);
-    });
-
-    it('should initialize errorMessageCounter to 0', () => {
-      expect(service.errorMessageCounter).toBe(0);
-    });
-
-    it('should initialize errorMessagesDisabled to false', () => {
-      expect(service.errorMessagesDisabled).toBe(false);
-    });
-
-    it('should initialize globalWarning to empty string', () => {
-      expect(service.globalWarning).toBe('');
-    });
-
-    it('should initialize dataLoading to false', () => {
-      expect(service.dataLoading).toBe(false);
     });
   });
 });

@@ -31,6 +31,7 @@ export class WsgAdminComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     const routeKey = 'wsg';
     this.wsgAdminService.selectedWorkspaceGroupId.next(Number(this.route.snapshot.params[routeKey]));
+    this.wsgAdminService.setSettingsLoad('loading');
     this.backendService.getWorkspaceGroupData(this.wsgAdminService.selectedWorkspaceGroupId.value)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(wsgData => {
@@ -47,13 +48,10 @@ export class WsgAdminComponent implements OnInit, OnDestroy {
             defaultPlayer: '',
             defaultEditor: ''
           });
+          this.wsgAdminService.setSettingsLoad('loaded');
         } else {
           this.wsgAdminService.selectedWorkspaceGroupName.next(this.translateService.instant('wsg-admin.error'));
-          this.wsgAdminService.selectedWorkspaceGroupSettings.next({
-            defaultSchemer: '',
-            defaultPlayer: '',
-            defaultEditor: ''
-          });
+          this.wsgAdminService.setSettingsLoad('failed');
         }
       });
   }

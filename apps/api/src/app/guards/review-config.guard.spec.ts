@@ -39,10 +39,6 @@ describe('ReviewConfigGuard', () => {
     reflector = module.get(Reflector);
   });
 
-  it('should be defined', () => {
-    expect(guard).toBeDefined();
-  });
-
   it('should pass a route that requires no setting, without loading the review', async () => {
     reflector.getAllAndOverride.mockReturnValue(undefined);
 

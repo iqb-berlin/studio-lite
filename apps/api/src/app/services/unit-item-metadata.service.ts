@@ -23,10 +23,6 @@ export class UnitItemMetadataService {
     return manager ? manager.getRepository(UnitItemMetadata) : this.unitItemMetadataRepository;
   }
 
-  async getAll(): Promise<UnitItemMetadataDto[]> {
-    return this.unitItemMetadataRepository.find();
-  }
-
   async getAllByItemId(unitItemUuid: string, manager?: EntityManager): Promise<UnitItemMetadataDto[]> {
     return this.repo(manager).findBy({ unitItemUuid: unitItemUuid });
   }

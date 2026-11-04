@@ -36,10 +36,6 @@ describe('QueryUnitsInWorkspaceGuard', () => {
     unitService.idsNotInWorkspace.mockResolvedValue([]);
   });
 
-  it('should be defined', () => {
-    expect(guard).toBeDefined();
-  });
-
   it('should pass when all units of the query are in the workspace of the route', async () => {
     expect(await guard.canActivate(contextFor({ query: { id: '10,11' } }))).toBe(true);
     expect(unitService.idsNotInWorkspace).toHaveBeenCalledWith([10, 11], 3);

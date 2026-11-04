@@ -1,0 +1,23 @@
+{
+  "version": "3.0",
+  "variableCodings": [
+    {
+      "id": "broken_1",
+      "alias": "broken_1",
+      "label": "",
+      "sourceType": "BASE",
+      "manualInstruction": "",
+      "codeModel": "RULES_ONLY",
+      "codes": [
+        {
+          "id": 1,
+          "score": 1,
+          "type": "FULL_CREDIT",
+          "label": "Code 1",
+          "manualInstruction": "",
+          "ruleSets": [{}]
+        }
+      ]
+    }
+  ]
+}

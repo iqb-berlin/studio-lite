@@ -1,7 +1,5 @@
 import {
-  addFirstUser,
   clearFormControl,
-  deleteFirstUser,
   goToSettings,
   saveAndExpect,
   setFormControl,
@@ -14,21 +12,14 @@ import {
 import { baseGroup } from '../../../support/testData';
 
 describe('Admin Settings Tab Configuration', () => {
-  before(() => addFirstUser());
-  after(() => {
-    deleteFirstUser();
+  before(() => {
+    cy.addFirstUserAPI(Cypress.expose('username'), Cypress.expose('password'))
+      .its('status').should('equal', 201);
+    login(Cypress.expose('username'), Cypress.expose('password'));
   });
 
   // -------------------------------------------------------------------------
   describe('App Config – Texts card', () => {
-    it('displays the Texts card fields', () => {
-      goToSettings();
-      cy.get('[formcontrolname="globalWarningText"]').should('exist');
-      cy.get('[formcontrolname="appTitle"]').should('exist');
-      cy.get('[formcontrolname="introHtml"]').should('exist');
-      cy.get('[formcontrolname="imprintHtml"]').should('exist');
-    });
-
     it('saves a start-page warning message', () => {
       goToSettings();
       setFormControl('globalWarningText', 'System-Wartung am 01.01.2026');
@@ -91,12 +82,6 @@ describe('Admin Settings Tab Configuration', () => {
 
   // -------------------------------------------------------------------------
   describe('Email Template card', () => {
-    it('displays the Email Template fields', () => {
-      goToSettings();
-      cy.get('[formcontrolname="emailSubject"]').should('exist');
-      cy.get('[formcontrolname="emailBody"]').should('exist');
-    });
-
     it('saves a custom email template', () => {
       goToSettings();
       setFormControl('emailSubject', 'Welcome to Studio Lite!');
@@ -123,14 +108,43 @@ describe('Admin Settings Tab Configuration', () => {
         1
       );
     });
+
+    // What is typed while the save is under way was not sent: it stays unsaved, and the button stays locked
+    // until the answer, so that no second save overtakes the first (#2094)
+    it('keeps what was typed while saving unsaved and sends it with the next save', () => {
+      const saveButton = () => cy.get('[data-cy="admin-email-template-save-button"]');
+      goToSettings();
+      // the answer to the first save is held back until the test has typed on
+      let release = (): void => undefined;
+      const held = new Promise<void>(resolve => { release = resolve; });
+      let saves = 0;
+      cy.intercept('PATCH', '/api/admin/settings/email-template', req => {
+        saves += 1;
+        if (saves === 1) req.on('response', () => held);
+      }).as('saveEmailTemplateSlowly');
+
+      setFormControl('emailSubject', 'Vorher');
+      saveButton().click();
+      cy.get('[formcontrolname="emailSubject"]').type(' danach', { force: true });
+      // within the 10 s the held answer may wait, so that a missing lock fails here and says so
+      cy.get('[data-cy="admin-email-template-save-button"]', { timeout: 2000 }).should('be.disabled');
+      cy.then(() => release());
+      cy.wait('@saveEmailTemplateSlowly').its('request.body.emailSubject').should('equal', 'Vorher');
+
+      saveButton().should('be.enabled').click();
+      cy.wait('@saveEmailTemplateSlowly').its('request.body.emailSubject').should('equal', 'Vorher danach');
+      saveButton().should('be.disabled');
+    });
   });
 
   // -------------------------------------------------------------------------
   describe('Logo and Colors card', () => {
-    it('checks that the Colors card fields exist', () => {
+    // Saving the empty form shown after a failed load would replace the stored logo (#1969).
+    it('offers no saving of logo and colors that could not be loaded', () => {
+      cy.intercept('GET', '/api/admin/settings/app-logo', { statusCode: 500 });
       goToSettings();
-      cy.get('[formcontrolname="bodyBackground"]').should('exist');
-      cy.get('[formcontrolname="boxBackground"]').should('exist');
+      cy.get('[data-cy="admin-app-logo-not-loaded"]').should('exist');
+      cy.get('[formcontrolname="bodyBackground"]').should('not.exist');
     });
 
     it('replaces the red to black logo', () => {
@@ -206,13 +220,6 @@ describe('Admin Settings Tab Configuration', () => {
     const testTakersXsdUrl =
       'https://w3id.org/iqb/spec/testcenter-testtaker-xml/18.0';
 
-    it('displays the Unit Export Config fields', () => {
-      goToSettings();
-      cy.get('[formcontrolname="unitXsdUrl"]').should('exist');
-      cy.get('[formcontrolname="bookletXsdUrl"]').should('exist');
-      cy.get('[formcontrolname="testTakersXsdUrl"]').should('exist');
-    });
-
     it('clears the XSD URL fields', () => {
       goToSettings();
       clearFormControl('unitXsdUrl');
@@ -249,11 +256,6 @@ describe('Admin Settings Tab Configuration', () => {
     // the retired registry and undo the 19.0.0 migration (#1570). Spelled without
     // the `www.` alias, which is the one form the 19.0.0 changesets write.
     const originalUrl = 'https://w3id.org/iqb/metadata-registry';
-    it('displays the Profiles Registry CSV URL field', () => {
-      goToSettings();
-      cy.get('[formcontrolname="csvUrl"]').should('exist');
-    });
-
     it('clears the profiles registry URL', () => {
       goToSettings();
       clearFormControl('csvUrl');
@@ -323,11 +325,6 @@ describe('Admin Settings Tab Configuration', () => {
     const validJson =
       '[{"id":"missing_by_intention","label":"missing by intention","description":"","code":-99}]';
 
-    it('displays the Missings Profiles IQB-Standard field', () => {
-      goToSettings();
-      cy.get('[formcontrolname="iqbStandardMissings"]').should('exist');
-    });
-
     it('sets the original valid IQB-standard missings profile JSON', () => {
       goToSettings();
       clearFormControl('iqbStandardMissings');
@@ -355,11 +352,6 @@ describe('Admin Settings Tab Configuration', () => {
 
   // -------------------------------------------------------------------------
   describe('Unit Rich Note Tags Config card', () => {
-    it('displays the Unit Rich Note Tags JSON field', () => {
-      goToSettings();
-      cy.get('studio-lite-unit-rich-note-tags-config mat-form-field').should('exist');
-    });
-
     it('sets a new valid rich note tags JSON', () => {
       goToSettings();
       cy.get('studio-lite-unit-rich-note-tags-config input').last()

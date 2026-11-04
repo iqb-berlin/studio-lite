@@ -116,6 +116,25 @@ describe('UnitImportData', () => {
     expect(data.baseVariables[0].values).toEqual([{ label: 'L1', value: '1' }]);
   });
 
+  // The attribute came over as text, and "false" counted as true (#1987).
+  describe('whether the values of a variable are complete', () => {
+    const valuesComplete = (attribute: string) => new UnitImportData(createMock<FileIo>({
+      originalname: 'unit01.xml',
+      buffer: Buffer.from('<Unit><Metadata><Id>UNIT01</Id><Label>L</Label></Metadata><BaseVariables>' +
+        `<Variable id="V1" type="string"><Values${attribute}><Value><label>L</label><value>1</value></Value>` +
+        '</Values></Variable></BaseVariables></Unit>')
+    })).baseVariables[0].valuesComplete;
+
+    // what else an xs:boolean may be written as is tested in utils/xsd-boolean.spec.ts
+    it.each([
+      [' complete="true"', true],
+      [' complete="false"', false],
+      ['', false]
+    ])('should read <Values%s> as %s', (attribute, expected) => {
+      expect(valuesComplete(attribute)).toBe(expected);
+    });
+  });
+
   it('should throw error if metadata is missing', () => {
     const invalidFile = createMock<FileIo>({
       originalname: 'test.xml',
@@ -227,5 +246,44 @@ describe('UnitImportData', () => {
       const unitImportData = data as unknown as { getFolder: () => string };
       expect(unitImportData.getFolder()).toBe('');
     });
+  });
+
+  describe('the dates of the changes', () => {
+    const read = (xml: string) => new UnitImportData(createMock<FileIo>({
+      originalname: 'u.xml', buffer: Buffer.from(`<Unit>${xml}</Unit>`)
+    }));
+
+    it('should read the dates on the references to definition and scheme', () => {
+      const data = read('<Metadata><Id>U</Id></Metadata>' +
+        '<DefinitionRef lastChange="2024-02-01T00:00:00.000Z">u.voud</DefinitionRef>' +
+        '<CodingSchemeRef schemer="s" lastChange="2024-03-01T00:00:00.000Z">u.vocs</CodingSchemeRef>');
+
+      expect(data.lastChangedDefinition).toEqual(new Date('2024-02-01T00:00:00.000Z'));
+      expect(data.lastChangedScheme).toEqual(new Date('2024-03-01T00:00:00.000Z'));
+    });
+
+    it('should read the date on a definition given in the file', () => {
+      const data = read('<Metadata><Id>U</Id></Metadata>' +
+        '<Definition lastChange="2024-02-01T00:00:00.000Z">{}</Definition>');
+
+      expect(data.lastChangedDefinition).toEqual(new Date('2024-02-01T00:00:00.000Z'));
+    });
+
+    // Files of older studios carry one date for everything; a date on Metadata is the metadata's own.
+    it('should take the one date of an older file for all three, but the date on Metadata where given', () => {
+      const data = read('<Metadata lastChange="2024-05-01T00:00:00.000Z"><Id>U</Id>' +
+        '<Lastchange>2020-01-01T00:00:00.000Z</Lastchange></Metadata>');
+
+      expect(data.lastChangedMetadata).toEqual(new Date('2024-05-01T00:00:00.000Z'));
+      expect(data.lastChangedDefinition).toEqual(new Date('2020-01-01T00:00:00.000Z'));
+      expect(data.lastChangedScheme).toEqual(new Date('2020-01-01T00:00:00.000Z'));
+    });
+
+    it.each(['<Metadata><Label>L</Label></Metadata>', '<Metadata><Id></Id></Metadata>'])(
+      'should refuse a unit without id: %s',
+      metadata => {
+        expect(() => read(metadata)).toThrow(/unit id/);
+      }
+    );
   });
 });

@@ -1,5 +1,5 @@
 import { AccessLevel, CommentData } from '../../../support/testData';
-import { addFirstUser, deleteFirstUser } from '../../../support/helpers';
+import { addFirstUser, FIRST_WORKSPACE_REQUEST_TIMEOUT } from '../../../support/helpers';
 
 // A new item gets its uuid from the server when the unit is saved. Until #1830 the frontend did not
 // take it over: the next save in the same view sent the item as a new one, the server deleted it and
@@ -10,7 +10,6 @@ describe('An item saved a second time in the same view', () => {
   const unit = { shortname: 'ITEMUUID1', name: 'Item mit UUID', group: '' };
   let token = '';
   let userId = 0;
-  let groupId = '';
   let wsId = '';
   let unitId = '';
 
@@ -21,7 +20,7 @@ describe('An item saved a second time in the same view', () => {
       cy.getUserIdAPI(token).then(authData => {
         userId = authData.body.userId;
         cy.createGroupAPI(group, token).then(createdGroup => {
-          groupId = String(createdGroup.body);
+          const groupId = String(createdGroup.body);
           cy.createWsAPI(groupId, ws, token).then(createdWs => {
             wsId = String(createdWs.body);
             cy.updateUsersOfWsAPI(wsId, AccessLevel.Admin, String(userId), token)
@@ -36,17 +35,12 @@ describe('An item saved a second time in the same view', () => {
     });
   });
 
-  after(() => {
-    cy.deleteGroupsAPI([groupId], token).its('status').should('equal', 200);
-    deleteFirstUser();
-  });
-
   it('keeps its uuid and the comment linked to it', () => {
     let itemUuid = '';
     cy.intercept('PATCH', `/api/workspaces/${wsId}/units/${unitId}/properties`).as('saveProps');
     cy.intercept('GET', `/api/workspaces/${wsId}/units/${unitId}/properties`).as('loadProps');
     cy.visit(`/#/a/${wsId}/${unitId}/properties`);
-    cy.wait('@loadProps');
+    cy.wait('@loadProps', { requestTimeout: FIRST_WORKSPACE_REQUEST_TIMEOUT });
 
     cy.get('.add-item-button').click();
     cy.translate(Cypress.expose('locale')).then(json => {

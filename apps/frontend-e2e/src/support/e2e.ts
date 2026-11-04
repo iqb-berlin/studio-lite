@@ -18,3 +18,14 @@ import './commands';
 import './commands-api';
 import './metadata/commands-metadata';
 import '@cypress/code-coverage/support';
+
+// Runs once before each spec file, as a hook at the top of the support file does. Every spec starts
+// with a database without users, groups and resource packages, whatever the spec before left behind
+// or failed to remove (#2028). The storage goes too: the reset restarts the ids, and a token left
+// there would pass for the next first user, who gets id 1 again. No reload is needed, as each spec
+// file starts on a new page, without the app of the spec before. Modules, settings and metadata
+// profiles stay.
+before(() => {
+  cy.resetDb();
+  cy.clearAllLocalStorage();
+});

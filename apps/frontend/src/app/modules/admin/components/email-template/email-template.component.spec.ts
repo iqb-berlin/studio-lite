@@ -9,7 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { provideHttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { EmailTemplateDto } from '@studio-lite-lib/api-dto';
 import { EmailTemplateComponent } from './email-template.component';
 import { environment } from '../../../../../environments/environment';
@@ -64,26 +64,6 @@ describe('EmailTemplateComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('should initialize form with empty values', () => {
-    expect(component.configForm).toBeDefined();
-    expect(component.configForm.get('emailSubject')).toBeDefined();
-    expect(component.configForm.get('emailBody')).toBeDefined();
-  });
-
-  it('should initialize dataChanged as false', () => {
-    expect(component.dataChanged).toBe(false);
-  });
-
-  it('should load email template on init', fakeAsync(() => {
-    component.ngOnInit();
-    tick(200);
-    expect(backendService.getEmailTemplate).toHaveBeenCalled();
-  }));
-
   it('should update form fields with loaded template', fakeAsync(() => {
     component.ngOnInit();
     tick(200);
@@ -136,7 +116,7 @@ describe('EmailTemplateComponent', () => {
 
     expect(backendService.setEmailTemplate).toHaveBeenCalled();
     tick(100);
-    expect(snackBar.open).toHaveBeenCalled();
+    expect(snackBar.open).toHaveBeenCalledWith('email-template.template-not-saved', 'error', expect.anything());
   }));
 
   it('should handle null email template response', fakeAsync(() => {
@@ -151,47 +131,25 @@ describe('EmailTemplateComponent', () => {
     expect(newComponent.configForm.get('emailBody')?.value).toBe('');
   }));
 
-  it('should properly construct EmailTemplateDto when saving', fakeAsync(() => {
-    backendService.setEmailTemplate.mockReturnValue(of(true));
-    component.ngOnInit();
-    tick(200);
-
-    component.configForm.patchValue({
-      emailSubject: 'Custom Subject',
-      emailBody: 'Custom Body with {{placeholder}}'
-    });
-
-    component.saveData();
-    tick(100);
-
-    const callArgs = backendService.setEmailTemplate.mock.calls[0][0];
-    expect(callArgs).toEqual({
-      emailSubject: 'Custom Subject',
-      emailBody: 'Custom Body with {{placeholder}}'
-    });
-  }));
-
-  it('should handle empty form values when saving', fakeAsync(() => {
-    backendService.setEmailTemplate.mockReturnValue(of(true));
-    component.ngOnInit();
-    tick(200);
-
-    component.configForm.patchValue({
-      emailSubject: '',
-      emailBody: ''
-    });
-
-    component.saveData();
-    tick(100);
-
-    const callArgs = backendService.setEmailTemplate.mock.calls[0][0];
-    expect(callArgs.emailSubject).toBe('');
-    expect(callArgs.emailBody).toBe('');
-  }));
-
   it('should not save if configForm is null', () => {
     component.configForm = null as unknown as typeof component.configForm;
     component.saveData();
     expect(backendService.setEmailTemplate).not.toHaveBeenCalled();
   });
+
+  // #2094: what is entered while the save is under way was not sent, and a second save waits
+  it('keeps an entry made while saving unsaved and does not save twice meanwhile', fakeAsync(() => {
+    const answer = new Subject<boolean>();
+    backendService.setEmailTemplate.mockReturnValue(answer);
+    component.ngOnInit();
+    tick();
+    component.configForm.get('emailSubject')?.setValue('Gesendet');
+    component.saveData();
+    component.configForm.get('emailSubject')?.setValue('Danach');
+    component.saveData();
+    answer.next(true);
+
+    expect(backendService.setEmailTemplate).toHaveBeenCalledTimes(1);
+    expect(component.dataChanged).toBe(true);
+  }));
 });

@@ -1,0 +1,133 @@
+import {
+  baseGroup,
+  primaryWorkspace,
+  secondaryWorkspace
+} from '../../../support/testData';
+import {
+  selectProfileForAreaFromGroup,
+  selectProfileForGroup
+} from '../../../support/metadata/metadata-util';
+import { IqbProfile } from '../../../support/metadata/iqbProfile';
+import {
+  saveWorkspaceSettings,
+  setModuleWithoutVerification,
+  setRouteVisibility,
+  verifyModuleConfiguration
+} from '../../../support/helpers';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
+
+describe('Workspace Settings & Verona Modules', () => {
+  before(() => {
+    createTestBaseAPI();
+  });
+
+  after(() => {
+    deleteTestBaseAPI();
+  });
+
+  it('selects metadata profile from workspace settings', () => {
+    selectProfileForGroup(baseGroup, IqbProfile.DEu);
+    selectProfileForGroup(baseGroup, IqbProfile.DEi);
+  });
+
+  it('selects metadata profile from group settings and verifies in workspace settings', () => {
+    selectProfileForAreaFromGroup([IqbProfile.DEu, IqbProfile.DEi], primaryWorkspace, baseGroup);
+    cy.visitWs(primaryWorkspace);
+    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
+    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
+    cy.get('[data-cy="edit-workspace-settings-select-unit-profile"]').should(
+      'contain.text',
+      'Deu'
+    );
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.clickDialogButton(json.cancel || json.close);
+    });
+  });
+
+  it('displays available modules in dropdowns', () => {
+    cy.visitWs(secondaryWorkspace);
+    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
+    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
+
+    // Verify editor options
+    cy.get('[data-cy="edit-workspace-settings-editor"]')
+      .find('mat-select').click();
+    cy.get('mat-option').should('have.length', 2);
+    cy.get('body').type('{esc}');
+
+    // Verify player options
+    cy.get('[data-cy="edit-workspace-settings-player"]')
+      .find('mat-select').click();
+    cy.get('mat-option').should('have.length', 3);
+    cy.get('body').type('{esc}');
+
+    // Verify schemer options
+    cy.get('[data-cy="edit-workspace-settings-schemer"]')
+      .find('mat-select').click();
+    cy.get('mat-option').should('have.length', 1);
+    cy.get('body').type('{esc}');
+
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.clickDialogButton(json.cancel || json.close);
+    });
+  });
+
+  it('configures Verona modules for workspace', () => {
+    setModuleWithoutVerification(primaryWorkspace, 'Aspect', 'Aspect', 'Schemer');
+  });
+
+  it('verifies module configuration persists after page reload', () => {
+    cy.visit('/');
+    cy.visitWs(primaryWorkspace);
+    verifyModuleConfiguration(primaryWorkspace, 'Aspect', 'Aspect', 'Schemer');
+  });
+
+  it('validates module settings are workspace-specific', () => {
+    verifyModuleConfiguration(primaryWorkspace, 'Aspect', 'Aspect', 'Schemer');
+
+    cy.visitWs(secondaryWorkspace);
+    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
+    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
+
+    cy.get('[data-cy="edit-workspace-settings-editor"]')
+      .find('mat-select').should('have.class', 'mat-mdc-select-empty');
+    cy.get('[data-cy="edit-workspace-settings-player"]')
+      .find('mat-select').should('have.class', 'mat-mdc-select-empty');
+    cy.get('[data-cy="edit-workspace-settings-schemer"]')
+      .find('mat-select').should('have.class', 'mat-mdc-select-empty');
+
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.clickDialogButton(json.cancel || json.close);
+    });
+  });
+
+  it('configures workspace with alternative module combinations', () => {
+    setModuleWithoutVerification(secondaryWorkspace, 'Aspect', 'Stars', 'Schemer');
+    verifyModuleConfiguration(primaryWorkspace, 'Aspect', 'Aspect', 'Schemer');
+  });
+
+  // A new workspace starts with the notes route hidden, so it is shown first and hidden again.
+  it('shows a route tab (Begleitmaterial / notes) when checked in settings', () => {
+    cy.visitWs(primaryWorkspace);
+
+    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
+    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
+
+    setRouteVisibility('notes', true);
+    saveWorkspaceSettings();
+
+    cy.get('[data-cy="workspace-routes-notes"]').should('be.visible');
+  });
+
+  it('hides the route tab again when unchecked in settings', () => {
+    cy.visitWs(primaryWorkspace);
+
+    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
+    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
+
+    setRouteVisibility('notes', false);
+    saveWorkspaceSettings();
+
+    cy.get('[data-cy="workspace-routes-notes"]').should('not.exist');
+  });
+});

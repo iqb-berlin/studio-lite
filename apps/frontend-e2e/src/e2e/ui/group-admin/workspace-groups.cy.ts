@@ -7,24 +7,16 @@ import {
   secondaryWorkspace
 } from '../../../support/testData';
 import {
-  addFirstUser,
-  createGroup,
-  createNewUser,
-  deleteFirstUser,
-  deleteGroup,
-  deleteUser,
   login,
   logout,
-  makeAdminOfGroup,
   clickIndexTabWsgAdmin,
-  importExercise,
   submitUnits,
   returnSubmittedUnits
 } from '../../../support/helpers';
+import { createGroupAdminBaseAPI } from '../../../support/helpers/test-base';
 import {
   addState,
   configureDropBox,
-  createWs,
   deleteState,
   grantRemovePrivilegeAtUser,
   grantRemovePrivilegeAtWs
@@ -32,38 +24,14 @@ import {
 
 describe('Workspace Group Administration', () => {
   before(() => {
-    addFirstUser();
-  });
-  after(() => {
-    deleteFirstUser();
-  });
-
-  it('sets up test workspace and users', () => {
-    createNewUser(standardUser);
-    createNewUser(groupAdminUser);
-    createGroup(baseGroup);
-    createWs(primaryWorkspace, baseGroup);
-    grantRemovePrivilegeAtWs(
-      [standardUser.username, groupAdminUser.username, Cypress.expose('username')],
-      primaryWorkspace,
-      [AccessLevel.Basic, AccessLevel.Admin, AccessLevel.Admin]
-    );
-    createWs(secondaryWorkspace, baseGroup);
-    grantRemovePrivilegeAtWs(
-      [standardUser.username, groupAdminUser.username, Cypress.expose('username')],
-      secondaryWorkspace,
-      [AccessLevel.Basic, AccessLevel.Admin, AccessLevel.Admin]
-    );
-  });
-
-  it('imports units from zip file', () => {
-    cy.visitWs(primaryWorkspace);
-    importExercise('test_studio_units_download.zip');
-    cy.contains('M6_AK0011').should('exist');
-  });
-
-  it('assigns group admin role to user', () => {
-    makeAdminOfGroup(baseGroup, [Cypress.expose('username'), groupAdminUser.username]);
+    createGroupAdminBaseAPI({
+      users: [
+        { user: standardUser, access: AccessLevel.Basic },
+        { user: groupAdminUser, access: AccessLevel.Admin, groupAdmin: true }
+      ],
+      firstUserAccess: AccessLevel.Admin,
+      zip: 'test_studio_units_download.zip'
+    });
   });
 
   it('displays all admin tabs (users, workspaces, units, settings)', () => {
@@ -183,14 +151,5 @@ describe('Workspace Group Administration', () => {
     cy.get('[data-cy="units-area-no-access-level"]').should('not.exist');
     cy.get('studio-lite-add-unit-button>button')
       .should('not.have.attr', 'disabled');
-  });
-
-  it('cleans up test data', () => {
-    logout();
-    login(Cypress.expose('username'), Cypress.expose('password'));
-    deleteGroup(baseGroup);
-    deleteUser(standardUser.username);
-    cy.findAdminSettings().click();
-    deleteUser(groupAdminUser.username);
   });
 });

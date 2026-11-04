@@ -1,6 +1,6 @@
 import { primaryWorkspace } from '../../../support/testData';
 import { clickIndexTabWorkspace, selectUnit } from '../../../support/helpers';
-import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 /**
  * A unit records the format its definition is written in (`unitDefinitionType`), and the preview
@@ -13,7 +13,7 @@ import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
  * unit edited elsewhere arrives anyway.
  */
 describe('Workspace Definition Type', () => {
-  const player = 'iqb-player-aspect@3.0';
+  const player = 'iqb-player-aspect@3.1';
   const aspectPlayerTitle = 'Verona Player Aspect';
   const units = {
     future: { key: 'DT_FUTURE', type: 'aspect-unit-definition@5.0.0' },
@@ -21,13 +21,12 @@ describe('Workspace Definition Type', () => {
     untyped: { key: 'DT_UNTYPED', type: '' }
   };
 
-  // See module-switch.cy.ts: the base needs an empty database and is torn down again afterwards.
   before(() => {
-    createBasicSpecCy();
+    createTestBaseAPI();
   });
 
   after(() => {
-    deleteBasicSpecCy();
+    deleteTestBaseAPI();
   });
 
   function unitXml(key: string, type: string): string {

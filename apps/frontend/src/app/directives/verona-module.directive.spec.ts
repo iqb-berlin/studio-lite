@@ -25,39 +25,32 @@ const createMessageEvent =
   <T>(data: T, source: Window): MessageEvent<T> => ({ data, source } as unknown as MessageEvent<T>);
 
 class TestVeronaModuleDirective extends VeronaModuleDirective {
-  moduleService: ModuleService;
-  translateService: TranslateService;
-  snackBar: MatSnackBar;
-  backendService: WorkspaceBackendService;
-  workspaceService: WorkspaceService;
-  appService: AppService;
   hostingIframe: ElementRef;
 
   onSelectedUnitChange = jest.fn();
   postStore = jest.fn();
   handleIncomingMessage = jest.fn();
+  startSubscriptions = jest.fn();
 
-  constructor(
-    moduleService: ModuleService,
-    translateService: TranslateService,
-    snackBar: MatSnackBar,
-    backendService: WorkspaceBackendService,
-    workspaceService: WorkspaceService,
-    appService: AppService,
-    hostingIframe: ElementRef
-  ) {
+  constructor(hostingIframe: ElementRef) {
     super();
-    this.moduleService = moduleService;
-    this.translateService = translateService;
-    this.snackBar = snackBar;
-    this.backendService = backendService;
-    this.workspaceService = workspaceService;
-    this.appService = appService;
     this.hostingIframe = hostingIframe;
+  }
+
+  renew(): void {
+    this.renewSubscriptions();
   }
 
   buildModule(moduleId: string | undefined, moduleType: 'player' | 'editor' | 'schemer'): void {
     this.buildVeronaModule(moduleId, moduleType);
+  }
+
+  show(moduleId: string, moduleType: 'player' | 'editor' | 'schemer', sendUnit: () => void): boolean {
+    return this.showVeronaModule(moduleId, moduleType, sendUnit);
+  }
+
+  accept(m: MessageEvent): boolean {
+    return this.acceptMessageFromModule(m);
   }
 }
 
@@ -95,18 +88,17 @@ describe('VeronaModuleDirective', () => {
     } as ElementRef;
 
     TestBed.configureTestingModule({
-      providers: [{ provide: WorkspaceBackendService, useValue: backendService }]
+      providers: [
+        { provide: ModuleService, useValue: moduleService },
+        { provide: TranslateService, useValue: translateService },
+        { provide: MatSnackBar, useValue: snackBar },
+        { provide: WorkspaceBackendService, useValue: backendService },
+        { provide: WorkspaceService, useValue: workspaceService },
+        { provide: AppService, useValue: appService }
+      ]
     });
     const unitStores = TestBed.inject(UnitStoresService);
-    const directive = TestBed.runInInjectionContext(() => new TestVeronaModuleDirective(
-      moduleService,
-      translateService,
-      snackBar,
-      backendService,
-      workspaceService,
-      appService,
-      hostingIframe
-    ));
+    const directive = TestBed.runInInjectionContext(() => new TestVeronaModuleDirective(hostingIframe));
 
     return {
       directive,
@@ -158,43 +150,42 @@ describe('VeronaModuleDirective', () => {
     return assigned;
   };
 
-  it('sets iframe element from hosting element', () => {
-    const { directive, hostingIframe } = createDirective();
+  // A module kept running showed the unit before and could report into the one now chosen (#2085).
+  describe('when there is no unit to show', () => {
+    const withModuleOfTheUnitBefore = (directive: TestVeronaModuleDirective): HTMLIFrameElement => {
+      const iframe = document.createElement('iframe');
+      iframe.srcdoc = 'the unit before';
+      directive.iFrameElement = iframe;
+      directive.sessionId = 'session-of-the-unit-before';
+      directive.lastVeronaModuleId = 'player-1';
+      directive.postMessageTarget = window;
+      directive.unitLoaded.next(false);
+      return iframe;
+    };
 
-    directive.setHostingIframe();
+    it.each([
+      ['the unit names no module', 'workspace.no-player',
+        (directive: TestVeronaModuleDirective) => directive.show('', 'player', jest.fn())],
+      ['the unit id is missing', 'workspace.unit-not-found',
+        (directive: TestVeronaModuleDirective) => directive.sendUnitDefinition(0)],
+      ['the definition cannot be loaded', 'workspace.unit-definition-not-loaded',
+        (directive: TestVeronaModuleDirective, backendService: jest.Mocked<WorkspaceBackendService>) => {
+          backendService.getUnitDefinition.mockReturnValue(of(null));
+          directive.sendUnitDefinition(5);
+        }]
+    ])('empties the frame, forgets the module and says why when %s', (_case, message, showNoUnit) => {
+      const { directive, backendService } = createDirective();
+      const iframe = withModuleOfTheUnitBefore(directive);
 
-    expect(directive.iFrameElement).toBe(hostingIframe.nativeElement);
-  });
+      showNoUnit(directive, backendService);
 
-  it('subscribes to selected unit changes', () => {
-    const { directive, workspaceService } = createDirective();
-
-    directive.subscribeForSelectedUnitChange();
-    directive.onSelectedUnitChange.mockClear();
-    workspaceService.selectedUnit$.next(3);
-
-    expect(directive.onSelectedUnitChange).toHaveBeenCalledTimes(1);
-  });
-
-  it('subscribes to post messages', () => {
-    const { directive, appService } = createDirective();
-
-    directive.subscribeForPostMessages();
-    const message = createMessageEvent({ type: 'x' }, window);
-    appService.postMessage$.next(message);
-
-    expect(directive.handleIncomingMessage).toHaveBeenCalledWith(message);
-  });
-
-  it('handles missing unit id by clearing post target and setting message', () => {
-    const { directive, translateService } = createDirective();
-
-    directive.postMessageTarget = window;
-    directive.sendUnitDefinition(0);
-
-    expect(translateService.instant).toHaveBeenCalledWith('workspace.unit-not-found');
-    expect(directive.message).toBe('workspace.unit-not-found');
-    expect(directive.postMessageTarget).toBeUndefined();
+      expect(iframe.srcdoc).toBe('');
+      expect(directive.sessionId).toBe('');
+      expect(directive.lastVeronaModuleId).toBe('');
+      expect(directive.postMessageTarget).toBeUndefined();
+      expect(directive.message).toBe(message);
+      expect(directive.unitLoaded.value).toBe(true);
+    });
   });
 
   it('loads unit definition when missing store and posts it', () => {
@@ -224,23 +215,6 @@ describe('VeronaModuleDirective', () => {
 
     expect(directive.postStore).toHaveBeenCalledWith(unitStores.definitionStore());
     expect(backendService.getUnitDefinition).toHaveBeenCalledTimes(1);
-  });
-
-  it('shows error when unit definition cannot be loaded', () => {
-    const {
-      directive, backendService, snackBar, translateService
-    } = createDirective();
-
-    backendService.getUnitDefinition.mockReturnValue(of(null));
-
-    directive.sendUnitDefinition(5);
-
-    expect(snackBar.open).toHaveBeenCalledWith(
-      'workspace.unit-definition-not-loaded',
-      'workspace.error',
-      { duration: 3000 }
-    );
-    expect(translateService.instant).toHaveBeenCalledWith('workspace.unit-definition-not-loaded');
   });
 
   it('returns empty module id when metadata store is missing', async () => {
@@ -286,6 +260,18 @@ describe('VeronaModuleDirective', () => {
     matchSpy.mockRestore();
   });
 
+  // The module list is loaded once and held; every unit opened after that is matched against it.
+  it('resolves the module id from the list it holds without loading the list again', async () => {
+    const { directive, moduleService } = createDirective();
+    moduleService.players = { 'player@1.2': createModule('player@1.2') };
+    const metadataStore = new UnitMetadataStore({ id: 1, player: 'player@1.1' } as UnitPropertiesDto);
+
+    const moduleId = await firstValueFrom(directive.getVeronaModuleId(metadataStore, 'player'));
+
+    expect(moduleService.loadList).not.toHaveBeenCalled();
+    expect(moduleId).toBe('player@1.2');
+  });
+
   it('builds module when iframe exists and module html is available', async () => {
     const { directive, moduleService } = createDirective();
 
@@ -314,6 +300,7 @@ describe('VeronaModuleDirective', () => {
     document.body.appendChild(iframe);
     iframe.srcdoc = 'the module shown so far';
     directive.iFrameElement = iframe;
+    directive.unitLoaded.next(false);
 
     moduleService.players = { 'module-3': createModule('module-3') };
     moduleService.getModuleHtml = jest.fn().mockResolvedValue('');
@@ -325,6 +312,8 @@ describe('VeronaModuleDirective', () => {
     expect(translateService.instant).toHaveBeenCalledWith('workspace.player-not-loaded', { id: 'module-3' });
     expect(directive.lastVeronaModuleId).toBe('');
     expect(iframe.srcdoc).toBe('');
+    // nothing more comes for this unit: the spinner turned on for good (#2085)
+    expect(directive.unitLoaded.value).toBe(true);
 
     document.body.removeChild(iframe);
   });
@@ -387,5 +376,118 @@ describe('VeronaModuleDirective', () => {
     expect(directive.lastVeronaModuleId).toBe('');
 
     document.body.removeChild(iframe);
+  });
+
+  describe('subscription lifecycle', () => {
+    it('takes the iframe and starts the host subscriptions once the view is there', () => {
+      const { directive, hostingIframe } = createDirective();
+
+      directive.ngAfterViewInit();
+
+      expect(directive.iFrameElement).toBe(hostingIframe.nativeElement);
+      expect(directive.startSubscriptions).toHaveBeenCalledTimes(1);
+    });
+
+    it('drops every subscription, marks the unit loaded and starts the host subscriptions again', () => {
+      const { directive } = createDirective();
+      const previous = directive.ngUnsubscribe;
+      const dropped = jest.fn();
+      previous.subscribe({ complete: dropped });
+      directive.unitLoaded.next(false);
+
+      directive.renew();
+
+      expect(dropped).toHaveBeenCalled();
+      expect(directive.ngUnsubscribe).not.toBe(previous);
+      expect(directive.ngUnsubscribe.closed).toBe(false);
+      expect(directive.unitLoaded.getValue()).toBe(true);
+      expect(directive.startSubscriptions).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('showVeronaModule', () => {
+    it('says that the unit names no module and loads none', () => {
+      const { directive, moduleService } = createDirective();
+      const sendUnit = jest.fn();
+      directive.postMessageTarget = window;
+
+      const loading = directive.show('', 'editor', sendUnit);
+
+      expect(loading).toBe(false);
+      expect(directive.message).toBe('workspace.no-editor');
+      expect(directive.postMessageTarget).toBeUndefined();
+      expect(sendUnit).not.toHaveBeenCalled();
+      expect(moduleService.getModuleHtml).not.toHaveBeenCalled();
+    });
+
+    it('hands the unit to the module that is already running', () => {
+      const { directive, moduleService } = createDirective();
+      const sendUnit = jest.fn();
+      directive.lastVeronaModuleId = 'editor-1';
+      directive.postMessageTarget = window;
+
+      const loading = directive.show('editor-1', 'editor', sendUnit);
+
+      expect(loading).toBe(false);
+      expect(sendUnit).toHaveBeenCalledTimes(1);
+      expect(directive.postMessageTarget).toBe(window);
+      expect(moduleService.getModuleHtml).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['another module is named', 'editor-1', window],
+      ['the same module has not reported ready yet', 'editor-2', undefined]
+    ])('loads the module when %s', async (_case: string, lastModuleId: string, target: Window | undefined) => {
+      const { directive, moduleService } = createDirective();
+      const sendUnit = jest.fn();
+      const iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+      directive.iFrameElement = iframe;
+      directive.lastVeronaModuleId = lastModuleId;
+      directive.postMessageTarget = target;
+      const module = createModule('editor-2', 'editor');
+      provideModule(moduleService, 'editor', module);
+      moduleService.getModuleHtml = jest.fn().mockResolvedValue('<html lang=""></html>');
+
+      const loading = directive.show('editor-2', 'editor', sendUnit);
+      await Promise.resolve();
+
+      expect(loading).toBe(true);
+      expect(directive.postMessageTarget).toBeUndefined();
+      expect(sendUnit).not.toHaveBeenCalled();
+      expect(moduleService.getModuleHtml).toHaveBeenCalledWith(module);
+      expect(iframe.srcdoc).toBe('<html lang=""></html>');
+
+      document.body.removeChild(iframe);
+    });
+  });
+
+  describe('acceptMessageFromModule', () => {
+    const frameOf = (contentWindow: Window) => ({ contentWindow } as unknown as HTMLIFrameElement);
+
+    it('accepts a message of the module in its frame and answers to that frame from then on', () => {
+      const { directive } = createDirective();
+      directive.iFrameElement = frameOf(window);
+
+      expect(directive.accept(createMessageEvent({ type: 'voeReadyNotification' }, window))).toBe(true);
+      expect(directive.postMessageTarget).toBe(window);
+    });
+
+    it('ignores a message from another window', () => {
+      const { directive } = createDirective();
+      directive.iFrameElement = frameOf(window);
+      const otherWindow = {} as Window;
+
+      expect(directive.accept(createMessageEvent({ type: 'voeReadyNotification' }, otherWindow))).toBe(false);
+      expect(directive.postMessageTarget).toBeUndefined();
+    });
+
+    it.each([undefined, null])('ignores a message whose type is %s', (type: undefined | null) => {
+      const { directive } = createDirective();
+      directive.iFrameElement = frameOf(window);
+
+      expect(directive.accept(createMessageEvent({ type }, window))).toBe(false);
+      expect(directive.postMessageTarget).toBeUndefined();
+    });
   });
 });

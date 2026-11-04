@@ -8,9 +8,10 @@ import * as crypto from 'crypto';
 import { UsersService } from './users.service';
 import { ReviewService } from './review.service';
 import { RefreshToken } from '../entities/refresh-token.entity';
+import { UsedRefreshToken } from '../entities/used-refresh-token.entity';
 import UserSession from '../entities/user-session.entity';
 import { findOrphanedSessionIds } from '../utils/orphaned-sessions';
-import { PASSIVE_THRESHOLD_MS } from '../app.constants';
+import { PASSIVE_THRESHOLD_MS, REFRESH_TOKEN_REUSE_GRACE_MS } from '../app.constants';
 
 /**
  * Everything about being logged in: checking credentials, issuing the token pair, renewing it, and
@@ -40,7 +41,9 @@ export class AuthService {
     @Inject(getRepositoryToken(RefreshToken))
     private refreshTokenRepository: Repository<RefreshToken>,
     @Inject(getRepositoryToken(UserSession))
-    private userSessionRepository: Repository<UserSession>
+    private userSessionRepository: Repository<UserSession>,
+    @Inject(getRepositoryToken(UsedRefreshToken))
+    private usedRefreshTokenRepository: Repository<UsedRefreshToken>
   ) {
   }
 
@@ -83,11 +86,15 @@ export class AuthService {
     return this.refreshTokenRepository.findOne({ where: { tokenHash: AuthService.hashToken(token) } });
   }
 
-  private async findActiveUserSession(refreshToken: RefreshToken): Promise<UserSession | null> {
+  private async findUsedRefreshToken(token: string): Promise<UsedRefreshToken | null> {
+    return this.usedRefreshTokenRepository.findOne({ where: { tokenHash: AuthService.hashToken(token) } });
+  }
+
+  private async findValidUserSession(userId: number, sessionId: string): Promise<UserSession | null> {
     const userSession = await this.userSessionRepository.findOne({
       where: {
-        sessionId: refreshToken.sessionId,
-        userId: refreshToken.userId
+        sessionId,
+        userId
       }
     });
 
@@ -241,18 +248,44 @@ export class AuthService {
     return true;
   }
 
+  /**
+   * A refresh token that was exchanged before and comes back has been copied: whoever used it first
+   * got the new pair. Which side is the copy cannot be told, so the session ends for both, the
+   * token that took this one's place included (RFC 9700, 4.14.2). Within the grace period the
+   * second use is taken for a second tab of the same browser and only refused.
+   *
+   * The warning is no proof of theft: a tab closed during a refresh sends the old token again when
+   * it is reopened.
+   */
+  private async endSessionOfReusedToken(token: string): Promise<void> {
+    const usedToken = await this.findUsedRefreshToken(token);
+    if (!usedToken || Date.now() - usedToken.usedAt.getTime() <= REFRESH_TOKEN_REUSE_GRACE_MS) {
+      return;
+    }
+    this.logger.warn(
+      `Refresh token of user '${usedToken.userId}' was used again after its exchange; ` +
+      `ending session '${usedToken.sessionId}'.`
+    );
+    await this.logoutSession(usedToken.userId, usedToken.sessionId);
+  }
+
   async refreshAccessToken(token: string): Promise<{ accessToken: string, refreshToken: string } | null> {
     const refreshToken = await this.findRefreshTokenByToken(token);
 
-    if (!refreshToken || refreshToken.expiresAt < new Date()) {
+    if (!refreshToken) {
+      await this.endSessionOfReusedToken(token);
       return null;
     }
 
-    // The expiry check inside findActiveUserSession is the inactivity gate: expiresAt is
+    if (refreshToken.expiresAt < new Date()) {
+      return null;
+    }
+
+    // The expiry check inside findValidUserSession is the inactivity gate: expiresAt is
     // always lastActivity plus PASSIVE_THRESHOLD_MS, so a session that outlives its
     // inactivity window is exactly a session whose row has expired. A second comparison
     // against lastActivity used to sit here and could not ever be true.
-    const userSession = await this.findActiveUserSession(refreshToken);
+    const userSession = await this.findValidUserSession(refreshToken.userId, refreshToken.sessionId);
     if (!userSession) {
       return null;
     }
@@ -269,8 +302,22 @@ export class AuthService {
     // The new token is written before the old one is dropped, so the session is never
     // without a key: a session with no unexpired refresh token is reported as orphaned and
     // may be deleted, and the row being rotated belongs to someone who is working.
+    // The old token is recorded as used before it goes, so that a second use can be told apart
+    // from an unknown token. Two refreshes with the same token in flight record the same hash;
+    // the second record is dropped rather than failing the refresh.
     const { sessionId } = userSession;
     const newRefreshToken = await this.generateRefreshToken(user.id, sessionId);
+    await this.usedRefreshTokenRepository
+      .createQueryBuilder()
+      .insert()
+      .values({
+        tokenHash: refreshToken.tokenHash,
+        userId: user.id,
+        sessionId,
+        usedAt: new Date()
+      })
+      .orIgnore()
+      .execute();
     await this.refreshTokenRepository.delete({ tokenHash: refreshToken.tokenHash });
 
     const accessToken = this.jwtService.sign(
@@ -289,6 +336,15 @@ export class AuthService {
     });
     this.logger.log(`First User with id '${newUserId}' is logging in.`);
     return this.login({ id: newUserId, name: username, reviewId: 0 });
+  }
+
+  /**
+   * Whether an access token of this session may still be used: exactly as long as a refresh could
+   * still renew the session. A session ended by a logout, a new password or the deletion of its
+   * account has no row any more, and an expired one could not be resumed (#2115).
+   */
+  async hasValidSession(userId: number, sessionId: string): Promise<boolean> {
+    return !!(await this.findValidUserSession(userId, sessionId));
   }
 
   async isAdminUser(userId: number): Promise<boolean> {
@@ -310,20 +366,37 @@ export class AuthService {
     await this.userSessionRepository.delete({ userId });
   }
 
+  /**
+   * Ends the session the refresh token belongs to. A token that has already been exchanged still
+   * names its session: a browser whose refresh answer got lost -- the tab was reloaded or closed
+   * while it ran -- holds only the token before it and logs out with that one. Ending nothing would
+   * leave the session resumable for a week by a token no browser holds (#2110). No grace period
+   * here, unlike the refresh: whoever logs out wants the session gone, and with the exchanged token
+   * a refresh after the grace period would end it anyway.
+   */
   async logoutCurrentSession(
     token: string,
     fallbackUserId?: number,
     fallbackSessionId?: string
   ): Promise<void> {
     const refreshToken = await this.findRefreshTokenByToken(token);
-
-    if (!refreshToken) {
-      if (fallbackUserId && fallbackSessionId) {
-        await this.logoutSession(fallbackUserId, fallbackSessionId);
-      }
+    if (refreshToken) {
+      await this.logoutSession(refreshToken.userId, refreshToken.sessionId);
       return;
     }
 
-    await this.logoutSession(refreshToken.userId, refreshToken.sessionId);
+    if (fallbackUserId && fallbackSessionId) {
+      await this.logoutSession(fallbackUserId, fallbackSessionId);
+      return;
+    }
+
+    const usedToken = await this.findUsedRefreshToken(token);
+    if (usedToken) {
+      this.logger.log(
+        `Logout of user '${usedToken.userId}' came with an exchanged refresh token; ` +
+        `ending session '${usedToken.sessionId}'.`
+      );
+      await this.logoutSession(usedToken.userId, usedToken.sessionId);
+    }
   }
 }

@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { provideHttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
+import { defer, of } from 'rxjs';
 import { FinishComponent } from './finish.component';
 import { ReviewService } from '../../services/review.service';
 import { environment } from '../../../../../environments/environment';
@@ -62,10 +62,6 @@ describe('FinishComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('ngOnInit()', () => {
     it('should load review data when units array is empty', fakeAsync(() => {
       mockReviewService.units = [];
@@ -78,17 +74,16 @@ describe('FinishComponent', () => {
 
     it('should set currentUnitSequenceId to units length after loading data', fakeAsync(() => {
       mockReviewService.units = [];
-      const mockUnits = createMockUnitData(5);
-      mockReviewService.loadReviewData.mockReturnValue(of(undefined).pipe(
-        () => {
-          mockReviewService.units = mockUnits;
-          return of(undefined);
-        }
-      ));
+      // the units arrive only when the component subscribes, as from the backend (#1954)
+      mockReviewService.loadReviewData.mockReturnValue(defer(() => {
+        mockReviewService.units = createMockUnitData(5);
+        return of(undefined);
+      }));
 
       component.ngOnInit();
       tick();
 
+      expect(mockReviewService.loadReviewData).toHaveBeenCalled();
       expect(mockReviewService.currentUnitSequenceId).toBe(5);
     }));
 
@@ -120,43 +115,6 @@ describe('FinishComponent', () => {
       expect(mockTranslateService.instant).toHaveBeenCalledWith('review.end-page');
       expect(mockReviewService.setHeaderText).toHaveBeenCalledWith('Test End Page');
     }));
-
-    it('should handle empty units array after loading', fakeAsync(() => {
-      mockReviewService.units = [];
-
-      component.ngOnInit();
-      tick();
-
-      expect(mockReviewService.currentUnitSequenceId).toBe(0);
-    }));
-
-    it('should use setTimeout for initialization', fakeAsync(() => {
-      mockReviewService.units = [];
-      const loadDataSpy = jest.spyOn(mockReviewService, 'loadReviewData');
-
-      component.ngOnInit();
-
-      expect(loadDataSpy).not.toHaveBeenCalled();
-
-      tick();
-
-      expect(loadDataSpy).toHaveBeenCalled();
-    }));
-  });
-
-  describe('Component Dependencies', () => {
-    it('should inject TranslateService', () => {
-      const translateService = (component as unknown as { translateService: TranslateService }).translateService;
-      expect(translateService).toBeDefined();
-    });
-
-    it('should inject ReviewService', () => {
-      expect(component.reviewService).toBeDefined();
-    });
-
-    it('should have reviewService accessible in template', () => {
-      expect(component.reviewService).toBe(mockReviewService);
-    });
   });
 
   describe('Component Lifecycle', () => {

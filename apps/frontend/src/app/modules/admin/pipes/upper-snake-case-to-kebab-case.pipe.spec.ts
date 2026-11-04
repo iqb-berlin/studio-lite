@@ -1,11 +1,6 @@
 import { UpperSnakeCaseToKebabCasePipe } from './upper-snake-case-to-kebab-case.pipe';
 
 describe('UpperSnakeCaseToKebabCasePipe', () => {
-  it('create an instance', () => {
-    const pipe = new UpperSnakeCaseToKebabCasePipe();
-    expect(pipe).toBeTruthy();
-  });
-
   it('should transform UPPER_SNAKE_CASE to kebab-case', () => {
     const pipe = new UpperSnakeCaseToKebabCasePipe();
     expect(pipe.transform('PERIODIC_TABLE')).toBe('periodic-table');

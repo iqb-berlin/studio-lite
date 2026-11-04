@@ -2,8 +2,7 @@ import { AccessLevel, standardUser } from '../../../support/testData';
 import {
   addFirstUser,
   createNewUser,
-  deleteFirstUser,
-  deleteUser,
+  FIRST_WORKSPACE_REQUEST_TIMEOUT,
   loginWithUser
 } from '../../../support/helpers';
 
@@ -15,7 +14,6 @@ describe('A unit link into a workspace without access', () => {
   const ws = { id: '', name: 'NoAccessWorkspace' };
   const unit = { shortname: 'NOACCESS1', name: 'Ohne Zugriff', group: '' };
   let adminToken = '';
-  let groupId = '';
   let wsId = '';
   let unitId = '';
 
@@ -26,7 +24,7 @@ describe('A unit link into a workspace without access', () => {
       adminToken = win.localStorage.getItem('id_token') || '';
       cy.getUserIdAPI(adminToken).then(authData => {
         cy.createGroupAPI(group, adminToken).then(createdGroup => {
-          groupId = String(createdGroup.body);
+          const groupId = String(createdGroup.body);
           cy.createWsAPI(groupId, ws, adminToken).then(createdWs => {
             wsId = String(createdWs.body);
             // the administrator becomes a member only to create the unit the link points to
@@ -42,24 +40,13 @@ describe('A unit link into a workspace without access', () => {
     });
   });
 
-  after(() => {
-    loginWithUser(Cypress.expose('username'), Cypress.expose('password'));
-    // the token of this login: the one from before() may have ended with it
-    cy.window().then(win => {
-      cy.deleteGroupsAPI([groupId], win.localStorage.getItem('id_token') || '')
-        .its('status').should('equal', 200);
-    });
-    deleteUser(standardUser.username);
-    deleteFirstUser();
-  });
-
   it('keeps the user logged in and says that the access is missing', () => {
     loginWithUser(standardUser.username, standardUser.password);
     cy.intercept('GET', `/api/workspaces/${wsId}/**`).as('workspaceRequest');
     // Opened afresh, as a link from outside is: a change of the hash alone would keep the page.
     cy.visit(`/#/a/${wsId}/${unitId}/preview`);
     cy.reload();
-    cy.wait('@workspaceRequest');
+    cy.wait('@workspaceRequest', { requestTimeout: FIRST_WORKSPACE_REQUEST_TIMEOUT });
 
     cy.translate(Cypress.expose('locale')).then(json => {
       cy.get('.error-container').should('contain', json['app-http-error']['403']);

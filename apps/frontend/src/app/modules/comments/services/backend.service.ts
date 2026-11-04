@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
 import { UpdateUnitCommentUnitItemsDto, UpdateUnitUserDto, UnitCommentVoterDto } from '@studio-lite-lib/api-dto';
 import { Comment } from '../models/comment.interface';
+import { succeeded } from '../../../utils/succeeded.utils';
 
 /**
  * The comment calls, for both places comments are written: a workspace and a review. Which of the
@@ -32,10 +33,7 @@ export class BackendService {
   updateComments(updateUnitUser: UpdateUnitUserDto, workspaceId: number, unitId: number): Observable<boolean> {
     return this.httpClient
       .patch(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/comments`, updateUnitUser)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   createComment(
@@ -60,10 +58,7 @@ export class BackendService {
       `${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/comments/${id}`;
     return this.httpClient
       .patch(url, body)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   updateCommentVisibility(
@@ -74,22 +69,16 @@ export class BackendService {
       `${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/comments/${id}/hidden`;
     return this.httpClient
       .patch(url, body)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
-  deleteComment(id: number, workspaceId: number, unitId: number, reviewId: number): Observable<unknown> {
+  deleteComment(id: number, workspaceId: number, unitId: number, reviewId: number): Observable<boolean> {
     const url = reviewId > 0 ?
       `${this.serverUrl}reviews/${reviewId}/units/${unitId}/comments/${id}` :
       `${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/comments/${id}`;
     return this.httpClient
       .delete(url)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   updateCommentItemConnections(
@@ -100,10 +89,7 @@ export class BackendService {
       `${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/comments/${commentId}/items`;
     return this.httpClient
       .patch(url, comment)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   toggleVote(
@@ -114,10 +100,7 @@ export class BackendService {
       `${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/comments/${commentId}/vote`;
     return this.httpClient
       .post(url, { vote })
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   getCommentVoters(

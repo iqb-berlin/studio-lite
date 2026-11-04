@@ -49,7 +49,10 @@ export function selectProfileForGroupFromAdmin(group: string, profile: IqbProfil
     .contains('settings')
     .click();
   checkProfile(profile);
+  // The profiles are sent once the dialog has closed; leaving the page before would lose them.
+  cy.intercept('PATCH', '/api/admin/workspace-groups/*').as('saveGroupProfiles');
   cy.get('[data-cy="admin-edit-workspace-group-settings-save-button"]').click();
+  waitForSuccess('@saveGroupProfiles');
 }
 
 export function selectProfileForGroup(group: string, profile: IqbProfile) {

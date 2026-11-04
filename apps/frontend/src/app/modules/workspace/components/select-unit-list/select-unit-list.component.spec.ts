@@ -71,10 +71,6 @@ describe('SelectUnitListComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should update unit list and set initial selection', () => {
     component.initialSelection = [2];
     component.queryParams = new HttpParams();
@@ -135,6 +131,21 @@ describe('SelectUnitListComponent', () => {
     });
   });
 
+  // The group management hides the group column, and lost the name with it (#2014)
+  it.each([
+    [false, ['U1', 'Unit 1']],
+    [true, ['U1', 'Unit 1', 'G1']]
+  ])('should show the name of each unit with show-groups %s', (showGroups, cells) => {
+    fixture.componentRef.setInput('show-groups', showGroups);
+    fixture.componentRef.setInput('workspace', 10);
+    fixture.detectChanges();
+
+    const firstRowCells: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('mat-row:first-of-type mat-cell')
+    );
+    expect(firstRowCells.slice(1).map(cell => cell.textContent?.trim())).toEqual(cells);
+  });
+
   it('should deselect disabled units', () => {
     component.queryParams = new HttpParams();
     component.updateUnitList(10);
@@ -143,5 +154,28 @@ describe('SelectUnitListComponent', () => {
     component.disabled = [2];
 
     expect(component.selectedUnitIds).toEqual([1, 3]);
+  });
+
+  it('should preselect the open unit', () => {
+    component.selectedUnitId = 2;
+    component.queryParams = new HttpParams();
+
+    component.updateUnitList(10);
+
+    expect(component.selectedUnitIds).toEqual([2]);
+  });
+
+  it.each([
+    ['key', 'x9', [4]],
+    ['name', 'nit 3', [3]],
+    ['group', 'g2', [3]]
+  ])('should filter the units by any part of their %s regardless of case', (_, filter, unitIds) => {
+    backendServiceMock.getUnitList.mockReturnValue(of([...createUnits(), { id: 4, key: 'AB-X9' }]));
+    component.queryParams = new HttpParams();
+    component.updateUnitList(10);
+
+    component.objectsDatasource.filter = filter;
+
+    expect(component.objectsDatasource.filteredData.map(unit => unit.id)).toEqual(unitIds);
   });
 });

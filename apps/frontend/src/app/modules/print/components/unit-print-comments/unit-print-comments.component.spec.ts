@@ -3,8 +3,9 @@ import { SimpleChange } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { provideHttpClient } from '@angular/common/http';
 import { of, Subject } from 'rxjs';
-import { ItemsMetadataValues } from '@studio-lite-lib/api-dto';
+import { By } from '@angular/platform-browser';
 import { UnitPrintCommentsComponent } from './unit-print-comments.component';
+import { UnitPrintCommentComponent } from '../unit-print-comment/unit-print-comment.component';
 import { BackendService } from '../../../comments/services/backend.service';
 import { Comment } from '../../../comments/models/comment.interface';
 import { environment } from '../../../../../environments/environment';
@@ -14,7 +15,7 @@ describe('UnitPrintCommentsComponent', () => {
   let fixture: ComponentFixture<UnitPrintCommentsComponent>;
   let mockBackendService: { getComments: jest.Mock };
 
-  const createMockComment = (id: number): Comment => ({
+  const createMockComment = (id: number, parentId: number | null = null): Comment => ({
     id,
     unitId: 1,
     body: `Test comment ${id}`,
@@ -22,7 +23,7 @@ describe('UnitPrintCommentsComponent', () => {
     userId: 1,
     itemUuids: [],
     hidden: false,
-    parentId: null,
+    parentId,
     createdAt: new Date(),
     changedAt: new Date()
   });
@@ -54,10 +55,6 @@ describe('UnitPrintCommentsComponent', () => {
 
     fixture = TestBed.createComponent(UnitPrintCommentsComponent);
     component = fixture.componentInstance;
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
   });
 
   describe('ngOnChanges', () => {
@@ -107,19 +104,6 @@ describe('UnitPrintCommentsComponent', () => {
       expect(component.comments).toEqual(mockComments);
     });
 
-    it('should handle empty comments array', () => {
-      mockBackendService.getComments.mockReturnValue(of([]));
-
-      component.unitId = 10;
-      component.workspaceId = 1;
-
-      component.ngOnChanges({
-        unitId: new SimpleChange(null, 10, true)
-      });
-
-      expect(component.comments).toEqual([]);
-    });
-
     it('should not fetch comments if changes do not include relevant properties', () => {
       component.ngOnChanges({
         metadata: new SimpleChange(null, [], false)
@@ -127,116 +111,30 @@ describe('UnitPrintCommentsComponent', () => {
 
       expect(mockBackendService.getComments).not.toHaveBeenCalled();
     });
-
-    it('should use default reviewId of 0 when not set', () => {
-      const mockComments = [createMockComment(1)];
-      mockBackendService.getComments.mockReturnValue(of(mockComments));
-
-      component.unitId = 10;
-      component.workspaceId = 1;
-
-      component.ngOnChanges({
-        unitId: new SimpleChange(null, 10, true)
-      });
-
-      expect(mockBackendService.getComments).toHaveBeenCalledWith(1, 10, 0);
-    });
-
-    it('should pass non-zero reviewId when set', () => {
-      const mockComments = [createMockComment(1)];
-      mockBackendService.getComments.mockReturnValue(of(mockComments));
-
-      component.unitId = 10;
-      component.workspaceId = 1;
-      component.reviewId = 15;
-
-      component.ngOnChanges({
-        unitId: new SimpleChange(null, 10, true)
-      });
-
-      expect(mockBackendService.getComments).toHaveBeenCalledWith(1, 10, 15);
-    });
   });
 
-  describe('fetchComments', () => {
-    it('should update comments property with fetched data', () => {
-      const mockComments = [
-        createMockComment(1),
-        createMockComment(2),
-        createMockComment(3)
-      ];
-      mockBackendService.getComments.mockReturnValue(of(mockComments));
+  // A reply written after a later comment was printed under that later comment (#2109).
+  it('should print each reply right below the comment it answers', () => {
+    mockBackendService.getComments.mockReturnValue(of([
+      createMockComment(1), createMockComment(2), createMockComment(3, 1)
+    ]));
+    fixture.componentRef.setInput('unitId', 10);
+    fixture.componentRef.setInput('workspaceId', 1);
+    fixture.componentRef.setInput('metadata', []);
 
-      component.unitId = 10;
-      component.workspaceId = 1;
+    fixture.detectChanges();
 
-      component.ngOnChanges({
-        unitId: new SimpleChange(null, 10, true)
-      });
-
-      expect(component.comments.length).toBe(3);
-      expect(component.comments).toEqual(mockComments);
-    });
-
-    it('should replace existing comments with new data', () => {
-      const oldComments = [createMockComment(1)];
-      const newComments = [createMockComment(2), createMockComment(3)];
-
-      mockBackendService.getComments.mockReturnValue(of(oldComments));
-      component.unitId = 10;
-      component.workspaceId = 1;
-      component.ngOnChanges({
-        unitId: new SimpleChange(null, 10, true)
-      });
-
-      mockBackendService.getComments.mockReturnValue(of(newComments));
-      component.ngOnChanges({
-        unitId: new SimpleChange(10, 11, false)
-      });
-
-      expect(component.comments).toEqual(newComments);
-      expect(component.comments.length).toBe(2);
-    });
+    const printed = fixture.debugElement.queryAll(By.directive(UnitPrintCommentComponent))
+      .map(debugElement => debugElement.componentInstance as UnitPrintCommentComponent)
+      .map(comment => ({ id: comment.comment.id, isReply: comment.isReply, divided: comment.divided }));
+    expect(printed).toEqual([
+      { id: 1, isReply: false, divided: false },
+      { id: 3, isReply: true, divided: false },
+      { id: 2, isReply: false, divided: true }
+    ]);
   });
 
-  describe('metadata input', () => {
-    it('should accept ItemsMetadataValues array', () => {
-      const mockMetadata: ItemsMetadataValues[] = [
-        { id: 'item1', profiles: [] },
-        { id: 'item2', profiles: [] }
-      ];
-
-      component.metadata = mockMetadata;
-
-      expect(component.metadata).toEqual(mockMetadata);
-    });
-
-    it('should accept null metadata', () => {
-      component.metadata = null;
-
-      expect(component.metadata).toBeNull();
-    });
-  });
-
-  describe('initial state', () => {
-    it('should have default values', () => {
-      expect(component.reviewId).toBe(0);
-      expect(component.comments).toEqual([]);
-    });
-  });
   describe('ngOnDestroy', () => {
-    it('should emit and complete ngUnsubscribe', () => {
-      // eslint-disable-next-line @typescript-eslint/dot-notation
-      const ngUnsubscribe = component['ngUnsubscribe'];
-      const nextSpy = jest.spyOn(ngUnsubscribe, 'next');
-      const completeSpy = jest.spyOn(ngUnsubscribe, 'complete');
-
-      component.ngOnDestroy();
-
-      expect(nextSpy).toHaveBeenCalled();
-      expect(completeSpy).toHaveBeenCalled();
-    });
-
     it('should cancel subscriptions on destroy', () => {
       const mockComments = [createMockComment(1)];
       const subject = new Subject<Comment[]>();

@@ -32,10 +32,6 @@ describe('ItemBadgeComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should render label', () => {
     const debugElement = fixture.debugElement.nativeElement.querySelector('.comment-item');
     expect(debugElement.textContent.trim()).toBe('Test Item');

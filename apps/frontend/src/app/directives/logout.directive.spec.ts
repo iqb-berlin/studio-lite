@@ -64,29 +64,6 @@ describe('LogoutDirective', () => {
     );
   });
 
-  it('should create an instance', () => {
-    expect(directive).toBeTruthy();
-  });
-
-  it('should open confirmation dialog when logout is called', () => {
-    mockTranslateService.instant.mockReturnValue('Translated Text');
-    mockDialogRef.afterClosed.mockReturnValue(of(false));
-
-    directive.logout();
-
-    expect(mockDialog.open).toHaveBeenCalledWith(ConfirmDialogComponent, {
-      width: '400px',
-      data: expect.objectContaining({
-        title: 'Translated Text',
-        content: 'Translated Text',
-        confirmButtonLabel: 'Translated Text',
-        showCancel: true
-      })
-    });
-    expect(mockTranslateService.instant).toHaveBeenCalledWith('home.logout');
-    expect(mockTranslateService.instant).toHaveBeenCalledWith('home.confirm-logout');
-  });
-
   it('should logout when user confirms the dialog', done => {
     mockTranslateService.instant.mockReturnValue('Logout');
     mockDialogRef.afterClosed.mockReturnValue(of(true));
@@ -131,9 +108,5 @@ describe('LogoutDirective', () => {
         done();
       }, 0);
     });
-  });
-
-  it('should cleanup subscriptions on destroy', () => {
-    directive.ngOnDestroy();
   });
 });

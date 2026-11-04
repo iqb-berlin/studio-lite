@@ -1,85 +1,33 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import {
   CreateWorkspaceDto,
   WorkspaceGroupDto,
   WorkspaceFullDto,
-  RequestReportDto,
   WorkspaceSettingsDto,
-  UnitPropertiesDto,
   UsersWorkspaceInListDto,
   UserWorkspaceAccessDto,
   UserWorkspaceFullDto,
   CodingReportDto,
-  CodingReportValidationProblemDto,
   WorkspaceInListDto,
   GroupNameDto,
-  RenameGroupNameDto,
-  ItemsMetadataValues,
-  MetadataValuesEntry,
-  ProfileValues,
-  UnitCommentDto,
-  UnitMetadataValues
+  RenameGroupNameDto
 } from '@studio-lite-lib/api-dto';
-import { orderFromCurrent, profileIdsMatch, toW3idProfileId } from '@studio-lite/shared-code';
-// adm-zip is CommonJS with no statically detectable named exports -- see the note on the katex
-// import in download-docx.class.ts.
-import AdmZip from 'adm-zip';
-import {
-  VariableCodingData,
-  RuleSet,
-  CodeData,
-  CodingSchemeData
-} from '@iqbspecs/coding-scheme/coding-scheme.interface';
-import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
-import { CodingSchemeFactory, CodingSchemeProblem } from '@iqb/responses';
+import { profileIdsMatch, toW3idProfileId } from '@studio-lite/shared-code';
 import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroup from '../entities/workspace-group.entity';
 import Unit from '../entities/unit.entity';
-import { FileIo } from '../interfaces/file-io.interface';
-import { UnitImportData } from '../classes/unit-import-data.class';
-import { NotAUnitXmlError } from '../exceptions/not-a-unit-xml.error';
-import { UnitImportJsonData } from '../classes/unit-import-json-data.class';
+import { CodingReportClass } from '../classes/coding-report.class';
 import { UnitService } from './unit.service';
+import { UnitMetadataService } from './unit-metadata.service';
 import { AdminWorkspaceNotFoundException } from '../exceptions/admin-workspace-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import { UsersService } from './users.service';
 import { WorkspaceUserService } from './workspace-user.service';
 import { UnitUserService } from './unit-user.service';
-import { UserWorkspaceGroupNotAdminException } from '../exceptions/user-workspace-group-not-admin.exception';
-import { UnitCommentService } from './unit-comment.service';
-import { UnitRichNoteService } from './unit-rich-note.service';
-import User from '../entities/user.entity';
-import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
-import { ZIP_MIME_TYPES } from '../constants/zip-mime-types';
-import {
-  EXPORT_REPORT_FILENAME,
-  LanguageCodedText,
-  MetadataEntryJson,
-  MetadataValuesJson,
-  UnitItemJson,
-  UnitMetadataJson,
-  VocabularyEntryJson
-} from '../interfaces/unit-json-specs.interface';
 import { GroupAdminUnprocessableWorkspaceException } from '../exceptions/group-admin-unprocessable-workspace.exception';
-
-// A comment as found in an exported *.voco.json file. Supports both the iqb
-// unit-comments@0.1 spec field names and the legacy ones for backwards compat.
-interface ImportedComment {
-  id: number;
-  body: string;
-  commentator?: string;
-  userName?: string;
-  parentComment?: number | null;
-  parentId?: number | null;
-  isHidden?: boolean;
-  hidden?: boolean;
-  createdAt?: string;
-  changedAt?: string;
-  itemUuids?: string[];
-}
 
 /**
  * The workspaces: creating and deleting them, moving them between groups, their settings, their
@@ -92,9 +40,8 @@ interface ImportedComment {
  * A unit group is not a table: it is a name in the settings and the same name on each unit, which
  * is why creating, renaming and removing one all write both sides.
  *
- * The coding report over a workspace lives here as well -- a block of static helpers that read the
- * coding schemes of its units and judge them. It belongs to the workspace only in that it is asked
- * for one, and it is the one part of this service that touches no repository.
+ * The coding report over a workspace is asked for here and built by {@link CodingReportClass} from
+ * the units alone.
  */
 @Injectable()
 export class WorkspaceService {
@@ -114,9 +61,8 @@ export class WorkspaceService {
     private workspaceUserService: WorkspaceUserService,
     private usersService: UsersService,
     private unitService: UnitService,
-    private unitUserService: UnitUserService,
-    private unitCommentService: UnitCommentService,
-    private unitRichNoteService: UnitRichNoteService
+    private unitMetadataService: UnitMetadataService,
+    private unitUserService: UnitUserService
   ) {}
 
   async getAllWorkspaces(): Promise<WorkspaceFullDto[]> {
@@ -345,7 +291,10 @@ export class WorkspaceService {
         dropBoxId: workspace.dropBoxId,
         groupName: workspaceGroup.name,
         userAccessLevel: userAccessLevel,
-        settings: workspace.settings
+        // A rename onto an existing group left its name twice in the settings until #1989
+        settings: workspace.settings?.unitGroups ?
+          { ...workspace.settings, unitGroups: [...new Set(workspace.settings.unitGroups)] } :
+          workspace.settings
       };
     }
     throw new AdminWorkspaceNotFoundException(id, 'GET');
@@ -362,12 +311,10 @@ export class WorkspaceService {
         where: { workspaceId: id },
         select: { groupName: true }
       });
-      const groups = unitGroups
-        .map(u => u.groupName)
-        .filter(
-          (value, index, self) => self.indexOf(value) === index && settingsGroups.indexOf(value) < 0
-        );
-      return [...groups, ...settingsGroups].filter(g => !!g).sort();
+      // Each name once: a rename onto an existing group left it twice in the settings until #1989
+      return [...new Set([...unitGroups.map(u => u.groupName), ...settingsGroups])]
+        .filter(g => !!g)
+        .sort();
     }
     throw new AdminWorkspaceNotFoundException(id, 'GET');
   }
@@ -393,8 +340,11 @@ export class WorkspaceService {
       }
     }
     this.logger.log(`Creating workspace with name: ${workspace.name}`);
+    // Only what the body may decide: nothing validates it, and an `id` sent along had `save`
+    // overwrite that workspace, a `dropBoxId` set any drop box at all (#2029).
     const newWorkspace = this.workspacesRepository.create({
-      ...workspace,
+      name: workspace.name,
+      groupId: workspace.groupId,
       settings: {
         ...new WorkspaceSettingsDto(),
         hiddenRoutes: ['notes']
@@ -427,257 +377,44 @@ export class WorkspaceService {
   }
 
   /**
-   * One row per coding variable of every unit in the workspace: what is coded, how, and what the
-   * validation of the scheme against the unit's variables says. A unit whose scheme cannot be used
-   * -- missing, unparsable, or written by a schemer too old for it -- still gets a row, so the
-   * report shows the gap instead of leaving the unit out.
+   * One row per coding variable of every unit in the workspace -- see {@link CodingReportClass}
+   * for what the rows say.
    */
   async getCodingReport(id: number): Promise<CodingReportDto[]> {
-    const unitDataRows: CodingReportDto[] = [];
     const unitListWithMetadata = await this.unitService.findAllWithProperties(
       id
     );
     if (!unitListWithMetadata) return [];
-
-    unitListWithMetadata.forEach((unit: UnitPropertiesDto) => {
-      if (WorkspaceService.isValidScheme(unit.scheme, unit.schemer)) {
-        const parsedUnitScheme = WorkspaceService.parseScheme(unit.scheme);
-        const version = 'version';
-        if (parsedUnitScheme && parsedUnitScheme[version]) {
-          const validationResults = CodingSchemeFactory.validate(
-            unit.variables,
-            parsedUnitScheme.variableCodings
-          );
-          WorkspaceService.processVariableCodings(
-            parsedUnitScheme,
-            validationResults,
-            unit,
-            id,
-            unitDataRows
-          );
-        }
-      } else {
-        WorkspaceService.addInvalidSchemeRow(unit, id, unitDataRows);
-      }
-    });
-
-    return unitDataRows;
+    return CodingReportClass.build(id, unitListWithMetadata);
   }
 
   /**
-   * Whether a unit's coding scheme can be read at all. A scheme without a schemer is the current
-   * JSON format, which no longer names one; an older scheme is only usable from schemer 1.5 on.
+   * Moves workspaces into another group, resets the state of their units and drops the drop boxes
+   * between moved and remaining workspaces -- including those of remaining workspaces, which share
+   * the group the controller checked (#1984, #2027). Ids that belong to no workspace are passed
+   * over, as by {@link remove}. All of it happens together or not at all: a workspace left moved
+   * with its old states would be passed over by a second attempt, as it is in the target group.
    */
-  private static isValidScheme(
-    scheme: string | undefined,
-    schemer: string
-  ): boolean {
-    if (!scheme) return false;
-    if (!schemer) return true; // JSON format: schemer is no longer explicitly assigned per spec
-    return schemer.split('@')[1] >= '1.5';
-  }
-
-  private static parseScheme(scheme: string): CodingSchemeData | null {
-    try {
-      return JSON.parse(scheme);
-    } catch {
-      return null; // Catch JSON parsing errors gracefully
-    }
-  }
-
-  static processVariableCodings(
-    parsedUnitScheme: CodingSchemeData,
-    validationResults: CodingSchemeProblem[],
-    unit: UnitPropertiesDto,
-    workspaceId: number,
-    unitDataRows: CodingReportDto[]
-  ): void {
-    parsedUnitScheme.variableCodings
-      ?.filter(vc => vc.sourceType !== 'BASE_NO_VALUE')
-      .forEach((codingVariable: VariableCodingData) => {
-        const validationProblems = WorkspaceService.getValidationProblems(
-          validationResults,
-          codingVariable
-        );
-        const validationResultText = WorkspaceService.getValidationStatus(
-          validationProblems
-        );
-        const codingType = WorkspaceService.determineCodingType(codingVariable);
-        const trainingEffort = WorkspaceService.determineTrainingEffort(
-          codingVariable
-        );
-        const foundItem = WorkspaceService.findMatchingItem(
-          unit,
-          codingVariable
-        );
-
-        unitDataRows.push({
-          unit: WorkspaceService.generateUnitLink(workspaceId, unit),
-          variable: codingVariable.alias || codingVariable.id || '–',
-          variableType: WorkspaceService.determineVariableType(codingVariable),
-          item: foundItem?.id || '–',
-          validation: validationResultText,
-          validationProblems,
-          codingType: codingType,
-          trainingEffort: trainingEffort
-        });
-      });
-  }
-
-  static getValidationProblems(
-    validationResults: CodingSchemeProblem[],
-    codingVariable: VariableCodingData
-  ): CodingReportValidationProblemDto[] {
-    const codingVariableId = codingVariable.alias || codingVariable.id;
-    const seenProblems = new Set<string>();
-
-    return validationResults
-      .filter(problem => problem.variableId === codingVariableId)
-      .map(problem => ({
-        type: problem.type,
-        breaking: problem.breaking,
-        ...(problem.code ? { code: problem.code } : {})
-      }))
-      .filter(problem => {
-        const key = `${problem.type}|${problem.breaking}|${problem.code || ''}`;
-        if (seenProblems.has(key)) return false;
-        seenProblems.add(key);
-        return true;
-      })
-      .sort((problemA, problemB) => (
-        Number(problemB.breaking) - Number(problemA.breaking) ||
-        problemA.type.localeCompare(problemB.type) ||
-        (problemA.code || '').localeCompare(problemB.code || '')
-      ));
-  }
-
-  static getValidationStatus(
-    validationProblems: CodingReportValidationProblemDto[]
-  ): string {
-    if (validationProblems.some(problem => problem.breaking)) return 'Fehler';
-    if (validationProblems.length > 0) return 'Warnung';
-    return 'OK';
-  }
-
-  static determineCodingType(codingVariable: VariableCodingData): string {
-    let closedCoding = false;
-    let manualCodingOnly = true;
-    let hasRules = false;
-
-    codingVariable.codes?.forEach((code: CodeData) => {
-      if (code.manualInstruction.length === 0) manualCodingOnly = false;
-
-      code.ruleSets.forEach((ruleSet: RuleSet) => {
-        hasRules ||= ruleSet.rules.length > 0;
-        manualCodingOnly &&=
-          code.manualInstruction.length > 0 && ruleSet.rules.length === 0;
-      });
-
-      closedCoding ||= ['RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(
-        code.type
-      );
+  async patchWorkspaceGroups(ids: number[], newWorkspaceGroupId: number): Promise<void> {
+    // Nothing validates the body: a target sent as a string would never equal a stored group,
+    // and the states of workspaces that stay where they are would be reset.
+    const targetId = Number(newWorkspaceGroupId);
+    const workspaces = await this.workspacesRepository.find({
+      where: { id: In(ids) },
+      select: { id: true, groupId: true }
     });
-
-    if (closedCoding) return 'automatisch';
-    if (manualCodingOnly) return 'manuell';
-    if (hasRules) return 'halbautomatisch';
-    return 'keine Regeln';
-  }
-
-  static determineVariableType(codingVariable: VariableCodingData): string {
-    return codingVariable.sourceType === 'BASE' ?
-      'Basisvariable' :
-      'abgeleitete Variable';
-  }
-
-  static determineTrainingEffort(codingVariable: VariableCodingData): string {
-    return codingVariable.processing?.includes('CODER_TRAINING_REQUIRED') ?
-      'erhöht' :
-      'normal';
-  }
-
-  static findMatchingItem(
-    unit: UnitPropertiesDto,
-    codingVariable: VariableCodingData
-  ): ItemsMetadataValues {
-    const codingVariableId = codingVariable.alias || codingVariable.id;
-    return unit.metadata.items?.find(
-      item => item.variableId === codingVariableId
-    );
-  }
-
-  static generateUnitLink(id: number, unit: UnitPropertiesDto): string {
-    return (
-      `<a href=#/a/${id}/${unit.id}>${unit.key}${unit.name ? ': ' : ''}${
-        unit.name
-      }</a>` || '-'
-    );
-  }
-
-  static addInvalidSchemeRow(
-    unit: UnitPropertiesDto,
-    id: number,
-    unitDataRows: CodingReportDto[]
-  ): void {
-    unitDataRows.push({
-      unit: WorkspaceService.generateUnitLink(id, unit),
-      variable: '',
-      variableType: '',
-      item: '',
-      validation: 'Kodierschema mit Schemer Version ab 1.5 erzeugen!',
-      validationProblems: [],
-      codingType: '',
-      trainingEffort: ''
+    const movedIds = workspaces
+      .filter(workspace => workspace.groupId !== targetId)
+      .map(workspace => workspace.id);
+    if (!movedIds.length) return;
+    await this.workspacesRepository.manager.transaction(async manager => {
+      await manager.update(Workspace, { id: In(movedIds) }, { groupId: targetId });
+      await manager.update(Unit, { workspaceId: In(movedIds) }, { state: '0' });
+      // A drop box is a workspace of the same group (#1805): links the move would stretch across
+      // the group boundary are dropped, in both directions; moved together, they stay (#2027).
+      await manager.update(Workspace, { id: In(movedIds), dropBoxId: Not(In(movedIds)) }, { dropBoxId: null });
+      await manager.update(Workspace, { id: Not(In(movedIds)), dropBoxId: In(movedIds) }, { dropBoxId: null });
     });
-  }
-
-  async patch(workspaceData: Partial<WorkspaceFullDto>): Promise<void> {
-    const workspaceToUpdate = await this.workspacesRepository.findOne({
-      where: { id: workspaceData.id }
-    });
-    if (workspaceToUpdate) {
-      if (workspaceData.name) workspaceToUpdate.name = workspaceData.name;
-      if (workspaceData.groupId) workspaceToUpdate.groupId = workspaceData.groupId;
-      await this.workspacesRepository.save(workspaceToUpdate);
-    } else {
-      throw new AdminWorkspaceNotFoundException(workspaceData.id, 'PATCH');
-    }
-  }
-
-  async patchWorkspaceGroups(
-    ids: number[],
-    newWorkspaceGroupId: number,
-    user: User
-  ): Promise<void> {
-    await Promise.all(
-      ids.map(async id => {
-        const workspace = await this.findOne(id);
-
-        if (workspace.groupId !== newWorkspaceGroupId) {
-          this.unitService
-            .findAllForWorkspace(workspace.id)
-            .then(async units => {
-              await Promise.all(
-                units.map(async unit => this.unitService.removeUnitState(unit.id)
-                )
-              );
-            });
-        }
-        if (
-          await this.usersService.isWorkspaceGroupAdmin(
-            user.id,
-            workspace.groupId
-          )
-        ) {
-          await this.patch({ id, groupId: newWorkspaceGroupId });
-        } else {
-          throw new UserWorkspaceGroupNotAdminException(
-            newWorkspaceGroupId,
-            'PATCH'
-          );
-        }
-      })
-    );
   }
 
   async patchGroupName(
@@ -710,7 +447,8 @@ export class WorkspaceService {
     if (!settings.unitGroups) settings.unitGroups = [];
     const groupPos = settings.unitGroups.indexOf(oldName);
     if (groupPos >= 0) settings.unitGroups = settings.unitGroups.filter(g => g !== oldName);
-    settings.unitGroups.push(newName);
+    // Renamed onto an existing group, the two become one: its units join it below (#1989)
+    if (!settings.unitGroups.includes(newName)) settings.unitGroups.push(newName);
     workspaceToUpdate.settings = settings;
     await this.workspacesRepository.save(workspaceToUpdate);
     await this.unitsRepository.update(
@@ -755,13 +493,26 @@ export class WorkspaceService {
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 
-  /** The drop box set for the workspace, or `null` when it has none or does not exist. */
+  /**
+   * The drop box set for the workspace, or `null` when it has none, does not exist, or is no drop
+   * box by the rule of {@link isDropBoxFor} -- such as one a move before #2027 left in another group.
+   */
   async dropBoxIdOf(id: number): Promise<number | null> {
     const workspace = await this.workspacesRepository.findOne({
       where: { id: id },
-      select: ['id', 'dropBoxId']
+      select: { id: true, groupId: true, dropBoxId: true }
     });
-    return workspace?.dropBoxId ?? null;
+    if (!workspace?.dropBoxId) return null;
+    return await this.isDropBoxFor(workspace, workspace.dropBoxId) ? workspace.dropBoxId : null;
+  }
+
+  /** A drop box is another workspace of the same group (#1805): asked when it is set and when it is used. */
+  private async isDropBoxFor(workspace: Workspace, dropBoxId: number): Promise<boolean> {
+    const dropBox = await this.workspacesRepository.findOne({
+      where: { id: dropBoxId },
+      select: { id: true, groupId: true }
+    });
+    return !!dropBox && dropBox.id !== workspace.id && dropBox.groupId === workspace.groupId;
   }
 
   /**
@@ -775,15 +526,8 @@ export class WorkspaceService {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: id }
     });
-    if (dropBoxId) {
-      const dropBox = await this.workspacesRepository.findOne({
-        where: { id: dropBoxId },
-        select: { id: true, groupId: true }
-      });
-      // The route hands the workspace id on as the text it arrives as (see WorkspaceId)
-      if (!dropBox || dropBox.id === Number(id) || dropBox.groupId !== workspaceToUpdate.groupId) {
-        throw new AdminWorkspaceNotFoundException(dropBoxId, 'PATCH');
-      }
+    if (dropBoxId && !await this.isDropBoxFor(workspaceToUpdate, dropBoxId)) {
+      throw new AdminWorkspaceNotFoundException(dropBoxId, 'PATCH');
     }
     workspaceToUpdate.dropBoxId = dropBoxId || null;
     await this.workspacesRepository.save(workspaceToUpdate);
@@ -849,531 +593,6 @@ export class WorkspaceService {
     await this.workspacesRepository.delete(id);
   }
 
-  async uploadFiles(
-    workspaceId: number,
-    originalFiles: FileIo[],
-    user: User
-  ): Promise<RequestReportDto> {
-    const functionReturn: RequestReportDto = {
-      source: 'upload-units',
-      messages: []
-    };
-    const files = WorkspaceService.getZippedFiles(
-      originalFiles,
-      functionReturn
-    );
-
-    const { unitData, notXmlFiles, usedFiles } =
-      WorkspaceService.readImportData(files, functionReturn);
-
-    await Promise.all(
-      unitData.map(async u => {
-        await this.uploadFile(
-          usedFiles,
-          u,
-          workspaceId,
-          user,
-          functionReturn,
-          notXmlFiles
-        );
-      })
-    );
-
-    files.forEach(f => {
-      if (usedFiles.indexOf(f.originalname) < 0) {
-        functionReturn.messages.push({
-          objectKey: f.originalname,
-          messageKey: 'unit-upload.api-warning.ignore-file'
-        });
-      }
-    });
-    return functionReturn;
-  }
-
-  private static readImportData(
-    files: FileIo[],
-    functionReturn: RequestReportDto
-  ): {
-    unitData: (UnitImportData | UnitImportJsonData)[];
-    notXmlFiles: { [fName: string]: FileIo };
-    usedFiles: string[];
-  } {
-    const processedKeys = new Set<string>();
-    const unitData: (UnitImportData | UnitImportJsonData)[] = [];
-    const notXmlFiles: { [fName: string]: FileIo } = {};
-    const usedFiles: string[] = [];
-    const xmlCandidates: UnitImportData[] = [];
-
-    files.forEach(f => {
-      if (f.mimetype === 'application/json') {
-        // the export report file is informational output of the JSON export;
-        // silently accept it instead of flagging it as a broken unit file
-        if (f.originalname === EXPORT_REPORT_FILENAME ||
-          f.originalname.endsWith(`/${EXPORT_REPORT_FILENAME}`)) {
-          usedFiles.push(f.originalname);
-          return;
-        }
-        // Only the unit index shape is recognized here. Every other JSON file
-        // becomes a lookup candidate regardless of its name: the index decides
-        // what is a companion file, so spec-conform exports of third-party
-        // systems (arbitrary companion names) import cleanly. Broken referenced
-        // files are reported by parseCompanionJson; files no unit references
-        // fall into the final ignore-file check.
-        try {
-          const parsed = JSON.parse(f.buffer.toString()) as Record<string, unknown>;
-          if (parsed.id && parsed.userInterface) {
-            const jsonData = new UnitImportJsonData(f);
-            unitData.push(jsonData);
-            processedKeys.add(jsonData.key);
-          } else {
-            notXmlFiles[f.originalname] = f;
-          }
-        } catch {
-          notXmlFiles[f.originalname] = f;
-        }
-      } else if (f.mimetype === 'text/xml') {
-        try {
-          xmlCandidates.push(new UnitImportData(f));
-        } catch (error) {
-          if (!(error instanceof NotAUnitXmlError && error.isTestcenterFile)) {
-            functionReturn.messages.push({
-              objectKey: f.originalname,
-              messageKey: 'unit-upload.api-warning.xml-parse'
-            });
-          }
-          usedFiles.push(f.originalname);
-        }
-      } else {
-        notXmlFiles[f.originalname] = f;
-      }
-    });
-
-    xmlCandidates.forEach(xmlData => {
-      if (processedKeys.has(xmlData.key)) {
-        usedFiles.push(xmlData.fileName);
-      } else {
-        unitData.push(xmlData);
-        processedKeys.add(xmlData.key);
-      }
-    });
-
-    return { unitData, notXmlFiles, usedFiles };
-  }
-
-  private async uploadFile(
-    usedFiles: string[],
-    unitImportData: UnitImportData | UnitImportJsonData,
-    workspaceId: number,
-    user: User,
-    functionReturn: RequestReportDto,
-    notXmlFiles: { [fName: string]: FileIo }
-  ) {
-    usedFiles.push(unitImportData.fileName);
-    const newUnitId = await this.unitService.create(
-      workspaceId,
-      { key: unitImportData.key, name: unitImportData.name },
-      user,
-      true
-    );
-    if (newUnitId > 0) {
-      if (unitImportData.uuid) {
-        await this.unitService.adoptUuidIfFree(newUnitId, unitImportData.uuid);
-      }
-
-      if (unitImportData.variablesFileName) {
-        if (notXmlFiles[unitImportData.variablesFileName]) {
-          const variablesData = WorkspaceService.parseCompanionJson<{ baseVariables?: VariableInfo[] }>(
-            notXmlFiles[unitImportData.variablesFileName], functionReturn
-          );
-          if (variablesData) unitImportData.baseVariables = variablesData.baseVariables ?? [];
-          usedFiles.push(unitImportData.variablesFileName);
-        } else {
-          WorkspaceService.warnMissingFile(unitImportData.variablesFileName, functionReturn);
-        }
-      }
-
-      if (unitImportData.definitionFileName) {
-        if (notXmlFiles[unitImportData.definitionFileName]) {
-          unitImportData.definition =
-            notXmlFiles[unitImportData.definitionFileName].buffer.toString();
-          usedFiles.push(unitImportData.definitionFileName);
-          if (unitImportData.definition || unitImportData.lastChangedDefinition) {
-            await this.importDefinition(newUnitId, unitImportData);
-          }
-        } else {
-          WorkspaceService.warnMissingFile(unitImportData.definitionFileName, functionReturn);
-        }
-      } else if (unitImportData.definition || unitImportData.lastChangedDefinition) {
-        // An inline definition (`<Definition>` in the XML, `isDefinitionInline` in the JSON index) has
-        // no file of its own, but is stored the same way, with its variables (#1839).
-        await this.importDefinition(newUnitId, unitImportData);
-      }
-
-      if (unitImportData.metadataFileName) {
-        if (notXmlFiles[unitImportData.metadataFileName]) {
-          const parsedMetadata = WorkspaceService.parseCompanionJson<unknown>(
-            notXmlFiles[unitImportData.metadataFileName], functionReturn
-          );
-          if (parsedMetadata !== undefined) {
-            unitImportData.metadata = WorkspaceService.mapImportedMetadata(parsedMetadata);
-          }
-          usedFiles.push(unitImportData.metadataFileName);
-        } else {
-          WorkspaceService.warnMissingFile(unitImportData.metadataFileName, functionReturn);
-        }
-      }
-
-      if (unitImportData.itemsFileName) {
-        if (notXmlFiles[unitImportData.itemsFileName]) {
-          const parsedItems = WorkspaceService.parseCompanionJson<UnitItemJson[]>(
-            notXmlFiles[unitImportData.itemsFileName], functionReturn
-          );
-          if (parsedItems !== undefined) {
-            // the items file is the authority on items: an empty list also
-            // overrides items embedded in a legacy metadata blob
-            unitImportData.metadata = {
-              ...(unitImportData.metadata ?? {}),
-              items: WorkspaceService.mapImportedItems(parsedItems)
-            };
-          }
-          usedFiles.push(unitImportData.itemsFileName);
-        } else {
-          WorkspaceService.warnMissingFile(unitImportData.itemsFileName, functionReturn);
-        }
-      }
-
-      const itemUuidLookups = await this.importUnitProperties(
-        workspaceId,
-        newUnitId,
-        unitImportData
-      );
-
-      if (unitImportData.commentsFileName) {
-        if (notXmlFiles[unitImportData.commentsFileName]) {
-          const comments = WorkspaceService.parseCompanionJson<ImportedComment[]>(
-            notXmlFiles[unitImportData.commentsFileName], functionReturn
-          );
-          usedFiles.push(unitImportData.commentsFileName);
-          if (comments) await this.importComments(newUnitId, comments, itemUuidLookups);
-        } else {
-          WorkspaceService.warnMissingFile(unitImportData.commentsFileName, functionReturn);
-        }
-      }
-
-      if (unitImportData.richNotesFileName) {
-        if (notXmlFiles[unitImportData.richNotesFileName]) {
-          const richNotes = WorkspaceService.parseCompanionJson<Record<string, unknown>[]>(
-            notXmlFiles[unitImportData.richNotesFileName], functionReturn
-          );
-          usedFiles.push(unitImportData.richNotesFileName);
-          if (richNotes) {
-            await this.unitRichNoteService.importNotes(richNotes, newUnitId, itemUuidLookups);
-          }
-        } else {
-          WorkspaceService.warnMissingFile(unitImportData.richNotesFileName, functionReturn);
-        }
-      }
-
-      if (unitImportData.codingSchemeFileName) {
-        if (notXmlFiles[unitImportData.codingSchemeFileName]) {
-          unitImportData.codingScheme =
-            notXmlFiles[unitImportData.codingSchemeFileName].buffer.toString();
-          usedFiles.push(unitImportData.codingSchemeFileName);
-          await this.importScheme(newUnitId, unitImportData);
-        } else {
-          WorkspaceService.warnMissingFile(unitImportData.codingSchemeFileName, functionReturn);
-        }
-      }
-    } else {
-      functionReturn.messages.push({
-        objectKey: unitImportData.fileName,
-        messageKey: 'unit-patch.duplicate-unit-id'
-      });
-    }
-  }
-
-  private static warnMissingFile(fileName: string, functionReturn: RequestReportDto): void {
-    functionReturn.messages.push({
-      objectKey: fileName,
-      messageKey: 'unit-upload.api-warning.missing-file'
-    });
-  }
-
-  // Parses a companion JSON file (vocs/voco/vorn/vomd/voit/vova). A broken
-  // file must not abort the whole upload: report a json-parse warning for
-  // the file and import the unit without this block.
-  private static parseCompanionJson<T>(
-    file: FileIo,
-    functionReturn: RequestReportDto
-  ): T | undefined {
-    try {
-      return JSON.parse(file.buffer.toString()) as T;
-    } catch {
-      functionReturn.messages.push({
-        objectKey: file.originalname,
-        messageKey: 'unit-upload.api-warning.json-parse'
-      });
-      return undefined;
-    }
-  }
-
-  private static getZippedFiles(
-    originalFiles: FileIo[],
-    functionReturn: RequestReportDto
-  ): FileIo[] {
-    const files: FileIo[] = [];
-    originalFiles.forEach(f => {
-      if (ZIP_MIME_TYPES.indexOf(f.mimetype) >= 0) {
-        try {
-          const zip = new AdmZip(f.buffer);
-          const zipEntries = zip.getEntries();
-          zipEntries.forEach(zipEntry => {
-            const isXmlFile = /\.xml$/i.test(zipEntry.entryName);
-            const isJsonFile = /\.json$/i.test(zipEntry.entryName);
-            const fileContent = zipEntry.getData();
-            files.push({
-              originalname: `${f.originalname}/${zipEntry.entryName}`,
-              // eslint-disable-next-line no-nested-ternary
-              mimetype: isXmlFile ? 'text/xml' : isJsonFile ? 'application/json' : 'application/octet-stream',
-              fieldname: f.fieldname,
-              encoding: f.encoding,
-              buffer: fileContent,
-              size: fileContent.length
-            });
-          });
-        } catch {
-          functionReturn.messages.push({
-            objectKey: f.originalname,
-            messageKey: 'unit-upload.api-error.zip'
-          });
-        }
-      } else {
-        files.push(f);
-      }
-    });
-    return files;
-  }
-
-  private async importUnitProperties(
-    workspaceId: number,
-    newUnitId: number,
-    unitImportData: UnitImportData | UnitImportJsonData
-  ): Promise<ItemUuidLookup[]> {
-    let itemUuidLookups: ItemUuidLookup[] = [];
-    await this.unitService.patchUnitProperties(
-      newUnitId,
-      {
-        id: newUnitId,
-        editor: unitImportData.editor,
-        player: unitImportData.player,
-        schemer: unitImportData.schemer,
-        description: unitImportData.description,
-        transcript: unitImportData.transcript,
-        lastChangedMetadata: unitImportData.lastChangedMetadata,
-        lastChangedDefinition: unitImportData.lastChangedDefinition,
-        lastChangedScheme: unitImportData.lastChangedScheme,
-        lastChangedMetadataUser: unitImportData.lastChangedMetadataUser,
-        lastChangedDefinitionUser: unitImportData.lastChangedDefinitionUser,
-        lastChangedSchemeUser: unitImportData.lastChangedSchemeUser
-      },
-      null
-    );
-    if (unitImportData.metadata) {
-      const workspace = await this.workspacesRepository.findOne({
-        where: { id: workspaceId }
-      });
-      const metadata = UnitService.setCurrentProfiles(
-        workspace.settings?.unitMDProfile,
-        workspace.settings?.itemMDProfile,
-        unitImportData.metadata
-      );
-      itemUuidLookups = await this.unitService.copyItemsWithMetadata(
-        newUnitId,
-        metadata
-      );
-    }
-    return itemUuidLookups;
-  }
-
-  private async importDefinition(
-    newUnitId: number,
-    unitImportData: UnitImportData | UnitImportJsonData
-  ) {
-    await this.unitService.patchDefinition(
-      newUnitId,
-      {
-        definition: unitImportData.definition,
-        definitionType: unitImportData.definitionType,
-        variables: unitImportData.baseVariables
-      },
-      null,
-      unitImportData.lastChangedDefinition
-    );
-  }
-
-  private async importScheme(
-    newUnitId: number,
-    unitImportData: UnitImportData | UnitImportJsonData
-  ) {
-    await this.unitService.patchScheme(
-      newUnitId,
-      {
-        scheme: unitImportData.codingScheme,
-        schemeType: unitImportData.schemeType
-      },
-      null,
-      unitImportData.lastChangedScheme
-    );
-  }
-
-  private async importComments(
-    unitId: number,
-    comments: ImportedComment[],
-    itemUuidLookups: ItemUuidLookup[]
-  ) {
-    const mappedComments = comments.map(c => WorkspaceService.mapImportedComment(c));
-    await this.unitCommentService.createComments(
-      mappedComments,
-      unitId,
-      itemUuidLookups
-    );
-  }
-
-  /**
-   * Maps metadata from an exported *.vomd.json back onto the internal structure. Detects the iqb
-   * unit-metadata@0.1 wrapper ({ metadata: [...] }) and falls back to the legacy raw
-   * { profiles, items } blob for backwards compatibility.
-   */
-  static mapImportedMetadata(parsed: unknown): UnitMetadataValues {
-    const wrapper = parsed as UnitMetadataJson;
-    if (Array.isArray(wrapper?.metadata)) {
-      return {
-        profiles: WorkspaceService.mapMetadataValuesJson(wrapper.metadata)
-      };
-    }
-    return WorkspaceService.normalizeLegacyProfileOrder((parsed ?? {}) as UnitMetadataValues);
-  }
-
-  // Legacy raw-blob exports predate the metadata-values@3.x `order` field and
-  // carry the obsolete boolean `isCurrent` on each profile. Derive `order` from
-  // it (true -> 0, false -> -1) and drop the flag so the imported structure
-  // matches the current model. A profile that already carries `order` keeps it.
-  // Profile ids are left as imported; UnitService.setCurrentProfiles rewrites the
-  // legacy github spelling to w3id on the way to persistence (#1570).
-  private static normalizeLegacyProfileOrder(metadata: UnitMetadataValues): UnitMetadataValues {
-    if (!metadata || typeof metadata !== 'object') return metadata;
-    const mapProfile = (profile: ProfileValues & { isCurrent?: boolean }): ProfileValues => {
-      const { isCurrent, ...rest } = profile;
-      return { ...rest, order: profile.order ?? orderFromCurrent(!!isCurrent) };
-    };
-    return {
-      ...metadata,
-      ...(metadata.profiles && { profiles: metadata.profiles.map(mapProfile) }),
-      ...(metadata.items && {
-        items: metadata.items.map(item => ({
-          ...item,
-          ...(item.profiles && { profiles: item.profiles.map(mapProfile) })
-        }))
-      })
-    };
-  }
-
-  // Maps metadata-values@3.0 profiles back onto the internal structure. The
-  // profile `order` is carried through; setCurrentProfiles reasserts it against
-  // the workspace profile settings during import.
-  static mapMetadataValuesJson(
-    values: MetadataValuesJson[]
-  ): { profileId: string; order?: number; entries: MetadataValuesEntry[] }[] {
-    return (values ?? [])
-      .filter(profile => !!profile?.profileId)
-      .map(profile => ({
-        profileId: profile.profileId,
-        order: profile.order,
-        entries: (profile.entries ?? [])
-          .filter(entry => !!entry?.id)
-          .map(entry => WorkspaceService.mapMetadataEntryJson(entry))
-      }));
-  }
-
-  // Reconstructs the internal entry shape (value/valueAsText) from the three
-  // metadata-values@3.0 value forms: simple_value, vocabulary_entries and
-  // language_coded_texts. Vocabulary labels become both the internal `text`
-  // and the display texts in valueAsText.
-  private static mapMetadataEntryJson(entry: MetadataEntryJson): MetadataValuesEntry {
-    const { value } = entry;
-    let internalValue: MetadataValuesEntry['value'] = '';
-    let valueAsText: LanguageCodedText[] = [];
-    if (Array.isArray(value)) {
-      if (value.some(entryValue => !!entryValue && typeof (entryValue as VocabularyEntryJson).id === 'string')) {
-        const vocabularyEntries = value as VocabularyEntryJson[];
-        // Preserve the spec field `annotation` (the numbering / SKOS notation);
-        // the pure label stays in `text`. valueAsText is left empty here because
-        // the read path (UnitService.ensureValueAsText) always recomputes the
-        // vocabulary display text, honouring hideNumbering — computing it now
-        // would only be overwritten.
-        internalValue = vocabularyEntries.map(vocabularyEntry => ({
-          id: vocabularyEntry.id,
-          text: vocabularyEntry.label ?? [],
-          annotation: vocabularyEntry.annotation ?? []
-        }));
-        valueAsText = [];
-      } else {
-        internalValue = value as LanguageCodedText[];
-        valueAsText = value as LanguageCodedText[];
-      }
-    } else if (value && typeof value === 'object' && typeof value.raw === 'string') {
-      internalValue = value.raw;
-      valueAsText = value.asText ?? [];
-    }
-    return {
-      id: entry.id,
-      label: entry.label ?? [],
-      value: internalValue,
-      valueAsText
-    };
-  }
-
-  /**
-   * Maps items from the iqb unit-items@0.2 spec shape back onto the internal structure:
-   * sourceVariableId/sourceVariableUuid become variableId/variableReadOnlyId. Items without the
-   * required id are dropped (mirrors transformItems on export); they would otherwise end up as
-   * unaddressable NULL-id rows in unit_item.
-   */
-  static mapImportedItems(items: UnitItemJson[]): ItemsMetadataValues[] {
-    return (Array.isArray(items) ? items : [])
-      .filter(item => !!item?.id)
-      .map(item => ({
-        uuid: item.uuid,
-        id: item.id,
-        description: item.description,
-        order: item.order,
-        variableId: item.sourceVariableId ?? null,
-        variableReadOnlyId: item.sourceVariableUuid ?? null,
-        createdAt: item.createdAt ? new Date(item.createdAt) : undefined,
-        changedAt: item.changedAt ? new Date(item.changedAt) : undefined,
-        profiles: WorkspaceService.mapMetadataValuesJson(item.metadata ?? [])
-      }));
-  }
-
-  // Maps a comment from the iqb unit-comments@0.1 spec shape (commentator/
-  // isHidden/parentComment) back onto the internal DTO, accepting the legacy
-  // field names (userName/hidden/parentId) for backwards compatibility.
-  static mapImportedComment(comment: ImportedComment): UnitCommentDto {
-    return {
-      id: comment.id,
-      body: comment.body,
-      userName: comment.commentator ?? comment.userName ?? '',
-      // User IDs from another instance are unreliable and could randomly collide with local IDs.
-      // We therefore set them to -1 during import to ensure comments are marked as unread for all local users.
-      userId: -1,
-      parentId: comment.parentComment ?? comment.parentId ?? null,
-      hidden: comment.isHidden ?? comment.hidden ?? false,
-      createdAt: comment.createdAt ? new Date(comment.createdAt) : undefined,
-      changedAt: comment.changedAt ? new Date(comment.changedAt) : undefined,
-      itemUuids: comment.itemUuids
-    };
-  }
-
   // Compared via profileIdsMatch, not string equality: a stored github spelling
   // and an incoming w3id of the same profile are the same configuration, and
   // reclassifying on a spelling change would be wrong — patchMetadataCurrentProfile
@@ -1401,7 +620,7 @@ export class WorkspaceService {
     // on the new profile, part of the units still classified under the old one,
     // and an unhandled rejection as the only trace (#1576).
     await Promise.all(
-      unitIds.map(unitId => this.unitService.patchMetadataCurrentProfile(
+      unitIds.map(unitId => this.unitMetadataService.patchMetadataCurrentProfile(
         unitId,
         newSettings?.unitMDProfile,
         newSettings?.itemMDProfile

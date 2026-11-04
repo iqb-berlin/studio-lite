@@ -1,30 +1,14 @@
 import { createMock } from '@golevelup/ts-jest';
 import {
-  ItemsMetadataValues,
-  ProfileValues,
-  UnitMetadataValues,
-  UnitCommentDto,
-  UnitDownloadBookletSettingsDto,
-  UnitDownloadSettingsDto,
-  UnitExportConfigDto,
-  UnitPropertiesDto,
-  UnitDefinitionDto,
-  UnitRichNoteDto,
-  UnitRichNotesDto,
-  UnitSchemeDto,
-  VeronaModuleInListDto,
-  VeronaModuleFileDto,
-  UnitRichNoteTagDto
+  UnitMetadataValues, UnitCommentDto, UnitDownloadSettingsDto, UnitExportConfigDto, UnitPropertiesDto, UnitDefinitionDto, UnitRichNoteDto, UnitRichNotesDto, UnitSchemeDto, VeronaModuleInListDto, VeronaModuleFileDto
 } from '@studio-lite-lib/api-dto';
 // `unstable_mockModule` is missing from the global `jest` object's type, so it comes from here.
 // It is aliased because the global `jest` -- used for `jest.fn()` below -- types its mocks
 // loosely, and importing over that name would make every `mockReturnValue` a type error.
 import { jest as jestEsm } from '@jest/globals';
-// Type only: the value comes from the mocked module below, while the casts further down keep
-// using `AdmZip` as a type.
-import type AdmZip from 'adm-zip';
-import { ExportReportMessage, ExportReportScope } from './export-report.class';
 import type { UnitService } from '../services/unit.service';
+import type { UnitMetadataService } from '../services/unit-metadata.service';
+import type { UnitDefinitionService } from '../services/unit-definition.service';
 import type { UnitCommentService } from '../services/unit-comment.service';
 import type { VeronaModulesService } from '../services/verona-modules.service';
 import type { SettingService } from '../services/setting.service';
@@ -38,6 +22,7 @@ jestEsm.unstable_mockModule('adm-zip', () => ({
 
 const AdmZipMock = (await import('adm-zip')).default as unknown as jest.Mock;
 const { UnitDownloadClass } = await import('./unit-download.class');
+const { UnitJsonDownloadClass } = await import('./unit-json-download.class');
 
 describe('UnitDownloadClass', () => {
   let mockZip: {
@@ -56,6 +41,8 @@ describe('UnitDownloadClass', () => {
   describe('get', () => {
     it('should create a zip with unit data and players', async () => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
@@ -81,10 +68,10 @@ describe('UnitDownloadClass', () => {
         lastChangedMetadata: new Date()
       } as unknown as UnitPropertiesDto);
 
-      unitServiceMock.findOnesDefinition.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: 'def'
       } as unknown as UnitDefinitionDto);
-      unitServiceMock.findOnesScheme.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({
         scheme: 'scheme'
       } as unknown as UnitSchemeDto);
       veronaModuleServiceMock.findAll.mockResolvedValue([
@@ -107,6 +94,8 @@ describe('UnitDownloadClass', () => {
       const result = await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
@@ -123,6 +112,8 @@ describe('UnitDownloadClass', () => {
   describe('definition type', () => {
     const exportUnit = async (exportFormat: 'xml' | 'json', definitionType?: string) => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const settingServiceMock = createMock<SettingService>();
       const unitRichNoteServiceMock = createMock<UnitRichNoteService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
@@ -132,15 +123,17 @@ describe('UnitDownloadClass', () => {
         key: 'U1', name: 'Unit 1', metadata: {}, player: 'iqb-player-aspect@3.0'
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-1');
-      unitServiceMock.findOnesDefinition.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: '{}', variables: [], ...(definitionType && { definitionType })
       } as UnitDefinitionDto);
-      unitServiceMock.findOnesScheme.mockResolvedValue({ scheme: '', schemeType: '' } as UnitSchemeDto);
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({ scheme: '', schemeType: '' } as UnitSchemeDto);
       veronaModuleServiceMock.findAll.mockResolvedValue([]);
 
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         createMock<UnitCommentService>(),
         veronaModuleServiceMock,
         settingServiceMock,
@@ -208,6 +201,8 @@ describe('UnitDownloadClass', () => {
       // several exports in one test share the zip mock
       mockZip.addFile.mockClear();
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const settingServiceMock = createMock<SettingService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       settingServiceMock.findUnitExportConfig.mockResolvedValue({} as UnitExportConfigDto);
@@ -215,14 +210,16 @@ describe('UnitDownloadClass', () => {
         key: 'U1', name: 'Unit 1', metadata, player: 'iqb-player-aspect@3.0', schemer: 'iqb-schemer@2.0'
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-1');
-      unitServiceMock.buildHideNumberingMap.mockResolvedValue({});
-      unitServiceMock.findOnesDefinition.mockResolvedValue({ definition: '{}', variables: [] } as UnitDefinitionDto);
-      unitServiceMock.findOnesScheme.mockResolvedValue({ scheme, schemeType: '' } as UnitSchemeDto);
+      unitMetadataServiceMock.buildHideNumberingMap.mockResolvedValue({});
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({ definition: '{}', variables: [] } as UnitDefinitionDto);
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({ scheme, schemeType: '' } as UnitSchemeDto);
       veronaModuleServiceMock.findAll.mockResolvedValue([]);
 
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         createMock<UnitCommentService>(),
         veronaModuleServiceMock,
         settingServiceMock,
@@ -317,320 +314,98 @@ describe('UnitDownloadClass', () => {
         expect(files).not.toContain('_export-report.json');
       });
     });
-  });
 
-  describe('generateCodeList', () => {
-    it('should generate requested number of unique codes', () => {
-      const result = UnitDownloadClass.generateCodeList(5, 10);
-      expect(result).toHaveLength(10);
-      const uniqueCodes = new Set(result);
-      expect(uniqueCodes.size).toBe(10);
+    // Booklet and test takers stay XML beside JSON units: a booklet names its units by id only
+    it('should write booklet and test takers for logins in both formats (#2099)', async () => {
+      const xml = await exportUnit('xml', { addTestTakersHot: 1, bookletSettings: [] });
+      const json = await exportUnit('json', { addTestTakersHot: 1, bookletSettings: [] });
+
+      expect(xml.files).toEqual(expect.arrayContaining(['booklet1.xml', 'booklet1_testtaker.xml']));
+      expect(json.files).toEqual(expect.arrayContaining(['booklet1.xml', 'booklet1_testtaker.xml']));
     });
   });
 
-  describe('createUnitXML', () => {
-    it('should generate valid XML structure', () => {
-      const exportConfig = {
-        unitXsdUrl: 'xsd'
-      } as unknown as UnitExportConfigDto;
-      const metadata = {
-        key: 'K1',
-        name: 'N1',
-        description: 'D1',
-        lastChangedMetadata: new Date('2023-01-01'),
-        metadata: {}
-      } as unknown as UnitPropertiesDto;
+  describe('the JSON index', () => {
+    const exportIndex = async (properties: Partial<UnitPropertiesDto>) => {
+      const unitServiceMock = createMock<UnitService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
+      const settingServiceMock = createMock<SettingService>();
+      const veronaModuleServiceMock = createMock<VeronaModulesService>();
+      settingServiceMock.findUnitExportConfig.mockResolvedValue({} as UnitExportConfigDto);
+      unitServiceMock.findOnesProperties.mockResolvedValue({
+        key: 'U1', metadata: {}, player: 'iqb-player-aspect@3.0', ...properties
+      } as UnitPropertiesDto);
+      unitServiceMock.ensureUuid.mockResolvedValue('uuid-1');
+      unitDefinitionServiceMock.findOnesDefinition
+        .mockResolvedValue({ definition: '', variables: [] } as UnitDefinitionDto);
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({ scheme: '', schemeType: '' } as UnitSchemeDto);
+      veronaModuleServiceMock.findAll.mockResolvedValue([]);
 
-      const unitDownloadClass = UnitDownloadClass as unknown as {
-        createUnitXML: (
-          config: UnitExportConfigDto,
-          meta: UnitPropertiesDto
-        ) => { toString: () => string };
-      };
-      const xml = unitDownloadClass.createUnitXML(exportConfig, metadata);
-      const xmlString = xml.toString();
-
-      expect(xmlString).toContain('K1');
-      expect(xmlString).toContain('N1');
-      expect(xmlString).toContain('D1');
-    });
-  });
-
-  // coding-box, the testcenter and the unit XSD know only the VariableInfo 1.x spelling (#1708)
-  describe('addVariables', () => {
-    const unitDownloadClass = UnitDownloadClass as unknown as {
-      createUnitXML: (
-        config: UnitExportConfigDto,
-        meta: UnitPropertiesDto
-      ) => { toString: () => string };
+      await UnitDownloadClass.get(
+        1,
+        unitServiceMock,
+        createMock<UnitMetadataService>(),
+        unitDefinitionServiceMock,
+        createMock<UnitCommentService>(),
+        veronaModuleServiceMock,
+        settingServiceMock,
+        createMock<UnitRichNoteService>(),
+        {
+          unitIdList: [1],
+          addPlayers: false,
+          addComments: false,
+          addTestTakersHot: 0,
+          addTestTakersMonitor: 0,
+          addTestTakersReview: 0
+        } as unknown as UnitDownloadSettingsDto,
+        'json'
+      );
+      const [, file] = mockZip.addFile.mock.calls.find(([name]: [string]) => name === 'U1.json');
+      return JSON.parse((file as Buffer).toString());
     };
 
-    it('should write a list stored in 2.x in the 1.x spelling, with the page', () => {
-      const unitXml = unitDownloadClass.createUnitXML(
-        { unitXsdUrl: 'xsd' } as unknown as UnitExportConfigDto,
-        { key: 'K1', name: 'N1', metadata: {} } as unknown as UnitPropertiesDto
-      );
-      const variable = (id: string, type: string, format: string) => ({
-        id, type, format, multiple: false, nullable: false, values: [], valuePositionLabels: []
-      });
-      const storedIn2x = [
-        variable('v1', 'NO_VALUE', ''),
-        variable('v2', 'STRING', 'GGB_FILE')
-      ] as unknown as UnitDefinitionDto['variables'];
+    it('should name the editor of the unit, its label and its description', async () => {
+      const index = await exportIndex({ editor: 'iqb-editor-aspect@2.0', name: 'Aufgabe', description: 'Text' });
 
-      UnitDownloadClass.addVariables(
-        { variables: storedIn2x } as UnitDefinitionDto,
-        unitXml as unknown as Parameters<typeof UnitDownloadClass.addVariables>[1]
-      );
-
-      const xmlString = unitXml.toString();
-      const flags = 'nullable="false" multiple="false" page=""';
-      expect(xmlString).toContain(`<Variable id="v1" type="no-value" format="" ${flags}/>`);
-      expect(xmlString).toContain(`<Variable id="v2" type="string" format="ggb-file" ${flags}/>`);
+      expect(index).toEqual(expect.objectContaining({ label: 'Aufgabe', description: 'Text' }));
+      expect(index.userInterface.editor).toBe('iqb-editor-aspect@2.0');
     });
 
-    it('should write a format that 1.x does not know as 1.x would, for the unit XSD (#1857)', () => {
-      const unitXml = unitDownloadClass.createUnitXML(
-        { unitXsdUrl: 'xsd' } as unknown as UnitExportConfigDto,
-        { key: 'K1', name: 'N1', metadata: {} } as unknown as UnitPropertiesDto
-      );
-      const variable = (id: string, type: string, format: string) => ({
-        id, type, format, multiple: false, nullable: false, values: [], valuePositionLabels: []
-      });
-      const chemistry = [
-        variable('periodic_1', 'STRING', 'CHEM_ELEMENT_SYMBOLS'),
-        variable('molecule_1', 'JSON', 'CHEM_MOLECULE')
-      ] as unknown as UnitDefinitionDto['variables'];
+    it('should leave out an empty label and description, and the editor of a unit that has none', async () => {
+      const index = await exportIndex({ editor: '', name: '', description: '' });
 
-      UnitDownloadClass.addVariables(
-        { variables: chemistry } as UnitDefinitionDto,
-        unitXml as unknown as Parameters<typeof UnitDownloadClass.addVariables>[1]
-      );
-
-      const xmlString = unitXml.toString();
-      const flags = 'nullable="false" multiple="false" page=""';
-      expect(xmlString).toContain(`<Variable id="periodic_1" type="string" format="chem-element-symbols" ${flags}/>`);
-      expect(xmlString).toContain(`<Variable id="molecule_1" type="json" format="chem-molecule" ${flags}/>`);
+      expect(index).not.toHaveProperty('label');
+      expect(index).not.toHaveProperty('description');
+      expect(index.userInterface).not.toHaveProperty('editor');
     });
   });
 
-  describe('addDerivedVariables', () => {
-    const unitDownloadClass = UnitDownloadClass as unknown as {
-      createUnitXML: (
-        config: UnitExportConfigDto,
-        meta: UnitPropertiesDto
-      ) => { toString: () => string };
-      addDerivedVariables: (
-        schemeData: UnitSchemeDto,
-        unitXml: { toString: () => string }
-      ) => void;
-    };
+  describe('addPlayers', () => {
+    // A unit made with an older minor version of a player is played with the latest one installed.
+    it('should add the player a unit names, or a later minor version of it, and skip one not installed', async () => {
+      const veronaModulesService = createMock<VeronaModulesService>();
+      veronaModulesService.findAll.mockResolvedValue(
+        ['aspect-player@2.3', 'aspect-player@2.5', 'other-player@1.0'].map(key => ({ key }) as VeronaModuleInListDto)
+      );
+      veronaModulesService.findFileById.mockImplementation(
+        async key => ({ fileName: `${key}.html`, file: 'html' }) as unknown as VeronaModuleFileDto
+      );
 
-    it('should add DerivedVariables from coding scheme', () => {
-      const exportConfig = {
-        unitXsdUrl: 'xsd'
-      } as unknown as UnitExportConfigDto;
-      const metadata = {
-        key: 'K1',
-        name: 'N1',
-        description: 'D1',
-        lastChangedMetadata: new Date('2023-01-01'),
-        metadata: {}
-      } as unknown as UnitPropertiesDto;
-      const unitXml = unitDownloadClass.createUnitXML(exportConfig, metadata);
+      await UnitDownloadClass.addPlayers(
+        veronaModulesService,
+        mockZip as unknown as Parameters<typeof UnitDownloadClass.addPlayers>[1],
+        ['aspect-player@2.1', 'unknown-player@1.0']
+      );
 
-      const schemeData = {
-        scheme: JSON.stringify({
-          version: '3.3',
-          variableCodings: [
-            { id: 'base1', sourceType: 'BASE', alias: 'base1_alias' },
-            {
-              id: 'derived1',
-              sourceType: 'SUM_CODE',
-              alias: 'derived1_alias',
-              page: 'page1'
-            },
-            {
-              id: 'derived2',
-              sourceType: 'CONCAT_CODE',
-              alias: 'derived2_alias'
-            },
-            { id: 'derived3', sourceType: 'SUM_SCORE' },
-            { id: 'derived4', sourceType: 'SOLVER', alias: 'solver_alias' }
-          ]
-        }),
-        schemeType: 'test'
-      } as unknown as UnitSchemeDto;
-
-      unitDownloadClass.addDerivedVariables(schemeData, unitXml);
-      const xmlString = unitXml.toString();
-
-      expect(xmlString).toContain('<DerivedVariables>');
-      expect(xmlString).toContain('derived1_alias');
-      expect(xmlString).toContain('derived2_alias');
-      expect(xmlString).toContain('derived3');
-      expect(xmlString).toContain('solver_alias');
-      expect(xmlString).not.toContain('base1_alias');
-    });
-
-    it('should not add DerivedVariables if scheme is empty', () => {
-      const exportConfig = {
-        unitXsdUrl: 'xsd'
-      } as unknown as UnitExportConfigDto;
-      const metadata = {
-        key: 'K1',
-        name: 'N1',
-        description: 'D1',
-        lastChangedMetadata: new Date('2023-01-01'),
-        metadata: {}
-      } as unknown as UnitPropertiesDto;
-      const unitXml = unitDownloadClass.createUnitXML(exportConfig, metadata);
-
-      const schemeData = {
-        scheme: '',
-        schemeType: ''
-      } as unknown as UnitSchemeDto;
-      unitDownloadClass.addDerivedVariables(schemeData, unitXml);
-      const xmlString = unitXml.toString();
-
-      expect(xmlString).not.toContain('DerivedVariables');
-    });
-
-    it('should not add DerivedVariables if only base variables exist', () => {
-      const exportConfig = {
-        unitXsdUrl: 'xsd'
-      } as unknown as UnitExportConfigDto;
-      const metadata = {
-        key: 'K1',
-        name: 'N1',
-        description: 'D1',
-        lastChangedMetadata: new Date('2023-01-01'),
-        metadata: {}
-      } as unknown as UnitPropertiesDto;
-      const unitXml = unitDownloadClass.createUnitXML(exportConfig, metadata);
-
-      const schemeData = {
-        scheme: JSON.stringify({
-          version: '3.3',
-          variableCodings: [
-            { id: 'base1', sourceType: 'BASE' },
-            { id: 'base2', sourceType: 'BASE_NO_VALUE' }
-          ]
-        }),
-        schemeType: 'test'
-      } as unknown as UnitSchemeDto;
-
-      unitDownloadClass.addDerivedVariables(schemeData, unitXml);
-      const xmlString = unitXml.toString();
-
-      expect(xmlString).not.toContain('DerivedVariables');
-    });
-
-    it('should set correct type based on sourceType', () => {
-      const exportConfig = {
-        unitXsdUrl: 'xsd'
-      } as unknown as UnitExportConfigDto;
-      const metadata = {
-        key: 'K1',
-        name: 'N1',
-        description: 'D1',
-        lastChangedMetadata: new Date('2023-01-01'),
-        metadata: {}
-      } as unknown as UnitPropertiesDto;
-      const unitXml = unitDownloadClass.createUnitXML(exportConfig, metadata);
-
-      const schemeData = {
-        scheme: JSON.stringify({
-          version: '3.3',
-          variableCodings: [
-            { id: 'sum_code_var', sourceType: 'SUM_CODE', alias: 'sc' },
-            { id: 'sum_score_var', sourceType: 'SUM_SCORE', alias: 'ss' },
-            { id: 'copy_value_var', sourceType: 'COPY_VALUE', alias: 'cv' },
-            { id: 'solver_var', sourceType: 'SOLVER', alias: 'sv' },
-            { id: 'concat_var', sourceType: 'CONCAT_CODE', alias: 'cc' },
-            {
-              id: 'unique_values_var',
-              sourceType: 'UNIQUE_VALUES',
-              alias: 'uv'
-            },
-            { id: 'manual_var', sourceType: 'MANUAL', alias: 'mv' }
-          ]
-        }),
-        schemeType: 'test'
-      } as unknown as UnitSchemeDto;
-
-      unitDownloadClass.addDerivedVariables(schemeData, unitXml);
-      const xmlString = unitXml.toString();
-
-      expect(xmlString).toContain('id="sc" type="integer"');
-      expect(xmlString).toContain('id="ss" type="integer"');
-      expect(xmlString).toContain('id="cv" type="integer"');
-      expect(xmlString).toContain('id="sv" type="number"');
-      expect(xmlString).toContain('id="cc" type="string"');
-      expect(xmlString).toContain('id="uv" type="boolean"');
-      expect(xmlString).toContain('id="mv" type="string"');
-    });
-  });
-
-  describe('findTag and getLabelString', () => {
-    const unitDownloadClass = UnitDownloadClass as unknown as {
-      findTag: (tags: UnitRichNoteTagDto[], id: string) => UnitRichNoteTagDto;
-      getLabelString: (label: { lang: string; value: string }[] | null) => string | null;
-    };
-    const tags = [
-      {
-        id: 't1',
-        label: [{ lang: 'de', value: 'Label 1' }],
-        children: [
-          {
-            id: 'c1',
-            label: [{ lang: 'de', value: 'Label 1.1' }]
-          }
-        ]
-      },
-      {
-        id: 'https://example.com/vocab/t2',
-        label: [{ lang: 'de', value: 'Label 2' }]
-      }
-    ];
-
-    it('should find tag by exact ID recursively', () => {
-      const tag = unitDownloadClass.findTag(tags, 'c1');
-      expect(tag.id).toBe('c1');
-      expect(unitDownloadClass.getLabelString(tag.label)).toBe('Label 1.1');
-    });
-
-    it('should find tag by URL ID', () => {
-      const tag = unitDownloadClass.findTag(tags, 'https://example.com/vocab/t2');
-      expect(tag.id).toBe('https://example.com/vocab/t2');
-      expect(unitDownloadClass.getLabelString(tag.label)).toBe('Label 2');
-    });
-
-    it('should find tag by legacy dot-separated path', () => {
-      const tag = unitDownloadClass.findTag(tags, 't1.c1');
-      expect(tag.id).toBe('c1');
-      expect(unitDownloadClass.getLabelString(tag.label)).toBe('Label 1.1');
-    });
-
-    it('should return null if tagId is not found', () => {
-      const tag = unitDownloadClass.findTag(tags, 'nonexistent');
-      expect(tag).toBeNull();
-    });
-
-    it('should return null if tagId is empty', () => {
-      const tag = unitDownloadClass.findTag(tags, '');
-      expect(tag).toBeNull();
-    });
-
-    it('should handle missing labels in getLabelString', () => {
-      expect(unitDownloadClass.getLabelString(null)).toBeNull();
-      expect(unitDownloadClass.getLabelString([])).toBeNull();
+      expect(mockZip.addFile.mock.calls.map(([name]: [string]) => name)).toEqual(['aspect-player@2.5.html']);
     });
   });
 
   describe('get with exportFormat json', () => {
     it('should create key.json index file and not key.xml', async () => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
@@ -653,12 +428,12 @@ describe('UnitDownloadClass', () => {
 
       unitServiceMock.ensureUuid.mockResolvedValue('test-uuid-1234');
 
-      unitServiceMock.findOnesDefinition.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: '<content/>',
         variables: []
       } as unknown as UnitDefinitionDto);
 
-      unitServiceMock.findOnesScheme.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({
         scheme: '',
         schemeType: ''
       } as unknown as UnitSchemeDto);
@@ -681,6 +456,8 @@ describe('UnitDownloadClass', () => {
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
@@ -696,6 +473,8 @@ describe('UnitDownloadClass', () => {
 
     it('should embed uuid and modifiedAt in the JSON index', async () => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
@@ -712,10 +491,10 @@ describe('UnitDownloadClass', () => {
         lastChangedMetadata: modifiedAt
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('my-uuid-5678');
-      unitServiceMock.findOnesDefinition.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: '', variables: []
       } as unknown as UnitDefinitionDto);
-      unitServiceMock.findOnesScheme.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({
         scheme: '', schemeType: ''
       } as unknown as UnitSchemeDto);
       unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
@@ -735,6 +514,8 @@ describe('UnitDownloadClass', () => {
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
@@ -753,6 +534,8 @@ describe('UnitDownloadClass', () => {
 
     it('should only include external blocks when data is present', async () => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
@@ -768,10 +551,10 @@ describe('UnitDownloadClass', () => {
         lastChangedMetadata: new Date()
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-3');
-      unitServiceMock.findOnesDefinition.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: '', variables: []
       } as unknown as UnitDefinitionDto);
-      unitServiceMock.findOnesScheme.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({
         scheme: '', schemeType: ''
       } as unknown as UnitSchemeDto);
       unitCommentServiceMock.findOnesComments.mockResolvedValue([]);
@@ -792,6 +575,8 @@ describe('UnitDownloadClass', () => {
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
@@ -811,6 +596,8 @@ describe('UnitDownloadClass', () => {
 
     it('should use id (not fileName) in external data blocks', async () => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
@@ -837,10 +624,10 @@ describe('UnitDownloadClass', () => {
         lastChangedMetadata: new Date()
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-4');
-      unitServiceMock.findOnesDefinition.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: '<content/>', variables: [{ id: 'v1', type: 'string' }]
       } as unknown as UnitDefinitionDto);
-      unitServiceMock.findOnesScheme.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({
         scheme: JSON.stringify({ variableCodings: [] }), schemeType: 'iqb-coding-scheme'
       } as unknown as UnitSchemeDto);
       unitCommentServiceMock.findOnesComments.mockResolvedValue([{ id: 1 }] as unknown as UnitCommentDto[]);
@@ -866,6 +653,8 @@ describe('UnitDownloadClass', () => {
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
@@ -886,6 +675,8 @@ describe('UnitDownloadClass', () => {
 
     it('should write voco.json in the unit-comments spec shape and drop non-spec fields', async () => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
@@ -896,10 +687,10 @@ describe('UnitDownloadClass', () => {
         key: 'U5', name: 'Unit 5', description: '', player: 'player-1', lastChangedMetadata: new Date()
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-5');
-      unitServiceMock.findOnesDefinition.mockResolvedValue(
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue(
         { definition: '', variables: [] } as unknown as UnitDefinitionDto
       );
-      unitServiceMock.findOnesScheme.mockResolvedValue(undefined as unknown as UnitSchemeDto);
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue(undefined as unknown as UnitSchemeDto);
       unitCommentServiceMock.findOnesComments.mockResolvedValue([{
         id: 7,
         body: 'a comment',
@@ -932,6 +723,8 @@ describe('UnitDownloadClass', () => {
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
@@ -965,7 +758,7 @@ describe('UnitDownloadClass', () => {
     });
 
     it('should omit optional comment fields when they are empty', () => {
-      const result = UnitDownloadClass.transformComments([{
+      const result = UnitJsonDownloadClass.transformComments([{
         id: 1, body: 'minimal', userName: '', parentId: null, hidden: false
       } as unknown as UnitCommentDto]);
       expect(result).toEqual([{ id: 1, body: 'minimal' }]);
@@ -973,6 +766,8 @@ describe('UnitDownloadClass', () => {
 
     it('should set modifiedAt on userInterface and external blocks when timestamps are available', async () => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
@@ -1005,10 +800,10 @@ describe('UnitDownloadClass', () => {
         lastChangedScheme: schemeChanged
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-6');
-      unitServiceMock.findOnesDefinition.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: '<content/>', variables: [{ id: 'v1', type: 'string' }]
       } as unknown as UnitDefinitionDto);
-      unitServiceMock.findOnesScheme.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({
         scheme: JSON.stringify({ variableCodings: [] }), schemeType: 'iqb-coding-scheme'
       } as unknown as UnitSchemeDto);
       unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
@@ -1017,6 +812,8 @@ describe('UnitDownloadClass', () => {
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
@@ -1044,6 +841,8 @@ describe('UnitDownloadClass', () => {
 
     it('should always include player in userInterface even when empty', async () => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
@@ -1059,16 +858,18 @@ describe('UnitDownloadClass', () => {
         lastChangedMetadata: new Date()
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-5');
-      unitServiceMock.findOnesDefinition.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: '', variables: []
       } as unknown as UnitDefinitionDto);
-      unitServiceMock.findOnesScheme.mockResolvedValue({ scheme: '', schemeType: '' } as unknown as UnitSchemeDto);
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({ scheme: '', schemeType: '' } as unknown as UnitSchemeDto);
       unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
       veronaModuleServiceMock.findAll.mockResolvedValue([]);
 
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
@@ -1092,6 +893,8 @@ describe('UnitDownloadClass', () => {
 
     it('should write vomd.json as unit-metadata@0.1 wrapper and voit.json as unit-items@0.2', async () => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
@@ -1147,16 +950,18 @@ describe('UnitDownloadClass', () => {
         lastChangedMetadata
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-6');
-      unitServiceMock.findOnesDefinition.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: '', variables: []
       } as unknown as UnitDefinitionDto);
-      unitServiceMock.findOnesScheme.mockResolvedValue({ scheme: '', schemeType: '' } as unknown as UnitSchemeDto);
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({ scheme: '', schemeType: '' } as unknown as UnitSchemeDto);
       unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
       veronaModuleServiceMock.findAll.mockResolvedValue([]);
 
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
@@ -1230,6 +1035,8 @@ describe('UnitDownloadClass', () => {
 
     it('should add an export report file when legacy metadata cannot be exported', async () => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
@@ -1244,10 +1051,10 @@ describe('UnitDownloadClass', () => {
         player: 'player-1'
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-7');
-      unitServiceMock.findOnesDefinition.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: '', variables: []
       } as unknown as UnitDefinitionDto);
-      unitServiceMock.findOnesScheme.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({
         scheme: '', schemeType: ''
       } as unknown as UnitSchemeDto);
       unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
@@ -1256,6 +1063,8 @@ describe('UnitDownloadClass', () => {
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
@@ -1287,6 +1096,8 @@ describe('UnitDownloadClass', () => {
 
     it('should not add a second metadata message when the transform already reported the drop', async () => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
@@ -1308,10 +1119,10 @@ describe('UnitDownloadClass', () => {
         player: 'player-1'
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-8');
-      unitServiceMock.findOnesDefinition.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: '', variables: []
       } as unknown as UnitDefinitionDto);
-      unitServiceMock.findOnesScheme.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({
         scheme: '', schemeType: ''
       } as unknown as UnitSchemeDto);
       unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
@@ -1320,6 +1131,8 @@ describe('UnitDownloadClass', () => {
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
@@ -1345,819 +1158,6 @@ describe('UnitDownloadClass', () => {
         messageKey: 'dropped-content.profile-not-exported',
         details: { entryCount: '2' }
       }]);
-    });
-  });
-
-  describe('transformProfilesToMetadataValues', () => {
-    it('should map internal profiles to metadata-values@3.0, emit order and drop internal-only fields', () => {
-      const result = UnitDownloadClass.transformProfilesToMetadataValues([{
-        profileId: 'https://example.org/profile.json',
-        order: 0,
-        entries: [{
-          id: 'iqb_author',
-          label: [{ lang: 'de', value: 'Entwickler:in' }],
-          value: [{ lang: 'de', value: 'Ana Maier' }],
-          valueAsText: [{ lang: 'de', value: 'Ana Maier' }]
-        }]
-      }] as unknown as ProfileValues[]);
-
-      expect(result).toEqual([{
-        profileId: 'https://example.org/profile.json',
-        order: 0,
-        entries: [{
-          id: 'iqb_author',
-          label: [{ lang: 'de', value: 'Entwickler:in' }],
-          value: [{ lang: 'de', value: 'Ana Maier' }]
-        }]
-      }]);
-    });
-
-    it('should omit profiles without profileId or without exportable entries', () => {
-      const result = UnitDownloadClass.transformProfilesToMetadataValues([
-        { order: 0, entries: [{ id: 'a1', value: 'x', valueAsText: [] }] },
-        { profileId: 'p1', entries: [{ id: 'empty', value: [], valueAsText: [] }] },
-        { profileId: 'p2', entries: [] }
-      ] as unknown as ProfileValues[]);
-      expect(result).toEqual([]);
-    });
-
-    it('should map vocabulary values with text to vocabulary_entries with label', () => {
-      const result = UnitDownloadClass.transformProfilesToMetadataValues([{
-        profileId: 'p1',
-        entries: [{
-          id: 'w8',
-          label: [{ lang: 'de', value: 'Leitidee' }],
-          value: [{ id: 'https://w3id.org/iqb/vocab/l3', text: [{ lang: 'de', value: 'Raum und Form' }] }],
-          valueAsText: [{ lang: 'de', value: 'Raum und Form' }]
-        }]
-      }] as unknown as ProfileValues[]);
-
-      expect(result[0].entries[0].value).toEqual([{
-        id: 'https://w3id.org/iqb/vocab/l3',
-        label: [{ lang: 'de', value: 'Raum und Form' }]
-      }]);
-    });
-
-    it('should export the annotation (numbering) alongside the label', () => {
-      const result = UnitDownloadClass.transformProfilesToMetadataValues([{
-        profileId: 'p1',
-        entries: [{
-          id: 'w9',
-          label: [{ lang: 'de', value: 'Leitidee' }],
-          value: [{
-            id: 'https://w3id.org/iqb/vocab/l3',
-            text: [{ lang: 'de', value: 'Raum und Form' }],
-            annotation: [{ lang: 'de', value: '1.3' }]
-          }],
-          valueAsText: [{ lang: 'de', value: '1.3 Raum und Form' }]
-        }]
-      }] as unknown as ProfileValues[]);
-
-      expect(result[0].entries[0].value).toEqual([{
-        id: 'https://w3id.org/iqb/vocab/l3',
-        label: [{ lang: 'de', value: 'Raum und Form' }],
-        annotation: [{ lang: 'de', value: '1.3' }]
-      }]);
-    });
-
-    it('should map string values to simple_value and skip empty strings', () => {
-      const result = UnitDownloadClass.transformProfilesToMetadataValues([{
-        profileId: 'p1',
-        entries: [
-          {
-            id: 'a1', label: [], value: 'true', valueAsText: { lang: 'de', value: 'ja' }
-          },
-          {
-            id: 'a2', label: [], value: '', valueAsText: []
-          }
-        ]
-      }] as unknown as ProfileValues[]);
-
-      expect(result[0].entries).toEqual([{
-        id: 'a1',
-        value: { raw: 'true', asText: [{ lang: 'de', value: 'ja' }] }
-      }]);
-    });
-
-    // metadata-values@3.x form-created shapes: the editor stores vocabulary values
-    // with `label` (not the legacy `text`) and simple values as { raw, asText }
-    // objects (not plain strings). The export must handle these, not just the
-    // legacy shapes, or form-edited metadata is lost on JSON export.
-    it('should export form-created vocabulary values that carry label (not text)', () => {
-      const result = UnitDownloadClass.transformProfilesToMetadataValues([{
-        profileId: 'p1',
-        entries: [{
-          id: 'iqb_phones',
-          label: [{ lang: 'de', value: 'Kopfhörereinsatz' }],
-          value: [{ id: 'https://w3id.org/iqb/v24/kh/r5f', label: [{ lang: 'de', value: 'nein' }] }],
-          valueAsText: []
-        }]
-      }] as unknown as ProfileValues[]);
-
-      expect(result[0].entries[0].value).toEqual([{
-        id: 'https://w3id.org/iqb/v24/kh/r5f',
-        label: [{ lang: 'de', value: 'nein' }]
-      }]);
-    });
-
-    it('should export form-created simple value objects { raw, asText } (not drop them)', () => {
-      const result = UnitDownloadClass.transformProfilesToMetadataValues([{
-        profileId: 'p1',
-        entries: [{
-          id: 'a1',
-          label: [{ lang: 'de', value: 'Für SPF geeignet' }],
-          value: { raw: 'true', asText: [{ lang: 'de', value: 'ja' }] },
-          valueAsText: []
-        }]
-      }] as unknown as ProfileValues[]);
-
-      expect(result[0].entries[0].value).toEqual({ raw: 'true', asText: [{ lang: 'de', value: 'ja' }] });
-    });
-
-    it('should drop label and asText entries without a valid two-letter language code', () => {
-      const result = UnitDownloadClass.transformProfilesToMetadataValues([{
-        profileId: 'p1',
-        entries: [{
-          id: 'a1',
-          label: [{ value: 'no lang' }],
-          value: 'x',
-          valueAsText: [{ value: 'no lang either' }]
-        }]
-      }] as unknown as ProfileValues[]);
-
-      expect(result[0].entries).toEqual([{ id: 'a1', value: { raw: 'x' } }]);
-    });
-  });
-
-  describe('transformItems', () => {
-    it('should map internal items to unit-items@0.2 and drop non-spec fields', () => {
-      const result = UnitDownloadClass.transformItems([{
-        uuid: 'u1',
-        id: 'ITEM1',
-        description: 'Desc',
-        order: 1,
-        position: '01',
-        locked: true,
-        unitId: 12,
-        weighting: 2,
-        variableId: 'VAR1',
-        variableReadOnlyId: 'var-uuid-1',
-        createdAt: '2025-01-01T00:00:00.000Z',
-        changedAt: '2025-02-01T00:00:00.000Z',
-        profiles: []
-      }] as unknown as ItemsMetadataValues[]);
-
-      expect(result).toEqual([{
-        uuid: 'u1',
-        id: 'ITEM1',
-        description: 'Desc',
-        order: 1,
-        sourceVariableId: 'VAR1',
-        sourceVariableUuid: 'var-uuid-1',
-        createdAt: '2025-01-01T00:00:00.000Z',
-        changedAt: '2025-02-01T00:00:00.000Z'
-      }]);
-    });
-
-    it('should skip items without id and derive order from the position in the list', () => {
-      const result = UnitDownloadClass.transformItems([
-        { uuid: 'u1', profiles: [] },
-        { uuid: 'u2', id: 'ITEM2', profiles: [] }
-      ] as unknown as ItemsMetadataValues[]);
-
-      expect(result).toEqual([{ uuid: 'u2', id: 'ITEM2', order: 1 }]);
-    });
-
-    it('should return an empty array for missing items', () => {
-      expect(UnitDownloadClass.transformItems(undefined)).toEqual([]);
-    });
-  });
-
-  describe('toLegacyMetadataBlob (frozen XML .vomd shape)', () => {
-    it('folds the annotation back into a form-created label and empties annotation', () => {
-      const result = UnitDownloadClass.toLegacyMetadataBlob({
-        profiles: [{
-          profileId: 'p1',
-          order: 0,
-          entries: [{
-            id: 'w1',
-            label: [{ lang: 'de', value: 'Leitidee' }],
-            value: [{
-              id: 'https://w3id.org/iqb/vocab/l3',
-              label: [{ lang: 'de', value: 'Raum und Form' }],
-              annotation: [{ lang: 'de', value: '1.3' }]
-            }],
-            valueAsText: [{ lang: 'de', value: '1.3 Raum und Form' }]
-          }]
-        }]
-      } as unknown as UnitMetadataValues);
-
-      expect(result.profiles[0].entries[0].value).toEqual([{
-        id: 'https://w3id.org/iqb/vocab/l3',
-        label: [{ lang: 'de', value: '1.3 Raum und Form' }],
-        annotation: []
-      }]);
-    });
-
-    it('folds the annotation into an imported text entry and drops the annotation key', () => {
-      const result = UnitDownloadClass.toLegacyMetadataBlob({
-        profiles: [{
-          profileId: 'p1',
-          order: 0,
-          entries: [{
-            id: 'w2',
-            label: [],
-            value: [{
-              id: 'https://w3id.org/iqb/vocab/l3',
-              text: [{ lang: 'de', value: 'Raum und Form' }],
-              annotation: [{ lang: 'de', value: '1.3' }]
-            }],
-            valueAsText: []
-          }]
-        }]
-      } as unknown as UnitMetadataValues);
-
-      expect(result.profiles[0].entries[0].value).toEqual([{
-        id: 'https://w3id.org/iqb/vocab/l3',
-        text: [{ lang: 'de', value: '1.3 Raum und Form' }]
-      }]);
-    });
-
-    it('leaves a vocabulary entry without numbering unchanged (label kept, annotation empty)', () => {
-      const result = UnitDownloadClass.toLegacyMetadataBlob({
-        profiles: [{
-          profileId: 'p1',
-          order: 0,
-          entries: [{
-            id: 'w3',
-            label: [],
-            value: [{
-              id: 'https://w3id.org/iqb/v24/kh/r5f',
-              label: [{ lang: 'de', value: 'nein' }],
-              annotation: []
-            }],
-            valueAsText: [{ lang: 'de', value: 'nein' }]
-          }]
-        }]
-      } as unknown as UnitMetadataValues);
-
-      expect(result.profiles[0].entries[0].value).toEqual([{
-        id: 'https://w3id.org/iqb/v24/kh/r5f',
-        label: [{ lang: 'de', value: 'nein' }],
-        annotation: []
-      }]);
-    });
-
-    it('passes simple (non-vocabulary) values through untouched', () => {
-      const metadata = {
-        profiles: [{
-          profileId: 'p1',
-          order: 0,
-          entries: [{
-            id: 's1',
-            label: [],
-            value: { raw: 'true', asText: [{ lang: 'de', value: 'ja' }] },
-            valueAsText: [{ lang: 'de', value: 'ja' }]
-          }]
-        }]
-      } as unknown as UnitMetadataValues;
-
-      expect(UnitDownloadClass.toLegacyMetadataBlob(metadata)).toEqual(metadata);
-    });
-
-    it('keeps the pure label (no numbering) when the field hides numbering', () => {
-      const result = UnitDownloadClass.toLegacyMetadataBlob({
-        profiles: [{
-          profileId: 'p1',
-          order: 0,
-          entries: [{
-            id: 'w1',
-            label: [],
-            value: [{
-              id: 'https://w3id.org/iqb/vocab/l3',
-              label: [{ lang: 'de', value: 'Raum und Form' }],
-              annotation: [{ lang: 'de', value: '1.3' }]
-            }],
-            valueAsText: [{ lang: 'de', value: 'Raum und Form' }]
-          }]
-        }]
-      } as unknown as UnitMetadataValues, { p1: { w1: true } });
-
-      expect(result.profiles[0].entries[0].value).toEqual([{
-        id: 'https://w3id.org/iqb/vocab/l3',
-        label: [{ lang: 'de', value: 'Raum und Form' }],
-        annotation: []
-      }]);
-    });
-
-    it('keeps the pure text (imported, no numbering) when the field hides numbering', () => {
-      const result = UnitDownloadClass.toLegacyMetadataBlob({
-        profiles: [{
-          profileId: 'p1',
-          order: 0,
-          entries: [{
-            id: 'w2',
-            label: [],
-            value: [{
-              id: 'https://w3id.org/iqb/vocab/l3',
-              text: [{ lang: 'de', value: 'Raum und Form' }],
-              annotation: [{ lang: 'de', value: '1.3' }]
-            }],
-            valueAsText: []
-          }]
-        }]
-      } as unknown as UnitMetadataValues, { p1: { w2: true } });
-
-      expect(result.profiles[0].entries[0].value).toEqual([{
-        id: 'https://w3id.org/iqb/vocab/l3',
-        text: [{ lang: 'de', value: 'Raum und Form' }]
-      }]);
-    });
-
-    it('folds annotations inside item metadata as well', () => {
-      const result = UnitDownloadClass.toLegacyMetadataBlob({
-        profiles: [],
-        items: [{
-          id: 'item-1',
-          profiles: [{
-            profileId: 'p1',
-            order: 0,
-            entries: [{
-              id: 'w4',
-              label: [],
-              value: [{
-                id: 'https://w3id.org/iqb/vocab/l3',
-                label: [{ lang: 'de', value: 'Raum und Form' }],
-                annotation: [{ lang: 'de', value: '1.3' }]
-              }],
-              valueAsText: [{ lang: 'de', value: '1.3 Raum und Form' }]
-            }]
-          }]
-        }]
-      } as unknown as UnitMetadataValues);
-
-      expect(result.items[0].profiles[0].entries[0].value).toEqual([{
-        id: 'https://w3id.org/iqb/vocab/l3',
-        label: [{ lang: 'de', value: '1.3 Raum und Form' }],
-        annotation: []
-      }]);
-    });
-  });
-
-  describe('export report', () => {
-    const makeScope = (objectKey: string) => {
-      const messages: ExportReportMessage[] = [];
-      const scope = new ExportReportScope('U1', objectKey, messages);
-      return { scope, messages };
-    };
-
-    it('should report texts dropped for an invalid language code', () => {
-      const { scope, messages } = makeScope('U1.vomd.json');
-      UnitDownloadClass.transformProfilesToMetadataValues([{
-        profileId: 'p1',
-        entries: [{
-          id: 'e1', label: [], value: [{ lang: 'de-DE', value: 'Text' }], valueAsText: []
-        }]
-      }] as unknown as ProfileValues[], scope);
-
-      expect(messages).toEqual([{
-        unitKey: 'U1',
-        objectKey: 'U1.vomd.json',
-        messageKey: 'dropped-content.invalid-language-code',
-        details: {
-          profileId: 'p1', entryId: 'e1', lang: 'de-DE', value: 'Text'
-        }
-      }]);
-    });
-
-    it('should report when plain texts are dropped from a mixed vocabulary value', () => {
-      const { scope, messages } = makeScope('U1.vomd.json');
-      const result = UnitDownloadClass.transformProfilesToMetadataValues([{
-        profileId: 'p1',
-        entries: [{
-          id: 'e1',
-          label: [],
-          value: [
-            { id: 'v1', text: [{ lang: 'de', value: 'A' }] },
-            { lang: 'de', value: 'B' }
-          ],
-          valueAsText: []
-        }]
-      }] as unknown as ProfileValues[], scope);
-
-      expect(result[0].entries[0].value).toEqual([{ id: 'v1', label: [{ lang: 'de', value: 'A' }] }]);
-      expect(messages).toEqual([expect.objectContaining({
-        messageKey: 'dropped-content.mixed-value-dropped',
-        details: { profileId: 'p1', entryId: 'e1', droppedCount: '1' }
-      })]);
-    });
-
-    it('should report a profile that is dropped for a missing profileId', () => {
-      const { scope, messages } = makeScope('U1.vomd.json');
-      UnitDownloadClass.transformProfilesToMetadataValues([{
-        entries: [{
-          id: 'e1', label: [], value: 'x', valueAsText: []
-        }]
-      }] as unknown as ProfileValues[], scope);
-
-      expect(messages).toEqual([expect.objectContaining({
-        messageKey: 'dropped-content.profile-not-exported'
-      })]);
-    });
-
-    it('should report an entry with content that is dropped for a missing id', () => {
-      const { scope, messages } = makeScope('U1.vomd.json');
-      const result = UnitDownloadClass.transformProfilesToMetadataValues([{
-        profileId: 'p1',
-        entries: [
-          { label: [], value: 'verlorener Inhalt', valueAsText: [] },
-          {
-            id: 'e2', label: [], value: 'x', valueAsText: []
-          }
-        ]
-      }] as unknown as ProfileValues[], scope);
-
-      expect(result).toHaveLength(1);
-      expect(messages).toEqual([{
-        unitKey: 'U1',
-        objectKey: 'U1.vomd.json',
-        messageKey: 'dropped-content.entry-not-exported',
-        details: { profileId: 'p1' }
-      }]);
-    });
-
-    it('should not report an id-less entry without content', () => {
-      const { scope, messages } = makeScope('U1.vomd.json');
-      UnitDownloadClass.transformProfilesToMetadataValues([{
-        profileId: 'p1',
-        entries: [{ label: [], value: '', valueAsText: [] }]
-      }] as unknown as ProfileValues[], scope);
-
-      expect(messages).toEqual([]);
-    });
-
-    it('should report an item that is dropped for a missing id', () => {
-      const { scope, messages } = makeScope('U1.voit.json');
-      UnitDownloadClass.transformItems(
-        [{ uuid: 'item-uuid-1', profiles: [] }] as unknown as ItemsMetadataValues[],
-        scope
-      );
-
-      expect(messages).toEqual([{
-        unitKey: 'U1',
-        objectKey: 'U1.voit.json',
-        messageKey: 'dropped-content.item-not-exported',
-        details: { uuid: 'item-uuid-1' }
-      }]);
-    });
-
-    it('should not report anything for clean data', () => {
-      const { scope, messages } = makeScope('U1.vomd.json');
-      UnitDownloadClass.transformProfilesToMetadataValues([{
-        profileId: 'p1',
-        entries: [{
-          id: 'e1', label: [{ lang: 'de', value: 'L' }], value: 'x', valueAsText: []
-        }]
-      }] as unknown as ProfileValues[], scope);
-
-      expect(messages).toEqual([]);
-    });
-  });
-
-  describe('buildVariablesJSON', () => {
-    const unitDownloadClass = UnitDownloadClass as unknown as {
-      buildVariablesJSON: (
-        definitionData: UnitDefinitionDto,
-        schemeData: UnitSchemeDto
-      ) => { baseVariables: unknown[]; derivedVariables: unknown[] } | null;
-    };
-
-    it('should return null when no variables exist', () => {
-      const result = unitDownloadClass.buildVariablesJSON(
-        { definition: '', variables: [] } as unknown as UnitDefinitionDto,
-        { scheme: '', schemeType: '' } as unknown as UnitSchemeDto
-      );
-      expect(result).toBeNull();
-    });
-
-    it('should return baseVariables from definition', () => {
-      const result = unitDownloadClass.buildVariablesJSON(
-        {
-          definition: '',
-          variables: [{ id: 'v1', type: 'string' }]
-        } as unknown as UnitDefinitionDto,
-        { scheme: '', schemeType: '' } as unknown as UnitSchemeDto
-      );
-      expect(result).not.toBeNull();
-      expect(result.baseVariables).toHaveLength(1);
-      expect(result.derivedVariables).toHaveLength(0);
-    });
-
-    // exported as the unit XML is, in the VariableInfo 1.x spelling (#1708)
-    it('should return baseVariables stored in 2.x in the 1.x spelling', () => {
-      const result = unitDownloadClass.buildVariablesJSON(
-        {
-          definition: '',
-          variables: [{ id: 'v1', type: 'NO_VALUE', format: '' }]
-        } as unknown as UnitDefinitionDto,
-        { scheme: '', schemeType: '' } as unknown as UnitSchemeDto
-      );
-      expect(result.baseVariables).toEqual([{
-        id: 'v1', type: 'no-value', format: '', page: ''
-      }]);
-    });
-
-    it('should set id and basedOn for derived variables, exclude BASE entries', () => {
-      const result = unitDownloadClass.buildVariablesJSON(
-        { definition: '', variables: [] } as unknown as UnitDefinitionDto,
-        {
-          scheme: JSON.stringify({
-            variableCodings: [
-              { id: 'b1', sourceType: 'BASE', alias: 'b1' },
-              {
-                id: 'd1', sourceType: 'SUM_CODE', alias: 'd1_alias', deriveSources: ['b1', 'b2']
-              }
-            ]
-          }),
-          schemeType: 'test'
-        } as unknown as UnitSchemeDto
-      );
-      expect(result).not.toBeNull();
-      expect(result.derivedVariables).toHaveLength(1);
-      expect(result.derivedVariables[0]).toEqual({ id: 'd1_alias', basedOn: ['b1', 'b2'] });
-    });
-
-    it('should use empty array for basedOn when deriveSources is absent', () => {
-      const result = unitDownloadClass.buildVariablesJSON(
-        { definition: '', variables: [] } as unknown as UnitDefinitionDto,
-        {
-          scheme: JSON.stringify({
-            variableCodings: [
-              { id: 'd1', sourceType: 'CONCAT_CODE' }
-            ]
-          }),
-          schemeType: 'test'
-        } as unknown as UnitSchemeDto
-      );
-      expect(result).not.toBeNull();
-      expect(result.derivedVariables[0]).toEqual({ id: 'd1', basedOn: [] });
-    });
-  });
-
-  describe('transformRichNotes', () => {
-    it('should map a note onto the unit-rich-notes spec shape', () => {
-      const notes = [{
-        tagId: 'tag-1',
-        content: '<p>note</p>',
-        links: [{ url: 'https://example.org', label: 'Ref' }],
-        itemReferences: ['item-uuid-1']
-      }] as unknown as UnitRichNoteDto[];
-      const tags = [
-        { id: 'tag-1', label: [{ lang: 'de', value: 'Tag Label' }] }
-      ] as unknown as UnitRichNoteTagDto[];
-
-      const result = UnitDownloadClass.transformRichNotes(notes, tags);
-
-      expect(result).toEqual([{
-        tagId: 'tag-1',
-        tagLabel: 'Tag Label',
-        content: '<p>note</p>',
-        links: [{ url: 'https://example.org', label: 'Ref' }],
-        itemUuids: ['item-uuid-1']
-      }]);
-    });
-
-    it('should omit links and itemUuids when empty (spec minItems: 1)', () => {
-      const notes = [{
-        tagId: 'tag-1',
-        content: 'note',
-        links: [],
-        itemReferences: []
-      }] as unknown as UnitRichNoteDto[];
-
-      const result = UnitDownloadClass.transformRichNotes(notes, []);
-
-      expect(result[0]).not.toHaveProperty('links');
-      expect(result[0]).not.toHaveProperty('itemUuids');
-      expect(result[0]).not.toHaveProperty('tagLabel');
-      expect(result[0]).toEqual({ tagId: 'tag-1', content: 'note' });
-    });
-
-    it('should omit links when the column is null', () => {
-      const notes = [{
-        tagId: 'tag-1',
-        content: 'note',
-        links: null,
-        itemReferences: ['item-uuid-1']
-      }] as unknown as UnitRichNoteDto[];
-
-      const result = UnitDownloadClass.transformRichNotes(notes, []);
-
-      expect(result[0]).not.toHaveProperty('links');
-      expect(result[0].itemUuids).toEqual(['item-uuid-1']);
-    });
-  });
-
-  describe('safeBookletId', () => {
-    it('should return booklet1 when input is undefined', () => {
-      expect(UnitDownloadClass.safeBookletId(undefined)).toBe('booklet1');
-    });
-
-    it('should return booklet1 when input is empty string', () => {
-      expect(UnitDownloadClass.safeBookletId('')).toBe('booklet1');
-    });
-
-    it('should return the value unchanged when it contains only safe characters', () => {
-      expect(UnitDownloadClass.safeBookletId('myBooklet-1_A')).toBe('myBooklet-1_A');
-    });
-
-    it('should replace path separators and unsafe characters with underscores', () => {
-      expect(UnitDownloadClass.safeBookletId('../../evil')).toBe('______evil');
-    });
-  });
-
-  describe('createBookletXml', () => {
-    const exportConfig = createMock<UnitExportConfigDto>({ bookletXsdUrl: 'booklet.xsd' });
-
-    it('should use default Id and empty Label when no args provided', () => {
-      const xml = UnitDownloadClass.createBookletXml(exportConfig).toString();
-      expect(xml).toContain('<Id>booklet1</Id>');
-      expect(xml).toContain('<Label/>');
-    });
-
-    it('should use custom Id and Label when provided', () => {
-      const xml = UnitDownloadClass.createBookletXml(exportConfig, 'myStudy', 'Mein Testheft').toString();
-      expect(xml).toContain('<Id>myStudy</Id>');
-      expect(xml).toContain('<Label>Mein Testheft</Label>');
-    });
-  });
-
-  describe('addBooklet', () => {
-    const exportConfig = createMock<UnitExportConfigDto>({ bookletXsdUrl: 'booklet.xsd' });
-    const units: UnitPropertiesDto[] = [
-      createMock<UnitPropertiesDto>({ key: 'unit1', name: 'Aufgabe A' }),
-      createMock<UnitPropertiesDto>({ key: 'unit2', name: '' })
-    ];
-
-    it('should write booklet1.xml when bookletId is not set', () => {
-      const settings = createMock<UnitDownloadSettingsDto>({ bookletId: undefined, bookletSettings: [] });
-      UnitDownloadClass.addBooklet(exportConfig, settings, units, mockZip as unknown as AdmZip);
-      expect(mockZip.addFile).toHaveBeenCalledWith(
-        'booklet1.xml',
-        expect.any(Buffer)
-      );
-    });
-
-    it('should write <bookletId>.xml when bookletId is set', () => {
-      const settings = createMock<UnitDownloadSettingsDto>({ bookletId: 'studie2025', bookletSettings: [] });
-      UnitDownloadClass.addBooklet(exportConfig, settings, units, mockZip as unknown as AdmZip);
-      expect(mockZip.addFile).toHaveBeenCalledWith('studie2025.xml', expect.any(Buffer));
-    });
-
-    it('should sanitize bookletId used as filename', () => {
-      const settings = createMock<UnitDownloadSettingsDto>({ bookletId: 'a/b', bookletSettings: [] });
-      UnitDownloadClass.addBooklet(exportConfig, settings, units, mockZip as unknown as AdmZip);
-      expect(mockZip.addFile).toHaveBeenCalledWith('a_b.xml', expect.any(Buffer));
-    });
-
-    it('should write an empty label when bookletLabel is not set', () => {
-      const settings = createMock<UnitDownloadSettingsDto>(
-        { bookletId: undefined, bookletLabel: undefined, bookletSettings: [] }
-      );
-      UnitDownloadClass.addBooklet(exportConfig, settings, units, mockZip as unknown as AdmZip);
-      const xmlContent = (mockZip.addFile.mock.calls[0][1] as Buffer).toString();
-      expect(xmlContent).toContain('<Label/>');
-    });
-
-    it('should use provided bookletLabel in the XML', () => {
-      const settings = createMock<UnitDownloadSettingsDto>(
-        { bookletId: undefined, bookletLabel: 'Mein Test', bookletSettings: [] }
-      );
-      UnitDownloadClass.addBooklet(exportConfig, settings, units, mockZip as unknown as AdmZip);
-      const xmlContent = (mockZip.addFile.mock.calls[0][1] as Buffer).toString();
-      expect(xmlContent).toContain('<Label>Mein Test</Label>');
-    });
-
-    it('should use unit index as labelshort', () => {
-      const settings = createMock<UnitDownloadSettingsDto>({ bookletId: undefined, bookletSettings: [] });
-      UnitDownloadClass.addBooklet(exportConfig, settings, units, mockZip as unknown as AdmZip);
-      const xmlContent = (mockZip.addFile.mock.calls[0][1] as Buffer).toString();
-      expect(xmlContent).toContain('labelshort="1"');
-      expect(xmlContent).toContain('labelshort="2"');
-    });
-  });
-
-  describe('addTestTakers', () => {
-    const exportConfig = createMock<UnitExportConfigDto>(
-      { bookletXsdUrl: 'booklet.xsd', testTakersXsdUrl: 'testtakers.xsd' }
-    );
-
-    const baseSettings: Partial<UnitDownloadSettingsDto> = {
-      bookletId: undefined,
-      groupLabel: undefined,
-      monitorBookletVisibility: undefined,
-      addTestTakersReview: 1,
-      addTestTakersHot: 0,
-      addTestTakersMonitor: 0,
-      passwordLess: true,
-      bookletSettings: [] as UnitDownloadBookletSettingsDto[]
-    };
-
-    it('should write booklet1_testtaker.xml when bookletId is not set', () => {
-      const settings = createMock<UnitDownloadSettingsDto>({ ...baseSettings });
-      UnitDownloadClass.addTestTakers(exportConfig, settings, 1, mockZip as unknown as AdmZip);
-      expect(mockZip.addFile).toHaveBeenCalledWith('booklet1_testtaker.xml', expect.any(Buffer));
-    });
-
-    it('should write <bookletId>_testtaker.xml when bookletId is set', () => {
-      const settings = createMock<UnitDownloadSettingsDto>({ ...baseSettings, bookletId: 'studie2025' });
-      UnitDownloadClass.addTestTakers(exportConfig, settings, 1, mockZip as unknown as AdmZip);
-      expect(mockZip.addFile).toHaveBeenCalledWith('studie2025_testtaker.xml', expect.any(Buffer));
-    });
-
-    it('should reference booklet1 in testtaker XML when no bookletId is set', () => {
-      const settings = createMock<UnitDownloadSettingsDto>({ ...baseSettings });
-      UnitDownloadClass.addTestTakers(exportConfig, settings, 1, mockZip as unknown as AdmZip);
-      const xmlContent = (mockZip.addFile.mock.calls[0][1] as Buffer).toString();
-      expect(xmlContent).toContain('>booklet1<');
-    });
-
-    it('should reference custom bookletId in testtaker XML', () => {
-      const settings = createMock<UnitDownloadSettingsDto>({ ...baseSettings, bookletId: 'studie2025' });
-      UnitDownloadClass.addTestTakers(exportConfig, settings, 1, mockZip as unknown as AdmZip);
-      const xmlContent = (mockZip.addFile.mock.calls[0][1] as Buffer).toString();
-      expect(xmlContent).toContain('>studie2025<');
-    });
-
-    it('should use bookletId_group as group id', () => {
-      const settings = createMock<UnitDownloadSettingsDto>({ ...baseSettings, bookletId: 'studie2025' });
-      UnitDownloadClass.addTestTakers(exportConfig, settings, 1, mockZip as unknown as AdmZip);
-      const xmlContent = (mockZip.addFile.mock.calls[0][1] as Buffer).toString();
-      expect(xmlContent).toContain('id="studie2025_group"');
-    });
-
-    it('should use booklet1_group as group id when bookletId is not set', () => {
-      const settings = createMock<UnitDownloadSettingsDto>({ ...baseSettings });
-      UnitDownloadClass.addTestTakers(exportConfig, settings, 1, mockZip as unknown as AdmZip);
-      const xmlContent = (mockZip.addFile.mock.calls[0][1] as Buffer).toString();
-      expect(xmlContent).toContain('id="booklet1_group"');
-    });
-
-    it('should use groupLabel in group label attribute', () => {
-      const settings = createMock<UnitDownloadSettingsDto>({ ...baseSettings, groupLabel: 'Meine Gruppe' });
-      UnitDownloadClass.addTestTakers(exportConfig, settings, 1, mockZip as unknown as AdmZip);
-      const xmlContent = (mockZip.addFile.mock.calls[0][1] as Buffer).toString();
-      expect(xmlContent).toContain('label="Meine Gruppe"');
-    });
-
-    it('should write an empty group label when groupLabel is not set', () => {
-      const settings = createMock<UnitDownloadSettingsDto>({ ...baseSettings });
-      UnitDownloadClass.addTestTakers(exportConfig, settings, 1, mockZip as unknown as AdmZip);
-      const xmlContent = (mockZip.addFile.mock.calls[0][1] as Buffer).toString();
-      expect(xmlContent).toContain('label=""');
-    });
-
-    it('should not include CustomTexts in testtaker XML', () => {
-      const settings = createMock<UnitDownloadSettingsDto>({ ...baseSettings });
-      UnitDownloadClass.addTestTakers(exportConfig, settings, 1, mockZip as unknown as AdmZip);
-      const xmlContent = (mockZip.addFile.mock.calls[0][1] as Buffer).toString();
-      expect(xmlContent).not.toContain('CustomText');
-      expect(xmlContent).not.toContain('login_testEndButtonLabel');
-    });
-
-    it('should write ViewSettings with monitorBookletVisibility for monitor login', () => {
-      const settings = createMock<UnitDownloadSettingsDto>({
-        ...baseSettings,
-        addTestTakersReview: 0,
-        addTestTakersMonitor: 1,
-        monitorBookletVisibility: 'collapsed'
-      });
-      UnitDownloadClass.addTestTakers(exportConfig, settings, 1, mockZip as unknown as AdmZip);
-      const xmlContent = (mockZip.addFile.mock.calls[0][1] as Buffer).toString();
-      expect(xmlContent).toContain('ViewSettings');
-      expect(xmlContent).toContain('collapsed');
-    });
-
-    it('should not write ViewSettings when monitorBookletVisibility is not set', () => {
-      const settings = createMock<UnitDownloadSettingsDto>({
-        ...baseSettings,
-        addTestTakersReview: 0,
-        addTestTakersMonitor: 1
-      });
-      UnitDownloadClass.addTestTakers(exportConfig, settings, 1, mockZip as unknown as AdmZip);
-      const xmlContent = (mockZip.addFile.mock.calls[0][1] as Buffer).toString();
-      expect(xmlContent).not.toContain('ViewSettings');
-    });
-
-    it('should not include Booklet element in monitor login', () => {
-      const settings = createMock<UnitDownloadSettingsDto>({
-        ...baseSettings,
-        addTestTakersReview: 0,
-        addTestTakersMonitor: 1
-      });
-      UnitDownloadClass.addTestTakers(exportConfig, settings, 1, mockZip as unknown as AdmZip);
-      const xmlContent = (mockZip.addFile.mock.calls[0][1] as Buffer).toString();
-      expect(xmlContent).not.toContain('<Booklet>');
     });
   });
 });

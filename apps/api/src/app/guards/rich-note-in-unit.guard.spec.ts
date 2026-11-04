@@ -32,10 +32,6 @@ describe('RichNoteInUnitGuard', () => {
     unitRichNoteService.isInUnit.mockResolvedValue(true);
   });
 
-  it('should be defined', () => {
-    expect(guard).toBeDefined();
-  });
-
   it('should pass when the note in the route belongs to the unit in the route', async () => {
     expect(await guard.canActivate(contextFor({ id: '7', unit_id: '10' }))).toBe(true);
     expect(unitRichNoteService.isInUnit).toHaveBeenCalledWith(7, 10);

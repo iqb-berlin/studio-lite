@@ -4,10 +4,6 @@ import { PrintOptions } from '../modules/print/models/print-options.interface';
 describe('IsActivePrintOption', () => {
   const pipe = new IsActivePrintOption();
 
-  it('should be defined', () => {
-    expect(pipe).toBeDefined();
-  });
-
   it('should return true if option is active', () => {
     const options: PrintOptions[] = [{ key: 'printComments', value: true }];
     expect(pipe.transform(options, 'printComments')).toBe(true);

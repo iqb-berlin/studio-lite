@@ -31,26 +31,7 @@ describe('UnitPrintCodeComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('ngOnChanges', () => {
-    it('should update codeAsText when codeData changes', () => {
-      const mockCodeData = createMockCodeData({
-        id: 1,
-        label: 'Code 1'
-      });
-
-      component.ngOnChanges({
-        codeData: new SimpleChange(null, mockCodeData, true)
-      });
-
-      expect(component.codeAsText).toBeDefined();
-      expect(component.codeAsText.id).toBe(1);
-      expect(component.codeAsText.label).toBeDefined();
-    });
-
     it('should not update if codeData change has no currentValue', () => {
       const previousCodeAsText = component.codeAsText;
 
@@ -59,30 +40,6 @@ describe('UnitPrintCodeComponent', () => {
       });
 
       expect(component.codeAsText).toBe(previousCodeAsText);
-    });
-
-    it('should handle codeData with INVALID id', () => {
-      const mockCodeData = createMockCodeData({
-        id: 'INVALID'
-      });
-
-      component.ngOnChanges({
-        codeData: new SimpleChange(null, mockCodeData, true)
-      });
-
-      expect(component.codeAsText.id).toBe('INVALID');
-    });
-
-    it('should handle codeData with INTENDED_INCOMPLETE id', () => {
-      const mockCodeData = createMockCodeData({
-        id: 'INTENDED_INCOMPLETE'
-      });
-
-      component.ngOnChanges({
-        codeData: new SimpleChange(null, mockCodeData, true)
-      });
-
-      expect(component.codeAsText.id).toBe('INTENDED_INCOMPLETE');
     });
 
     it('should not process changes if codeData is not in changes', () => {
@@ -96,165 +53,62 @@ describe('UnitPrintCodeComponent', () => {
     });
   });
 
-  describe('mapCodeDataToCodeInfo', () => {
-    it('should map code data with manual instruction', () => {
-      const mockCodeData = createMockCodeData({
-        id: 5,
-        label: 'Test Label',
-        manualInstruction: 'Manual instruction text'
-      });
+  describe('rules', () => {
+    const show = (overrides: Partial<CodeData>): HTMLElement => {
+      const code = createMockCodeData({ type: 'FULL_CREDIT', manualInstruction: '', ...overrides });
+      component.ngOnChanges({ codeData: new SimpleChange(null, code, true) });
+      fixture.detectChanges();
+      return fixture.nativeElement;
+    };
+    const ruleSet = (...values: string[]) => ({
+      ruleOperatorAnd: true,
+      rules: values.map(value => ({ method: 'MATCH' as const, parameters: [value] }))
+    });
+    const blockTexts = (element: HTMLElement): (string | undefined)[] => Array
+      .from(element.querySelectorAll('.rule-block'))
+      .map(block => block.textContent?.trim());
 
-      component.ngOnChanges({
-        codeData: new SimpleChange(null, mockCodeData, true)
-      });
+    // Which rule sets are printed and how they are split, ruleBlocks decides (#1974, #1975).
+    it('should print each rule of a rule set on a line of its own', () => {
+      const lines = show({ ruleSets: [ruleSet('a', 'b')] }).querySelectorAll('.rule-line');
 
-      expect(component.codeAsText.id).toBe(5);
-      expect(component.codeAsText.manualInstruction).toBe('Manual instruction text');
+      expect(lines.length).toBe(2);
+      expect(lines[0].textContent).toContain("'a'");
+      expect(lines[1].textContent).toContain("'b'");
     });
 
-    it('should handle code without manual instruction', () => {
-      const mockCodeData = createMockCodeData({
-        manualInstruction: ''
+    // Coded by hand without any rule, there is nothing to join either.
+    it('should print neither rules nor their joining for a code coded by hand', () => {
+      const element = show({
+        manualInstruction: '<p>Bitte von Hand kodieren.</p>',
+        ruleSetOperatorAnd: true,
+        ruleSets: [ruleSet(), ruleSet()]
       });
 
-      component.ngOnChanges({
-        codeData: new SimpleChange(null, mockCodeData, true)
-      });
-
-      expect(component.codeAsText.manualInstruction).toBe('');
+      expect(blockTexts(element)).toEqual([]);
     });
 
-    it('should generate rules description', () => {
-      const mockCodeData = createMockCodeData({
-        ruleSets: [
-          {
-            rules: [],
-            ruleOperatorAnd: true
-          }
-        ]
-      });
+    // Printed as HTML, a value such as <b> was taken for markup and vanished (#1975).
+    it('should print a value as text', () => {
+      const line = show({ ruleSets: [ruleSet('<b>fett</b>')] }).querySelector('.rule-line');
 
-      component.ngOnChanges({
-        codeData: new SimpleChange(null, mockCodeData, true)
-      });
-
-      expect(component.codeAsText.description).toBeDefined();
-    });
-  });
-
-  describe('generateRulesDescription', () => {
-    it('should generate description with UND operator for multiple rule sets', () => {
-      const mockCodeData = createMockCodeData({
-        ruleSets: [
-          {
-            rules: [],
-            ruleOperatorAnd: true
-          },
-          {
-            rules: [],
-            ruleOperatorAnd: true
-          }
-        ],
-        ruleSetOperatorAnd: true
-      });
-
-      component.ngOnChanges({
-        codeData: new SimpleChange(null, mockCodeData, true)
-      });
-
-      expect(component.codeAsText.description).toContain('UND');
+      expect(line?.textContent).toContain("'<b>fett</b>'");
+      expect(line?.querySelector('b')).toBeNull();
     });
 
-    it('should generate description with ODER operator for multiple rule sets', () => {
-      const mockCodeData = createMockCodeData({
-        ruleSets: [
-          {
-            rules: [],
-            ruleOperatorAnd: true
-          },
-          {
-            rules: [],
-            ruleOperatorAnd: true
-          }
-        ],
-        ruleSetOperatorAnd: false
-      });
+    it.each([
+      [true, 'print.rule-sets-and'],
+      [false, 'print.rule-sets-or']
+    ])('should join two rule sets with operator AND %s as %s', (ruleSetOperatorAnd, joining) => {
+      const element = show({ ruleSetOperatorAnd, ruleSets: [ruleSet('a'), ruleSet('b')] });
 
-      component.ngOnChanges({
-        codeData: new SimpleChange(null, mockCodeData, true)
-      });
-
-      expect(component.codeAsText.description).toContain('ODER');
+      expect(blockTexts(element).pop()).toBe(joining);
     });
 
-    it('should not add operator description for single rule set', () => {
-      const mockCodeData = createMockCodeData({
-        ruleSets: [
-          {
-            rules: [],
-            ruleOperatorAnd: true
-          }
-        ]
-      });
+    it('should not join a single rule set', () => {
+      const element = show({ ruleSets: [ruleSet('a')] });
 
-      component.ngOnChanges({
-        codeData: new SimpleChange(null, mockCodeData, true)
-      });
-
-      expect(component.codeAsText.description).not.toContain('UND');
-      expect(component.codeAsText.description).not.toContain('ODER');
-    });
-
-    it('should handle empty rule sets', () => {
-      const mockCodeData = createMockCodeData({
-        ruleSets: []
-      });
-
-      component.ngOnChanges({
-        codeData: new SimpleChange(null, mockCodeData, true)
-      });
-
-      expect(component.codeAsText.description).toBeDefined();
-    });
-
-    it('should wrap text on semicolons with br tags', () => {
-      const mockCodeData = createMockCodeData({
-        label: 'Test; with; semicolons',
-        ruleSets: []
-      });
-
-      component.ngOnChanges({
-        codeData: new SimpleChange(null, mockCodeData, true)
-      });
-
-      // The description might contain HTML formatting
-      expect(component.codeAsText.description).toBeDefined();
-    });
-  });
-
-  describe('edge cases', () => {
-    it('should handle code data with zero score', () => {
-      const mockCodeData = createMockCodeData({
-        score: 0
-      });
-
-      component.ngOnChanges({
-        codeData: new SimpleChange(null, mockCodeData, true)
-      });
-
-      expect(component.codeAsText).toBeDefined();
-    });
-
-    it('should handle code data with negative score', () => {
-      const mockCodeData = createMockCodeData({
-        score: -5
-      });
-
-      component.ngOnChanges({
-        codeData: new SimpleChange(null, mockCodeData, true)
-      });
-
-      expect(component.codeAsText).toBeDefined();
+      expect(blockTexts(element).length).toBe(1);
     });
   });
 });

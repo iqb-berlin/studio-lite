@@ -161,8 +161,10 @@ export class GroupManageComponent implements OnInit {
   }
 
   detectChanges(): boolean {
-    return this.groupUnitsOriginal.reduce((a, b) => a + b, 0) !==
-      this.groupUnitsToChange.reduce((a, b) => a + b, 0);
+    // Compared by the sums of their ids, [1, 4] and [2, 3] passed for the same selection (#1963).
+    const original = new Set(this.groupUnitsOriginal);
+    const toChange = new Set(this.groupUnitsToChange);
+    return original.size !== toChange.size || [...toChange].some(id => !original.has(id));
   }
 
   addGroup(group: string) {

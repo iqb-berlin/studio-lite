@@ -6,18 +6,13 @@ import {
   clickIndexTabWsgAdmin,
   createGroup,
   createNewUser,
-  deleteFirstUser,
-  deleteGroup,
-  deleteUser
+  waitForSuccess
 } from '../../../support/helpers';
 
 describe('Metadata Profile Management', () => {
   const groups = [metadataMathGroup, metadataGermanGroup];
   before(() => {
     addFirstUser();
-  });
-  after(() => {
-    deleteFirstUser();
   });
 
   it('sets up groups and users', () => {
@@ -79,12 +74,9 @@ describe('Metadata Profile Management', () => {
       .contains('settings')
       .click();
     checkMultipleProfiles(searchProfiles);
+    // waited for, so that the reset before the next spec does not come in the middle of the save
+    cy.intercept('PATCH', '/api/admin/workspace-groups/*').as('saveGroupProfiles');
     cy.get('[data-cy="admin-edit-workspace-group-settings-save-button"]').click();
-  });
-
-  it('cleans up test data', () => {
-    deleteUser(standardUser.username);
-    deleteGroup(groups[0]);
-    deleteGroup(groups[1]);
+    waitForSuccess('@saveGroupProfiles');
   });
 });

@@ -23,10 +23,6 @@ describe('DeleteAccessGuard', () => {
     workspaceUserService = module.get(WorkspaceUserService);
   });
 
-  it('should be defined', () => {
-    expect(guard).toBeDefined();
-  });
-
   it('should return true if workspaceUserService.canDelete returns true', async () => {
     const userId = 1;
     const workspaceId = 'w1';

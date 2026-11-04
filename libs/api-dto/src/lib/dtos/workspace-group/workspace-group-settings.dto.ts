@@ -24,6 +24,10 @@ export class WorkspaceGroupSettingsDto {
   @ApiProperty()
   states?: State[] = [];
 
+  // Units keep the id of a deleted state, so a new state gets one above this (#2009).
+  @ApiProperty({ description: 'The highest id the group ever gave a state' })
+  lastStateId?: number;
+
   @ApiProperty()
   hiddenRoutes?: string[];
 

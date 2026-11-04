@@ -21,10 +21,6 @@ describe('IsAdminGuard', () => {
     isAdminGuard = new IsAdminGuard(authService);
   });
 
-  it('should be defined', () => {
-    expect(isAdminGuard).toBeDefined();
-  });
-
   it('should return true if authService.isAdminUser returns true', async () => {
     const userId = 1;
     authService.isAdminUser.mockResolvedValue(true);

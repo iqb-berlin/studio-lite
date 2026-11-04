@@ -3,23 +3,20 @@ import { BadRequestException, Logger } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import {
-  EntityManager, In, QueryFailedError, Repository
+  EntityManager, FindOperator, FindOptionsWhere, In, Not, QueryFailedError, Repository
 } from 'typeorm';
-import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import {
   CreateUnitDto,
+  UnitCommentDto,
   UnitItemDto,
-  UnitItemWithMetadataDto,
   UnitMetadataDto,
-  UnitMetadataValues,
   UnitPropertiesDto,
-  UnitSchemeDto
+  UnitDefinitionDto
 } from '@studio-lite-lib/api-dto';
 import { UnitService } from './unit.service';
 import { UnitUserService } from './unit-user.service';
 import { UnitCommentService } from './unit-comment.service';
 import Unit from '../entities/unit.entity';
-import UnitDefinition from '../entities/unit-definition.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import User from '../entities/user.entity';
 import Workspace from '../entities/workspace.entity';
@@ -27,14 +24,13 @@ import UnitDropBoxHistory from '../entities/unit-drop-box-history.entity';
 import { UnitMetadataService } from './unit-metadata.service';
 import { UnitItemService } from './unit-item.service';
 import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
-import { MetadataProfileService } from './metadata-profile.service';
+import { UnitDefinitionService } from './unit-definition.service';
 import { UnitNotFoundException } from '../exceptions/unit-not-found.exception';
 import { UnitKeyExistsException } from '../exceptions/unit-key-exists.exception';
 
 describe('UnitService', () => {
   let service: UnitService;
   let unitsRepository: DeepMocked<Repository<Unit>>;
-  let unitDefinitionsRepository: DeepMocked<Repository<UnitDefinition>>;
   let usersRepository: DeepMocked<Repository<User>>;
   let workspaceUserRepository: DeepMocked<Repository<WorkspaceUser>>;
   let workspaceRepository: DeepMocked<Repository<Workspace>>;
@@ -44,7 +40,7 @@ describe('UnitService', () => {
   let unitMetadataService: DeepMocked<UnitMetadataService>;
   let unitItemService: DeepMocked<UnitItemService>;
   let unitMetadataToDeleteService: DeepMocked<UnitMetadataToDeleteService>;
-  let metadataProfileService: DeepMocked<MetadataProfileService>;
+  let unitDefinitionService: DeepMocked<UnitDefinitionService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -71,16 +67,12 @@ describe('UnitService', () => {
           useValue: createMock<UnitMetadataToDeleteService>()
         },
         {
-          provide: MetadataProfileService,
-          useValue: createMock<MetadataProfileService>()
+          provide: UnitDefinitionService,
+          useValue: createMock<UnitDefinitionService>()
         },
         {
           provide: getRepositoryToken(Unit),
           useValue: createMock<Repository<Unit>>()
-        },
-        {
-          provide: getRepositoryToken(UnitDefinition),
-          useValue: createMock<Repository<UnitDefinition>>()
         },
         {
           provide: getRepositoryToken(WorkspaceUser),
@@ -103,7 +95,6 @@ describe('UnitService', () => {
 
     service = module.get<UnitService>(UnitService);
     unitsRepository = module.get(getRepositoryToken(Unit));
-    unitDefinitionsRepository = module.get(getRepositoryToken(UnitDefinition));
     usersRepository = module.get(getRepositoryToken(User));
     workspaceUserRepository = module.get(getRepositoryToken(WorkspaceUser));
     workspaceRepository = module.get(getRepositoryToken(Workspace));
@@ -113,11 +104,15 @@ describe('UnitService', () => {
     unitMetadataService = module.get(UnitMetadataService);
     unitItemService = module.get(UnitItemService);
     unitMetadataToDeleteService = module.get(UnitMetadataToDeleteService);
-    metadataProfileService = module.get(MetadataProfileService);
+    unitDefinitionService = module.get(UnitDefinitionService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  describe('findOne', () => {
+    it('should throw for an unknown unit', async () => {
+      unitsRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.findOne(9)).rejects.toThrow(UnitNotFoundException);
+    });
   });
 
   describe('getUnitIdsByWorkspaceId', () => {
@@ -129,9 +124,20 @@ describe('UnitService', () => {
   });
 
   describe('getAllUnits', () => {
-    it('should return all units', async () => {
-      unitsRepository.find.mockResolvedValue([]);
-      expect(await service.getAllUnits()).toEqual([]);
+    // The CSV of the admin's unit list has a column for it, which stayed empty (#2012).
+    it('should name the workspace of each unit', async () => {
+      unitsRepository.find.mockResolvedValue([
+        { id: 1, workspaceId: 2 } as Unit,
+        { id: 2, workspaceId: 1 } as Unit
+      ]);
+      workspaceRepository.find.mockResolvedValue([
+        { id: 1, name: 'ws1' } as Workspace,
+        { id: 2, name: 'ws2' } as Workspace
+      ]);
+
+      const result = await service.getAllUnits();
+
+      expect(result.map(unit => unit.workspaceName)).toEqual(['ws2', 'ws1']);
     });
   });
 
@@ -170,6 +176,59 @@ describe('UnitService', () => {
       expect(unitCommentService.findOnesLastChangedComment).toHaveBeenCalledWith(1, 1);
       expect(result[0].lastSeenCommentChangedAt).toEqual(new Date(0));
     });
+
+    // Compared with the time the user last looked, this decides whether the unit shows new comments.
+    it.each([
+      ['the time of its last changed comment', { changedAt: new Date(2024, 0, 1) }, new Date(2024, 0, 1)],
+      ['the epoch without a comment', null, new Date(0)]
+    ])('should give a unit %s', async (_, comment, expected) => {
+      unitsRepository.find.mockResolvedValue([{ id: 1 } as Unit]);
+      unitCommentService.findOnesLastChangedComment.mockResolvedValue(comment as UnitCommentDto);
+
+      const [unit] = await service.findAllForWorkspace(1, 1, true);
+
+      expect(unit.lastCommentChangedAt).toEqual(expected);
+    });
+
+    it.each([
+      ['without the flag', 1, false],
+      ['without a user', null, true]
+    ])('should leave the comment times out %s', async (_, userId, withComments) => {
+      unitsRepository.find.mockResolvedValue([{ id: 1 } as Unit]);
+
+      const [unit] = await service.findAllForWorkspace(1, userId, withComments);
+
+      expect(unit).not.toHaveProperty('lastCommentChangedAt');
+      expect(unitCommentService.findOnesLastChangedComment).not.toHaveBeenCalled();
+    });
+
+    describe('with the drop box history', () => {
+      beforeEach(() => {
+        unitsRepository.find.mockResolvedValue([{ id: 1 }, { id: 2 }] as Unit[]);
+        unitDropBoxHistoryRepository.findOne.mockImplementation(async ({ where }) => (
+          (where as { unitId: number }[])[0].unitId === 1 ?
+            { sourceWorkspaceId: 4, targetWorkspaceId: 9, returned: true } as UnitDropBoxHistory :
+            null
+        ));
+      });
+
+      it('should tell for each unit where it was submitted from and to, and whether it came back', async () => {
+        const units = await service.findAllForWorkspace(4, null, false, 9);
+
+        expect(units.map(({ sourceWorkspaceId, targetWorkspaceId, returned }) => (
+          { sourceWorkspaceId, targetWorkspaceId, returned }
+        ))).toEqual([
+          { sourceWorkspaceId: 4, targetWorkspaceId: 9, returned: true },
+          { sourceWorkspaceId: null, targetWorkspaceId: null, returned: false }
+        ]);
+      });
+
+      it('should keep only the units submitted to the workspace when asked to', async () => {
+        const units = await service.findAllForWorkspace(9, null, false, 4, true);
+
+        expect(units.map(unit => unit.id)).toEqual([1]);
+      });
+    });
   });
 
   describe('isInWorkspace', () => {
@@ -178,12 +237,6 @@ describe('UnitService', () => {
 
       expect(await service.isInWorkspace(10, 3)).toBe(true);
       expect(unitsRepository.exists).toHaveBeenCalledWith({ where: { id: 10, workspaceId: 3 } });
-    });
-
-    it('should return false when the unit is not in the workspace', async () => {
-      unitsRepository.exists.mockResolvedValue(false);
-
-      expect(await service.isInWorkspace(10, 7)).toBe(false);
     });
   });
 
@@ -194,7 +247,7 @@ describe('UnitService', () => {
       expect(await service.idsNotInWorkspace([10, 11, 10], 3)).toEqual([11]);
       expect(unitsRepository.find).toHaveBeenCalledWith({
         where: { id: In([10, 11]), workspaceId: 3 },
-        select: ['id']
+        select: { id: true }
       });
     });
 
@@ -219,7 +272,7 @@ describe('UnitService', () => {
       expect(await service.workspacesOfUnits([10, 11, 12, 10])).toEqual(new Map([[10, 3], [11, 4]]));
       expect(unitsRepository.find).toHaveBeenCalledWith({
         where: { id: In([10, 11, 12]) },
-        select: ['id', 'workspaceId']
+        select: { id: true, workspaceId: true }
       });
     });
 
@@ -260,6 +313,14 @@ describe('UnitService', () => {
       expect(result).toBe(0);
     });
 
+    // TypeORM 1 throws on an undefined value in a where (#2095)
+    it('should refuse a unit without a key before looking for a duplicate', async () => {
+      await expect(service.create(1, {} as CreateUnitDto, { id: 1 } as User, false))
+        .rejects.toBeInstanceOf(BadRequestException);
+      expect(unitsRepository.findOne).not.toHaveBeenCalled();
+      expect(unitsRepository.save).not.toHaveBeenCalled();
+    });
+
     it('should assign a uuid to the new unit', async () => {
       const newUnit: Partial<Unit> = { id: 2 };
       unitsRepository.findOne.mockResolvedValue(null);
@@ -274,6 +335,109 @@ describe('UnitService', () => {
         /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
       );
     });
+
+    describe('from another unit', () => {
+      const caller = { id: 1 } as User;
+      const changed = new Date(2024, 0, 1);
+      let newUnit: Unit;
+
+      // The unit 7 to copy from, under key K; no unit of the new key exists in the workspace yet.
+      const givenSource = (source: Partial<Unit>) => {
+        unitsRepository.findOne.mockImplementation(async ({ where }) => (
+          (where as { key?: string }).key ? null : { id: 7, key: 'K', ...source } as Unit
+        ));
+      };
+      const copyAs = (key: string, addComments = false) => service
+        .create(3, { key, createFrom: 7 } as CreateUnitDto, caller, addComments);
+
+      beforeEach(() => {
+        unitsRepository.create.mockImplementation((dto: Partial<Unit>) => {
+          newUnit = { ...dto, id: 2 } as Unit;
+          return newUnit;
+        });
+        workspaceRepository.findOne.mockResolvedValue({ id: 3, settings: {} } as Workspace);
+        workspaceUserRepository.find.mockResolvedValue([]);
+        usersRepository.findOne.mockResolvedValue({ name: 'caller', lastName: 'Rufer' } as User);
+        unitMetadataService.getMetadataOfUnit.mockResolvedValue({ profiles: [], items: [] });
+        unitMetadataService.copyItemsWithMetadata.mockResolvedValue([{ oldUuid: 'old', newUuid: 'new' }]);
+        unitDefinitionService.findOnesDefinition.mockResolvedValue({ definition: '' } as UnitDefinitionDto);
+      });
+
+      it('should keep who changed the metadata and when, if the copy keeps the key', async () => {
+        givenSource({ lastChangedMetadata: changed, lastChangedMetadataUser: 'Quelle' });
+
+        await copyAs('K');
+
+        expect(newUnit.lastChangedMetadataUser).toBe('Quelle');
+        expect(newUnit.lastChangedMetadata).toEqual(changed);
+      });
+
+      it('should name the caller as the one who changed the metadata of a copy with a new key', async () => {
+        givenSource({ lastChangedMetadata: changed, lastChangedMetadataUser: 'Quelle' });
+
+        await copyAs('NEU');
+
+        expect(newUnit.lastChangedMetadataUser).toBe('Rufer');
+      });
+
+      it.each([
+        ['with a new key', 'NEU', changed],
+        ['whose source has no date', 'K', null]
+      ])('should date the metadata of a copy %s now', async (_, key, sourceDate) => {
+        givenSource({ lastChangedMetadata: sourceDate, lastChangedMetadataUser: 'Quelle' });
+        const before = Date.now();
+
+        await copyAs(key);
+
+        expect(newUnit.lastChangedMetadata.getTime()).toBeGreaterThanOrEqual(before);
+      });
+
+      // An emptied definition with a date is a change of its own and is copied with it.
+      it.each([
+        [null, false],
+        [changed, true]
+      ])('should copy an empty definition dated %p: %p', async (definitionDate, copied) => {
+        givenSource({ lastChangedDefinition: definitionDate });
+
+        await copyAs('K');
+
+        expect(unitDefinitionService.patchDefinition).toHaveBeenCalledTimes(copied ? 1 : 0);
+      });
+
+      // patchScheme refuses a scheme without a list of codings, as units from before 9.3.0 may carry;
+      // the copy failed, and remained without its scheme and the comments (#2057)
+      it('should take over the scheme of the source as it is, also one without a list of codings', async () => {
+        givenSource({ scheme: '{}', schemeType: 'iqb@1.0' });
+
+        await copyAs('K');
+
+        expect(newUnit.scheme).toBe('{}');
+        expect(newUnit.schemeType).toBe('iqb@1.0');
+        expect(unitDefinitionService.patchScheme).not.toHaveBeenCalled();
+      });
+
+      it.each([true, false])('should copy the comments onto the new items only if asked to: %p', async addComments => {
+        givenSource({});
+
+        await copyAs('K', addComments);
+
+        expect(unitCommentService.copyComments.mock.calls)
+          .toEqual(addComments ? [[7, 2, [{ oldUuid: 'old', newUuid: 'new' }]]] : []);
+      });
+
+      // Whoever copies keeps their view of the comments; everyone else starts as for a new unit.
+      it('should hand the copying user the time they last saw the comments of the source', async () => {
+        givenSource({});
+        const seen = new Date(2024, 5, 1);
+        workspaceUserRepository.find.mockResolvedValue([{ userId: 1 }, { userId: 3 }] as WorkspaceUser[]);
+        unitUserService.findLastSeenCommentTimestamp.mockResolvedValue(seen);
+
+        await copyAs('K');
+
+        expect(unitUserService.findLastSeenCommentTimestamp).toHaveBeenCalledWith(1, 7);
+        expect(unitUserService.createUnitUser.mock.calls).toEqual([[1, 2, seen], [3, 2]]);
+      });
+    });
   });
 
   describe('findOnesProperties', () => {
@@ -282,23 +446,18 @@ describe('UnitService', () => {
       await expect(service.findOnesProperties(1, 1)).rejects.toThrow(UnitNotFoundException);
     });
 
-    it('should return properties', async () => {
-      unitsRepository.findOne.mockResolvedValue({ id: 1, metadata: {} } as Unit);
-      workspaceRepository.findOne.mockResolvedValue({ id: 1 } as Workspace);
-      unitMetadataToDeleteService.getOneByUnit.mockResolvedValue(undefined);
+    it('should return properties with the metadata UnitMetadataService reads for them', async () => {
+      const unit = { id: 1, metadata: {} } as Unit;
+      const workspace = { id: 1 } as Workspace;
+      unitsRepository.findOne.mockResolvedValue(unit);
+      workspaceRepository.findOne.mockResolvedValue(workspace);
+      unitMetadataService.getModifiedMetadataForUnit.mockResolvedValue(unit);
 
-      await service.findOnesProperties(1, 1);
+      const result = await service.findOnesProperties(1, 1);
+
       expect(unitsRepository.findOne).toHaveBeenCalled();
-    });
-  });
-
-  describe('findAllWithProperties', () => {
-    it('should return units', async () => {
-      workspaceRepository.findOne.mockResolvedValue({ id: 1 } as Workspace);
-      unitsRepository.find.mockResolvedValue([{ id: 1, metadata: {} } as Unit]);
-
-      const result = await service.findAllWithProperties(1);
-      expect(result).toHaveLength(1);
+      expect(unitMetadataService.getModifiedMetadataForUnit).toHaveBeenCalledWith(unit, workspace);
+      expect(result).toBe(unit);
     });
   });
 
@@ -315,9 +474,9 @@ describe('UnitService', () => {
       expect(result).toEqual([{ id: 1, metadata, scheme: '{}' }]);
       expect(unitsRepository.find).toHaveBeenCalledWith({
         where: { workspaceId: 4 },
-        select: ['id', 'metadata', 'scheme']
+        select: { id: true, metadata: true, scheme: true }
       });
-      expect(metadataProfileService.getStoredMetadataProfileFromDb).not.toHaveBeenCalled();
+      expect(unitMetadataService.buildHideNumberingMap).not.toHaveBeenCalled();
     });
 
     it('reads the metadata tables of the marked units, as the export does, in one query each', async () => {
@@ -352,158 +511,6 @@ describe('UnitService', () => {
     });
   });
 
-  describe('patchUnitMetadata', () => {
-    it('should patch metadata', async () => {
-      unitMetadataService.getAllByUnitId.mockResolvedValue([]);
-      await service.patchUnitMetadata(1, []);
-      expect(unitMetadataService.getAllByUnitId).toHaveBeenCalled();
-    });
-
-    it('updates the matching stored profile by profileId instead of re-inserting', async () => {
-      // The incoming profile has no row id (the profile form drops it) but keeps
-      // its profileId; it must update the stored row, not delete + re-insert.
-      unitMetadataService.getAllByUnitId.mockResolvedValue([
-        { id: 7, profileId: 'p1' },
-        { id: 8, profileId: 'p2' }
-      ] as UnitMetadataDto[]);
-
-      await service.patchUnitMetadata(1, [{ profileId: 'p1' } as UnitMetadataDto]);
-
-      expect(unitMetadataService.updateMetadata)
-        .toHaveBeenCalledWith(7, expect.objectContaining({ id: 7, profileId: 'p1' }), undefined);
-      expect(unitMetadataService.addMetadata).not.toHaveBeenCalled();
-      // p2 is gone from the incoming payload -> removed
-      expect(unitMetadataService.removeMetadata).toHaveBeenCalledWith(8, undefined);
-    });
-
-    it('inserts a profile that has no stored counterpart', async () => {
-      unitMetadataService.getAllByUnitId.mockResolvedValue([]);
-
-      await service.patchUnitMetadata(1, [{ profileId: 'p-new' } as UnitMetadataDto]);
-
-      expect(unitMetadataService.addMetadata)
-        .toHaveBeenCalledWith(1, expect.objectContaining({ profileId: 'p-new' }), undefined);
-      expect(unitMetadataService.removeMetadata).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('patchItemsMetadata', () => {
-    it('should patch items', async () => {
-      unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
-      await service.patchItemsMetadata(1, []);
-      expect(unitItemService.getAllByUnitIdWithMetadata).toHaveBeenCalled();
-    });
-
-    it('should leave alone an item the unit does not have, neither updating nor creating it (#1816)', async () => {
-      unitItemService.getAllByUnitIdWithMetadata
-        .mockResolvedValue([{ uuid: 'own', id: 'item_1' } as UnitItemWithMetadataDto]);
-
-      await service.patchItemsMetadata(1, [
-        { uuid: 'own', id: 'item_1' } as UnitItemWithMetadataDto,
-        { uuid: 'foreign', id: 'item_9' } as UnitItemWithMetadataDto
-      ]);
-
-      expect(unitItemService.updateItem).toHaveBeenCalledTimes(1);
-      expect(unitItemService.updateItem).toHaveBeenCalledWith('own', expect.anything(), undefined);
-      expect(unitItemService.addItem).not.toHaveBeenCalled();
-      expect(unitItemService.removeItem).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('patchMetadata', () => {
-    it('runs the whole save in one transaction and threads the manager through', async () => {
-      const manager = createMock<EntityManager>();
-      const transaction = jest.fn().mockImplementation(
-        (runInTransaction: (m: EntityManager) => Promise<unknown>) => runInTransaction(manager)
-      );
-      Object.defineProperty(unitsRepository, 'manager', {
-        value: { transaction } as unknown as EntityManager,
-        configurable: true
-      });
-      unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 10 } as Unit);
-      workspaceRepository.findOne.mockResolvedValue({ id: 10, settings: {} } as unknown as Workspace);
-      unitMetadataService.getAllByUnitId.mockResolvedValue([]);
-      unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
-
-      await service.patchMetadata(1, { profiles: [], items: [] });
-
-      expect(transaction).toHaveBeenCalled();
-      expect(unitMetadataService.getAllByUnitId).toHaveBeenCalledWith(1, manager);
-      expect(unitItemService.getAllByUnitIdWithMetadata).toHaveBeenCalledWith(1, manager);
-      expect(unitMetadataToDeleteService.upsertOneForUnit).toHaveBeenCalledWith(1, manager);
-    });
-
-    it('flags the current profile as order 0 from the workspace settings on save', async () => {
-      const manager = createMock<EntityManager>();
-      const transaction = jest.fn().mockImplementation(
-        (runInTransaction: (m: EntityManager) => Promise<unknown>) => runInTransaction(manager)
-      );
-      Object.defineProperty(unitsRepository, 'manager', {
-        value: { transaction } as unknown as EntityManager,
-        configurable: true
-      });
-      unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 10 } as Unit);
-      workspaceRepository.findOne.mockResolvedValue({
-        id: 10,
-        settings: { unitMDProfile: 'profile-a', itemMDProfile: 'profile-b' }
-      } as unknown as Workspace);
-      unitMetadataService.getAllByUnitId.mockResolvedValue([]);
-      unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
-
-      const patchUnitMetadataSpy = jest.spyOn(service, 'patchUnitMetadata').mockResolvedValue();
-      jest.spyOn(service, 'patchItemsMetadata').mockResolvedValue();
-
-      await service.patchMetadata(1, {
-        profiles: [{ profileId: 'profile-a' }, { profileId: 'other' }]
-      });
-
-      const savedProfiles = patchUnitMetadataSpy.mock.calls[0][1];
-      expect(savedProfiles[0]).toMatchObject({ profileId: 'profile-a', order: 0 });
-      expect(savedProfiles[1]).toMatchObject({ profileId: 'other', order: -1 });
-    });
-
-    it('canonicalizes a github profile id from the client to w3id and still flags it current (#1570)', async () => {
-      const manager = createMock<EntityManager>();
-      const transaction = jest.fn().mockImplementation(
-        (runInTransaction: (m: EntityManager) => Promise<unknown>) => runInTransaction(manager)
-      );
-      Object.defineProperty(unitsRepository, 'manager', {
-        value: { transaction } as unknown as EntityManager,
-        configurable: true
-      });
-      unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 10 } as Unit);
-      workspaceRepository.findOne.mockResolvedValue({
-        id: 10,
-        settings: {
-          unitMDProfile: 'https://w3id.org/iqb/p11/unit/',
-          itemMDProfile: 'https://w3id.org/iqb/p11/item/'
-        }
-      } as unknown as Workspace);
-      unitMetadataService.getAllByUnitId.mockResolvedValue([]);
-      unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
-
-      const patchUnitMetadataSpy = jest.spyOn(service, 'patchUnitMetadata').mockResolvedValue();
-      const patchItemsMetadataSpy = jest.spyOn(service, 'patchItemsMetadata').mockResolvedValue();
-
-      // a client still holding pre-#1570 state sends the github spelling
-      await service.patchMetadata(1, {
-        profiles: [{ profileId: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json' }],
-        items: [{
-          uuid: 'u-1',
-          profiles: [{ profileId: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/item.json' }]
-        }]
-      });
-
-      const savedProfiles = patchUnitMetadataSpy.mock.calls[0][1];
-      expect(savedProfiles[0]).toMatchObject({ profileId: 'https://w3id.org/iqb/p11/unit/', order: 0 });
-      const savedItems = patchItemsMetadataSpy.mock.calls[0][1];
-      expect(savedItems[0].profiles[0]).toMatchObject({
-        profileId: 'https://w3id.org/iqb/p11/item/',
-        order: 0
-      });
-    });
-  });
-
   describe('patchUnit', () => {
     it('should patch unit props', async () => {
       const unit = { id: 1 } as Unit;
@@ -512,6 +519,98 @@ describe('UnitService', () => {
       await service.patchUnit(1, { name: 'n' } as UnitPropertiesDto, 'user');
       expect(unit.name).toBe('n');
       expect(unitsRepository.save).toHaveBeenCalled();
+    });
+
+    it('should hand the metadata on only when it is sent', async () => {
+      unitsRepository.findOne.mockResolvedValue({ id: 1 } as Unit);
+      const metadata = { profiles: [], items: [] };
+
+      await service.patchUnit(1, { name: 'n' } as UnitPropertiesDto, 'user');
+      expect(unitMetadataService.patchMetadata).not.toHaveBeenCalled();
+
+      await service.patchUnit(1, { metadata } as UnitPropertiesDto, 'user');
+      expect(unitMetadataService.patchMetadata).toHaveBeenCalledWith(1, metadata, 'user');
+    });
+
+    describe('of the properties', () => {
+      const stored = new Date(2020, 0, 1);
+      let unit: Unit;
+
+      beforeEach(() => {
+        unit = {
+          id: 1,
+          key: 'K',
+          name: 'N',
+          description: 'D',
+          transcript: 'T',
+          reference: 'R',
+          editor: 'E',
+          player: 'P',
+          schemer: 'S',
+          schemeType: 'ST',
+          state: '3',
+          groupName: 'G',
+          lastChangedMetadata: stored,
+          lastChangedDefinition: stored,
+          lastChangedDefinitionUser: 'old',
+          lastChangedScheme: stored,
+          lastChangedSchemeUser: 'old'
+        } as Unit;
+        unitsRepository.findOne.mockResolvedValue(unit);
+      });
+
+      it('should change only what is sent', async () => {
+        const untouched = { ...unit };
+
+        await service.patchUnitProperties(1, { id: 1, description: 'neu' } as UnitPropertiesDto, 'user');
+
+        expect(unit).toEqual(expect.objectContaining({
+          ...untouched,
+          description: 'neu',
+          lastChangedMetadata: expect.any(Date),
+          lastChangedMetadataUser: 'user'
+        }));
+      });
+
+      it.each([
+        ['an empty group as no group', '', ''],
+        ['a group sent along', 'H', 'H'],
+        ['the group when none is sent', undefined, 'G']
+      ])('should take %s', async (_, groupName, expected) => {
+        await service.patchUnitProperties(1, { id: 1, groupName } as UnitPropertiesDto, 'user');
+
+        expect(unit.groupName).toBe(expected);
+      });
+
+      // A change of the properties is a change of the metadata; definition and scheme change with their editors.
+      it('should date the metadata change now and leave the dates of definition and scheme', async () => {
+        await service.patchUnitProperties(1, { id: 1, name: 'n' } as UnitPropertiesDto, 'user');
+
+        expect(unit.lastChangedMetadata.getTime()).toBeGreaterThan(stored.getTime());
+        expect(unit).toEqual(expect.objectContaining({
+          lastChangedDefinition: stored,
+          lastChangedDefinitionUser: 'old',
+          lastChangedScheme: stored,
+          lastChangedSchemeUser: 'old'
+        }));
+      });
+
+      it('should take the dates sent along, each with the user', async () => {
+        const sent = new Date(2023, 0, 1);
+
+        await service.patchUnitProperties(1, {
+          id: 1, lastChangedMetadata: sent, lastChangedDefinition: sent, lastChangedScheme: sent
+        } as UnitPropertiesDto, 'user');
+
+        expect(unit).toEqual(expect.objectContaining({
+          lastChangedMetadata: sent,
+          lastChangedMetadataUser: 'user',
+          lastChangedDefinition: sent,
+          lastChangedDefinitionUser: 'user',
+          lastChangedScheme: sent,
+          lastChangedSchemeUser: 'user'
+        }));
+      });
     });
 
     // #1842: renaming did not check what creating and copying refuse
@@ -560,14 +659,63 @@ describe('UnitService', () => {
         .mockResolvedValueOnce(null); // Second call: find existing (return null to proceed)
 
       workspaceRepository.findOne.mockResolvedValue({ id: 2 } as Workspace);
-      unitMetadataService.getAllByUnitId.mockResolvedValue([]);
 
       await service.patchDropBoxHistory([1], 2, 1, { id: 1 } as User);
+      expect(unitMetadataService.patchMetadataCurrentProfile).toHaveBeenCalledWith(1, undefined, undefined);
       expect(unitsRepository.save).toHaveBeenCalled();
     });
   });
 
+  describe('patchWorkspace', () => {
+    // Unit 1 under key K, workspace 1 in group 10, workspace 2 in the group given. The unit is read
+    // without its state, so a save leaves the stored state alone unless the move sets one.
+    const given = ({ unitInTarget = false, targetGroupId = 10 } = {}) => {
+      const unitOfTheKeyInTarget = unitInTarget ? { id: 9 } as Unit : null;
+      unitsRepository.findOne.mockImplementation(async ({ where }) => (
+        (where as { key?: string }).key ? unitOfTheKeyInTarget : { id: 1, key: 'K' } as Unit
+      ));
+      workspaceRepository.findOne.mockImplementation(async ({ where }) => (
+        (where as { id: number }).id === 2 ?
+          { groupId: targetGroupId, settings: {} } as Workspace :
+          { groupId: 10 } as Workspace
+      ));
+    };
+
+    it('should refuse a unit whose key the target already carries', async () => {
+      given({ unitInTarget: true });
+
+      const report = await service.patchWorkspace([1], 2, { id: 1 } as User, 1, 'moveTo');
+
+      expect(report.messages).toEqual([{ objectKey: 'K', messageKey: 'unit-patch.duplicate-unit-id' }]);
+      expect(unitsRepository.save).not.toHaveBeenCalled();
+    });
+
+    // The states are defined per group; a moved unit is no longer in any submission.
+    it.each([
+      ['reset the state of a unit moved into another group', 20, '0'],
+      ['leave the state of a unit moved within its group alone', 10, undefined]
+    ])('should %s', async (_, targetGroupId, state) => {
+      given({ targetGroupId });
+
+      await service.patchWorkspace([1], 2, { id: 1 } as User, 1, 'moveTo');
+
+      const saved = unitsRepository.save.mock.calls[0][0] as Unit;
+      expect(saved.workspaceId).toBe(2);
+      expect(saved.state).toBe(state);
+      expect(unitDropBoxHistoryRepository.delete).toHaveBeenCalledWith({ unitId: 1 });
+    });
+  });
+
   describe('patchReturnDropBoxHistory', () => {
+    // Answers only the workspaces asked for, so a question about the wrong ones gets the wrong groups
+    const givenWorkspaces = (workspaces: Workspace[]) => workspaceRepository.find.mockImplementation(
+      async options => {
+        const { id } = options?.where as FindOptionsWhere<Workspace>;
+        const asked: unknown = (id as FindOperator<number>).value;
+        return workspaces.filter(workspace => Array.isArray(asked) && asked.includes(workspace.id));
+      }
+    );
+
     beforeEach(() => {
       unitsRepository.findOne.mockImplementation(async ({ where }) => {
         const { id, key } = where as { id?: number; key?: string };
@@ -580,6 +728,11 @@ describe('UnitService', () => {
           null
       ));
       workspaceRepository.findOne.mockResolvedValue({ id: 5 } as Workspace);
+      givenWorkspaces([
+        createMock<Workspace>({ id: 5, groupId: 1 }),
+        createMock<Workspace>({ id: 9, groupId: 1 }),
+        createMock<Workspace>({ id: 7, groupId: 2 })
+      ]);
     });
 
     it('should return a submitted unit to where it came from', async () => {
@@ -603,6 +756,30 @@ describe('UnitService', () => {
       expect(unitsRepository.save).toHaveBeenCalledTimes(1);
       expect(unitsRepository.save).toHaveBeenCalledWith(expect.objectContaining({ id: 1, workspaceId: 5 }));
       expect(unitDropBoxHistoryRepository.upsert).toHaveBeenCalledTimes(1);
+    });
+
+    // #2027: the workspace it came from has been moved into another group since
+    it('should report a unit submitted from a workspace of another group, and leave it in the drop box', async () => {
+      unitDropBoxHistoryRepository.findOne.mockResolvedValue(
+        createMock<UnitDropBoxHistory>({ unitId: 1, sourceWorkspaceId: 7, targetWorkspaceId: 9 })
+      );
+
+      const report = await service.patchReturnDropBoxHistory([1], 9, { id: 1 } as User);
+
+      expect(report.messages).toEqual([{ objectKey: 'SUBMITTED', messageKey: 'unit-patch.other-group' }]);
+      expect(unitsRepository.save).not.toHaveBeenCalled();
+      expect(unitDropBoxHistoryRepository.upsert).not.toHaveBeenCalled();
+    });
+
+    // A workspace set as its own drop box before #1805 is in its own group, not in another one
+    it('should not report a submission within the same workspace as one from another group', async () => {
+      unitDropBoxHistoryRepository.findOne.mockResolvedValue(
+        createMock<UnitDropBoxHistory>({ unitId: 1, sourceWorkspaceId: 9, targetWorkspaceId: 9 })
+      );
+
+      const report = await service.patchReturnDropBoxHistory([1], 9, { id: 1 } as User);
+
+      expect(report.messages).not.toContainEqual(expect.objectContaining({ messageKey: 'unit-patch.other-group' }));
     });
 
     // #1806: an older, already returned submission from another workspace must not decide the target
@@ -629,10 +806,7 @@ describe('UnitService', () => {
       // 1. copy: findOne -> unit
       // 2. create: findOne(existing) -> null
       // 3. create: findOne(source) -> unit
-      // 4. findOnesDefinition -> unit
-      // 5. patchDefinition -> unit
-      // 6. findOnesScheme -> unit
-      // 7. patchScheme -> unit
+      // The definition is copied through UnitDefinitionService.
       unitsRepository.findOne
         .mockResolvedValueOnce(unit)
         .mockResolvedValueOnce(null)
@@ -642,10 +816,15 @@ describe('UnitService', () => {
       unitsRepository.save.mockResolvedValue({ id: 2 } as Unit);
       workspaceUserRepository.find.mockResolvedValue([]);
       usersRepository.findOne.mockResolvedValue({ firstName: 'F', lastName: 'L', name: 'N' } as User);
-      unitDefinitionsRepository.findOne.mockResolvedValue({ data: 'xml' } as UnitDefinition);
+      unitMetadataService.getMetadataOfUnit.mockResolvedValue({ profiles: [], items: [] });
+      unitDefinitionService.findOnesDefinition.mockResolvedValue({ definition: 'xml' } as UnitDefinitionDto);
 
       await service.copy([1], 2, { id: 1, name: 'u' } as User, false);
       expect(unitsRepository.create).toHaveBeenCalled();
+      expect(unitDefinitionService.findOnesDefinition).toHaveBeenCalledWith(1);
+      expect(unitDefinitionService.patchDefinition)
+        .toHaveBeenCalledWith(2, { definition: 'xml' }, undefined, null);
+      expect(unitMetadataService.copyItemsWithMetadata).toHaveBeenCalledWith(2, { profiles: [], items: [] });
     });
 
     it('should not copy uuid to the new unit', async () => {
@@ -670,501 +849,23 @@ describe('UnitService', () => {
       unitsRepository.save.mockResolvedValue({ id: 2 } as Unit);
       workspaceUserRepository.find.mockResolvedValue([]);
       usersRepository.findOne.mockResolvedValue({ firstName: 'F', lastName: 'L', name: 'N' } as User);
-      unitDefinitionsRepository.findOne.mockResolvedValue({ data: 'xml' } as UnitDefinition);
+      unitMetadataService.getMetadataOfUnit.mockResolvedValue({ profiles: [], items: [] });
+      unitDefinitionService.findOnesDefinition.mockResolvedValue({ definition: 'xml' } as UnitDefinitionDto);
 
       await service.copy([1], 2, { id: 1, name: 'u' } as User, false);
 
       expect(capturedCreateArg.uuid).toBeUndefined();
     });
-  });
 
-  describe('remove', () => {
-    it('should remove unit', async () => {
-      await service.remove(1);
-      expect(unitsRepository.delete).toHaveBeenCalledWith(1);
-    });
-  });
+    it('should report a unit whose key the target already carries', async () => {
+      unitsRepository.findOne.mockImplementation(async ({ where }) => (
+        (where as { key?: string }).key ? { id: 9 } as Unit : { id: 1, key: 'K' } as Unit
+      ));
 
-  describe('findOnesDefinition', () => {
-    it('should return definition', async () => {
-      unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 1 } as Unit);
-      unitDefinitionsRepository.findOne.mockResolvedValue({ data: 'xml' } as UnitDefinition);
+      const report = await service.copy([1], 2, { id: 1 } as User, false);
 
-      const result = await service.findOnesDefinition(1);
-      expect(result.definition).toBe('xml');
-    });
-
-    it('should return the stored definition type', async () => {
-      unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 1 } as Unit);
-      unitDefinitionsRepository.findOne.mockResolvedValue(
-        { data: 'xml', type: 'aspect-unit-definition@4.12.0' } as UnitDefinition
-      );
-
-      const result = await service.findOnesDefinition(1);
-      expect(result.definitionType).toBe('aspect-unit-definition@4.12.0');
-    });
-
-    it('should leave the definition type out when none is stored', async () => {
-      unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 1 } as Unit);
-      unitDefinitionsRepository.findOne.mockResolvedValue({ data: 'xml', type: null } as UnitDefinition);
-
-      const result = await service.findOnesDefinition(1);
-      expect(result).not.toHaveProperty('definitionType');
-    });
-  });
-
-  describe('findOnesScheme', () => {
-    it('should return scheme', async () => {
-      unitsRepository.findOne.mockResolvedValue({ scheme: '{}', schemeType: 't' } as Unit);
-      const result = await service.findOnesScheme(1);
-      expect(result.scheme).toBe('{}');
-    });
-
-    // The schemer reads the variables from here and knows only the 1.x spelling (#1708).
-    it('should hand out a variable list stored in 2.x in the 1.x spelling', async () => {
-      const storedIn2x = {
-        id: 'geo1',
-        type: 'STRING',
-        format: 'GGB_FILE',
-        multiple: false,
-        nullable: false,
-        values: [],
-        valuePositionLabels: []
-      } as unknown as VariableInfo;
-      unitsRepository.findOne.mockResolvedValue({ scheme: '{}', variables: [storedIn2x] } as Unit);
-
-      const result = await service.findOnesScheme(1);
-
-      expect(result.variables).toEqual([{
-        ...storedIn2x, type: 'string', format: 'ggb-file', page: ''
-      }]);
-    });
-
-    it('should keep a missing variable list missing', async () => {
-      unitsRepository.findOne.mockResolvedValue({ scheme: '{}', variables: null } as Unit);
-      const result = await service.findOnesScheme(1);
-      expect(result.variables).toBeNull();
-    });
-  });
-
-  describe('patchUnitGroup', () => {
-    it('should update group', async () => {
-      await service.patchUnitGroup(1, 'group', [1]);
-      expect(unitsRepository.update).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  describe('removeUnitState', () => {
-    it('should reset state', async () => {
-      unitsRepository.findOne.mockResolvedValue({ id: 1, state: '1' } as Unit);
-      await service.removeUnitState(1);
-      expect(unitsRepository.save).toHaveBeenCalled();
-    });
-  });
-
-  describe('patchDefinition', () => {
-    it('should save definition', async () => {
-      unitsRepository.findOne.mockResolvedValue({ id: 1 } as Unit);
-      unitDefinitionsRepository.findOne.mockResolvedValue({ id: 1 } as UnitDefinition);
-
-      await service.patchDefinition(1, { definition: 'xml' }, 'user', new Date());
-      expect(unitDefinitionsRepository.save).toHaveBeenCalled();
-      expect(unitsRepository.save).toHaveBeenCalled();
-    });
-
-    // Saving from the editor and importing both end up here. The list is stored in the spelling it
-    // came in; readers that know only 1.x get it converted on the way out (#1708).
-    it('should store a variable list in the spelling it was sent in', async () => {
-      unitsRepository.findOne.mockResolvedValue({ id: 1 } as Unit);
-      unitDefinitionsRepository.findOne.mockResolvedValue({ id: 1 } as UnitDefinition);
-      const sentByA20Editor = {
-        id: 'geo1',
-        alias: 'geo1',
-        type: 'STRING',
-        format: 'GGB_FILE',
-        multiple: false,
-        nullable: false,
-        values: [],
-        valuePositionLabels: []
-      } as unknown as VariableInfo;
-
-      await service.patchDefinition(1, { definition: 'xml', variables: [sentByA20Editor] }, 'user', new Date());
-
-      const stored = unitsRepository.save.mock.calls[0][0] as Unit;
-      expect(stored.variables).toEqual([sentByA20Editor]);
-    });
-
-    // The frontend brings the items in line with the variables when it saves (#1361). The definition
-    // names only the base variables, so an item of a derived variable lost it here (#1853).
-    it('should leave the items in the stored metadata alone', async () => {
-      const metadata = {
-        items: [{ uuid: 'u-1', variableReadOnlyId: 'sum', variableId: 'Summe' }]
-      } as unknown as UnitMetadataValues;
-      unitsRepository.findOne.mockResolvedValue({ id: 1, metadata: structuredClone(metadata) } as Unit);
-      unitDefinitionsRepository.findOne.mockResolvedValue({ id: 1 } as UnitDefinition);
-
-      await service.patchDefinition(
-        1,
-        { definition: 'xml', variables: [{ id: 'text_1', alias: 'Antwort' } as VariableInfo] },
-        'user',
-        new Date()
-      );
-
-      const stored = unitsRepository.save.mock.calls[0][0] as Unit;
-      expect(stored.metadata).toEqual(metadata);
-    });
-
-    // The type belongs to the definition it came with (#1368).
-    describe('with a definition type', () => {
-      const savedDefinition = () => unitDefinitionsRepository.save.mock.calls[0][0] as UnitDefinition;
-
-      beforeEach(() => {
-        unitsRepository.findOne.mockResolvedValue({ id: 1 } as Unit);
-      });
-
-      it('should store the type sent with a definition', async () => {
-        unitDefinitionsRepository.findOne.mockResolvedValue({ id: 1, type: null } as UnitDefinition);
-
-        await service.patchDefinition(
-          1,
-          { definition: 'xml', definitionType: 'aspect-unit-definition@4.12.0' },
-          'user',
-          new Date()
-        );
-
-        expect(savedDefinition().type).toBe('aspect-unit-definition@4.12.0');
-      });
-
-      it('should clear the stored type when a definition comes without one', async () => {
-        unitDefinitionsRepository.findOne.mockResolvedValue(
-          { id: 1, type: 'aspect-unit-definition@4.11.0' } as UnitDefinition
-        );
-
-        await service.patchDefinition(1, { definition: 'xml' }, 'user', new Date());
-
-        expect(savedDefinition().type).toBeNull();
-      });
-
-      it('should leave the stored type alone when only the variables change', async () => {
-        unitDefinitionsRepository.findOne.mockResolvedValue(
-          { id: 1, type: 'aspect-unit-definition@4.11.0' } as UnitDefinition
-        );
-
-        await service.patchDefinition(
-          1,
-          { variables: [], definitionType: 'aspect-unit-definition@4.12.0' },
-          'user',
-          new Date()
-        );
-
-        // undefined is what TypeORM skips on save, so the column keeps its value
-        expect(savedDefinition().type).toBeUndefined();
-      });
-
-      it('should store the type on a definition created by this call', async () => {
-        unitDefinitionsRepository.findOne.mockResolvedValue(null);
-        unitDefinitionsRepository.create.mockImplementation(entity => entity as UnitDefinition);
-
-        await service.patchDefinition(
-          1,
-          { definition: 'xml', definitionType: 'aspect-unit-definition@4.12.0' },
-          'user',
-          new Date()
-        );
-
-        expect(unitDefinitionsRepository.create).toHaveBeenCalledWith(
-          expect.objectContaining({ type: 'aspect-unit-definition@4.12.0', unitId: 1 })
-        );
-      });
-    });
-  });
-
-  describe('patchScheme', () => {
-    it('should save scheme', async () => {
-      unitsRepository.findOne.mockResolvedValue({ id: 1 } as Unit);
-      await service.patchScheme(
-        1,
-        { scheme: '{"variableCodings": []}', schemeType: 't' } as UnitSchemeDto,
-        'user',
-        new Date()
-      );
-      expect(unitsRepository.save).toHaveBeenCalled();
-    });
-
-    it.each(['{broken', 'null', '{}'])('should refuse the scheme %s without a list of codings', async scheme => {
-      await expect(service.patchScheme(1, { scheme, schemeType: 't' }, 'user', new Date()))
-        .rejects.toThrow(BadRequestException);
-      expect(unitsRepository.save).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('setCurrentProfiles', () => {
-    it('should set current profile', () => {
-      const metadata = {
-        profiles: [{ profileId: 'p1' }, { profileId: 'p2' }],
-        items: []
-      } as UnitMetadataValues;
-      const result = UnitService.setCurrentProfiles('p1', 'p2', metadata);
-      expect(result.profiles[0].order).toBe(0);
-      expect(result.profiles[1].order).toBe(-1);
-    });
-
-    // This is the single place that canonicalizes profile ids (#1570); it sits on
-    // the units read (incl. the legacy unit.metadata blob the migration cannot
-    // reach), the save, the unit copy and the import.
-    it('rewrites github-spelled profile ids to w3id on unit and item level', () => {
-      const metadata = {
-        profiles: [{ profileId: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json' }],
-        items: [{
-          uuid: 'u-1',
-          profiles: [{ profileId: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/item.json' }]
-        }]
-      } as unknown as UnitMetadataValues;
-
-      const result = UnitService.setCurrentProfiles(
-        'https://w3id.org/iqb/p11/unit/',
-        'https://w3id.org/iqb/p11/item/',
-        metadata
-      );
-
-      expect(result.profiles[0].profileId).toBe('https://w3id.org/iqb/p11/unit/');
-      expect(result.items[0].profiles[0].profileId).toBe('https://w3id.org/iqb/p11/item/');
-      // the canonical comparison still recognizes them as the configured profiles
-      expect(result.profiles[0].order).toBe(0);
-      expect(result.items[0].profiles[0].order).toBe(0);
-    });
-
-    it('leaves foreign profile ids untouched', () => {
-      const metadata = {
-        profiles: [{ profileId: 'https://example.org/own/profile.json' }]
-      } as unknown as UnitMetadataValues;
-
-      const result = UnitService.setCurrentProfiles('https://w3id.org/iqb/p11/unit/', '', metadata);
-
-      expect(result.profiles[0].profileId).toBe('https://example.org/own/profile.json');
-    });
-  });
-
-  describe('ensureValueAsText', () => {
-    it('derives valueAsText from vocabulary entries (text, not label)', () => {
-      const metadata = {
-        profiles: [{
-          profileId: 'p1',
-          entries: [{
-            id: 'e1',
-            label: [{ lang: 'de', value: 'Prozess' }],
-            value: [{ id: 'https://w3id.org/iqb/vocab/p2', text: [{ lang: 'de', value: 'Anwenden' }] }],
-            valueAsText: []
-          }]
-        }]
-      } as unknown as UnitMetadataValues;
-
-      const result = UnitService.ensureValueAsText(metadata);
-
-      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Anwenden' }]);
-    });
-
-    it('combines the annotation (numbering) into valueAsText by default', () => {
-      const metadata = {
-        profiles: [{
-          profileId: 'p1',
-          entries: [{
-            id: 'e1',
-            label: [{ lang: 'de', value: 'Prozess' }],
-            value: [{
-              id: 'https://w3id.org/iqb/vocab/p2',
-              label: [{ lang: 'de', value: 'Anwenden' }],
-              annotation: [{ lang: 'de', value: '1.2' }]
-            }],
-            valueAsText: []
-          }]
-        }]
-      } as unknown as UnitMetadataValues;
-
-      const result = UnitService.ensureValueAsText(metadata);
-
-      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: '1.2 Anwenden' }]);
-    });
-
-    it('drops the numbering when the entry hideNumbering flag is set', () => {
-      const metadata = {
-        profiles: [{
-          profileId: 'p1',
-          entries: [{
-            id: 'e1',
-            label: [{ lang: 'de', value: 'Prozess' }],
-            value: [{
-              id: 'https://w3id.org/iqb/vocab/p2',
-              label: [{ lang: 'de', value: 'Anwenden' }],
-              annotation: [{ lang: 'de', value: '1.2' }]
-            }],
-            valueAsText: []
-          }]
-        }]
-      } as unknown as UnitMetadataValues;
-
-      const result = UnitService.ensureValueAsText(metadata, { p1: { e1: true } });
-
-      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Anwenden' }]);
-    });
-
-    it('recomputes vocabulary valueAsText even when one was already stored (hideNumbering applies to imports)', () => {
-      const metadata = {
-        profiles: [{
-          profileId: 'p1',
-          entries: [{
-            id: 'e1',
-            label: [{ lang: 'de', value: 'Prozess' }],
-            value: [{
-              id: 'https://w3id.org/iqb/vocab/p2',
-              text: [{ lang: 'de', value: 'Anwenden' }],
-              annotation: [{ lang: 'de', value: '1.2' }]
-            }],
-            valueAsText: [{ lang: 'de', value: '1.2 Anwenden' }]
-          }]
-        }]
-      } as unknown as UnitMetadataValues;
-
-      const result = UnitService.ensureValueAsText(metadata, { p1: { e1: true } });
-
-      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Anwenden' }]);
-    });
-
-    it('derives valueAsText from form-created vocabulary entries that carry label', () => {
-      const metadata = {
-        profiles: [{
-          profileId: 'p1',
-          entries: [{
-            id: 'e1',
-            label: [],
-            value: [{ id: 'https://w3id.org/iqb/v24/kh/r5f', label: [{ lang: 'de', value: 'nein' }] }],
-            valueAsText: []
-          }]
-        }]
-      } as unknown as UnitMetadataValues;
-
-      const result = UnitService.ensureValueAsText(metadata);
-
-      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'nein' }]);
-    });
-
-    it('derives valueAsText from a form-created simple value object { raw, asText }', () => {
-      const metadata = {
-        profiles: [{
-          profileId: 'p1',
-          entries: [{
-            id: 'e1', label: [], value: { raw: 'true', asText: [{ lang: 'de', value: 'ja' }] }, valueAsText: []
-          }]
-        }]
-      } as unknown as UnitMetadataValues;
-
-      const result = UnitService.ensureValueAsText(metadata);
-
-      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'ja' }]);
-    });
-
-    it('tolerates a null element in a vocabulary value array without crashing', () => {
-      const metadata = {
-        profiles: [{
-          profileId: 'p1',
-          entries: [{
-            id: 'e1',
-            label: [],
-            value: [{ id: 'v', text: [{ lang: 'de', value: 'Anwenden' }] }, null],
-            valueAsText: []
-          }]
-        }]
-      } as unknown as UnitMetadataValues;
-
-      const result = UnitService.ensureValueAsText(metadata);
-
-      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Anwenden' }]);
-    });
-
-    it('keeps multilingual free text arrays as valueAsText', () => {
-      const metadata = {
-        profiles: [{
-          profileId: 'p1',
-          entries: [{
-            id: 'e1',
-            label: [],
-            value: [{ lang: 'de', value: 'Freitext' }],
-            valueAsText: []
-          }]
-        }]
-      } as unknown as UnitMetadataValues;
-
-      const result = UnitService.ensureValueAsText(metadata);
-
-      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Freitext' }]);
-    });
-
-    it('leaves valueAsText empty for a plain string value (not derivable)', () => {
-      const metadata = {
-        profiles: [{
-          profileId: 'p1',
-          entries: [{
-            id: 'e1', label: [], value: 'false', valueAsText: []
-          }]
-        }]
-      } as unknown as UnitMetadataValues;
-
-      const result = UnitService.ensureValueAsText(metadata);
-
-      expect(result.profiles[0].entries[0].valueAsText).toEqual([]);
-    });
-
-    it('does not overwrite an existing valueAsText for non-vocabulary values', () => {
-      // Vocabulary display text is always recomputed (so hideNumbering applies),
-      // but other value types keep a stored valueAsText.
-      const metadata = {
-        profiles: [{
-          profileId: 'p1',
-          entries: [{
-            id: 'e1',
-            label: [],
-            value: [{ lang: 'de', value: 'Neu' }],
-            valueAsText: [{ lang: 'de', value: 'Alt' }]
-          }]
-        }]
-      } as unknown as UnitMetadataValues;
-
-      const result = UnitService.ensureValueAsText(metadata);
-
-      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Alt' }]);
-    });
-
-    it('fills item profile entries and does not mutate the input', () => {
-      const metadata = {
-        items: [{
-          id: 'ITEM1',
-          profiles: [{
-            profileId: 'ip1',
-            entries: [{
-              id: 'e1',
-              label: [],
-              value: [{ id: 'v', text: [{ lang: 'de', value: 'Anwenden' }] }],
-              valueAsText: []
-            }]
-          }]
-        }]
-      } as unknown as UnitMetadataValues;
-
-      const result = UnitService.ensureValueAsText(metadata);
-
-      expect(result.items[0].profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Anwenden' }]);
-      // input untouched
-      expect(metadata.items[0].profiles[0].entries[0].valueAsText).toEqual([]);
-    });
-  });
-
-  describe('findOnesMetadata', () => {
-    it('should return metadata', async () => {
-      unitMetadataService.getAllByUnitId.mockResolvedValue([]);
-      unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
-
-      await service.findOnesMetadata(1);
-      expect(unitMetadataService.getAllByUnitId).toHaveBeenCalledWith(1);
+      expect(report.messages).toEqual([{ objectKey: 'K', messageKey: 'unit-patch.duplicate-unit-id' }]);
+      expect(unitsRepository.create).not.toHaveBeenCalled();
     });
   });
 
@@ -1252,54 +953,20 @@ describe('UnitService', () => {
     });
   });
 
-  describe('buildHideNumberingMap', () => {
-    it('extracts hideNumbering per entry from the stored profile definition', async () => {
-      metadataProfileService.getStoredMetadataProfileFromDb.mockResolvedValue({
-        id: 'p1',
-        groups: [{
-          entries: [
-            { id: 'e1', parameters: { hideNumbering: true } },
-            { id: 'e2', parameters: { hideNumbering: false } },
-            { id: 'e3', parameters: null }
-          ]
-        }]
-      } as never);
+  describe('patchUnitGroup', () => {
+    // The ids come from the body unchecked, and the route's guard asks about the workspace alone:
+    // only the workspace in both conditions keeps the units of other workspaces out of reach (#1957).
+    it('should limit both updates to the workspace of the path', async () => {
+      await service.patchUnitGroup(3, 'Gruppe', [1, 2]);
 
-      const metadata = {
-        profiles: [{ profileId: 'p1', entries: [] }],
-        items: [{ id: 'i1', profiles: [{ profileId: 'p1', entries: [] }] }]
-      } as unknown as UnitMetadataValues;
-
-      const map = await service.buildHideNumberingMap(metadata);
-
-      // only the flagged entry is recorded; false/null yield no entry
-      expect(map).toEqual({ p1: { e1: true } });
-      // the profile is looked up once even though two profiles reference it
-      expect(metadataProfileService.getStoredMetadataProfileFromDb).toHaveBeenCalledTimes(1);
-    });
-
-    it('returns an empty map when the profile is not stored', async () => {
-      metadataProfileService.getStoredMetadataProfileFromDb.mockResolvedValue(null);
-      const metadata = { profiles: [{ profileId: 'p1', entries: [] }] } as unknown as UnitMetadataValues;
-      await expect(service.buildHideNumberingMap(metadata)).resolves.toEqual({});
-    });
-
-    it('returns an empty map for undefined metadata', async () => {
-      await expect(service.buildHideNumberingMap(undefined)).resolves.toEqual({});
-    });
-
-    it('reuses a shared profile cache across units so the profile is fetched once', async () => {
-      metadataProfileService.getStoredMetadataProfileFromDb.mockResolvedValue({
-        id: 'p1',
-        groups: [{ entries: [{ id: 'e1', parameters: { hideNumbering: true } }] }]
-      } as never);
-      const cache = new Map();
-      const metadata = { profiles: [{ profileId: 'p1', entries: [] }] } as unknown as UnitMetadataValues;
-
-      await service.buildHideNumberingMap(metadata, cache);
-      await service.buildHideNumberingMap(metadata, cache);
-
-      expect(metadataProfileService.getStoredMetadataProfileFromDb).toHaveBeenCalledTimes(1);
+      expect(unitsRepository.update).toHaveBeenCalledWith(
+        { workspaceId: 3, groupName: 'Gruppe', id: Not(In([1, 2])) },
+        { groupName: '' }
+      );
+      expect(unitsRepository.update).toHaveBeenCalledWith(
+        { workspaceId: 3, id: In([1, 2]) },
+        { groupName: 'Gruppe' }
+      );
     });
   });
 });

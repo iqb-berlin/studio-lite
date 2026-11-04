@@ -33,10 +33,13 @@ import {
 import { FilesInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
 import { WorkspaceService } from '../services/workspace.service';
+import { WorkspaceImportService } from '../services/workspace-import.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceId } from '../decorators/workspace.decorator';
 import { UnitDownloadClass } from '../classes/unit-download.class';
 import { UnitService } from '../services/unit.service';
+import { UnitMetadataService } from '../services/unit-metadata.service';
+import { UnitDefinitionService } from '../services/unit-definition.service';
 import { VeronaModulesService } from '../services/verona-modules.service';
 import { SettingService } from '../services/setting.service';
 import { UsersService } from '../services/users.service';
@@ -64,7 +67,10 @@ import { ManageOrGroupAdminAccessGuard } from '../guards/manage-or-group-admin-a
 export class WorkspaceController {
   constructor(
     private workspaceService: WorkspaceService,
+    private workspaceImportService: WorkspaceImportService,
     private unitService: UnitService,
+    private unitMetadataService: UnitMetadataService,
+    private unitDefinitionService: UnitDefinitionService,
     private unitCommentService: UnitCommentService,
     private veronaModuleService: VeronaModulesService,
     private settingService: SettingService,
@@ -84,7 +90,9 @@ export class WorkspaceController {
   @ApiOkResponse()
   @ApiForbiddenResponse({ description: 'Forbidden.' })
   @ApiForbiddenResponse({ description: 'User has no privileges in the workspace.' })
-  @ApiNotFoundResponse({ description: 'The requested workspace_id does not exist.' })
+  @ApiNotFoundResponse({
+    description: 'The requested workspace_id does not exist. Only administrators get this; anyone else gets 403.'
+  })
   @ApiQuery({
     name: 'download',
     type: Boolean,
@@ -109,21 +117,7 @@ export class WorkspaceController {
       } catch {
         throw new BadRequestException('Invalid settings JSON');
       }
-      const file = await UnitDownloadClass.get(
-        workspaceId,
-        this.unitService,
-        this.unitCommentService,
-        this.veronaModuleService,
-        this.settingService,
-        this.unitRichNoteService,
-        unitDownloadSettings,
-        'xml'
-      );
-      res.set({
-        'Content-Type': 'text/html',
-        'Content-Disposition': 'attachment; filename="studio-export-units.zip"'
-      });
-      return new StreamableFile(file as unknown as Uint8Array);
+      return this.downloadUnits(workspaceId, unitDownloadSettings, 'xml', 'text/html', res);
     }
     return this.workspaceService.findOne(workspaceId);
   }
@@ -146,18 +140,31 @@ export class WorkspaceController {
     @Body() settings: UnitDownloadSettingsDto,
     @Res({ passthrough: true }) res: Response
   ): Promise<StreamableFile> {
+    return this.downloadUnits(workspaceId, settings, 'json', 'application/zip', res);
+  }
+
+  /** The zip of the workspace's units in the given format, sent as an attachment of the given type. */
+  private async downloadUnits(
+    workspaceId: number,
+    settings: UnitDownloadSettingsDto,
+    exportFormat: 'xml' | 'json',
+    contentType: string,
+    res: Response
+  ): Promise<StreamableFile> {
     const file = await UnitDownloadClass.get(
       workspaceId,
       this.unitService,
+      this.unitMetadataService,
+      this.unitDefinitionService,
       this.unitCommentService,
       this.veronaModuleService,
       this.settingService,
       this.unitRichNoteService,
       settings,
-      'json'
+      exportFormat
     );
     res.set({
-      'Content-Type': 'application/zip',
+      'Content-Type': contentType,
       'Content-Disposition': 'attachment; filename="studio-export-units.zip"'
     });
     return new StreamableFile(file as unknown as Uint8Array);
@@ -238,7 +245,7 @@ export class WorkspaceController {
   async addUnitFiles(@WorkspaceId() workspaceId: number,
     @User() user: UserEntity,
     @UploadedFiles() files): Promise<RequestReportDto> {
-    return this.workspaceService.uploadFiles(workspaceId, files, user);
+    return this.workspaceImportService.uploadFiles(workspaceId, files, user);
   }
 
   @Patch('settings')

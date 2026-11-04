@@ -4,6 +4,15 @@
  */
 
 /**
+ * requestTimeout for the first request after a workspace is opened in a fresh page: before it can go
+ * out, the workspace chunk has to be loaded and run, which takes longer than the default 5 s on a
+ * runner that stalls (#1890). Where the workspace was already open in the page, the default stays.
+ * @example
+ * cy.wait('@getUnits', { requestTimeout: FIRST_WORKSPACE_REQUEST_TIMEOUT });
+ */
+export const FIRST_WORKSPACE_REQUEST_TIMEOUT = 20000;
+
+/**
  * Waits for an intercepted request and asserts that it succeeded: any 2xx, and for a GET also
  * 304, which the browser answers from its cache when the same resource is loaded again (#1745).
  * @param alias - Alias of the intercept, with the leading '@'
@@ -43,17 +52,4 @@ export function editInput(data: string, content: string | undefined): void {
       .should('exist')
       .type(content, { force: true });
   }
-}
-
-/**
- * Adds a status/state to a workspace
- * @param statusName - Name of the status
- * @param position - Position index of the status
- * @example
- * addStatus('In Progress', 0);
- */
-export function addStatus(statusName: string, position: number): void {
-  cy.get('[data-cy="wsg-admin-states-add-state-button"]').click();
-  cy.get('div.state').eq(position).find('input[type="text"]').click()
-    .type(statusName);
 }

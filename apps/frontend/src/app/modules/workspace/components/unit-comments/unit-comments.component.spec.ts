@@ -74,10 +74,6 @@ describe('UnitCommentsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should sort unit items by id', () => {
     expect(component.unitItems.map(i => i.id)).toEqual(['1', '2', '3']);
   });
@@ -90,5 +86,15 @@ describe('UnitCommentsComponent', () => {
     expect(component.workspaceId).toBe(7);
     expect(component.userId).toBe(5);
     expect(component.userName).toBe('User Long');
+  }));
+
+  // the name new comments are written under
+  it('should name a user without a long name by the login name', fakeAsync(() => {
+    appServiceMock.authData.userLongName = '';
+
+    workspaceServiceMock.selectedUnit$.next(99);
+    tick();
+
+    expect(component.userName).toBe('user');
   }));
 });

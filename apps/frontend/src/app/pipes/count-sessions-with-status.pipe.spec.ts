@@ -21,8 +21,9 @@ describe('CountSessionsWithStatusPipe', () => {
     expect(pipe.transform(sessions, 'passive')).toBe(1);
   });
 
-  it('should return zero when no session carries the status', () => {
-    expect(pipe.transform([{ sessionId: 's1', activityStatus: 'active' }], 'orphaned')).toBe(0);
+  it('should count the sessions carrying any of several statuses', () => {
+    expect(pipe.transform(sessions, 'active', 'passive')).toBe(2);
+    expect(pipe.transform(sessions, 'active', 'orphaned')).toBe(3);
   });
 
   it('should treat a missing session list as empty', () => {

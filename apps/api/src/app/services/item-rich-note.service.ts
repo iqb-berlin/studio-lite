@@ -102,7 +102,7 @@ export class ItemRichNoteService {
       .find({
         where: { unitId: unitId, unitRichNoteId: noteId },
         order: { createdAt: 'ASC' },
-        select: ['unitItemUuid']
+        select: { unitItemUuid: true }
       });
   }
 

@@ -1,18 +1,11 @@
-import {
-  AfterViewInit, Component, ElementRef, ViewChild
-} from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { TranslateService } from '@ngx-translate/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import { takeUntil } from 'rxjs';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { ModuleService } from '../../../../services/module.service';
-import { WorkspaceBackendService } from '../../services/workspace-backend.service';
-import { AppService } from '../../../../services/app.service';
-import { WorkspaceService } from '../../services/workspace.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { RolePipe } from '../../pipes/role.pipe';
 import { VeronaModuleDirective } from '../../../../directives/verona-module.directive';
 import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
+import { readSpecVersion } from '../../../../utils/spec-version.utils';
 
 /**
  * Hosts the EDITOR a unit names and keeps the definition store in step with what it reports.
@@ -28,7 +21,7 @@ import { TrackIframeActivityDirective } from '../../../../directives/track-ifram
   host: { class: 'unit-editor' },
   imports: [MatProgressSpinner, TrackIframeActivityDirective]
 })
-export class UnitEditorComponent extends VeronaModuleDirective implements AfterViewInit {
+export class UnitEditorComponent extends VeronaModuleDirective {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
   editorApiVersion = 1;
 
@@ -46,19 +39,15 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
       {};
   }
 
-  constructor(
-    public backendService: WorkspaceBackendService,
-    public workspaceService: WorkspaceService,
-    public snackBar: MatSnackBar,
-    public moduleService: ModuleService,
-    public appService: AppService,
-    public translateService: TranslateService
-  ) {
-    super();
+  // Editor spec 5.0 writes the role in capitals: GUEST, COMMENTER, DEVELOPER, MAINTAINER, SUPER (#2065).
+  private static readonly ROLE_IN_CAPITALS_FROM = 5;
+
+  private role(): string {
+    const role = new RolePipe().transform(this.workspaceService.userAccessLevel);
+    return this.editorApiVersion >= UnitEditorComponent.ROLE_IN_CAPITALS_FROM ? role.toUpperCase() : role;
   }
 
-  ngAfterViewInit(): void {
-    this.setHostingIframe();
+  protected startSubscriptions(): void {
     this.subscribeForPostMessages();
     this.subscribeForSelectedUnitChange();
   }
@@ -74,91 +63,72 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
           this.onLoadUnitProperties();
         });
     } else {
-      this.ngUnsubscribe.next();
-      this.ngUnsubscribe.complete();
-      this.ngUnsubscribe = new Subject<void>();
-      this.unitLoaded.next(true);
-      this.subscribeForPostMessages();
-      this.subscribeForSelectedUnitChange();
+      this.renewSubscriptions();
     }
   }
 
   handleIncomingMessage(m: MessageEvent) {
+    if (!this.acceptMessageFromModule(m)) return;
     const msgData = m.data;
     const msgType = msgData.type;
-    if (
-      msgType !== undefined &&
-      msgType !== null &&
-      m.source === this.iFrameElement?.contentWindow
-    ) {
-      this.postMessageTarget = m.source as Window;
-      switch (msgType) {
-        case 'voeReadyNotification':
-        case 'vo.FromAuthoringModule.ReadyNotification':
-          if (msgType === 'voeReadyNotification') {
-            const majorVersion = msgData.metadata ?
-              msgData.metadata.specVersion.match(/\d+/) :
-              msgData.apiVersion.match(/\d+/);
-            if (majorVersion.length > 0) {
-              const majorVersionNumber = Number(majorVersion[0]);
-              this.editorApiVersion =
-                majorVersionNumber < 3 ? 2 : majorVersionNumber;
-            } else {
-              this.editorApiVersion = 2;
+    switch (msgType) {
+      case 'voeReadyNotification':
+      case 'vo.FromAuthoringModule.ReadyNotification':
+        if (msgType === 'voeReadyNotification') {
+          const specVersion = readSpecVersion(msgData);
+          this.editorApiVersion = specVersion !== undefined && specVersion >= 3 ? specVersion : 2;
+        } else {
+          this.editorApiVersion = 1;
+        }
+        this.sessionId = UnitEditorComponent.getSessionId();
+        this.sendUnitDefinition(this.workspaceService.selectedUnit$.getValue());
+        break;
+
+      case 'voeDefinitionChangedNotification':
+      case 'vo.FromAuthoringModule.ChangedNotification':
+        if (msgData.sessionId === this.sessionId) {
+          if (this.editorApiVersion > 1) {
+            if (msgData.unitDefinition) {
+              this.unitStores
+                .definitionStore()
+                ?.setData(
+                  msgData.variables,
+                  msgData.unitDefinition,
+                  typeof msgData.unitDefinitionType === 'string' ? msgData.unitDefinitionType : undefined
+                );
+              // } else { TODO: find solution for voeGetDefinitionRequest
+              //   this.postMessageTarget.postMessage({
+              //     type: 'voeGetDefinitionRequest',
+              //     sessionId: this.sessionId
+              //   }, '*');
+            }
+            if (msgData.sharedParameters) {
+              this.sharedParameters = this.getMergedSharedParameters(msgData.sharedParameters);
             }
           } else {
-            this.editorApiVersion = 1;
+            this.postMessageTarget?.postMessage(
+              {
+                type: 'vo.ToAuthoringModule.DataRequest',
+                sessionId: this.sessionId
+              },
+              '*'
+            );
           }
-          this.sessionId = UnitEditorComponent.getSessionId();
-          this.sendUnitDefinition(this.workspaceService.selectedUnit$.getValue());
-          break;
+        }
+        break;
 
-        case 'voeDefinitionChangedNotification':
-        case 'vo.FromAuthoringModule.ChangedNotification':
-          if (msgData.sessionId === this.sessionId) {
-            if (this.editorApiVersion > 1) {
-              if (msgData.unitDefinition) {
-                this.unitStores
-                  .definitionStore()
-                  ?.setData(
-                    msgData.variables,
-                    msgData.unitDefinition,
-                    typeof msgData.unitDefinitionType === 'string' ? msgData.unitDefinitionType : undefined
-                  );
-                // } else { TODO: find solution for voeGetDefinitionRequest
-                //   this.postMessageTarget.postMessage({
-                //     type: 'voeGetDefinitionRequest',
-                //     sessionId: this.sessionId
-                //   }, '*');
-              }
-              if (msgData.sharedParameters) {
-                this.sharedParameters = this.getMergedSharedParameters(msgData.sharedParameters);
-              }
-            } else {
-              this.postMessageTarget.postMessage(
-                {
-                  type: 'vo.ToAuthoringModule.DataRequest',
-                  sessionId: this.sessionId
-                },
-                '*'
-              );
-            }
-          }
-          break;
+      case 'vo.FromAuthoringModule.DataTransfer':
+        if (msgData.sessionId === this.sessionId) {
+          this.unitStores
+            .definitionStore()
+            ?.setData(msgData.variables, msgData.unitDefinition);
+        }
+        break;
 
-        case 'vo.FromAuthoringModule.DataTransfer':
-          if (msgData.sessionId === this.sessionId) {
-            this.unitStores
-              .definitionStore()
-              ?.setData(msgData.variables, msgData.unitDefinition);
-          }
-          break;
-
-        default:
-          // eslint-disable-next-line no-console
-          console.warn(`processMessagePost ignored message: ${msgType}`);
-          break;
-      }
+      default:
+        // eslint-disable-next-line no-console
+        console.warn(`processMessagePost ignored message: ${msgType}`);
+        break;
     }
   }
 
@@ -168,20 +138,11 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
       'editor'
     )
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(editorId => {
-        if (editorId) {
-          if (editorId === this.lastVeronaModuleId && this.postMessageTarget) {
-            this.sendUnitDefinition(this.workspaceService.selectedUnit$.getValue());
-          } else {
-            this.postMessageTarget = undefined;
-            this.buildVeronaModule(editorId, 'editor');
-            // editor gets unit data via ReadyNotification
-          }
-        } else {
-          this.message = this.translateService.instant('workspace.no-editor');
-          this.postMessageTarget = undefined;
-        }
-      });
+      .subscribe(editorId => this.showVeronaModule(
+        editorId,
+        'editor',
+        () => this.sendUnitDefinition(this.workspaceService.selectedUnit$.getValue())
+      ));
   }
 
   private onLoadUnitProperties() {
@@ -208,9 +169,7 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
             editorConfig: {
               ...this.legacyDefinitionReportPolicy(),
               directDownloadUrl: this.backendService.getDirectDownloadLink(),
-              role: new RolePipe().transform(
-                this.workspaceService.userAccessLevel
-              ),
+              role: this.role(),
               sharedParameters: this.sharedParameters
             },
             unitDefinition: unitDef.definition ? unitDef.definition : '',

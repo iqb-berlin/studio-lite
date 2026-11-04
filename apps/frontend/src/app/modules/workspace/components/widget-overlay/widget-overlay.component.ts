@@ -88,6 +88,16 @@ export class WidgetOverlayComponent implements AfterViewInit, OnDestroy {
         break;
 
       case 'vowReturnRequested':
+        // `saveState: false` cancels the widget, and then the player gets no return, as with the
+        // close button. Otherwise a string `state` is the widget's final state; anything else keeps
+        // the last one, since widgets send the key without a value as well (#1928).
+        if (msgData.saveState === false) {
+          this.close();
+          break;
+        }
+        if (typeof msgData.state === 'string') {
+          this.widgetState = msgData.state;
+        }
         this.continue();
         break;
 
@@ -96,15 +106,18 @@ export class WidgetOverlayComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * The start command allows no more than the widget API names: the parameters as lists, and no
+   * callId -- that one stays between player and host and goes back in vopWidgetReturn (#2047).
+   */
   private sendWidgetStartCommand(): void {
     if (this.widgetPostMessageTarget) {
       this.widgetPostMessageTarget.postMessage({
         type: 'vowStartCommand',
         sessionId: this.widgetSessionId,
-        parameters: this.widgetCallData.parameters || {},
-        callId: this.widgetCallData.callId || '',
+        parameters: this.widgetCallData.parameters || [],
         state: this.widgetState,
-        sharedParameters: this.widgetCallData.sharedParameters || {}
+        sharedParameters: this.widgetCallData.sharedParameters || []
       }, '*');
     }
   }

@@ -30,10 +30,6 @@ describe('SplitterGutterComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should emit startDragging and set pointerPressed on pointerdown', () => {
     jest.spyOn(component.startDragging, 'emit');
     const event = new PointerEvent('pointerdown');
@@ -77,6 +73,15 @@ describe('SplitterGutterComponent', () => {
     component.onGlobalPointerMove(event);
 
     expect(component.dragging.emit).not.toHaveBeenCalled();
+  });
+
+  // Every gutter listens to the whole window; a click elsewhere ends no drag of its own.
+  it('should not emit stopDragging on a pointer up that did not start on the gutter', () => {
+    jest.spyOn(component.stopDragging, 'emit');
+
+    component.onGlobalPointerUp(new PointerEvent('pointerup'));
+
+    expect(component.stopDragging.emit).not.toHaveBeenCalled();
   });
 
   it('should emit stopDragging and reset pointerPressed on global pointer up', () => {

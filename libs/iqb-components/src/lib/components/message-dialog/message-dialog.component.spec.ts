@@ -32,16 +32,6 @@ describe('MessageDialogComponent', () => {
     }).compileComponents();
   });
 
-  it('should create a component', async () => {
-    createComponent({
-      type: MessageType.error,
-      title: '',
-      content: '',
-      closeButtonLabel: ''
-    });
-    expect(component).toBeTruthy();
-  });
-
   it('should take default properties for error messages on #ngOnInit()', async () => {
     createComponent({
       type: MessageType.error,

@@ -64,10 +64,31 @@
 - **Rationale**: `$any()` is the template equivalent of `any` in TypeScript and defeats the purpose of type-safe templates.
 - **Preferred Solution**: Use a custom `cast` pipe or a dedicated getter in the component to provide typed access to complex structures (like `FormGroup` within a `FormArray`).
 ### Unit Testing Policy
-- **New Classes**: Every new Angular or NestJS class (e.g., Pipes, Components, Services, Guards, Controllers) MUST have a corresponding `.spec.ts` file with comprehensive unit tests.
-- **Logic Changes**: Any modification to existing business logic or security flows MUST be accompanied by corresponding updates to the unit tests to verify the new behavior and prevent regressions.
-- **Public Members**: Adding or modifying any public method or property MUST trigger the creation or update of corresponding unit tests to ensure full coverage of the public interface.
+- **Rule**: A unit test checks behaviour that can be wrong: a decision (a branch, a calculation, a mapping), an error path, an authorisation, or a bug that has already happened. It is written from what a caller can observe — what is returned, emitted, rendered or sent — not from the lines of the implementation. What the code only copies from its own source, such as a fixed URL or a constant, is no behaviour of its own.
+- **Rule**: A change to business logic or a security flow comes with a test that fails without the change: a unit test, or an e2e test where only the running API shows the change (a query, a URL). A fixed bug gets a test that names its issue (`#1844`).
+- **Rule**: A new class or function with behaviour of its own (directive, pipe, service, guard, controller, a class in `classes/`, a function in `utils/`) gets a `.spec.ts` that tests that behaviour; where nothing could be wrong, there is no spec. A component always has its spec, as it has its `.scss` (see *Component Structure*); without behaviour of its own, `it('should create')` is its only test.
+- **Not this**:
+  - A test that only checks that the instance exists (`should create`, `should be created`, `should be defined`) beside other tests: each of them creates the instance anyway.
+  - A test without an assertion.
+  - A test that restates the implementation: the controller passes its arguments to the service and returns its answer; the backend method requests the URL written in it and answers `false` on an error, as every backend method does; the mocked repository returns X and so does the service. It breaks with every refactoring and cannot see whether the URL matches the API or the query the database — only the e2e tests in `apps/frontend-e2e` run against the real ones.
+  - Constants and framework wiring: the length of a list held in a field, that an injected service is defined, that `ngOnInit` defers its work with `setTimeout`.
+  - The same call with the same assertions in a second test.
+- **Still this**:
+  - The guards of a controller method (`Reflect.getMetadata('__guards__', …)`): they are its authorisation, and no other unit test sees them.
+  - A method that passes something on but assembles it first (query parameters, a body built from several values, an answer it reshapes) is tested for the assembly.
+  - That a caller reaches for code moved out of it (see *Responsibility*): one test per seam.
+- **Note**: Coverage shows what no test reaches; whether that needs a test, this rule decides. A test written only to reach a line is the test it excludes.
 - **Mocking**: Use `createMock<T>()` from `@golevelup/ts-jest` for NestJS tests to ensure type-safe mocking.
+- **Rationale**: A test that restates the code doubles the cost of every change to it and catches nothing. A spec demanded for every class and a test for every public member produced such tests by the hundreds (#1939).
+
+### End-to-End Tests
+- **Rule**: An e2e test checks a path through the interface and the running API — what no unit test can see. What a unit test or a spec in `e2e/api` already checks, it does not check again.
+- **Rule**: Test data comes from the API commands in `support/` (`cy.*API`, `createTestBaseAPI`). Only what the spec checks goes through the interface; a spec that is about the coding report does not click its user, group and workspace into being.
+- **Rule**: A UI spec does not test the API itself: status codes, permissions and error cases belong in `e2e/api`. It asserts that its setup succeeded, so that a failure shows where it happened, and it may read back through the API what the interface saved.
+- **Rule**: Specs in `e2e/ui` import nothing from `e2e/api`, nor the other way round. What both need lives in `support/`.
+- **Rule**: A spec does not reset the database at its end. The hook in `support/e2e.ts` resets it and empties the storage before every spec, so that a spec that fails before its end takes no other with it (#2028). The reset leaves the Verona modules, as well as settings and metadata profiles; a spec removes the modules it installed.
+- **Note**: Creating users, groups and workspaces and uploading modules through the interface stays checked once, in the admin and group-admin specs.
+- **Rationale**: Cypress recommends specs that run in isolation and state that is set up programmatically, not through the interface ([best practices](https://docs.cypress.io/app/core-concepts/best-practices#Organizing-Tests-Logging-In-Controlling-State)). A test base clicked through the admin screens cost half a minute per spec, and to save it, fourteen files came to share one spec and its data (#1967).
 
 
 ### Type Safety: Avoid `any`
@@ -97,6 +118,7 @@
     - `[component-name].component.html` (Template)
     - `[component-name].component.scss` (Styles)
     - `[component-name].component.spec.ts` (Unit Tests)
+- **Rule**: The `.scss` and the `.spec.ts` exist even when there is nothing to style or to test: the stylesheet stays empty, and the spec holds `it('should create')` alone (see *Unit Testing Policy*).
 - **Rule**: These component directories MUST be located within the `components` subdirectory of their respective Angular module.
 - **Rationale**: This ensures a clean separation of concerns, consistent project structure, and improved maintainability.
 
@@ -120,7 +142,7 @@
   2. **Behaviour at the host element → an applied directive**, with a selector: `ScrollCommentIntoViewDirective`, `ScrollIntoViewDirective`, `TrackIframeActivityDirective`. The mark is that it hangs on an element rather than on the data flow, and that a second element should be able to have it by writing an attribute — without touching that element's class, which is exactly what a base class would demand.
   3. **A shared role → an abstract base class**, written `@Directive()` **without a selector**, and only for "is a" — never merely to share code. Everything the base holds must be something every subclass needs; where only some of them need it, add a step rather than a member: `VeronaModuleDirective` → `UnitDefinitionDirective` → `PreviewDirective`, inherited by `UnitPreviewComponent`, `UnitPlayerComponent` and `UnitPrintPlayerComponent`.
 - **Not this**: length alone. A loop body of one element with two bindings stays where it is, and a child that holds nothing but a stretch of markup, with nothing crossing the boundary but the parent's own fields, spreads one view over two places without separating anything. A child costs four files (see *Component Structure*) and an entry in the parent's `imports`.
-- **Note**: four bases here (`PreviewDirective`, `UnitDefinitionDirective`, `VeronaModuleDirective`, `CheckForChangesDirective`) still carry a selector that no template uses and that could not do anything anyway, since an abstract class is never instantiated. Do not copy that — a base class gets no selector.
+- **Note**: one base here, `CheckForChangesDirective`, still carries a selector that no template uses and that could not do anything anyway, since an abstract class is never instantiated. Do not copy that — a base class gets no selector.
 - **Rationale**: The reflex is a helper class, and it leaves untouched what is usually too big about a component: its view. Inheritance is last because it is the one split that cannot be undone in a single file.
 
 ### Deprecations
@@ -155,8 +177,8 @@
 - **Rule**: A controller takes the request, applies its guards and calls a service. The business logic belongs in the service, not in the controller.
 - **Rule**: A task that is not the service's own subject — producing a file format, parsing an import, a question two callers have to answer identically — becomes a class in `classes/` or a function in `utils/`, and the service or controller calls it by name. This is the backend half of *Responsibility: Work That Is Not the Class's Job*.
 - **Examples**:
-  - `UnitDownloadClass`, `DownloadWorkspacesClass` and `DownloadDocx` build what is downloaded; the controllers hand them the data and return the result.
-  - `UnitImportData` and `UnitImportJsonData` read the import formats for `WorkspaceService`.
+  - `UnitDownloadClass` and `DownloadWorkspacesClass` build what is downloaded; the controllers hand them the data and return the result.
+  - `UnitImportData` and `UnitImportJsonData` read the import formats for `WorkspaceImportService`.
   - `findOrphanedSessionIds` in `utils/` is asked by both `admin-user-controller.ts` (which displays them) and `SessionCleanupService` (which deletes them), so the two cannot drift into asking it in different words.
 - **Rationale**: The services here run to a thousand lines and more, and what can be named on its own is what leaves without a fight. Once out, it is testable without the service's dependencies — and a second caller can have it.
 
@@ -182,6 +204,12 @@ Branches, the pipeline and the board columns are described in the README under *
 - **Rule**: `/code-review` without a target reviews the uncommitted diff (`git diff HEAD`). Once the change is committed that diff is empty and the review finds nothing; then name the scope explicitly (`/code-review origin/develop..HEAD`, or the pull request number).
 - **Rule**: After the review, check `git status`. Review agents can leave files of their own in the working tree; they do not belong in the commit.
 
+### Commit Messages
+- **Rule**: The subject line names the change in the imperative, at most 72 characters, with the issue as `(#1629)`.
+- **Rule**: The body says only what the diff cannot: why the change was needed, a decision the code does not make obvious, a change in behaviour someone will look for later. As a guide, no more than five lines; more only for a behaviour change that needs it.
+  - **Rationale**: A commit message is read in `git log` and `git blame`, months later, by someone asking why the code is the way it is. Every further paragraph makes that answer harder to find.
+- **Rule**: Leave out how the change came about (drafts, review rounds, what was tried first, where it sits in a series), test results (they belong in the pull request) and a retelling of the diff. Why the code is built the way it is belongs in a code comment, where it survives the next refactoring.
+
 ### Pull Requests
 - **Rule**: Never write `Closes #…`, `Fixes #…` or `Resolves #…` in a commit message or pull request text. Reference the issue as `(#1629)`.
   - **Rationale**: GitHub closes the ticket on merge, and the board moves it to *Done* past *zu testen* and *Zu veröffentlichen*.
@@ -197,7 +225,7 @@ Branches, the pipeline and the board columns are described in the README under *
 - **Rule**: After the merge the test decides the column. With an end-to-end test of its own the change goes to *Zu veröffentlichen*, without one to *zu testen*, where someone else builds the test.
   - "Of its own" means a test that checks exactly this change and would fail without it. An existing spec that keeps passing does not count.
   - **Exception**: Upgrades, CI and dependency changes without behaviour of their own (Angular, NestJS, ESLint, the release gate) go to *Zu veröffentlichen*; the whole suite is their test.
-  - **Exception**: No end-to-end test of its own when it would catch nothing new: unit tests fail without the change, and a named existing spec exercises exactly the changed path. The "Stand" comment names both.
+  - **Exception**: No end-to-end test of its own when it would catch nothing new: unit tests fail without the change, and either a named existing spec exercises exactly the changed path, or the path can only be reached with a faked server response, such as a failed load. A test with a faked response checks only what the unit tests already check, provided they cover every step from the response to what the user sees. The "Stand" comment names the unit tests and the spec, or the faked response the path would need.
 - **Rule**: *In review* means released and awaiting validation by the reporters, not code-reviewed. A ticket stays open through all of these columns; do not close it by hand.
 
 ### Tickets

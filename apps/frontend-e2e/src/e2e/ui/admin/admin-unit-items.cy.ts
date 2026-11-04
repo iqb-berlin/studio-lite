@@ -1,4 +1,4 @@
-import { addFirstUser, deleteFirstUser, clickIndexTabAdmin } from '../../../support/helpers';
+import { addFirstUser, clickIndexTabAdmin } from '../../../support/helpers';
 
 describe('Admin Unit Items Management', () => {
   const mockUnitItems = [
@@ -28,10 +28,6 @@ describe('Admin Unit Items Management', () => {
 
   before(() => {
     addFirstUser();
-  });
-
-  after(() => {
-    deleteFirstUser();
   });
 
   beforeEach(() => {

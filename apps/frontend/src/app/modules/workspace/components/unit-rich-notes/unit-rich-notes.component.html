@@ -4,6 +4,8 @@
       <div class="loading-spinner">
         <mat-spinner></mat-spinner>
       </div>
+    } @else if (notesNotLoaded()) {
+      <div data-cy="unit-rich-notes-not-loaded">{{'workspace.rich-notes-not-loaded' | translate}}</div>
     } @else {
       @for (node of displayNodes; track node.tagId) {
         <studio-lite-unit-rich-note-node 

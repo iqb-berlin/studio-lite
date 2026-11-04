@@ -38,10 +38,6 @@ describe('ReviewCommentOwnerGuard', () => {
     unitCommentService = module.get(UnitCommentService);
   });
 
-  it('should be defined', () => {
-    expect(guard).toBeDefined();
-  });
-
   it('should let a user pass on their own comment', async () => {
     commentBy(7);
 

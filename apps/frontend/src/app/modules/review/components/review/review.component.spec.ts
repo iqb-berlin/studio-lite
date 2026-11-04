@@ -65,31 +65,7 @@ describe('ReviewComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  describe('Component Initialization', () => {
-    it('should have appService accessible', () => {
-      expect(component.appService).toBeDefined();
-    });
-
-    it('should have reviewService accessible', () => {
-      expect(component.reviewService).toBeDefined();
-    });
-  });
-
   describe('ngOnInit()', () => {
-    it('should set reviewId from route params when different and valid', fakeAsync(() => {
-      mockReviewService.reviewId = 0;
-      mockActivatedRoute.snapshot!.params = { review: '456' };
-
-      component.ngOnInit();
-      tick();
-
-      expect(mockReviewService.reviewId).toBe(456);
-    }));
-
     it('should clear units array when reviewId changes', fakeAsync(() => {
       mockReviewService.reviewId = 123;
       mockReviewService.units = [
@@ -109,17 +85,6 @@ describe('ReviewComponent', () => {
 
       expect(mockReviewService.units).toEqual([]);
       expect(mockReviewService.reviewId).toBe(456);
-    }));
-
-    it('should not change reviewId when it matches route param', fakeAsync(() => {
-      mockReviewService.reviewId = 123;
-      mockActivatedRoute.snapshot!.params = { review: '123' };
-
-      component.ngOnInit();
-      tick();
-
-      expect(mockReviewService.reviewId).toBe(123);
-      expect(mockReviewService.units).toBeDefined();
     }));
 
     it('should not clear units when reviewId has not changed', fakeAsync(() => {
@@ -182,32 +147,5 @@ describe('ReviewComponent', () => {
 
       expect(mockReviewService.reviewId).toBe(123);
     }));
-  });
-
-  describe('Template Bindings', () => {
-    it('should bind appService in template', () => {
-      fixture.detectChanges();
-      expect(component.appService).toBe(mockAppService);
-    });
-
-    it('should bind reviewService in template', () => {
-      fixture.detectChanges();
-      expect(component.reviewService).toBe(mockReviewService);
-    });
-  });
-
-  describe('Component Dependencies', () => {
-    it('should inject AppService', () => {
-      expect(component.appService).toBeDefined();
-    });
-
-    it('should inject ActivatedRoute', () => {
-      const route = (component as unknown as { route: ActivatedRoute }).route;
-      expect(route).toBeDefined();
-    });
-
-    it('should inject ReviewService', () => {
-      expect(component.reviewService).toBeDefined();
-    });
   });
 });

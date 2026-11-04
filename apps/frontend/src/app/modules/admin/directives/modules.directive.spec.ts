@@ -14,14 +14,6 @@ class TestModulesDirective extends ModulesDirective {
   protected readonly pageTitleKey = 'modules.title';
   protected readonly uploadPath = 'admin/verona-modules?type=editor&type=player&type=schemer';
 
-  protected serverUrl: string;
-  protected appService: AppService;
-  moduleService: ModuleService;
-  protected backendService: BackendService;
-  protected deleteConfirmDialog: MatDialog;
-  protected snackBar: MatSnackBar;
-  protected translateService: TranslateService;
-
   constructor(
     serverUrl: string,
     appService: AppService,
@@ -31,14 +23,7 @@ class TestModulesDirective extends ModulesDirective {
     snackBar: MatSnackBar,
     translateService: TranslateService
   ) {
-    super();
-    this.serverUrl = serverUrl;
-    this.appService = appService;
-    this.moduleService = moduleService;
-    this.backendService = backendService;
-    this.deleteConfirmDialog = deleteConfirmDialog;
-    this.snackBar = snackBar;
-    this.translateService = translateService;
+    super(serverUrl, appService, moduleService, backendService, deleteConfirmDialog, snackBar, translateService);
     this.setUpdateUploadUrl();
   }
 
@@ -158,5 +143,19 @@ describe('ModulesDirective', () => {
     directive.deleteFiles();
 
     expect(backendService.deleteVeronaModules).not.toHaveBeenCalled();
+  });
+
+  it.each<[string, string[], string]>([
+    ['one module', ['m1'], 'modules.delete-module'],
+    ['several modules by their number', ['m1', 'm2'], 'modules.delete-modules']
+  ])('asks before deleting %s', (_, keys, content) => {
+    const { directive, deleteConfirmDialog } = createDirective();
+    directive.selectedModules = keys.map(key => ({ key }) as VeronaModuleClass);
+
+    directive.deleteFiles();
+
+    expect(deleteConfirmDialog.open).toHaveBeenCalledWith(ConfirmDialogComponent, expect.objectContaining({
+      data: expect.objectContaining({ content })
+    }));
   });
 });

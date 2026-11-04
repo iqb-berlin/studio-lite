@@ -1,18 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import {
-  CreateWorkspaceDto,
-  WorkspaceFullDto,
-  WorkspaceUserInListDto,
-  UserWorkspaceAccessDto, MoveToDto
-} from '@studio-lite-lib/api-dto';
+import { CreateWorkspaceDto, MoveToDto } from '@studio-lite-lib/api-dto';
 import { GroupAdminWorkspaceController } from './group-admin-workspace.controller';
 import { WorkspaceService } from '../services/workspace.service';
 import { UsersService } from '../services/users.service';
-import UserEntity from '../entities/user.entity';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 import { AuthService } from '../services/auth.service';
 import { UserWorkspaceGroupNotAdminException } from '../exceptions/user-workspace-group-not-admin.exception';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
 describe('GroupAdminWorkspaceController', () => {
   let controller: GroupAdminWorkspaceController;
@@ -36,44 +31,14 @@ describe('GroupAdminWorkspaceController', () => {
     controller = module.get<GroupAdminWorkspaceController>(GroupAdminWorkspaceController);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
-  describe('findOne', () => {
-    it('should return a workspace', async () => {
-      const mockWorkspace = { id: 1, name: 'WS' } as WorkspaceFullDto;
-      workspaceService.findOne.mockResolvedValue(mockWorkspace);
-
-      const result = await controller.findOne(1);
-
-      expect(result).toBe(mockWorkspace);
-      expect(workspaceService.findOne).toHaveBeenCalledWith(1);
-    });
-  });
-
-  describe('findOnesUsers', () => {
-    it('should return users for a workspace', async () => {
-      const mockUsers = [{ id: 1 }] as WorkspaceUserInListDto[];
-      usersService.findAllUsers.mockResolvedValue(mockUsers);
-
-      const result = await controller.findOnesUsers(1);
-
-      expect(result).toBe(mockUsers);
-      expect(usersService.findAllUsers).toHaveBeenCalledWith(1);
-    });
-  });
-
-  describe('patchOnesUsers', () => {
-    it('should update users for a workspace', async () => {
-      usersService.setUsersByWorkspace.mockResolvedValue(undefined as unknown as void);
-      const dto = [{ workspaceId: 1, role: 'RW' }] as unknown as UserWorkspaceAccessDto[];
-
-      await controller.patchOnesUsers(1, dto);
-
-      expect(usersService.setUsersByWorkspace).toHaveBeenCalledWith(1, dto);
-    });
-  });
+  // The guards are the authorisation of each method; no other unit test sees them (#1953).
+  it.each(['findOne', 'findOnesUsers', 'patchOnesUsers', 'remove', 'patchGroups', 'create'] as const)(
+    'should let only admins of the group reach %s',
+    method => {
+      expect(Reflect.getMetadata('__guards__', GroupAdminWorkspaceController.prototype[method]))
+        .toEqual([JwtAuthGuard, IsWorkspaceGroupAdminGuard]);
+    }
+  );
 
   describe('remove', () => {
     it('should remove workspaces of a group the user administers', async () => {
@@ -127,38 +92,59 @@ describe('GroupAdminWorkspaceController', () => {
   });
 
   describe('patchGroups', () => {
-    it('should move workspaces to a target group the user administers', async () => {
-      const user = { id: 1 } as UserEntity;
+    it('should move workspaces between groups the user administers', async () => {
       const dto: MoveToDto = { ids: [10, 20], targetId: 2 };
       usersService.getUserIsAdmin.mockResolvedValue(false);
       usersService.isWorkspaceGroupAdmin.mockResolvedValue(true);
+      workspaceService.findGroupIdsOfWorkspaces.mockResolvedValue([7]);
       workspaceService.patchWorkspaceGroups.mockResolvedValue(undefined);
 
-      await controller.patchGroups(user, dto);
+      await controller.patchGroups(1, dto);
 
-      expect(workspaceService.patchWorkspaceGroups).toHaveBeenCalledWith(dto.ids, dto.targetId, user);
+      expect(usersService.isWorkspaceGroupAdmin).toHaveBeenCalledWith(1, 2);
+      expect(usersService.isWorkspaceGroupAdmin).toHaveBeenCalledWith(1, 7);
+      expect(workspaceService.findGroupIdsOfWorkspaces).toHaveBeenCalledWith(dto.ids);
+      expect(workspaceService.patchWorkspaceGroups).toHaveBeenCalledWith(dto.ids, dto.targetId);
     });
 
     it('should refuse a target group the user does not administer (#1005)', async () => {
-      // The service checks the group the workspaces are moved OUT of; this is the one they are
-      // moved INTO, and it stands in the body.
-      const user = { id: 1 } as UserEntity;
+      // The target group stands in the body, where the guard does not look.
       usersService.getUserIsAdmin.mockResolvedValue(false);
       usersService.isWorkspaceGroupAdmin.mockResolvedValue(false);
 
-      await expect(controller.patchGroups(user, { ids: [10], targetId: 2 }))
+      await expect(controller.patchGroups(1, { ids: [10], targetId: 2 }))
         .rejects.toThrow(UserWorkspaceGroupNotAdminException);
       expect(workspaceService.patchWorkspaceGroups).not.toHaveBeenCalled();
+    });
+
+    it('should refuse workspaces of a group the user does not administer before moving any (#1984)', async () => {
+      // Moving resets the states of the units, so the refusal has to come before the service.
+      usersService.getUserIsAdmin.mockResolvedValue(false);
+      usersService.isWorkspaceGroupAdmin
+        .mockImplementation((_userId: number, groupId: number) => Promise.resolve(groupId === 2));
+      workspaceService.findGroupIdsOfWorkspaces.mockResolvedValue([7]);
+
+      await expect(controller.patchGroups(1, { ids: [10], targetId: 2 }))
+        .rejects.toThrow(UserWorkspaceGroupNotAdminException);
+      expect(workspaceService.patchWorkspaceGroups).not.toHaveBeenCalled();
+    });
+
+    it('should let an administrator move workspaces between any groups (#1984)', async () => {
+      usersService.getUserIsAdmin.mockResolvedValue(true);
+      usersService.isWorkspaceGroupAdmin.mockResolvedValue(false);
+
+      await controller.patchGroups(1, { ids: [10], targetId: 2 });
+
+      expect(workspaceService.patchWorkspaceGroups).toHaveBeenCalledWith([10], 2);
     });
 
     it('should refuse a body without a target group instead of asking about it', async () => {
       // Nothing validates the body, and isWorkspaceGroupAdmin without a group answers "administers
       // any group at all" -- the very fallback this change removes.
-      const user = { id: 1 } as UserEntity;
       usersService.getUserIsAdmin.mockResolvedValue(false);
       usersService.isWorkspaceGroupAdmin.mockResolvedValue(true);
 
-      await expect(controller.patchGroups(user, { ids: [10] } as MoveToDto))
+      await expect(controller.patchGroups(1, { ids: [10] } as MoveToDto))
         .rejects.toThrow(UserWorkspaceGroupNotAdminException);
       expect(usersService.isWorkspaceGroupAdmin).not.toHaveBeenCalled();
       expect(workspaceService.patchWorkspaceGroups).not.toHaveBeenCalled();
@@ -177,6 +163,16 @@ describe('GroupAdminWorkspaceController', () => {
       expect(result).toBe(123);
       expect(workspaceService.create).toHaveBeenCalledWith(dto);
       expect(usersService.isWorkspaceGroupAdmin).toHaveBeenCalledWith(1, 1);
+    });
+
+    // An administrator is not entered as admin of every group, and needs not be.
+    it('should let an administrator create a workspace in any group', async () => {
+      const dto = { name: 'new', groupId: 2 } as CreateWorkspaceDto;
+      usersService.getUserIsAdmin.mockResolvedValue(true);
+      usersService.isWorkspaceGroupAdmin.mockResolvedValue(false);
+      workspaceService.create.mockResolvedValue(124);
+
+      expect(await controller.create(1, dto)).toBe(124);
     });
 
     it('should refuse a group the user does not administer (#1005)', async () => {

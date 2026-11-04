@@ -51,6 +51,9 @@ export class NewUnitComponent {
 
   setGroupDirectMode(groupDirectMode: boolean) {
     this.groupDirectMode = groupDirectMode;
+    // The group of the view left is dropped: the caller takes a typed group before a selected one,
+    // and a group typed before switching back to the selection won over the one selected (#2015).
+    this.newUnitForm.get(groupDirectMode ? 'groupSelect' : 'groupDirect')?.setValue('');
     setTimeout(() => {
       if (groupDirectMode && this.newGroupInput) {
         this.newGroupInput.nativeElement.focus();

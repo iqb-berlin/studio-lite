@@ -1,6 +1,9 @@
 
 
     <mat-dialog-content class="container">
+      @if (data.warning) {
+        <p class="info" data-cy="metadata-table-view-profile-not-loaded">{{ data.warning }}</p>
+      }
       <mat-tab-group class="metadata-tabs"
                      animationDuration="0ms"
                      #tabGroup

@@ -1,0 +1,14 @@
+{
+  "id": "JS_SCHEME",
+  "label": "JSON unit with a scheme",
+  "userInterface": {
+    "player": "iqb-player-aspect@3.0",
+    "editor": "iqb-editor-aspect@3.0",
+    "definition": "JS_SCHEME.voud",
+    "isDefinitionInline": false
+  },
+  "codingScheme": {
+    "id": "JS_SCHEME.vocs.json",
+    "type": "iqb-coding-scheme"
+  }
+}

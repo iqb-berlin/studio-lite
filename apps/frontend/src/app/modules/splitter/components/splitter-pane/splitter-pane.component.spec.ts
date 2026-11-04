@@ -27,23 +27,6 @@ describe('SplitterPaneComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  describe('init', () => {
-    it('should initialize properties and calling initSize', () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const initSizeSpy = jest.spyOn(component as any, 'initSize');
-      component.init(1, true);
-
-      expect(component.index).toBe(1);
-      expect(component.isLast).toBe(true);
-      expect(component.elementRef.nativeElement.style.order).toBe('1');
-      expect(initSizeSpy).toHaveBeenCalled();
-    });
-  });
-
   describe('initSize', () => {
     it('should use stored size if available and not last pane', () => {
       mockSplitterService.panelSizes[0] = 200;
@@ -78,6 +61,16 @@ describe('SplitterPaneComponent', () => {
       component['initSize']();
 
       expect(component.elementRef.nativeElement.style.flexBasis).toBe('auto');
+    });
+
+    // An automatic size is left to the stylesheet; a flex-basis of 0px would collapse the pane.
+    it('should leave the size of a pane with an automatic initial size and no stored size to the stylesheet', () => {
+      component.initialSize = 'auto';
+
+      component.init(0, false);
+
+      expect(component.elementRef.nativeElement.style.flexBasis).toBe('');
+      expect(component.size).toBe(0);
     });
 
     it('should respect minSize and maxSize', () => {

@@ -1,5 +1,5 @@
-// exceljs is CommonJS with no statically detectable named exports -- see the note on the katex
-// import in download-docx.class.ts.
+// exceljs is CommonJS with no statically detectable named exports -- see the note on the adm-zip
+// import in workspace-import.service.ts.
 import Excel from 'exceljs';
 import {
   CodeBookContentSetting,
@@ -248,14 +248,12 @@ export class DownloadWorkspacesClass {
                 schemers: {}
               };
               unitData.forEach(u => {
-                if (u.lastChangedMetadata !== null) {
-                  returnData.latestChange = u.lastChangedMetadata;
-                } else {
-                  returnData.latestChange = null;
-                }
-
-                if (returnData.latestChange < u.lastChangedDefinition) returnData.latestChange = u.lastChangedDefinition;
-                if (returnData.latestChange < u.lastChangedScheme) returnData.latestChange = u.lastChangedScheme;
+                // The newest change across all units, not the change of the last one (#1983)
+                returnData.latestChange = [u.lastChangedMetadata, u.lastChangedDefinition, u.lastChangedScheme]
+                  .reduce(
+                    (latest, changed) => (changed && (!latest || changed > latest) ? changed : latest),
+                    returnData.latestChange
+                  );
                 if (returnData.editors[u.editor]) {
                   returnData.editors[u.editor] += 1;
                 } else {
@@ -317,9 +315,9 @@ export class DownloadWorkspacesClass {
     wsDataWithMetadata.forEach(wsData => {
       let date = '';
       if (wsData.latestChange !== null) {
-        date = `${wsData.latestChange.getDate()}.${
-          wsData.latestChange.getMonth() + 1
-        }.${wsData.latestChange.getFullYear()}`;
+        // The day in German time: the API runs in UTC, and a change shortly after midnight fell
+        // on the day before (#2082)
+        date = wsData.latestChange.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' });
       }
       const rowData = [
         wsData.groupName,

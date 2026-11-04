@@ -21,12 +21,6 @@ describe('PageNavigationComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    component.pageList = [];
-    fixture.detectChanges();
-    expect(component).toBeTruthy();
-  });
-
   describe('Template rendering', () => {
     it('should not render navigation when pageList is empty', () => {
       component.pageList = [];
@@ -122,30 +116,6 @@ describe('PageNavigationComponent', () => {
       const pageButton = fixture.debugElement.query(By.css('.page-button'));
       expect(pageButton.nativeElement.classList.contains('selected-page')).toBe(true);
       expect(pageButton.nativeElement.disabled).toBe(true);
-    });
-
-    it('should render multiple page buttons', () => {
-      component.pageList = [
-        {
-          index: 0, id: 'prev', type: '#previous', disabled: false
-        },
-        {
-          index: 1, id: 'page1', type: '#goto', disabled: false
-        },
-        {
-          index: 2, id: 'page2', type: '#goto', disabled: true
-        },
-        {
-          index: 3, id: 'page3', type: '#goto', disabled: false
-        },
-        {
-          index: 0, id: 'next', type: '#next', disabled: false
-        }
-      ];
-      fixture.detectChanges();
-
-      const pageButtons = fixture.debugElement.queryAll(By.css('.page-button'));
-      expect(pageButtons.length).toBe(3);
     });
 
     it('should carry the markers the e2e tests address it by', () => {

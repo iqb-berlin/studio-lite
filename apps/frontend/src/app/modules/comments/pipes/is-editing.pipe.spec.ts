@@ -9,10 +9,6 @@ describe('IsEditingPipe', () => {
     pipe = new IsEditingPipe();
   });
 
-  it('create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should return true if activeComment matches comment id and type is editing', () => {
     const comment = { id: 1 } as unknown as Comment;
     const activeComment: ActiveComment = { id: 1, type: ActiveCommentType.editing };

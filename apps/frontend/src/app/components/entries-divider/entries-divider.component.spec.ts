@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { EntriesDividerComponent } from './entries-divider.component';
 
 describe('EntriesDividerComponent', () => {
-  let component: EntriesDividerComponent;
   let fixture: ComponentFixture<EntriesDividerComponent>;
 
   beforeEach(async () => {
@@ -11,12 +10,7 @@ describe('EntriesDividerComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(EntriesDividerComponent);
-    component = fixture.componentInstance;
     fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
   });
 
   it('should render a div with class "entries-divider"', () => {

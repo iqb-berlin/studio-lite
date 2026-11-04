@@ -132,10 +132,6 @@ describe('CodingReportComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('loads coding report and filters coded variables by default', () => {
     expect(backendService.getCodingReport).toHaveBeenCalledWith(10);
     expect(component.unitDataRows[0].validationDetails).toBe('');
@@ -363,6 +359,20 @@ describe('CodingReportComponent', () => {
       'warning',
       'ok'
     ]);
+  });
+
+  it('sorts the other columns by their values', () => {
+    component.toggleChange();
+
+    const sortedRows = component.dataSource.sortData(
+      [...component.dataSource.data],
+      {
+        active: 'variable',
+        direction: 'desc'
+      } as MatSort
+    );
+
+    expect(sortedRows.map(row => row.variable)).toEqual(['V3', 'V2', 'V1', '']);
   });
 
   it('downloadCodingReport creates and revokes object URL', () => {

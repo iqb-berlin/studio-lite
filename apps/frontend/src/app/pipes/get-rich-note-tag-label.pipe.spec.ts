@@ -23,10 +23,6 @@ describe('GetRichNoteTagLabelPipe', () => {
     pipe = TestBed.inject(GetRichNoteTagLabelPipe);
   });
 
-  it('create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should call workspaceService.getRichNoteTagLabel', done => {
     pipe.transform('path.to.tag').subscribe(result => {
       expect(workspaceServiceMock.getRichNoteTagLabel).toHaveBeenCalledWith('path.to.tag');

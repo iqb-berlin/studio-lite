@@ -28,6 +28,7 @@ import {
   UpdateUnitRichNoteUnitItemsDto,
   UnitRichNoteTagDto
 } from '@studio-lite-lib/api-dto';
+import { succeeded } from '../../../utils/succeeded.utils';
 
 /**
  * Every call the workspace area makes: the units and their parts, the exports (units, coding book,
@@ -117,10 +118,7 @@ export class WorkspaceBackendService {
     units.forEach(id => { queryParams = queryParams.append('id', id); });
     return this.http
       .delete(`${this.serverUrl}workspaces/${workspaceId}/units`, { params: queryParams })
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   submitUnits(workspaceId: number, dropBoxId: number, units: number[]): Observable<boolean | RequestReportDto> {
@@ -166,6 +164,7 @@ export class WorkspaceBackendService {
    * Turns the stream of a download into what a caller can bind to: a percentage while it runs (or
    * the bytes so far when the size is unknown), the blob when it arrives, and -1 for nothing at all.
    * An export can take minutes, so the dialog has to be able to show that something is happening.
+   * A failed download is -1 as well, as a failed upload is in {@link uploadUnits} (#1994).
    */
   private static mapDownloadEvent(event: HttpEvent<Blob>): Blob | number | null {
     if (event) {
@@ -192,7 +191,10 @@ export class WorkspaceBackendService {
       responseType: 'blob',
       reportProgress: true,
       observe: 'events'
-    }).pipe(map(WorkspaceBackendService.mapDownloadEvent));
+    }).pipe(
+      map(WorkspaceBackendService.mapDownloadEvent),
+      catchError(() => of(-1))
+    );
   }
 
   downloadUnitsJson(
@@ -207,7 +209,10 @@ export class WorkspaceBackendService {
         reportProgress: true,
         observe: 'events'
       }
-    ).pipe(map(WorkspaceBackendService.mapDownloadEvent));
+    ).pipe(
+      map(WorkspaceBackendService.mapDownloadEvent),
+      catchError(() => of(-1))
+    );
   }
 
   getCodingBook(workspaceId: number, missingsProfile:string, contentOptions: CodeBookContentSetting,
@@ -277,10 +282,7 @@ export class WorkspaceBackendService {
   setUnitProperties(workspaceId: number, unitData: UnitPropertiesDto): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}workspaces/${workspaceId}/units/${unitData.id}/properties`, unitData)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   uploadUnits(workspaceId: number, files: FileList | null): Observable<RequestReportDto | number> {
@@ -307,7 +309,9 @@ export class WorkspaceBackendService {
             return 0;
           }
           return -1;
-        })
+        }),
+        // the caller ends the loading indicator on -1; a failed upload left it turning (#1994)
+        catchError(() => of(-1))
       );
     }
     return of(-1);
@@ -316,19 +320,13 @@ export class WorkspaceBackendService {
   setUnitDefinition(workspaceId: number, unitId: number, unitData: UnitDefinitionDto): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/definition`, unitData)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   setUnitScheme(workspaceId: number, unitId: number, unitData: UnitSchemeDto): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/scheme`, unitData)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   getReviewList(workspaceId: number): Observable <ReviewInListDto[]> {
@@ -351,10 +349,7 @@ export class WorkspaceBackendService {
   setReview(workspaceId: number, reviewId: number, reviewData: ReviewFullDto): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}workspaces/${workspaceId}/reviews/${reviewId}`, reviewData)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   addReview(workspaceId: number, newReview: CreateReviewDto): Observable<number | null> {
@@ -369,10 +364,7 @@ export class WorkspaceBackendService {
   deleteReview(workspaceId: number, review: number): Observable<boolean> {
     return this.http
       .delete(`${this.serverUrl}workspaces/${workspaceId}/reviews/${review}`)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   getDirectDownloadLink(): string {
@@ -392,10 +384,7 @@ export class WorkspaceBackendService {
       .patch(`${this.serverUrl}workspaces/${workspaceId}/group-name`, {
         groupName: newGroup
       })
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   deleteUnitGroup(workspaceId: number, group: string): Observable<boolean> {
@@ -403,10 +392,7 @@ export class WorkspaceBackendService {
       .patch(
         `${this.serverUrl}workspaces/${workspaceId}/group-name`,
         { groupName: group, operation: 'remove' })
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   renameUnitGroup(workspaceId: number, oldGroupName: string, newGroupName: string): Observable<boolean> {
@@ -414,10 +400,7 @@ export class WorkspaceBackendService {
       .patch(
         `${this.serverUrl}workspaces/${workspaceId}/group-name`,
         { groupName: oldGroupName, newGroupName: newGroupName, operation: 'rename' })
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   setGroupUnits(workspaceId: number, groupName: string, units: number[]): Observable<boolean> {
@@ -425,10 +408,7 @@ export class WorkspaceBackendService {
       .patch(
         `${this.serverUrl}workspaces/${workspaceId}/units/group-name`,
         { name: groupName, ids: units })
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   getCodingReport(workspaceId: number): Observable<CodingReportDto[]> {
@@ -474,10 +454,7 @@ export class WorkspaceBackendService {
   ): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/rich-notes/${noteId}`, noteData)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   patchUnitRichNoteItems(
@@ -485,19 +462,13 @@ export class WorkspaceBackendService {
   ): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/rich-notes/${noteId}/items`, itemsData)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   deleteUnitRichNote(workspaceId: number, unitId: number, noteId: number): Observable<boolean> {
     return this.http
       .delete(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/rich-notes/${noteId}`)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   getUnitRichNoteTags(workspaceGroupId?: number): Observable<UnitRichNoteTagDto[]> {

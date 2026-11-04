@@ -7,5 +7,7 @@ export type EditUserComponentData = {
   lastName?: string,
   email?: string,
   isAdmin: boolean,
-  emailApproved: boolean
+  emailApproved: boolean,
+  // the logged-in administrator's own account, whose administrator right they cannot take away (#1950)
+  isOwnAccount?: boolean
 };

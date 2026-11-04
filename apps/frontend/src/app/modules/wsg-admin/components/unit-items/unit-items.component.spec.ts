@@ -1,7 +1,7 @@
 import {
   ComponentFixture, fakeAsync, TestBed, tick
 } from '@angular/core/testing';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterTestingModule } from '@angular/router/testing';
 import { TranslateModule } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { UnitItemInViewDto } from '@studio-lite-lib/api-dto';
 import { UnitItemsComponent } from './unit-items.component';
 import { BackendService } from '../../services/backend.service';
@@ -88,10 +88,6 @@ describe('UnitItemsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should update unit items on init', fakeAsync(() => {
     const mockItems: UnitItemInViewDto[] = [
       {
@@ -121,16 +117,22 @@ describe('UnitItemsComponent', () => {
     expect(component.dataSource.data).toEqual(mockItems);
   }));
 
+  // Switching to another tab cancelled the list, whose answer alone took the spinner down (#2105)
+  it('should take the spinner down when the page is left while the list loads', fakeAsync(() => {
+    const appService = TestBed.inject(AppService);
+    jest.spyOn(backendService, 'getAllUnitItemsForGroup').mockReturnValue(new Subject<UnitItemInViewDto[]>());
+    component.ngOnInit();
+    tick();
+    expect(appService.dataLoading).toBe(true);
+
+    fixture.destroy();
+
+    expect(appService.dataLoading).toBe(false);
+  }));
+
   it('should format UUID correctly', () => {
     const uuid = '12345678-90ab-cdef-1234-567890abcdef';
     expect(component.formatUuid(uuid)).toBe('123...def');
-  });
-
-  it('should open delete dialog', () => {
-    const item = { uuid: '123', workspaceId: 1, unitId: 1 } as unknown as UnitItemInViewDto;
-    const dialogSpy = jest.spyOn(dialog, 'open');
-    component.openDeleteDialog(item);
-    expect(dialogSpy).toHaveBeenCalled();
   });
 
   it('should call backend service delete on confirmation', fakeAsync(() => {
@@ -161,4 +163,17 @@ describe('UnitItemsComponent', () => {
 
     expect(snackBarSpy).toHaveBeenCalledWith('wsg-admin.unit-item-not-deleted', 'error', { duration: 3000 });
   }));
+
+  // Esc, a click beside the dialog and navigation close it with undefined (#1844)
+  it.each([false, undefined])('should not delete an item when its confirmation closes with %s', result => {
+    const item: UnitItemInViewDto = {
+      uuid: '123', unitId: 1, unitKey: 'UNIT-1', unitName: 'Unit 1', workspaceId: 1, workspaceName: 'Workspace 1'
+    };
+    const deleteSpy = jest.spyOn(backendService, 'deleteUnitItem');
+    jest.spyOn(dialog, 'open').mockReturnValue({ afterClosed: () => of(result) } as MatDialogRef<unknown>);
+
+    component.openDeleteDialog(item);
+
+    expect(deleteSpy).not.toHaveBeenCalled();
+  });
 });

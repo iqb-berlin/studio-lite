@@ -5,8 +5,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { provideRouter, ActivatedRoute } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
-import { of, Subject } from 'rxjs';
-import { AuthDataDto } from '@studio-lite-lib/api-dto';
+import { BehaviorSubject, of, Subject } from 'rxjs';
+import { AuthDataDto, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { Overlay } from '@angular/cdk/overlay';
 import { environment } from '../../../../../environments/environment';
 import { UnitPlayerComponent } from './unit-player.component';
@@ -131,26 +131,6 @@ describe('UnitPlayerComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  describe('Component Initialization', () => {
-    it('should initialize unitData with default values', () => {
-      expect(component.unitData).toBeDefined();
-      expect(component.unitData.databaseId).toBe(0);
-      expect(component.unitData.sequenceId).toBe(0);
-    });
-
-    it('should have all required services injected', () => {
-      const route = (component as never as { route: ActivatedRoute }).route;
-      expect(route).toBeDefined();
-      expect(component.snackBar).toBeDefined();
-      expect(component.backendService).toBeDefined();
-      expect(component.reviewService).toBeDefined();
-    });
-  });
-
   describe('gotoUnit()', () => {
     beforeEach(() => {
       mockReviewService.currentUnitSequenceId = 5;
@@ -194,6 +174,23 @@ describe('UnitPlayerComponent', () => {
       expect(mockReviewService.setUnitNavigationRequest).toHaveBeenCalledWith(10);
     });
 
+    // Player spec 7.0 names the target in capitals (#2064).
+    it.each([
+      ['NEXT', 6],
+      ['END', 10]
+    ])('should follow the target %s a player of spec 7.0 names in capitals', (target, sequenceId) => {
+      component.gotoUnit(target);
+
+      expect(mockReviewService.setUnitNavigationRequest).toHaveBeenCalledWith(sequenceId);
+    });
+
+    it('should show the message for an unknown target when the target is no string', () => {
+      expect(() => component.gotoUnit({ id: 'next' } as unknown as string)).not.toThrow();
+
+      expect(mockReviewService.setUnitNavigationRequest).not.toHaveBeenCalled();
+      expect(mockSnackBar.open).toHaveBeenCalled();
+    });
+
     it('should show snackbar for unknown navigation target', () => {
       component.gotoUnit('unknown');
 
@@ -230,17 +227,6 @@ describe('UnitPlayerComponent', () => {
 
       expect(component.unitData.responses).toEqual(initialResponses);
     });
-
-    it('should handle empty dataParts object', () => {
-      const unitState = { dataParts: {} };
-
-      const handleMethod = (component as never as {
-        handleUnitStateData: (state: { dataParts?: Record<string, unknown> }) => void
-      }).handleUnitStateData;
-      handleMethod.call(component, unitState);
-
-      expect(component.unitData.responses).toEqual({});
-    });
   });
 
   describe('postStore()', () => {
@@ -261,11 +247,8 @@ describe('UnitPlayerComponent', () => {
         postMessageTarget: Window | undefined;
       };
       componentWithPrivates.postMessageTarget = undefined;
-      const postMessageSpy = jest.fn();
 
-      component.postStore('test definition');
-
-      expect(postMessageSpy).not.toHaveBeenCalled();
+      expect(() => component.postStore('test definition')).not.toThrow();
     });
 
     it('should post message with API version 1 format', () => {
@@ -309,6 +292,20 @@ describe('UnitPlayerComponent', () => {
       );
     });
 
+    // An empty string is not the definition of a unit that has none; the testcenter leaves it out (#719).
+    it('should start a player on a unit without definition without one', () => {
+      const componentWithPrivates = component as {
+        postMessageTarget: Window | undefined;
+        playerApiVersion: number;
+      };
+      componentWithPrivates.playerApiVersion = 6;
+      const postMessageSpy = jest.spyOn(componentWithPrivates.postMessageTarget!, 'postMessage');
+
+      component.postStore('');
+
+      expect(postMessageSpy.mock.calls[0][0]).not.toHaveProperty('unitDefinition');
+    });
+
     it('should send stateReportPolicy to players below spec version 5', () => {
       const componentWithPrivates = component as {
         postMessageTarget: Window | undefined;
@@ -323,6 +320,35 @@ describe('UnitPlayerComponent', () => {
         .toHaveProperty('stateReportPolicy', 'eager');
     });
 
+    // Player spec 7.0 writes the values of its enumerations in capitals; the booklet config keeps the
+    // lower case it is stored in (#2064).
+    it.each([
+      [6, 'concat-scroll', ['next', 'previous', 'first', 'last', 'end'], 'none'],
+      [7, 'CONCAT_SCROLL', ['NEXT', 'PREVIOUS', 'FIRST', 'LAST', 'END'], 'NONE']
+    ])('should start a player of version %s with the paging mode %s, the targets %j and the progress %s',
+      (version, pagingMode, targets, progress) => {
+        mockReviewService.bookletConfig = { pagingMode: 'concat-scroll' } as never;
+        const componentWithPrivates = component as {
+          postMessageTarget: Window | undefined;
+          playerApiVersion: number;
+        };
+        componentWithPrivates.playerApiVersion = version;
+        const postMessageSpy = jest.spyOn(componentWithPrivates.postMessageTarget!, 'postMessage');
+
+        component.postStore('test definition');
+
+        const message = postMessageSpy.mock.calls[0][0] as {
+          playerConfig: { pagingMode: string, enabledNavigationTargets: string[] },
+          unitState: { presentationProgress: string, responseProgress: string }
+        };
+        expect(message.playerConfig.pagingMode).toBe(pagingMode);
+        expect(message.playerConfig.enabledNavigationTargets).toEqual(targets);
+        expect(message.unitState).toEqual(expect.objectContaining({
+          presentationProgress: progress, responseProgress: progress
+        }));
+        expect(mockReviewService.bookletConfig.pagingMode).toBe('concat-scroll');
+      });
+
     it('should omit stateReportPolicy from spec version 5 on', () => {
       const componentWithPrivates = component as {
         postMessageTarget: Window | undefined;
@@ -335,24 +361,6 @@ describe('UnitPlayerComponent', () => {
 
       expect((postMessageSpy.mock.calls[0][0] as { playerConfig: object }).playerConfig)
         .not.toHaveProperty('stateReportPolicy');
-    });
-
-    it('should handle empty definition string', () => {
-      const componentWithPrivates = component as {
-        postMessageTarget: Window | undefined;
-        playerApiVersion: number;
-      };
-      componentWithPrivates.playerApiVersion = 1;
-      const postMessageSpy = jest.spyOn(componentWithPrivates.postMessageTarget!, 'postMessage');
-
-      component.postStore('');
-
-      expect(postMessageSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          unitDefinition: ''
-        }),
-        '*'
-      );
     });
 
     it('should send the definition type at the top level when it is known', () => {
@@ -384,6 +392,21 @@ describe('UnitPlayerComponent', () => {
 
       expect(postMessageSpy.mock.calls[0][0]).not.toHaveProperty('unitDefinitionType');
     });
+
+    // ReviewService.loadReviewData gives a unit an empty string as its responses until the player reports some.
+    it('should start the player with empty data parts for a unit without responses', () => {
+      const componentWithPrivates = component as {
+        postMessageTarget: Window | undefined;
+        playerApiVersion: number;
+      };
+      componentWithPrivates.playerApiVersion = 6;
+      component.unitData.responses = '';
+      const postMessageSpy = jest.spyOn(componentWithPrivates.postMessageTarget!, 'postMessage');
+
+      component.postStore('test definition');
+
+      expect(postMessageSpy.mock.calls[0][0]).toHaveProperty(['unitState', 'dataParts'], {});
+    });
   });
 
   describe('sendChangeData()', () => {
@@ -400,6 +423,30 @@ describe('UnitPlayerComponent', () => {
       expect(component.unitData.definitionType).toBe('aspect-unit-definition@4.12.0');
       expect(postStoreSpy).toHaveBeenCalledWith('loaded definition');
     });
+
+    it('should not load the definition again for a unit shown before', () => {
+      component.unitData.definition = 'shown before';
+      const postStoreSpy = jest.spyOn(component, 'postStore');
+
+      component.sendChangeData();
+
+      expect(mockReviewBackendService.getUnitDefinition).not.toHaveBeenCalled();
+      expect(postStoreSpy).toHaveBeenCalledWith('shown before');
+    });
+
+    // a player kept running for the unit before still showed it (#2003)
+    it('should empty the player and say so when the definition could not be loaded', () => {
+      component.unitData.definition = '';
+      component.iFrameElement!.srcdoc = 'the player with the unit before';
+      mockReviewBackendService.getUnitDefinition.mockReturnValue(of(null));
+      const postStoreSpy = jest.spyOn(component, 'postStore');
+
+      component.sendChangeData();
+
+      expect(postStoreSpy).not.toHaveBeenCalled();
+      expect(component.message).toBe('workspace.unit-definition-not-loaded');
+      expect(component.iFrameElement!.srcdoc).toBe('');
+    });
   });
 
   describe('onLoadUnitProperties()', () => {
@@ -410,6 +457,96 @@ describe('UnitPlayerComponent', () => {
 
       expect(component.pageList).toEqual([]);
     });
+
+    it.each([
+      ['Test Unit', '1: unit-1 - Test Unit'],
+      ['', '1: unit-1']
+    ])('should head the unit with its position, its key and its name "%s"', (name, header) => {
+      const properties: UnitPropertiesDto = {
+        id: 1, key: 'unit-1', name, player: 'player-1'
+      };
+      mockReviewBackendService.getUnitProperties.mockReturnValue(of(properties));
+
+      component.onLoadUnitProperties();
+
+      expect(mockReviewService.setHeaderText).toHaveBeenCalledWith(header);
+    });
+
+    // The player and the header went on showing the unit before, while a comment went to the
+    // unit the route names (#2003).
+    it('should show neither the player nor the header of the unit before when the unit cannot be loaded', () => {
+      component.unitData = { ...mockUnitData, name: 'Aufgabe 2' };
+      component.iFrameElement!.srcdoc = 'the player with the unit before';
+      mockReviewBackendService.getUnitProperties.mockReturnValue(of(null));
+
+      component.onLoadUnitProperties();
+
+      expect(component.message).toBe('workspace.unit-not-found');
+      expect(component.iFrameElement!.srcdoc).toBe('');
+      expect(mockReviewService.setHeaderText).toHaveBeenCalledWith('Aufgabe 2');
+    });
+  });
+
+  describe('following the route', () => {
+    const reviewUnits = (count: number): UnitData[] => Array.from({ length: count }, (_, i) => ({
+      databaseId: 100 + i,
+      sequenceId: i,
+      playerId: '',
+      responses: {},
+      definition: '',
+      name: ''
+    }));
+
+    // The route is followed from the task after the view is there. In the test, no player reports
+    // ready, so the unit asked for stays the one being loaded.
+    const followRoute = (params: Subject<{ u: string }>): void => {
+      mockActivatedRoute.params = params.asObservable();
+      component.ngAfterViewInit();
+      tick();
+    };
+
+    it('should load the review first when a unit is opened by its link', fakeAsync(() => {
+      mockReviewService.units = [];
+      mockReviewService.loadReviewData.mockImplementation(() => {
+        mockReviewService.units = reviewUnits(3);
+        return of(undefined);
+      });
+      const params = new Subject<{ u: string }>();
+      followRoute(params);
+
+      params.next({ u: '2' });
+      tick();
+
+      expect(mockReviewService.loadReviewData).toHaveBeenCalled();
+      expect(mockReviewBackendService.getUnitProperties).toHaveBeenCalledWith(123, 102);
+    }));
+
+    it('should not load the review again when paging to another unit', fakeAsync(() => {
+      mockReviewService.units = reviewUnits(3);
+      const params = new Subject<{ u: string }>();
+      followRoute(params);
+
+      params.next({ u: '1' });
+      tick();
+
+      expect(mockReviewService.loadReviewData).not.toHaveBeenCalled();
+      expect(mockReviewBackendService.getUnitProperties).toHaveBeenCalledWith(123, 101);
+    }));
+
+    it('should not let a late answer for the unit left behind replace the unit chosen after it', fakeAsync(() => {
+      mockReviewService.units = reviewUnits(3);
+      const lateProperties = new Subject<UnitPropertiesDto | null>();
+      mockReviewBackendService.getUnitProperties.mockImplementation((_, unitId) => (
+        unitId === 100 ? lateProperties.asObservable() : of({ id: unitId, key: 'second' })));
+      const params = new BehaviorSubject({ u: '0' });
+      followRoute(params);
+
+      params.next({ u: '1' });
+      tick();
+      lateProperties.next({ id: 100, key: 'first' });
+
+      expect(mockReviewService.setHeaderText).toHaveBeenLastCalledWith('2: second');
+    }));
   });
 
   describe('page navigation (#1800)', () => {
@@ -439,46 +576,6 @@ describe('UnitPlayerComponent', () => {
 
       expect(element.querySelector('studio-lite-page-navigation')).toBeNull();
       expect(element.querySelector('.unit-host.with-footer')).toBeNull();
-    });
-  });
-
-  describe('Component Properties', () => {
-    it('should have unitData property', () => {
-      expect(component.unitData).toBeDefined();
-    });
-
-    it('should have hostingIframe ViewChild reference', () => {
-      expect(component.hostingIframe).toBeDefined();
-    });
-  });
-
-  describe('Service Dependencies', () => {
-    it('should inject ActivatedRoute', () => {
-      const route = (component as never as { route: ActivatedRoute }).route;
-      expect(route).toBeDefined();
-    });
-
-    it('should inject MatSnackBar', () => {
-      expect(component.snackBar).toBeDefined();
-    });
-
-    it('should inject WorkspaceBackendService', () => {
-      expect(component.backendService).toBeDefined();
-    });
-
-    it('should inject ReviewBackendService', () => {
-      const reviewBackendService = (component as never as {
-        reviewBackendService: ReviewBackendService
-      }).reviewBackendService;
-      expect(reviewBackendService).toBeDefined();
-    });
-
-    it('should inject ReviewService', () => {
-      expect(component.reviewService).toBeDefined();
-    });
-
-    it('should inject TranslateService', () => {
-      expect(component.translateService).toBeDefined();
     });
   });
 
@@ -514,7 +611,7 @@ describe('UnitPlayerComponent', () => {
       component.handleWidgetCall({
         callId: 'c1',
         widgetType: 'CALC',
-        parameters: { k: 'v' },
+        parameters: [{ key: 'K', value: 'v' }],
         state: 's'
       });
 
@@ -598,7 +695,7 @@ describe('UnitPlayerComponent', () => {
       const callData = {
         callId: 'c4',
         widgetType: 'CALC',
-        parameters: { p: '1' },
+        parameters: [{ key: 'P', value: '1' }],
         state: 'saved-state'
       };
 

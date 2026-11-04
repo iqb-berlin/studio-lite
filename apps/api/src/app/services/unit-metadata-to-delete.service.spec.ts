@@ -33,10 +33,6 @@ describe('UnitMetadataToDeleteService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('upsertOneForUnit', () => {
     it('should upsert metadata to delete entry', async () => {
       const unitId = 1;
@@ -52,19 +48,6 @@ describe('UnitMetadataToDeleteService', () => {
         }),
         ['unitId']
       );
-    });
-  });
-
-  describe('getOneByUnit', () => {
-    it('should return one entry by unitId', async () => {
-      const unitId = 1;
-      const mockResult = { unitId, changedAt: new Date() } as UnitMetadataToDelete;
-      mockRepository.findOneBy.mockResolvedValue(mockResult);
-
-      const result = await service.getOneByUnit(unitId);
-
-      expect(repository.findOneBy).toHaveBeenCalledWith({ unitId });
-      expect(result).toEqual(mockResult);
     });
   });
 

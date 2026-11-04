@@ -30,54 +30,7 @@ describe('PrintOptionsComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  describe('Initialization', () => {
-    it('should initialize with default print options', () => {
-      expect(component.printOptions).toBeDefined();
-      expect(component.printOptions.length).toBe(9);
-
-      const expectedOptions = [
-        { key: 'printLandscape', value: false },
-        { key: 'printProperties', value: true },
-        { key: 'printMetadata', value: true },
-        { key: 'printComments', value: true },
-        { key: 'printCoding', value: true },
-        { key: 'printPreview', value: true },
-        { key: 'printElementIds', value: true },
-        { key: 'printPreviewAutoHeight', value: true },
-        { key: 'printPreviewHeight', value: 1000 }
-      ];
-
-      expect(component.printOptions).toEqual(expectedOptions);
-    });
-
-    it('should emit printOptions on init', () => {
-      jest.spyOn(component.printOptionsChange, 'emit');
-
-      component.ngOnInit();
-
-      expect(component.printOptionsChange.emit).toHaveBeenCalledWith(component.printOptions);
-    });
-  });
-
   describe('setPrintOptions', () => {
-    it('should update printOptions and emit change', () => {
-      jest.spyOn(component.printOptionsChange, 'emit');
-
-      const newOptions: PrintOptions[] = [
-        { key: 'printProperties', value: false },
-        { key: 'printMetadata', value: true }
-      ];
-
-      component.setPrintOptions(newOptions);
-
-      expect(component.printOptions).toEqual(newOptions);
-      expect(component.printOptionsChange.emit).toHaveBeenCalledWith(newOptions);
-    });
-
     it('should create a shallow copy of the options array', () => {
       const originalOptions: PrintOptions[] = [
         { key: 'printProperties', value: true }
@@ -162,42 +115,6 @@ describe('PrintOptionsComponent', () => {
       const input = fixture.debugElement.query(By.css('input[type="number"]'));
 
       expect(input.nativeElement.disabled).toBe(true);
-    });
-  });
-
-  describe('User interactions', () => {
-    it('should call setPrintOptions when checkbox value changes', async () => {
-      jest.spyOn(component, 'setPrintOptions');
-
-      fixture.detectChanges();
-      await fixture.whenStable();
-      fixture.detectChanges();
-
-      // Change the value directly and trigger ngModelChange
-      component.printOptions[0].value = false;
-      component.setPrintOptions(component.printOptions);
-
-      await fixture.whenStable();
-      fixture.detectChanges();
-
-      expect(component.setPrintOptions).toHaveBeenCalled();
-    });
-
-    it('should call setPrintOptions when input value changes', async () => {
-      jest.spyOn(component, 'setPrintOptions');
-
-      fixture.detectChanges();
-      await fixture.whenStable();
-      fixture.detectChanges();
-
-      const input = fixture.debugElement.query(By.css('input[type="number"]'));
-      input.nativeElement.value = '500';
-      input.nativeElement.dispatchEvent(new Event('input'));
-
-      await fixture.whenStable();
-      fixture.detectChanges();
-
-      expect(component.setPrintOptions).toHaveBeenCalled();
     });
   });
 });

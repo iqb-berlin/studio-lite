@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { MetadataProfileDto, MetadataVocabularyDto } from '@studio-lite-lib/api-dto';
 import MetadataProfile from '../entities/metadata-profile.entity';
 import { MetadataProfileService } from './metadata-profile.service';
@@ -46,10 +46,6 @@ describe('MetadataProfileService', () => {
     httpService = module.get(HttpService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('getStoredMetadataProfileFromDb', () => {
     it('returns the stored profile from the DB without a background network fetch', async () => {
       const profile = new MetadataProfile();
@@ -90,6 +86,15 @@ describe('MetadataProfileService', () => {
 
       const result = await service.getStoredMetadataProfile('url');
       expect(result).toEqual(profileDto);
+    });
+
+    it('should store nothing for a profile that cannot be fetched', async () => {
+      metadataProfileRepository.findOneBy.mockResolvedValue(null);
+      httpService.get
+        .mockReturnValue(throwError(() => new Error('offline')) as unknown as ReturnType<HttpService['get']>);
+
+      expect(await service.getStoredMetadataProfile('url')).toBeNull();
+      expect(metadataProfileRepository.upsert).not.toHaveBeenCalled();
     });
 
     // Real iqb-vocabs profiles still declare the github spelling as their own id
@@ -164,6 +169,37 @@ describe('MetadataProfileService', () => {
       const result = await service.getProfileVocabularies('url');
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe('vocab-url');
+    });
+
+    // TypeORM 1 throws on an undefined value in a where (#2095), and the profile comes from outside
+    it('should skip vocabulary entries without a url instead of looking them up', async () => {
+      const profileDto = {
+        groups: [
+          {
+            entries: [
+              { type: 'vocabulary', parameters: {} },
+              { type: 'vocabulary' },
+              { type: 'vocabulary', parameters: { url: 'vocab-url' } }
+            ]
+          }
+        ]
+      } as unknown as MetadataProfileDto;
+      jest.spyOn(service, 'getStoredMetadataProfile').mockResolvedValue(profileDto);
+      metadataVocabularyService.getStoredMetadataVocabularyById
+        .mockResolvedValue({ id: 'vocab-url' } as MetadataVocabularyDto);
+
+      const result = await service.getProfileVocabularies('url');
+
+      expect(metadataVocabularyService.getStoredMetadataVocabularyById).toHaveBeenCalledTimes(1);
+      expect(metadataVocabularyService.getStoredMetadataVocabularyById).toHaveBeenCalledWith('vocab-url');
+      expect(result.map(vocabulary => vocabulary.id)).toEqual(['vocab-url']);
+    });
+
+    it('should answer a profile that can neither be read nor fetched with no vocabularies (#2095)', async () => {
+      jest.spyOn(service, 'getStoredMetadataProfile').mockResolvedValue(null);
+
+      await expect(service.getProfileVocabularies('no-profile')).resolves.toEqual([]);
+      expect(metadataVocabularyService.getStoredMetadataVocabularyById).not.toHaveBeenCalled();
     });
   });
 });

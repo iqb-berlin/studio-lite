@@ -16,8 +16,7 @@ import {
   addFirstUser,
   addUnit,
   createGroup,
-  deleteFirstUser,
-  deleteGroup
+  waitForSuccess
 } from '../../../support/helpers';
 import {
   createWs,
@@ -90,11 +89,9 @@ describe('Metadata Management', () => {
     getItem('iDE', false);
     getItem('iDE', true);
     getItem('iDE', true, 'iDE');
+    // waited for, so that the reset before the next spec does not come in the middle of the save
+    cy.intercept('PATCH', '/api/workspaces/*/units/*/properties').as('saveMetadata');
     cy.get('[data-cy="workspace-unit-save-button"]').click();
-  });
-
-  it('cleans up test data', () => {
-    deleteGroup(group);
-    deleteFirstUser();
+    waitForSuccess('@saveMetadata');
   });
 });

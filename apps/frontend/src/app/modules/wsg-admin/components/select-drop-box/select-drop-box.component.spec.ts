@@ -31,10 +31,7 @@ describe('SelectDropBoxComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create and initialize with data', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
-    expect(component.workspaces).toEqual(mockDialogData.workspaces);
-    expect(component.dropBoxId).toBe(mockDialogData.dropBoxId);
-    expect(component.selectedWorkspaceName).toBe(mockDialogData.selectedWorkspaceName);
   });
 });

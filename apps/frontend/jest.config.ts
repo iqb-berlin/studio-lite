@@ -1,3 +1,10 @@
+// The users work in German time, and only there does a change of the clocks fall into a test (#1896).
+// Set here because the workers inherit it; in a spec process.env is a copy and TZ has no effect.
+// @types/node knows TZ only through the index signature, which this project may not use with a dot,
+// and ESLint rejects the brackets; declared on the same object, it can be written (#2081).
+const env: NodeJS.ProcessEnv & { TZ?: string } = process.env;
+env.TZ = 'Europe/Berlin';
+
 export default {
   displayName: 'frontend',
   preset: '../../jest.preset.js',

@@ -1,49 +1,24 @@
-import {
-  CanActivate, ExecutionContext, ForbiddenException, Injectable
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { WorkspaceService } from '../services/workspace.service';
 import { WorkspaceUserService } from '../services/workspace-user.service';
+import { AccessLevelOrGroupAdminGuard } from './access-level-or-group-admin.guard';
 
 /**
  * Managing a workspace, for the assigned user with manage access and for whoever administers the
  * workspace from outside -- see {@link ReadOrGroupAdminAccessGuard} for why this pair exists.
  */
 @Injectable()
-export class ManageOrGroupAdminAccessGuard implements CanActivate {
+export class ManageOrGroupAdminAccessGuard extends AccessLevelOrGroupAdminGuard {
   constructor(
-    private authService: AuthService,
-    private workspaceService: WorkspaceService,
-    private workspaceUserService: WorkspaceUserService
-  ) {}
-
-  /**
-   * Passes for manage access, for an administrator, or for the group admin. A route without
-   * `workspace_id` never passes.
-   */
-  async canActivate(
-    context: ExecutionContext
+    authService: AuthService,
+    workspaceService: WorkspaceService,
+    workspaceUserService: WorkspaceUserService
   ) {
-    const req = context.switchToHttp().getRequest();
-    const userId = req.user.id;
-    const params = req.params;
-
-    if (params.workspace_id) {
-      // Check for normal manage access (Level > 2)
-      const canManage = await this.workspaceUserService.canManage(userId, params.workspace_id);
-      if (canManage) return true;
-
-      // Check for Admin or Workspace Group Admin
-      const isAdmin = await this.authService.isAdminUser(userId);
-      if (isAdmin) return true;
-
-      const workspaceData = await this.workspaceService.findOne(params.workspace_id);
-      if (workspaceData) {
-        const isGroupAdmin = await this.authService.isWorkspaceGroupAdmin(userId, workspaceData.groupId);
-        if (isGroupAdmin) return true;
-      }
-    }
-
-    throw new ForbiddenException();
+    super(
+      authService,
+      workspaceService,
+      (userId, workspaceId) => workspaceUserService.canManage(userId, workspaceId)
+    );
   }
 }

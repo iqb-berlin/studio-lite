@@ -42,6 +42,8 @@ import {
 } from '@studio-lite-lib/api-dto';
 import type { Response } from 'express';
 import { UnitService } from '../services/unit.service';
+import { UnitMetadataService } from '../services/unit-metadata.service';
+import { UnitDefinitionService } from '../services/unit-definition.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGuard } from '../guards/workspace.guard';
 import { WorkspaceId } from '../decorators/workspace.decorator';
@@ -99,6 +101,8 @@ import { isCopyBody, isSubmissionBody } from '../utils/unit-request-body';
 export class WorkspaceUnitController {
   constructor(
     private unitService: UnitService,
+    private unitMetadataService: UnitMetadataService,
+    private unitDefinitionService: UnitDefinitionService,
     private workspaceService: WorkspaceService,
     private settingsService: SettingService,
     private unitCommentService: UnitCommentService,
@@ -317,7 +321,7 @@ export class WorkspaceUnitController {
   async findOnesMetadata(
     @Param('unit_id', ParseIntPipe) unitId: number
   ): Promise<UnitFullMetadataDto> {
-    return this.unitService.findOnesMetadata(unitId);
+    return this.unitMetadataService.findOnesMetadata(unitId);
   }
 
   @Get(':unit_id/definition')
@@ -331,7 +335,7 @@ export class WorkspaceUnitController {
   async findOnesDefinition(
     @Param('unit_id', ParseIntPipe) unitId: number
   ): Promise<UnitDefinitionDto> {
-    return this.unitService.findOnesDefinition(unitId);
+    return this.unitDefinitionService.findOnesDefinition(unitId);
   }
 
   @Get(':unit_id/scheme')
@@ -345,7 +349,7 @@ export class WorkspaceUnitController {
   async findOnesScheme(
     @Param('unit_id', ParseIntPipe) unitId: number
   ): Promise<UnitSchemeDto> {
-    return this.unitService.findOnesScheme(unitId);
+    return this.unitDefinitionService.findOnesScheme(unitId);
   }
 
   /**
@@ -384,14 +388,19 @@ export class WorkspaceUnitController {
   /**
    * Submits units to a drop box, or sends submitted ones back -- which of the two follows from the
    * body: with a `targetId` it is a submission, without it a return. Both move the units and record
-   * the move in {@link UnitDropBoxHistory}.
+   * the move in {@link UnitDropBoxHistory}. A unit that cannot be returned -- never submitted, or
+   * submitted from a workspace now in another group (#2027) -- stays where it is and is named in
+   * the answer.
    */
   @Patch('drop-box-history')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitsInWorkspaceGuard, CommentAccessGuard, DropBoxTargetGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiOkResponse({ description: 'Unit moved' })
-  @ApiForbiddenResponse({ description: 'No privileges in the workspace, or the target is not its drop box.' })
+  @ApiOkResponse({ description: 'Units moved; those that could not be returned are named in the report.' })
+  @ApiForbiddenResponse({
+    description: 'No privileges in the workspace, or the target is not its drop box. A drop box in another group ' +
+      'counts as none.'
+  })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit')
   async patchDropBoxHistory(@User() user: UserEntity,
@@ -429,7 +438,7 @@ export class WorkspaceUnitController {
   async patchDefinition(@Param('unit_id', ParseIntPipe) unitId: number,
     @User() user: UserEntity,
     @Body() unitDefinitionDto: UnitDefinitionDto) {
-    return this.unitService.patchDefinition(
+    return this.unitDefinitionService.patchDefinition(
       unitId,
       unitDefinitionDto,
       await this.unitService.getDisplayNameForUser(user.id),
@@ -448,7 +457,7 @@ export class WorkspaceUnitController {
   async patchScheme(@Param('unit_id', ParseIntPipe) unitId: number,
     @User() user: UserEntity,
     @Body() unitSchemeDto: UnitSchemeDto) {
-    return this.unitService.patchScheme(
+    return this.unitDefinitionService.patchScheme(
       unitId,
       unitSchemeDto,
       await this.unitService.getDisplayNameForUser(user.id),

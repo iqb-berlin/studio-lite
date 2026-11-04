@@ -12,7 +12,7 @@ import { ReviewGuard } from '../guards/review.guard';
 import { ReviewConfigGuard } from '../guards/review-config.guard';
 import { ReviewConfigRequired } from '../decorators/review-config-required.decorator';
 import { ReviewService } from '../services/review.service';
-import { UnitService } from '../services/unit.service';
+import { UnitDefinitionService } from '../services/unit-definition.service';
 
 /**
  * `reviews/:review_id/units` -- a unit as a reviewer sees it: its properties, its definition, its
@@ -26,7 +26,7 @@ import { UnitService } from '../services/unit.service';
 export class ReviewUnitController {
   constructor(
     private reviewService: ReviewService,
-    private unitService: UnitService
+    private unitDefinitionService: UnitDefinitionService
   ) {}
 
   @Get(':unit_id/properties')
@@ -56,7 +56,7 @@ export class ReviewUnitController {
   async getUnitDefinition(
     @Param('unit_id', ParseIntPipe) unitId: number
   ): Promise<UnitDefinitionDto> {
-    return this.unitService.findOnesDefinition(unitId);
+    return this.unitDefinitionService.findOnesDefinition(unitId);
   }
 
   @Get(':unit_id/scheme')
@@ -70,6 +70,6 @@ export class ReviewUnitController {
   async findOnesScheme(
     @Param('unit_id', ParseIntPipe) unitId: number
   ): Promise<UnitSchemeDto> {
-    return this.unitService.findOnesScheme(unitId);
+    return this.unitDefinitionService.findOnesScheme(unitId);
   }
 }

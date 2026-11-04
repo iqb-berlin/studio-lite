@@ -1,16 +1,8 @@
-import {
-  AfterViewInit, Component, ElementRef, ViewChild
-} from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { TranslateService } from '@ngx-translate/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import { takeUntil } from 'rxjs';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { toVariableInfoListV1 } from '@studio-lite/shared-code';
-import { WorkspaceService } from '../../services/workspace.service';
-import { WorkspaceBackendService } from '../../services/workspace-backend.service';
-import { AppService } from '../../../../services/app.service';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
-import { ModuleService } from '../../../../services/module.service';
 import {
   UnitDefinitionDirective
 } from '../../../../directives/unit-definition.directive';
@@ -29,24 +21,10 @@ import { TrackIframeActivityDirective } from '../../../../directives/track-ifram
   host: { class: 'unit-schemer' },
   imports: [MatProgressSpinner, TrackIframeActivityDirective]
 })
-export class UnitSchemerComponent
-  extends UnitDefinitionDirective
-  implements AfterViewInit {
+export class UnitSchemerComponent extends UnitDefinitionDirective {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
 
-  constructor(
-    public backendService: WorkspaceBackendService,
-    public workspaceService: WorkspaceService,
-    public snackBar: MatSnackBar,
-    public moduleService: ModuleService,
-    public appService: AppService,
-    public translateService: TranslateService
-  ) {
-    super();
-  }
-
-  ngAfterViewInit(): void {
-    this.setHostingIframe();
+  protected startSubscriptions(): void {
     this.subscribeForPostMessages();
     this.subscribeForSelectedUnitChange();
     this.addSubscriptionForUnitDefinitionChanges();
@@ -61,55 +39,43 @@ export class UnitSchemerComponent
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(() => this.onLoadUnitProperties());
     } else {
-      this.ngUnsubscribe.next();
-      this.ngUnsubscribe.complete();
-      this.ngUnsubscribe = new Subject<void>();
-      this.unitLoaded.next(true);
-      this.subscribeForPostMessages();
-      this.subscribeForSelectedUnitChange();
-      this.addSubscriptionForUnitDefinitionChanges();
+      this.renewSubscriptions();
     }
   }
 
   handleIncomingMessage(m: MessageEvent) {
+    if (!this.acceptMessageFromModule(m)) return;
     const msgData = m.data;
     const msgType = msgData.type;
-    if (
-      msgType !== undefined &&
-      msgType !== null &&
-      m.source === this.iFrameElement?.contentWindow
-    ) {
-      this.postMessageTarget = m.source as Window;
-      switch (msgType) {
-        case 'vosReadyNotification':
-          this.sessionId = UnitSchemerComponent.getSessionId();
-          this.postMessageTarget = m.source as Window;
-          this.sendScheme(this.workspaceService.selectedUnit$.getValue());
-          break;
+    switch (msgType) {
+      case 'vosReadyNotification':
+        this.sessionId = UnitSchemerComponent.getSessionId();
+        this.postMessageTarget = m.source as Window;
+        this.sendScheme(this.workspaceService.selectedUnit$.getValue());
+        break;
 
-        case 'vosSchemeChangedNotification':
-          if (msgData.sessionId === this.sessionId) {
-            if (msgData.codingScheme) {
-              this.unitStores
-                .schemeStore()
-                ?.setData(msgData.codingScheme, msgData.codingSchemeType);
-              // } else { TODO: find solution for vosGetSchemeRequest
-              //   this.postMessageTarget.postMessage({
-              //     type: 'vosGetSchemeRequest',
-              //     sessionId: this.sessionId
-              //   }, '*');
-            }
-            if (msgData.sharedParameters) {
-              this.sharedParameters = this.getMergedSharedParameters(msgData.sharedParameters);
-            }
+      case 'vosSchemeChangedNotification':
+        if (msgData.sessionId === this.sessionId) {
+          if (msgData.codingScheme) {
+            this.unitStores
+              .schemeStore()
+              ?.setData(msgData.codingScheme, msgData.codingSchemeType);
+            // } else { TODO: find solution for vosGetSchemeRequest
+            //   this.postMessageTarget.postMessage({
+            //     type: 'vosGetSchemeRequest',
+            //     sessionId: this.sessionId
+            //   }, '*');
           }
-          break;
+          if (msgData.sharedParameters) {
+            this.sharedParameters = this.getMergedSharedParameters(msgData.sharedParameters);
+          }
+        }
+        break;
 
-        default:
-          // eslint-disable-next-line no-console
-          console.warn(`processMessagePost ignored message: ${msgType}`);
-          break;
-      }
+      default:
+        // eslint-disable-next-line no-console
+        console.warn(`processMessagePost ignored message: ${msgType}`);
+        break;
     }
   }
 
@@ -119,8 +85,7 @@ export class UnitSchemerComponent
 
   private sendScheme(unitId: number) {
     if (!unitId) {
-      this.message = this.translateService.instant('workspace.unit-not-found');
-      this.postMessageTarget = undefined;
+      this.showNoModule(this.translateService.instant('workspace.unit-not-found'));
       return;
     }
     this.unitStores
@@ -130,13 +95,7 @@ export class UnitSchemerComponent
         if (unitSchemeStore) {
           this.postStore(unitSchemeStore);
         } else {
-          this.snackBar.open(
-            this.translateService.instant(
-              'workspace.coding-scheme-not-loaded'
-            ),
-            this.translateService.instant('workspace.error'),
-            { duration: 3000 }
-          );
+          this.showNoModule(this.translateService.instant('workspace.coding-scheme-not-loaded'));
         }
       });
   }
@@ -147,20 +106,11 @@ export class UnitSchemerComponent
       'schemer'
     )
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(schemerId => {
-        if (schemerId) {
-          if (schemerId === this.lastVeronaModuleId && this.postMessageTarget) {
-            this.sendScheme(this.workspaceService.selectedUnit$.getValue());
-          } else {
-            this.postMessageTarget = undefined;
-            this.buildVeronaModule(schemerId, 'schemer');
-            // schemer gets unit data via ReadyNotification
-          }
-        } else {
-          this.postMessageTarget = undefined;
-          this.message = this.translateService.instant('workspace.no-schemer');
-        }
-      });
+      .subscribe(schemerId => this.showVeronaModule(
+        schemerId,
+        'schemer',
+        () => this.sendScheme(this.workspaceService.selectedUnit$.getValue())
+      ));
   }
 
   onLoadUnitProperties() {

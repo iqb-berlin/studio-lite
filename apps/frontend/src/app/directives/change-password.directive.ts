@@ -2,6 +2,7 @@ import { Directive, HostListener, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
+import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { BackendService } from '../services/backend.service';
 import { ChangePasswordComponent } from '../components/change-password/change-password.component';
@@ -22,7 +23,8 @@ export class ChangePasswordDirective implements OnDestroy {
     private changePasswordDialog: MatDialog,
     private backendService: BackendService,
     private snackBar: MatSnackBar,
-    private translateService: TranslateService
+    private translateService: TranslateService,
+    private router: Router
   ) {
   }
 
@@ -46,6 +48,13 @@ export class ChangePasswordDirective implements OnDestroy {
             .pipe(takeUntil(this.ngUnsubscribe))
             .subscribe(
               respOk => {
+                // The server has ended every session of the account, this one included (#1901). Leaving
+                // first, as LogoutDirective does, keeps the open page from firing requests without a token.
+                if (respOk) {
+                  this.router.navigate(['/']).then(done => {
+                    if (done) this.backendService.logout();
+                  });
+                }
                 this.snackBar.open(
                   respOk ?
                     this.translateService.instant('user-profile.new-password') :

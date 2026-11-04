@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Verona-Testwidget</title>
+  <!--
+    A widget for the e2e tests of the studio as host (#1763), written against the widget API and not
+    against one release of a real widget. It shows the state it was started with and hands a new one
+    back at the click of a button.
+  -->
+  <script id="metadata" type="application/ld+json">
+    {
+      "id": "verona-test-widget",
+      "version": "1.0.0",
+      "type": "WIDGET",
+      "model": "CALC",
+      "name": [
+        { "lang": "de", "value": "Verona-Testwidget" },
+        { "lang": "en", "value": "Verona test widget" }
+      ],
+      "specVersion": "1.0",
+      "metadataVersion": "3.1"
+    }
+  </script>
+</head>
+<body>
+  <p id="start-state"></p>
+  <button id="return" type="button">Zurückgeben</button>
+  <script>
+    let sessionId = '';
+    // The frame is a srcdoc of the host and shares its origin: messages go there and nowhere else
+    const hostOrigin = window.parent.location.origin;
+
+    window.addEventListener('message', event => {
+      if (event.source !== window.parent) return;
+      const message = event.data;
+      if (message.type === 'vowStartCommand') {
+        sessionId = message.sessionId;
+        document.getElementById('start-state').textContent = message.state;
+      }
+    });
+
+    document.getElementById('return').addEventListener('click', () => {
+      window.parent.postMessage({
+        type: 'vowReturnRequested',
+        sessionId,
+        timeStamp: new Date().toISOString(),
+        state: 'state-of-the-widget',
+        saveState: true
+      }, hostOrigin);
+    });
+
+    window.parent.postMessage({
+      type: 'vowReadyNotification',
+      metadata: document.getElementById('metadata').textContent
+    }, hostOrigin);
+  </script>
+</body>
+</html>

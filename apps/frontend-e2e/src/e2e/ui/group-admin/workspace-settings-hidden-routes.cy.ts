@@ -4,8 +4,6 @@ import {
   addFirstUser,
   clickIndexTabWsgAdmin,
   createGroup,
-  deleteFirstUser,
-  deleteGroup,
   openWorkspaceSettingsDialog,
   saveWorkspaceSettings,
   setRouteVisibility
@@ -22,11 +20,6 @@ describe('Workspace Settings – hiddenRoutes', () => {
     createGroup(baseGroup);
     createWs(primaryWorkspace, baseGroup);
     grantRemovePrivilegeAtWs([Cypress.expose('username')], primaryWorkspace, [AccessLevel.Admin]);
-  });
-
-  after(() => {
-    deleteGroup(baseGroup);
-    deleteFirstUser();
   });
 
   // -------------------------------------------------------------------------

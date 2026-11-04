@@ -1,4 +1,4 @@
-import { addFirstUser, deleteFirstUser, logout } from '../../../support/helpers';
+import { addFirstUser, logout } from '../../../support/helpers';
 
 /**
  * A login without a sessionId creates a session row, and the frontend keeps the tokens of
@@ -12,10 +12,6 @@ import { addFirstUser, deleteFirstUser, logout } from '../../../support/helpers'
 describe('Login form', () => {
   before(() => {
     addFirstUser();
-  });
-
-  after(() => {
-    deleteFirstUser();
   });
 
   const enterCredentials = (): void => {

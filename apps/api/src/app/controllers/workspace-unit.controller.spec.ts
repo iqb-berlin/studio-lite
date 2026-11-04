@@ -1,14 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
 import {
-  CodingReportDto,
   CopyUnitDto,
   CreateUnitDto,
   IdArrayDto,
   MoveToDto,
   NewNameDto,
   UnitDefinitionDto,
-  UnitFullMetadataDto,
   UnitInListDto,
   UnitPropertiesDto,
   UnitSchemeDto
@@ -18,6 +16,8 @@ import { Response } from 'express';
 import { WorkspaceUnitController } from './workspace-unit.controller';
 import { AuthService } from '../services/auth.service';
 import { UnitService } from '../services/unit.service';
+import { UnitMetadataService } from '../services/unit-metadata.service';
+import { UnitDefinitionService } from '../services/unit-definition.service';
 import { WorkspaceUserService } from '../services/workspace-user.service';
 import { SettingService } from '../services/setting.service';
 import { WorkspaceService } from '../services/workspace.service';
@@ -37,12 +37,15 @@ import { WriteAccessGuard } from '../guards/write-access.guard';
 import { MoveTargetAccessGuard } from '../guards/move-target-access.guard';
 import { DropBoxTargetGuard } from '../guards/drop-box-target.guard';
 import { CopySourcesAccessibleGuard } from '../guards/copy-sources-accessible.guard';
+import { AppVersionGuard } from '../guards/app-version.guard';
+import { ManageAccessGuard } from '../guards/manage-access.guard';
+import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
 
 describe('WorkspaceUnitController', () => {
   let controller: WorkspaceUnitController;
   let unitService: UnitService;
+  let unitDefinitionService: UnitDefinitionService;
   let settingsService: SettingService;
-  let workspaceService: WorkspaceService;
   let unitCommentService: UnitCommentService;
   let unitRichNoteService: UnitRichNoteService;
 
@@ -61,6 +64,14 @@ describe('WorkspaceUnitController', () => {
         {
           provide: UnitService,
           useValue: createMock<UnitService>()
+        },
+        {
+          provide: UnitMetadataService,
+          useValue: createMock<UnitMetadataService>()
+        },
+        {
+          provide: UnitDefinitionService,
+          useValue: createMock<UnitDefinitionService>()
         },
         {
           provide: SettingService,
@@ -87,14 +98,29 @@ describe('WorkspaceUnitController', () => {
 
     controller = module.get<WorkspaceUnitController>(WorkspaceUnitController);
     unitService = module.get<UnitService>(UnitService);
+    unitDefinitionService = module.get<UnitDefinitionService>(UnitDefinitionService);
     settingsService = module.get<SettingService>(SettingService);
-    workspaceService = module.get<WorkspaceService>(WorkspaceService);
     unitCommentService = module.get<UnitCommentService>(UnitCommentService);
     unitRichNoteService = module.get<UnitRichNoteService>(UnitRichNoteService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+  // The guards are the authorisation of each method; no other unit test sees them (#1953).
+  it('should let only who has access to the workspace, with a current app version, reach findAll', () => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceUnitController.prototype.findAll))
+      .toEqual([JwtAuthGuard, WorkspaceGuard, AppVersionGuard, WorkspaceAccessGuard]);
+  });
+
+  it.each(['getCodingReport', 'downloadCodingBook', 'findAllWithProperties', 'findExportContents'] as const)(
+    'should let only who has access to the workspace reach %s',
+    method => {
+      expect(Reflect.getMetadata('__guards__', WorkspaceUnitController.prototype[method]))
+        .toEqual([JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard]);
+    }
+  );
+
+  it('should let only who may manage the workspace reach patchUnitsGroup', () => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceUnitController.prototype.patchUnitsGroup))
+      .toEqual([JwtAuthGuard, WorkspaceGuard, ManageAccessGuard]);
   });
 
   // The access guards ask about the workspace in the path alone; the unit has to be held to it
@@ -143,16 +169,6 @@ describe('WorkspaceUnitController', () => {
 
       expect(await controller.findAll({ user: { id: 1 } }, 1, false, false, null)).toBe(result);
       expect(unitService.findAllForWorkspace).toHaveBeenCalledWith(1, 1, false, null, false);
-    });
-  });
-
-  describe('getCodingReport', () => {
-    it('should return coding report', async () => {
-      const result: CodingReportDto[] = [];
-      jest.spyOn(workspaceService, 'getCodingReport').mockResolvedValue(result);
-
-      expect(await controller.getCodingReport(1)).toBe(result);
-      expect(workspaceService.getCodingReport).toHaveBeenCalledWith(1);
     });
   });
 
@@ -233,82 +249,52 @@ describe('WorkspaceUnitController', () => {
     });
   });
 
-  describe('findOnesProperties', () => {
-    it('should return unit properties', async () => {
-      const result: UnitPropertiesDto = {} as UnitPropertiesDto;
-      jest.spyOn(unitService, 'findOnesProperties').mockResolvedValue(result);
-
-      expect(await controller.findOnesProperties(1, 1)).toBe(result);
-      expect(unitService.findOnesProperties).toHaveBeenCalledWith(1, 1);
-    });
-  });
-
-  describe('findOnesMetadata', () => {
-    it('should return unit metadata', async () => {
-      const result: UnitFullMetadataDto = {} as UnitFullMetadataDto;
-      jest.spyOn(unitService, 'findOnesMetadata').mockResolvedValue(result);
-
-      expect(await controller.findOnesMetadata(1)).toBe(result);
-      expect(unitService.findOnesMetadata).toHaveBeenCalledWith(1);
-    });
-  });
-
-  describe('findOnesDefinition', () => {
-    it('should return unit definition', async () => {
-      const result: UnitDefinitionDto = {} as UnitDefinitionDto;
-      jest.spyOn(unitService, 'findOnesDefinition').mockResolvedValue(result);
-
-      expect(await controller.findOnesDefinition(1)).toBe(result);
-      expect(unitService.findOnesDefinition).toHaveBeenCalledWith(1);
-    });
-  });
-
-  describe('findOnesScheme', () => {
-    it('should return unit scheme', async () => {
-      const result: UnitSchemeDto = {} as UnitSchemeDto;
-      jest.spyOn(unitService, 'findOnesScheme').mockResolvedValue(result);
-
-      expect(await controller.findOnesScheme(1)).toBe(result);
-      expect(unitService.findOnesScheme).toHaveBeenCalledWith(1);
-    });
-  });
-
   describe('patchUnitProperties', () => {
-    it('should patch unit properties', async () => {
+    it('should record the display name of the caller as the one who changed the properties', async () => {
       const dto: UnitPropertiesDto = {} as UnitPropertiesDto;
       jest.spyOn(unitService, 'patchUnit').mockResolvedValue(undefined);
       jest.spyOn(unitService, 'getDisplayNameForUser').mockResolvedValue('User');
 
-      await controller.patchUnitProperties(1, { id: 1 } as UserEntity, dto);
-      expect(unitService.patchUnit).toHaveBeenCalled();
+      await controller.patchUnitProperties(1, { id: 7 } as UserEntity, dto);
+
+      expect(unitService.getDisplayNameForUser).toHaveBeenCalledWith(7);
+      expect(unitService.patchUnit).toHaveBeenCalledWith(1, dto, 'User');
     });
   });
 
   describe('moveUnits', () => {
-    it('should move units', async () => {
+    it('should move the units out of the workspace of the path', async () => {
       const dto: MoveToDto = { ids: [1], targetId: 2 };
+      const user = { id: 7 } as UserEntity;
       jest.spyOn(unitService, 'patchWorkspace').mockResolvedValue(undefined);
 
-      await controller.moveUnits(dto, { id: 1 } as UserEntity, 1);
-      expect(unitService.patchWorkspace).toHaveBeenCalled();
+      await controller.moveUnits(dto, user, 3);
+
+      expect(unitService.patchWorkspace).toHaveBeenCalledWith([1], 2, user, 3, 'moveTo');
     });
   });
 
   describe('patchDropBoxHistory', () => {
-    it('should patch dropbox history (move)', async () => {
+    it('should submit the units to the drop box a body with a target names', async () => {
       const dto: MoveToDto = { ids: [1], targetId: 2 };
+      const user = { id: 7 } as UserEntity;
       jest.spyOn(unitService, 'patchDropBoxHistory').mockResolvedValue(undefined);
 
-      await controller.patchDropBoxHistory({ id: 1 } as UserEntity, 1, dto);
-      expect(unitService.patchDropBoxHistory).toHaveBeenCalled();
+      await controller.patchDropBoxHistory(user, 3, dto);
+
+      expect(unitService.patchDropBoxHistory).toHaveBeenCalledWith([1], 2, 3, user);
+      expect(unitService.patchReturnDropBoxHistory).not.toHaveBeenCalled();
     });
 
-    it('should patch dropbox history (return)', async () => {
+    it('should send the units back when the body names no target', async () => {
       const dto: IdArrayDto = { ids: [1] };
+      const user = { id: 7 } as UserEntity;
       jest.spyOn(unitService, 'patchReturnDropBoxHistory').mockResolvedValue(undefined);
 
-      await controller.patchDropBoxHistory({ id: 1 } as UserEntity, 1, dto);
-      expect(unitService.patchReturnDropBoxHistory).toHaveBeenCalled();
+      await controller.patchDropBoxHistory(user, 3, dto);
+
+      expect(unitService.patchReturnDropBoxHistory).toHaveBeenCalledWith([1], 3, user);
+      expect(unitService.patchDropBoxHistory).not.toHaveBeenCalled();
     });
   });
 
@@ -323,60 +309,52 @@ describe('WorkspaceUnitController', () => {
   });
 
   describe('patchDefinition', () => {
-    it('should patch definition', async () => {
+    it('should record the display name of the caller with the definition', async () => {
       const dto: UnitDefinitionDto = {} as UnitDefinitionDto;
-      jest.spyOn(unitService, 'patchDefinition').mockResolvedValue(undefined);
+      jest.spyOn(unitDefinitionService, 'patchDefinition').mockResolvedValue(undefined);
       jest.spyOn(unitService, 'getDisplayNameForUser').mockResolvedValue('User');
 
-      await controller.patchDefinition(1, { id: 1 } as UserEntity, dto);
-      expect(unitService.patchDefinition).toHaveBeenCalled();
+      await controller.patchDefinition(1, { id: 7 } as UserEntity, dto);
+
+      expect(unitService.getDisplayNameForUser).toHaveBeenCalledWith(7);
+      expect(unitDefinitionService.patchDefinition).toHaveBeenCalledWith(1, dto, 'User', expect.any(Date));
     });
   });
 
   describe('patchScheme', () => {
-    it('should patch scheme', async () => {
+    it('should record the display name of the caller with the scheme', async () => {
       const dto: UnitSchemeDto = {} as UnitSchemeDto;
-      jest.spyOn(unitService, 'patchScheme').mockResolvedValue(undefined);
+      jest.spyOn(unitDefinitionService, 'patchScheme').mockResolvedValue(undefined);
       jest.spyOn(unitService, 'getDisplayNameForUser').mockResolvedValue('User');
 
-      await controller.patchScheme(1, { id: 1 } as UserEntity, dto);
-      expect(unitService.patchScheme).toHaveBeenCalled();
+      await controller.patchScheme(1, { id: 7 } as UserEntity, dto);
+
+      expect(unitService.getDisplayNameForUser).toHaveBeenCalledWith(7);
+      expect(unitDefinitionService.patchScheme).toHaveBeenCalledWith(1, dto, 'User', expect.any(Date));
     });
   });
 
   describe('create', () => {
-    it('should create a unit', async () => {
+    it('should create a unit in the workspace of the path when the body is no copy', async () => {
       const dto: CreateUnitDto = { key: 'unit', name: 'Unit' } as CreateUnitDto;
+      const user = { id: 7 } as UserEntity;
       jest.spyOn(unitService, 'create').mockResolvedValue(1);
 
-      await controller.create(1, dto, { id: 1 } as UserEntity);
-      expect(unitService.create).toHaveBeenCalled();
+      await controller.create(3, dto, user);
+
+      expect(unitService.create).toHaveBeenCalledWith(3, dto, user, false);
+      expect(unitService.copy).not.toHaveBeenCalled();
     });
 
-    it('should copy units', async () => {
+    it('should copy the units when the body says whether to take the comments', async () => {
       const dto: CopyUnitDto = { ids: [1], addComments: true };
+      const user = { id: 7 } as UserEntity;
       jest.spyOn(unitService, 'copy').mockResolvedValue(undefined);
 
-      await controller.create(1, dto, { id: 1 } as UserEntity);
-      expect(unitService.copy).toHaveBeenCalled();
-    });
-  });
+      await controller.create(3, dto, user);
 
-  describe('remove', () => {
-    it('should remove units', async () => {
-      jest.spyOn(unitService, 'remove').mockResolvedValue(undefined);
-
-      await controller.remove([1, 2]);
-      expect(unitService.remove).toHaveBeenCalledWith([1, 2]);
-    });
-  });
-
-  describe('removeUnit', () => {
-    it('should remove a unit', async () => {
-      jest.spyOn(unitService, 'remove').mockResolvedValue(undefined);
-
-      await controller.removeUnit(1);
-      expect(unitService.remove).toHaveBeenCalledWith(1);
+      expect(unitService.copy).toHaveBeenCalledWith([1], 3, user, true);
+      expect(unitService.create).not.toHaveBeenCalled();
     });
   });
 });

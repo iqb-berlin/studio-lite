@@ -1,4 +1,4 @@
-import { addFirstUser, deleteFirstUser, clickIndexTabAdmin } from '../../../support/helpers';
+import { addFirstUser, clickIndexTabAdmin } from '../../../support/helpers';
 
 describe('Admin Workspaces Management', () => {
   const mockWorkspaces = [
@@ -24,10 +24,6 @@ describe('Admin Workspaces Management', () => {
 
   before(() => {
     addFirstUser();
-  });
-
-  after(() => {
-    deleteFirstUser();
   });
 
   beforeEach(() => {

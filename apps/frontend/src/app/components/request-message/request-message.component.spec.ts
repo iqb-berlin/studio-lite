@@ -28,10 +28,6 @@ describe('RequestMessageComponent', () => {
       fixture.detectChanges();
     });
 
-    it('should create', () => {
-      expect(component).toBeTruthy();
-    });
-
     it('should default to info message type', () => {
       expect(component.messageType).toBe('info');
     });

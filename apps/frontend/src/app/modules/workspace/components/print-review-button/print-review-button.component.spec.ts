@@ -50,10 +50,6 @@ describe('PrintReviewButtonComponent', () => {
     jest.clearAllMocks();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should open dialog and print view on close with result', () => {
     const dialogRef = { afterClosed: () => of([{ key: 'opt1', value: true }]) };
     mockDialog.open.mockReturnValue(dialogRef);

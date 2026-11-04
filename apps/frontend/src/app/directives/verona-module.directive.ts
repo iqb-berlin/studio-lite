@@ -1,5 +1,5 @@
 import {
-  Directive, ElementRef, inject, OnDestroy
+  AfterViewInit, Directive, ElementRef, inject, OnDestroy
 } from '@angular/core';
 import {
   BehaviorSubject, from, map, Observable, of, Subject, takeUntil
@@ -26,17 +26,15 @@ import { AppService } from '../services/app.service';
  * cannot be shared -- what a message means, what to do with a changed unit -- are left abstract for
  * the hosting component to answer.
  */
-@Directive({
-  selector: '[veronaModule]',
-  standalone: true
-})
-export abstract class VeronaModuleDirective implements OnDestroy {
-  abstract moduleService: ModuleService;
-  abstract translateService: TranslateService;
-  abstract snackBar: MatSnackBar;
-  abstract backendService: WorkspaceBackendService;
-  abstract workspaceService: WorkspaceService;
-  abstract appService: AppService;
+@Directive()
+export abstract class VeronaModuleDirective implements AfterViewInit, OnDestroy {
+  // the services every host talks through, injected here rather than by each host
+  moduleService = inject(ModuleService);
+  translateService = inject(TranslateService);
+  snackBar = inject(MatSnackBar);
+  backendService = inject(WorkspaceBackendService);
+  workspaceService = inject(WorkspaceService);
+  appService = inject(AppService);
   abstract hostingIframe: ElementRef;
   // injected here rather than demanded of every subclass, of which only some read the unit's stores
   protected readonly unitStores = inject(UnitStoresService);
@@ -60,12 +58,36 @@ export abstract class VeronaModuleDirective implements OnDestroy {
 
   abstract onSelectedUnitChange(): void;
 
+  /**
+   * What the host listens to while it shows a unit: at least the module's messages
+   * ({@link subscribeForPostMessages}), and whatever tells it the unit has changed. Started once the
+   * view is there, and again by {@link renewSubscriptions}.
+   */
+  protected abstract startSubscriptions(): void;
+
   abstract postStore(store: unknown): void;
 
   abstract handleIncomingMessage(m: MessageEvent): void;
 
+  ngAfterViewInit(): void {
+    this.setHostingIframe();
+    this.startSubscriptions();
+  }
+
   setHostingIframe(): void {
     this.iFrameElement = this.hostingIframe.nativeElement;
+  }
+
+  /**
+   * Drops every subscription, those of a unit still loading included, and starts the host's own
+   * again -- the way out when another unit is chosen before the current one has finished loading.
+   */
+  protected renewSubscriptions(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
+    this.ngUnsubscribe = new Subject<void>();
+    this.unitLoaded.next(true);
+    this.startSubscriptions();
   }
 
   subscribeForSelectedUnitChange(): void {
@@ -83,8 +105,7 @@ export abstract class VeronaModuleDirective implements OnDestroy {
   /** Hands the unit's definition to the module, from the store if it is there, else loaded into it. */
   sendUnitDefinition(unitId: number): void {
     if (!unitId) {
-      this.message = this.translateService.instant('workspace.unit-not-found');
-      this.postMessageTarget = undefined;
+      this.showNoModule(this.translateService.instant('workspace.unit-not-found'));
       return;
     }
     this.unitStores
@@ -94,15 +115,28 @@ export abstract class VeronaModuleDirective implements OnDestroy {
         if (unitDefinitionStore) {
           this.postStore(unitDefinitionStore);
         } else {
-          this.snackBar.open(
-            this.translateService.instant(
-              'workspace.unit-definition-not-loaded'
-            ),
-            this.translateService.instant('workspace.error'),
-            { duration: 3000 }
-          );
+          this.showNoModule(this.translateService.instant('workspace.unit-definition-not-loaded'));
         }
       });
+  }
+
+  /**
+   * Shows no unit, with the message why. The module goes with the frame: a module kept running
+   * still showed the unit before and could report into the one now chosen (#2085). Nothing is left
+   * to load either, so the host counts the unit as done.
+   */
+  protected showNoModule(message: string): void {
+    this.dropModule();
+    this.message = message;
+    this.unitLoaded.next(true);
+  }
+
+  /** Empties the frame and forgets the module that ran in it, its session and its window. */
+  private dropModule(): void {
+    this.sessionId = '';
+    this.postMessageTarget = undefined;
+    this.lastVeronaModuleId = '';
+    this.clearIFrame();
   }
 
   private getModulesByType(
@@ -150,6 +184,45 @@ export abstract class VeronaModuleDirective implements OnDestroy {
   }
 
   /**
+   * Shows the module a unit names: the one already running gets the unit handed over, any other is
+   * loaded into the iframe -- it asks for the unit itself once it reports ready --, and a unit that
+   * names none gets the message that it has no module of this type.
+   * @param sendUnit How this host hands a unit to a module that is already running.
+   * @returns Whether a module is being loaded.
+   */
+  protected showVeronaModule(
+    moduleId: string,
+    moduleType: 'player' | 'editor' | 'schemer',
+    sendUnit: () => void
+  ): boolean {
+    if (!moduleId) {
+      // workspace.no-player, workspace.no-editor, workspace.no-schemer
+      this.showNoModule(this.translateService.instant(`workspace.no-${moduleType}`));
+      return false;
+    }
+    if (moduleId === this.lastVeronaModuleId && this.postMessageTarget) {
+      sendUnit();
+      return false;
+    }
+    this.postMessageTarget = undefined;
+    this.buildVeronaModule(moduleId, moduleType);
+    return true;
+  }
+
+  /**
+   * Whether a message is one the module in this host's iframe sent -- a message with a type, from
+   * that frame's window. If it is, that window is where the answers go from now on.
+   */
+  protected acceptMessageFromModule(m: MessageEvent): boolean {
+    const msgType = m.data.type;
+    if (msgType === undefined || msgType === null || m.source !== this.iFrameElement?.contentWindow) {
+      return false;
+    }
+    this.postMessageTarget = m.source as Window;
+    return true;
+  }
+
+  /**
    * The frame is emptied only when there is no module to show. It must not be emptied on the way to
    * a module: the module HTML is held after its first load, so the two assignments would then fall
    * into the same task, and Chrome 152 keeps the empty document and drops the module -- the frame
@@ -171,8 +244,7 @@ export abstract class VeronaModuleDirective implements OnDestroy {
     this.sessionId = '';
 
     if (!moduleId) {
-      this.clearIFrame();
-      this.lastVeronaModuleId = '';
+      this.dropModule();
       return;
     }
 
@@ -187,12 +259,10 @@ export abstract class VeronaModuleDirective implements OnDestroy {
           this.lastVeronaModuleId = moduleId;
           this.message = '';
         } else {
-          this.clearIFrame();
-          this.message = this.translateService.instant(
+          this.showNoModule(this.translateService.instant(
             `workspace.${moduleType}-not-loaded`,
             { id: moduleId }
-          );
-          this.lastVeronaModuleId = '';
+          ));
         }
       });
   }

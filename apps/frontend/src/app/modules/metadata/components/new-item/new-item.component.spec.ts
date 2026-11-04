@@ -35,10 +35,6 @@ describe('NewItemComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize options with empty item and existing items', () => {
     // metadata.empty-item + 2 items from mock data
     expect(component.options.length).toBe(3);

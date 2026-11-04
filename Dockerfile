@@ -19,8 +19,9 @@ WORKDIR /usr/src/studio-lite
 COPY . .
 
 # Install dependencies
+# without the Cypress binary that package.json allows to be installed: the e2e image installs its own (#2042)
 RUN --mount=type=cache,target=~/.npm \
-    npm ci --no-fund
+    CYPRESS_INSTALL_BINARY=0 npm ci --no-fund
 
 # Build project
 RUN npx nx --version

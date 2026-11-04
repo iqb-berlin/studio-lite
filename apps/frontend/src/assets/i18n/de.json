@@ -23,7 +23,8 @@
   "id": "ID",
   "unit-patch": {
     "duplicate-unit-id": "Aufgabe bereits im Arbeitsbereich vorhanden",
-    "not-submitted": "Keine Abgabe in diese Drop-Box bekannt, Aufgabe kann nicht zurückgegeben werden"
+    "not-submitted": "Keine Abgabe in diese Drop-Box bekannt, Aufgabe kann nicht zurückgegeben werden",
+    "other-group": "Der abgebende Arbeitsbereich liegt in einer anderen Bereichsgruppe, Aufgabe kann nicht zurückgegeben werden"
   },
   "unit-upload": {
     "api-error": {
@@ -33,7 +34,8 @@
       "xml-parse": "Nicht als Unit-Xml erkannt",
       "json-parse": "Nicht als Unit-Json-Index erkannt",
       "missing-file": "Referenzierte Datei nicht im Upload gefunden",
-      "ignore-file": "Datei wurde ignoriert"
+      "ignore-file": "Datei wurde ignoriert",
+      "coding-scheme": "Kein gültiges Kodierschema, Unit wurde ohne Schema angelegt"
     },
     "menu-label": {
       "import": "Import",
@@ -75,13 +77,15 @@
       "title": "Aufgabe(n) als Datei herunterladen",
       "ok-button-label": "Herunterladen",
       "booklet-id-required": "Pflichtfeld",
+      "booklet-id-pattern": "Nur A–Z, a–z, Ziffern, _ und -",
+      "test-takers-without-players": "Der Export enthält keine Player. Sie müssen im Testcenter bereits vorhanden sein.",
       "xml-key-group-label": "Group/@label",
       "xml-key-booklet-id": "Metadata/Id",
       "xml-key-booklet-label": "Metadata/Label",
       "xml-key-monitor-booklet-visibility": "ViewSettings/monitorBookletVisibility",
       "desc-group-label": "Bezeichnung der Testgruppe in der Testtaker-Datei (optional)",
       "desc-monitor-booklet-visibility": "Sichtbarkeit des Testhefts für Beobachter · Standard: (kein Eintrag)",
-      "desc-booklet-id": "Eindeutige technische ID des Testhefts (Pflichtfeld) · zugleich Dateiname der Testheft- und der Testtaker-XML",
+      "desc-booklet-id": "Eindeutige technische ID des Testhefts (Pflichtfeld, nur A–Z, a–z, Ziffern, _ und -) · zugleich Dateiname der Testheft- und der Testtaker-XML",
       "desc-booklet-label": "Anzeigename des Testhefts (optional)"
     }
   },
@@ -102,7 +106,7 @@
   "user-profile": {
     "data-edited": "Nutzer:innen-Daten geändert",
     "data-edit-error": "Konnte Nutzer:innen-Daten nicht ändern",
-    "new-password": "Neues Kennwort gespeichert",
+    "new-password": "Neues Kennwort gespeichert. Bitte melden Sie sich neu an.",
     "new-password-error": "Konnte Kennwort nicht ändern.",
     "error": "Fehler",
     "ok": "OK"
@@ -144,6 +148,9 @@
     "appVersion": "Version",
     "not-logged-in": "Nicht angemeldet",
     "logged-in-for-review": "Für Aufgabenfolge angemeldet",
+    "auth-check-failed-title": "Server nicht erreichbar",
+    "auth-check-failed": "Ihre Anmeldung kann gerade nicht geprüft werden, weil der Server nicht antwortet.",
+    "auth-check-retry": "Erneut versuchen",
     "logged-in-as": "Angemeldet als",
     "isAdminMessage": "Berechtigung zum Ändern von Nutzer:innen-Rechten und Arbeitsbereichen",
     "reviews-details-view": "Detailansicht",
@@ -188,6 +195,9 @@
     "not-saved": "Zugriffsrechte nicht gespeichert.",
     "changed": "Zugriffsrechte geändert",
     "not-changed": "Konnte Zugriffsrechte nicht ändern",
+    "admins-not-loaded": "Die Admins der Bereichsgruppe konnten nicht geladen werden.",
+    "groups-not-loaded": "Die verwalteten Bereichsgruppen konnten nicht geladen werden.",
+    "not-loaded": "Die Zugriffsrechte konnten nicht geladen werden.",
     "access-level-0": "Gast",
     "access-level-1": "Kommentierer:in",
     "access-level-2": "Entwickler:in",
@@ -254,6 +264,7 @@
     "password": "Kennwort",
     "new-password": "Neues Kennwort",
     "password-hint": "Das Kennwort muss mindestens drei Zeichen lang sein und darf keine Leerzeichen enthalten.",
+    "own-admin-hint": "Das Recht als System-Administrator:in kann man sich nicht selbst entziehen.",
     "user-name-hint": "Der Name muss mindestens drei Zeichen lang sein. Es sind nur Kleinbuchstaben erlaubt.",
     "email-approved": "Zustimmung zur Anzeige der E-Mail-Adresse wurde erteilt.",
     "email-not-approved": "Zustimmung zur Anzeige der E-Mail-Adresse wurde nicht erteilt.",
@@ -285,6 +296,7 @@
     "groups-not-deleted": "Bereichsgruppe konnten nicht gelöscht werden",
     "groups-title": "Admin: Bereichsgruppen",
     "edit-group-settings": "Bereichsgruppe Einstellungen",
+    "group-profiles-not-loaded": "Die Profile der Bereichsgruppe konnten nicht geladen werden.",
     "download-units": "Aufgaben als CSV-Datei herunterladen",
     "error": "Fehler",
     "delete-one-package": "Paket löschen",
@@ -352,7 +364,8 @@
     "unit-rich-note-tags-info": "Wenn hier keine Kategorien für Begleitmaterial angegeben werden, werden die allgemeinen Kategorien für Begleitmaterial des IQB-Studios verwendet.",
     "use-global-tags": "Kategorien für Begleitmaterial aus den allgemeinen Einstellungen kopieren",
     "unit-rich-note-tags-group": "Kategorien für Begleitmaterial der Bereichsgruppen",
-    "global-tags-preview": "Allgemeine Kategorien für Begleitmaterial"
+    "global-tags-preview": "Allgemeine Kategorien für Begleitmaterial",
+    "settings-not-loaded": "Die Einstellungen der Bereichsgruppe konnten nicht geladen werden."
   },
   "settings": {
     "texts": "Texte",
@@ -364,7 +377,8 @@
     "email-replace-values": "Folgende Platzhalter werden im E-Mail-Body durch die Nutzer:innen-Angaben ersetzt: {{firstname}}, {{lastname}}, {{user}}, {{password}}",
     "email-subject": "E-Mail-Betreff",
     "email-body": "E-Mail-Body",
-    "unit-rich-note-tags": "Kategorien für Begleitmaterial"
+    "unit-rich-note-tags": "Kategorien für Begleitmaterial",
+    "unit-rich-note-tags-not-loaded": "Die Kategorien für Begleitmaterial konnten nicht geladen werden."
   },
   "profiles-registry": {
     "csv-url": "URL der CSV-Datei",
@@ -383,7 +397,8 @@
     "start-page-content-right": "Html-Inhalt für die Startseite",
     "imprint-content": "Html-Inhalt für die Impressum-/Datenschutzseite",
     "config-data-saved": "Konfigurationsdaten der Anwendung gespeichert - bitte neu laden!",
-    "config-data-not-saved": "Konnte Konfigurationsdaten der Anwendung nicht speichern"
+    "config-data-not-saved": "Konnte Konfigurationsdaten der Anwendung nicht speichern",
+    "config-data-not-loaded": "Die Konfiguration konnte nicht geladen werden."
   },
   "email-template": {
     "template-saved": "E-Mail-Template gespeichert",
@@ -414,6 +429,7 @@
     "boxes-background-color-placeholder": "Farbe",
     "logo-and-colors-saved": "Logo und Farben gespeichert - bitte neu laden!",
     "logo-and-colors-not-saved": "Konnte Logo und Farben nicht speichern",
+    "logo-not-loaded": "Logo und Farben konnten nicht geladen werden.",
     "image-too-large": "Datei zu groß ( > {{maxSize}} Mb)",
     "allowed-image-types": "Zulässige Datei-Typen: {{types}}",
     "not-allowed-image-size": "Unzulässige Größe (maximal erlaubt: {{maxHeight}}*{{maxWidth}}px)"
@@ -458,7 +474,7 @@
     "workspace-not-loaded": "Konnte Daten für Arbeitsbereich nicht laden",
     "delete-workspaces": "Sollen {{count}} Arbeitsbereiche mit allen enthaltenen Aufgaben gelöscht werden?",
     "move-workspaces": "Sollen {{count}} Arbeitsbereiche mit allen enthaltenen Aufgaben verschoben werden?",
-    "move-workspaces-warning": "Befindet sich der Ziel Arbeitsbereich in einer anderen Bereichsgruppe, werden alle Aufgabenstatus zurückgesetzt!",
+    "move-workspaces-warning": "Befindet sich der Ziel Arbeitsbereich in einer anderen Bereichsgruppe, werden alle Aufgabenstatus zurückgesetzt! Ablagen zwischen verschobenen und verbleibenden Arbeitsbereichen werden entfernt, dort abgegebene Aufgaben können nicht mehr zurückgegeben werden.",
     "add-workspace": "Neuer Arbeitsbereich",
     "move-selected-workspaces": "Arbeitsbereich verschieben",
     "change-workspace-settings": "Arbeitsbereichseinstellungen ändern",
@@ -801,7 +817,10 @@
     "delete-rich-note-confirm": "Soll dieses Begleitmaterial wirklich gelöscht werden?",
     "delete-rich-note-title": "Begleitmaterial löschen",
     "required": "Pflichtfeld",
-    "unassigned-rich-notes": "Uneindeutiges Begleitmaterial"
+    "unassigned-rich-notes": "Uneindeutiges Begleitmaterial",
+    "rich-notes-not-loaded": "Das Begleitmaterial konnte nicht geladen werden.",
+    "rich-note-not-saved": "Das Begleitmaterial konnte nicht gespeichert werden.",
+    "rich-note-not-deleted": "Das Begleitmaterial konnte nicht gelöscht werden."
   },
   "rich-note": {
     "tag": "Kategorie",
@@ -870,7 +889,8 @@
     "title": "Aufgaben-Eigenschaften",
     "modules": "Verona-Module",
     "deprecated": "Veraltet",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "not-loaded": "Die Eigenschaften der Aufgabe konnten nicht geladen werden."
   },
   "status": {
     "true": "Ja",
@@ -1203,6 +1223,8 @@
     "label": "Beschreibung",
     "common-manual-instruction": "Allgemeine Instruktionen für manuelles Kodieren",
     "manual-instruction": "Instruktionen für manuelles Kodieren",
+    "rule-sets-and": "Verknüpfung der Regelsätze: UND",
+    "rule-sets-or": "Verknüpfung der Regelsätze: ODER",
     "code-list": "Liste der möglichen Codes",
     "id": "ID",
     "coding": "Kodierung",

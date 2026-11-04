@@ -39,10 +39,4 @@ describe('WorkspacesMenuComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-
-  it('should emit event when download is clicked', () => {
-    const emitSpy = jest.spyOn(component.downloadWorkspacesReport, 'emit');
-    component.downloadWorkspacesReport.emit(true);
-    expect(emitSpy).toHaveBeenCalledWith(true);
-  });
 });

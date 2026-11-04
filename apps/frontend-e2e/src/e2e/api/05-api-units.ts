@@ -1,4 +1,4 @@
-import type { UnitInViewDto } from '@studio-lite-lib/api-dto';
+import type { UnitInViewDto, WorkspaceGroupFullDto } from '@studio-lite-lib/api-dto';
 import {
   AccessLevel,
   DefinitionUnit,
@@ -177,6 +177,16 @@ describe('Unit API tests', () => {
       });
     });
 
+    // An unknown id answered 404 and a foreign workspace 403, which told anyone which ids exist.
+    it('403 negative test: should refuse a workspace that does not exist like a foreign one (#1930)', () => {
+      cy.getWsNormalAPI(
+        noId,
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(403);
+      });
+    });
+
     it('200 negative test: should allow access to group admin', () => {
       cy.getWsNormalAPI(
         Cypress.expose(ws3.id),
@@ -331,17 +341,18 @@ describe('Unit API tests', () => {
           Cypress.expose(`token_${Cypress.expose('username')}`)
         ).then(resp => {
           expect(resp.status).to.equal(200);
+          // the registry's first profile names vocabularies; an empty list means it was not loaded
+          expect(resp.body).to.be.an('array').with.length.greaterThan(0);
         });
       });
 
-      // At sweagger if we pass an incorrect url, it returns 500
-      it('500/200 negative test: should return success but fail to retrieve vocabulary for an invalid profile', () => {
+      it('200 negative test: should return no vocabulary for a profile that cannot be loaded (#2095)', () => {
         cy.getVocabularyMetadataAPI(
           noId,
           Cypress.expose(`token_${Cypress.expose('username')}`)
         ).then(resp => {
           expect(resp.status).to.equal(200);
-          // expect(resp.status).to.equal(500); // should
+          expect(resp.body).to.deep.equal([]);
         });
       });
 
@@ -358,9 +369,9 @@ describe('Unit API tests', () => {
       let newSettings: WsSettings;
       before(() => {
         newSettings = {
-          defaultEditor: 'iqb-editor-aspect@3.0',
-          defaultPlayer: 'iqb-player-aspect@3.0',
-          defaultSchemer: 'iqb-schemer@2.8',
+          defaultEditor: 'iqb-editor-aspect@3.1',
+          defaultPlayer: 'iqb-player-aspect@3.1',
+          defaultSchemer: 'iqb-schemer@2.9',
           stableModulesOnly: false,
           unitMDProfile: Cypress.expose('profile1'),
           itemMDProfile: Cypress.expose('profile2')
@@ -1114,6 +1125,96 @@ describe('Unit API tests', () => {
     });
   });
 
+  // A drop box is a workspace of the same group (#1805). Moving a workspace into another group
+  // left both its own drop box and the workspaces using it as theirs pointing across (#2027).
+  describe('#2027 drop boxes of a workspace moved to another group', () => {
+    const token = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+    const ids = {
+      moved: '', dropBox: '', user: '', together: ''
+    };
+    const createWorkspace = (name: string, assign: (id: string) => void) => cy
+      .createWsAPI(Cypress.expose(groupVera.id), { id: '', name }, token())
+      .then(resp => {
+        expect(resp.status).to.equal(201);
+        assign(`${resp.body}`);
+      });
+    const dropBoxOf = (wsId: string) => cy.getWsAPI(wsId, token()).its('body.dropBoxId');
+
+    before(() => {
+      createWorkspace('Verschoben-2027', id => { ids.moved = id; });
+      createWorkspace('Ablage-2027', id => { ids.dropBox = id; });
+      createWorkspace('Bleibt-2027', id => { ids.user = id; });
+      createWorkspace('Mitverschoben-2027', id => { ids.together = id; });
+      cy.then(() => {
+        cy.dropboxWsAPI(ids.moved, ids.dropBox, token()).its('status').should('equal', 200);
+        cy.dropboxWsAPI(ids.user, ids.moved, token()).its('status').should('equal', 200);
+        cy.dropboxWsAPI(ids.together, ids.moved, token()).its('status').should('equal', 200);
+      });
+    });
+
+    after(() => {
+      cy.deleteWsAPI([ids.moved, ids.dropBox, ids.user, ids.together], token());
+    });
+
+    it('200 positive test: should drop the drop boxes between moved and remaining workspaces only', () => {
+      cy.moveWsAPI([ids.moved, ids.together], Cypress.expose(group2.id), token())
+        .its('status').should('equal', 200);
+      // its own drop box stayed behind, and it was the drop box of one that stayed behind
+      dropBoxOf(ids.moved).should('be.null');
+      dropBoxOf(ids.user).should('be.null');
+      // moved along with its drop box, the link does not cross the boundary
+      cy.then(() => dropBoxOf(ids.together).should('equal', Number(ids.moved)));
+    });
+  });
+
+  // Submitting and returning stay within a group (#1805). A unit submitted from a workspace that
+  // has been moved into another group since stays in the drop box; moving it crosses groups (#2027).
+  describe('#2027 returning a unit to a workspace moved to another group', () => {
+    const token = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+    const unit: UnitData = { shortname: 'D2027', name: 'Abgabe', group: '' };
+    const ids = { source: '', dropBox: '', unit: '' };
+    const createWorkspace = (name: string, assign: (id: string) => void) => cy
+      .createWsAPI(Cypress.expose(groupVera.id), { id: '', name }, token())
+      .then(resp => {
+        expect(resp.status).to.equal(201);
+        assign(`${resp.body}`);
+        const adminId = Cypress.expose(`id_${Cypress.expose('username')}`);
+        cy.updateUsersOfWsAPI(`${resp.body}`, AccessLevel.Admin, adminId, token())
+          .its('status').should('equal', 200);
+      });
+    const unitKeysOf = (wsId: string) => cy.getUnitsByWsAPI(wsId, token())
+      .then(resp => (resp.body as { key: string }[]).map(u => u.key));
+
+    before(() => {
+      createWorkspace('Abgebend-2027', id => { ids.source = id; });
+      createWorkspace('Ablage-Rueckgabe-2027', id => { ids.dropBox = id; });
+      cy.then(() => {
+        cy.createUnitAPI(ids.source, unit, token()).then(resp => {
+          expect(resp.status).to.equal(201);
+          ids.unit = `${resp.body}`;
+        });
+        cy.dropboxWsAPI(ids.source, ids.dropBox, token()).its('status').should('equal', 200);
+      });
+      cy.then(() => {
+        cy.submitUnitsAPI(ids.source, ids.dropBox, ids.unit, token()).its('status').should('equal', 200);
+        cy.moveWsAPI(ids.source, Cypress.expose(group2.id), token()).its('status').should('equal', 200);
+      });
+    });
+
+    after(() => {
+      cy.deleteWsAPI([ids.source, ids.dropBox], token());
+    });
+
+    it('200 positive test: should report the unit and leave it in the drop box', () => {
+      cy.submitUnitsAPI(ids.dropBox, '', ids.unit, token()).then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(resp.body.messages).to.deep.equal([{ objectKey: unit.shortname, messageKey: 'unit-patch.other-group' }]);
+      });
+      unitKeysOf(ids.dropBox).should('include', unit.shortname);
+      unitKeysOf(ids.source).should('not.include', unit.shortname);
+    });
+  });
+
   describe('39. PATCH /api/workspaces/{workspace_id}/name', () => {
     it('200 positive test: should allow an authorized user to rename a workspace', () => {
       cy.renameWsAPI(
@@ -1165,20 +1266,15 @@ describe('Unit API tests', () => {
       });
     });
 
-    it(
-      '500/201 negative test: should return success but fail to duplicate a unit' +
-        ' when an invalid request structure is provided',
-      () => {
-        cy.copyToAPI(
-          Cypress.expose(ws2.id),
-          noId,
-          Cypress.expose(`token_${Cypress.expose('username')}`)
-        ).then(resp => {
-          expect(resp.status).to.equal(201);
-          // expect(resp.status).to.equal(500); // should
-        });
-      }
-    );
+    it('400 negative test: should refuse a unit without a key (#2095)', () => {
+      cy.copyToAPI(
+        Cypress.expose(ws2.id),
+        noId,
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(400);
+      });
+    });
 
     it(
       '403 negative test: should be refused when trying to duplicate' +
@@ -1202,6 +1298,32 @@ describe('Unit API tests', () => {
       ).then(resp => {
         expect(resp.status).to.equal(201);
       });
+    });
+
+    // A scheme stored before 9.3.0 may have no list of codings, which the scheme endpoint refuses: the copy
+    // went through it, failed and remained without its scheme (#2057). The source is created with the
+    // scheme in the body, as a copy into another workspace passes on the row of its source.
+    it('201 positive test: should duplicate a unit with a scheme without a list of codings (#2057)', () => {
+      const token = Cypress.expose(`token_${Cypress.expose('username')}`);
+      const wsId = Cypress.expose(ws2.id);
+      cy.requestWorkspaceAPI('POST', `${wsId}/units`, token, { key: 'D2057_SOURCE', name: 'Alt', scheme: '{}' })
+        .then(source => {
+          expect(source.status, 'source').to.equal(201);
+          cy.copyToAPI(wsId, {
+            createFrom: source.body, groupName: '', key: 'D2057_COPY', name: 'Kopie'
+          }, token).then(copy => {
+            cy.getUnitSchemeAPI(String(copy.body), wsId, token).then(read => {
+              // cleaned up before anything else is asserted, so that a failure leaves ws2 as it was; a failed
+              // copy answers with an error instead of an id
+              const created = [source.body, copy.body].filter(id => typeof id === 'number').map(String);
+              cy.deleteUnitsAPI(created, wsId, token);
+              cy.then(() => {
+                expect(copy.status).to.equal(201);
+                expect(read.body.scheme).to.equal('{}');
+              });
+            });
+          });
+        });
     });
   });
 
@@ -1717,6 +1839,17 @@ describe('Unit API tests', () => {
         });
       });
 
+      // A text as states broke the unit list in every workspace of the group (#2092)
+      it('400 negative test: should refuse states that are no list and keep the stored ones (#2092)', () => {
+        const token = Cypress.expose(`token_${Cypress.expose('username')}`);
+        cy.updateGroupSettingsAPI(Cypress.expose(groupVera.id), { states: 'x' }, token)
+          .its('status').should('equal', 400);
+        cy.getGroupPropertiesAPI(Cypress.expose(groupVera.id), token).then(resp => {
+          const states = (resp.body as WorkspaceGroupFullDto).settings?.states;
+          expect(states?.map(state => state.label)).to.deep.equal(['Initial', 'Finale']);
+        });
+      });
+
       it('401 negative test: should deny adding new states to a group when no credentials are provided', () => {
         cy.updateGroupPropertiesAPI(Cypress.expose(group2.id), noId).then(
           resp => {
@@ -1807,6 +1940,26 @@ describe('Unit API tests', () => {
         ).then(resp => {
           expect(resp.status).to.equal(200);
           // expect(resp.status).to.equal(500);  // should
+        });
+      });
+
+      // The states belong to the group's settings, so a move resets them, for all units of the
+      // workspace in one statement (#1984).
+      describe('of a workspace moved to another group', () => {
+        const adminToken = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+
+        // The sections below expect ws1 in groupVera, also when the test fails.
+        after(() => {
+          cy.moveWsAPI(Cypress.expose(ws1.id), Cypress.expose(groupVera.id), adminToken());
+        });
+
+        it('200 positive test: should reset the state of its units', () => {
+          cy.updateUnitStateAPI(Cypress.expose(ws1.id), Cypress.expose(unit3.shortname), '1', adminToken())
+            .its('status').should('equal', 200);
+          cy.moveWsAPI(Cypress.expose(ws1.id), Cypress.expose(group2.id), adminToken())
+            .its('status').should('equal', 200);
+          cy.getUnitPropertiesAPI(Cypress.expose(ws1.id), Cypress.expose(unit3.shortname), adminToken())
+            .its('body.state').should('equal', '0');
         });
       });
 

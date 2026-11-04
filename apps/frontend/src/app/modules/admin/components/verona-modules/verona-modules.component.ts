@@ -35,14 +35,6 @@ export class VeronaModulesComponent extends ModulesDirective {
   protected readonly pageTitleKey = 'modules.title';
   protected readonly uploadPath = 'admin/verona-modules?type=EDITOR&type=PLAYER&type=SCHEMER';
 
-  protected serverUrl: string;
-  protected appService: AppService;
-  moduleService: ModuleService;
-  protected backendService: BackendService;
-  protected deleteConfirmDialog: MatDialog;
-  protected snackBar: MatSnackBar;
-  protected translateService: TranslateService;
-
   constructor(@Inject('SERVER_URL') serverUrl: string,
                                     appService: AppService,
                                     moduleService: ModuleService,
@@ -50,14 +42,7 @@ export class VeronaModulesComponent extends ModulesDirective {
                                     deleteConfirmDialog: MatDialog,
                                     snackBar: MatSnackBar,
                                     translateService: TranslateService) {
-    super();
-    this.serverUrl = serverUrl;
-    this.appService = appService;
-    this.moduleService = moduleService;
-    this.backendService = backendService;
-    this.deleteConfirmDialog = deleteConfirmDialog;
-    this.snackBar = snackBar;
-    this.translateService = translateService;
+    super(serverUrl, appService, moduleService, backendService, deleteConfirmDialog, snackBar, translateService);
     this.setUpdateUploadUrl();
   }
 

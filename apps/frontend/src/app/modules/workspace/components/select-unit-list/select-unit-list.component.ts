@@ -33,8 +33,9 @@ import { ScrollIntoViewDirective } from '../../directives/scroll-into-view.direc
   imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, IncludePipe, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, TranslateModule, ScrollIntoViewDirective]
 })
 export class SelectUnitListComponent implements OnChanges, OnDestroy {
+  private static readonly allColumns = ['selectCheckbox', 'key', 'name', 'groupName'];
   objectsDatasource = new MatTableDataSource<UnitInListDto>();
-  displayedColumns = ['selectCheckbox', 'key', 'name', 'groupName'];
+  displayedColumns = SelectUnitListComponent.allColumns;
   tableSelectionCheckboxes = new SelectionModel <UnitInListDto>(true, []);
   disabledUnits: number[] = [];
   selectionChangedSubscription: Subscription | null = null;
@@ -48,9 +49,10 @@ export class SelectUnitListComponent implements OnChanges, OnDestroy {
   // `disabled` instead names single units that can never be selected.
   @Input() locked = false;
 
+  // Leaves out the group alone. A list of its own here lost the name when it got a column (#2014).
   @Input('show-groups')
   set showGroups(value: boolean) {
-    this.displayedColumns = value ? ['selectCheckbox', 'key', 'groupName'] : ['selectCheckbox', 'key'];
+    this.displayedColumns = SelectUnitListComponent.allColumns.filter(column => value || column !== 'groupName');
   }
 
   updateUnitList(value: number) {

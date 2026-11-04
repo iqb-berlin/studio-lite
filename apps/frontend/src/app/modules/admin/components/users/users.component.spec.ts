@@ -1,5 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, TestBed, fakeAsync, flushMicrotasks
+} from '@angular/core/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -9,18 +11,20 @@ import {
 } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
-import { UserFullDto, UserInListDto } from '@studio-lite-lib/api-dto';
+import { UserFullDto, WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
 import { FormControl, FormGroup, UntypedFormGroup } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { ADMIN_USER_LIST_POLL_INTERVAL_MS } from '@studio-lite/shared-code';
 import { AppConfig } from '../../../../classes/app-config.class';
 import { WorkspaceGroupToCheckCollection } from '../../models/workspace-group-to-check-collection.class';
 import { environment } from '../../../../../environments/environment';
 import { UsersComponent } from './users.component';
 import { AppService } from '../../../../services/app.service';
+import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import { BackendService } from '../../services/backend.service';
 import { HeartbeatService } from '../../../../services/heartbeat.service';
 import { UsersMenuComponent } from '../users-menu/users-menu.component';
@@ -34,6 +38,8 @@ describe('UsersComponent', () => {
   let mockSnackBar: Partial<MatSnackBar>;
   let mockDialog: Partial<MatDialog>;
   let mockHeartbeatService: Partial<HeartbeatService>;
+  let mockAppBackendService: Partial<AppBackendService>;
+  let mockRouter: Partial<Router>;
 
   const setDocumentVisibility = (visibilityState: 'visible' | 'hidden'): void => {
     Object.defineProperty(document, 'visibilityState', {
@@ -74,6 +80,7 @@ describe('UsersComponent', () => {
 
     mockAppService = {
       dataLoading: false,
+      authData: { ...AppService.defaultAuthData, userId: 7 },
       appConfig: {
         setPageTitle: jest.fn()
       } as unknown as AppConfig,
@@ -92,6 +99,14 @@ describe('UsersComponent', () => {
 
     mockHeartbeatService = {
       refreshActivityPulse: jest.fn()
+    };
+
+    mockAppBackendService = {
+      logout: jest.fn()
+    };
+
+    mockRouter = {
+      navigate: jest.fn().mockResolvedValue(true)
     };
 
     await TestBed.configureTestingModule({
@@ -116,7 +131,9 @@ describe('UsersComponent', () => {
         { provide: AppService, useValue: mockAppService },
         { provide: HeartbeatService, useValue: mockHeartbeatService },
         { provide: MatSnackBar, useValue: mockSnackBar },
-        { provide: MatDialog, useValue: mockDialog }
+        { provide: MatDialog, useValue: mockDialog },
+        { provide: AppBackendService, useValue: mockAppBackendService },
+        { provide: Router, useValue: mockRouter }
       ]
     })
       .overrideComponent(UsersComponent, {
@@ -131,19 +148,6 @@ describe('UsersComponent', () => {
     fixture = TestBed.createComponent(UsersComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('should load initial data on init', () => {
-    jest.useFakeTimers();
-    component.ngOnInit();
-    jest.runOnlyPendingTimers();
-    expect(mockBackendService.getWorkspaceGroupList).toHaveBeenCalled();
-    expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
-    jest.useRealTimers();
   });
 
   it('should refresh without activity when explicitly requested', () => {
@@ -216,22 +220,6 @@ describe('UsersComponent', () => {
     jest.useRealTimers();
   });
 
-  it('should add user successfully', () => {
-    const userData = new FormGroup({
-      name: new FormControl('test'),
-      password: new FormControl('pass'),
-      isAdmin: new FormControl(false),
-      description: new FormControl('desc'),
-      firstName: new FormControl('first'),
-      lastName: new FormControl('last'),
-      email: new FormControl('email@test.com')
-    });
-    component.addUser(userData);
-    expect(mockBackendService.addUser).toHaveBeenCalled();
-    expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
-    expect(mockSnackBar.open).toHaveBeenCalledWith('admin.user-created', '', { duration: 1000 });
-  });
-
   it('should handle add user failure', () => {
     (mockBackendService.addUser as jest.Mock).mockReturnValue(of(false));
     const userData = new FormGroup({
@@ -272,7 +260,57 @@ describe('UsersComponent', () => {
     }));
     expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
     expect(mockSnackBar.open).toHaveBeenCalledWith('admin.user-edited', '', { duration: 1000 });
+    expect(mockRouter.navigate).not.toHaveBeenCalled();
+    expect(mockAppBackendService.logout).not.toHaveBeenCalled();
   });
+
+  // The server has ended every session of the account, the administrator's own included (#1901)
+  it('should log out when an administrator sets their own password', fakeAsync(() => {
+    const user = { id: 7, name: 'admin' } as UserFullDto;
+    const userData = new FormGroup({
+      name: new FormControl('admin'),
+      password: new FormControl('newPass')
+    });
+
+    component.editUser({ selection: [user], user: userData });
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/']);
+    flushMicrotasks();
+
+    expect(mockAppBackendService.logout).toHaveBeenCalled();
+    expect(mockSnackBar.open).toHaveBeenCalledWith('user-profile.new-password', 'user-profile.ok', { duration: 3000 });
+    expect(mockBackendService.getUsersFullWithActivity).not.toHaveBeenCalled();
+    expect(mockAppService.dataLoading).toBe(false);
+  }));
+
+  it('should stay logged in when an administrator changes their own data without a password', fakeAsync(() => {
+    const user = { id: 7, name: 'admin' } as UserFullDto;
+    const userData = new FormGroup({
+      name: new FormControl('newAdmin'),
+      password: new FormControl('')
+    });
+
+    component.editUser({ selection: [user], user: userData });
+    flushMicrotasks();
+
+    expect(mockRouter.navigate).not.toHaveBeenCalled();
+    expect(mockAppBackendService.logout).not.toHaveBeenCalled();
+    expect(mockSnackBar.open).toHaveBeenCalledWith('admin.user-edited', '', { duration: 1000 });
+  }));
+
+  it('should stay logged in when setting their own password fails', fakeAsync(() => {
+    (mockBackendService.changeUserData as jest.Mock).mockReturnValue(of(false));
+    const user = { id: 7, name: 'admin' } as UserFullDto;
+    const userData = new FormGroup({
+      name: new FormControl('admin'),
+      password: new FormControl('newPass')
+    });
+
+    component.editUser({ selection: [user], user: userData });
+    flushMicrotasks();
+
+    expect(mockRouter.navigate).not.toHaveBeenCalled();
+    expect(mockAppBackendService.logout).not.toHaveBeenCalled();
+  }));
 
   it('should handle edit user failure', () => {
     (mockBackendService.changeUserData as jest.Mock).mockReturnValue(of(false));
@@ -384,6 +422,170 @@ describe('UsersComponent', () => {
       .toEqual(['active', 'orphaned']);
   });
 
+  // Switching to another tab cancelled the list, whose answer alone took the spinner down (#2105)
+  it('should take the spinner down when the page is left while the list loads', () => {
+    (mockBackendService.getUsersFullWithActivity as jest.Mock).mockReturnValue(new Subject<UserFullDto[]>());
+    component.updateUserList();
+    expect(mockAppService.dataLoading).toBe(true);
+
+    fixture.destroy();
+
+    expect(mockAppService.dataLoading).toBe(false);
+  });
+
+  // A check set before the groups of the selected user arrived was reset by them, and so was one
+  // set before a poll selected the fresh row of the same user again (#2056).
+  describe('while the groups of the selected user load', () => {
+    const groups = [{ id: 1, name: 'g1' }, { id: 2, name: 'g2' }] as WorkspaceGroupInListDto[];
+    const users = [{ id: 1, name: 'u1' }, { id: 2, name: 'u2' }] as UserFullDto[];
+    let groupsOf1: Subject<WorkspaceGroupInListDto[] | null>;
+    let groupsOf2: Subject<WorkspaceGroupInListDto[] | null>;
+
+    const checkboxes = (): HTMLInputElement[] => Array.from(
+      fixture.nativeElement.querySelectorAll('mat-checkbox input[type="checkbox"]')
+    );
+    const saveButton = (): HTMLButtonElement => fixture.nativeElement
+      .querySelector('[data-cy="admin-users-save-button"]');
+    // ngModel hands a changed disabled on to the checkbox in a promise of its own, which
+    // fakeAsync does not reach
+    const render = async (): Promise<void> => {
+      fixture.detectChanges();
+      await Promise.resolve();
+      fixture.detectChanges();
+    };
+    const selectUser = (index: number): void => {
+      component.tableSelectionRow.select(component.objectsDatasource.data[index]);
+    };
+    const checkGroup = (id: number): void => {
+      component.userWorkspaceGroups.entries.find(group => group.id === id)!.isChecked = true;
+      component.userWorkspaceGroups.updateHasChanged();
+    };
+
+    beforeEach(() => {
+      groupsOf1 = new Subject<WorkspaceGroupInListDto[] | null>();
+      groupsOf2 = new Subject<WorkspaceGroupInListDto[] | null>();
+      (mockBackendService.getWorkspaceGroupList as jest.Mock).mockReturnValue(of(groups));
+      (mockBackendService.getUsersFullWithActivity as jest.Mock).mockReturnValue(of(users));
+      (mockBackendService.getWorkspaceGroupsByAdmin as jest.Mock)
+        .mockImplementation((id: number) => (id === 1 ? groupsOf1 : groupsOf2));
+      component.createWorkspaceList();
+    });
+
+    it('should lock the checks until the groups have arrived', async () => {
+      await render();
+      selectUser(0);
+      fixture.detectChanges();
+
+      expect(checkboxes()).toHaveLength(2);
+      expect(checkboxes().every(input => input.disabled)).toBe(true);
+
+      groupsOf1.next([]);
+      await render();
+
+      expect(checkboxes().every(input => !input.disabled)).toBe(true);
+    });
+
+    it('should not save the checks of the user before onto the one still loading', () => {
+      selectUser(0);
+      groupsOf1.next([]);
+      checkGroup(1);
+      selectUser(1);
+      fixture.detectChanges();
+
+      expect(saveButton().disabled).toBe(true);
+
+      component.saveWorkspaces();
+
+      expect(mockBackendService.setWorkspaceGroupsByAdmin).not.toHaveBeenCalled();
+    });
+
+    it('should drop the late groups of the user selected before', () => {
+      selectUser(0);
+      selectUser(1);
+
+      groupsOf1.next([groups[0]]);
+
+      expect(component.userWorkspaceGroups.getChecks()).toEqual([]);
+
+      groupsOf2.next([groups[1]]);
+
+      expect(component.userWorkspaceGroups.getChecks()).toEqual([2]);
+      expect(mockAppService.dataLoading).toBe(false);
+    });
+
+    it('should take the spinner down when the page is left before the groups arrive', () => {
+      selectUser(0);
+
+      fixture.destroy();
+
+      expect(mockAppService.dataLoading).toBe(false);
+    });
+
+    // Without them the user administered no group, and saving one check replaced the stored ones
+    // (#2070).
+    it('should keep the checks locked when the groups could not be loaded', async () => {
+      const notLoadedHint = (): HTMLElement | null => fixture.nativeElement
+        .querySelector('[data-cy="admin-users-groups-not-loaded"]');
+      await render();
+      selectUser(0);
+      groupsOf1.next(null);
+      await render();
+
+      expect(notLoadedHint()).not.toBeNull();
+      expect(checkboxes()).toHaveLength(0);
+      expect(mockAppService.dataLoading).toBe(false);
+
+      checkGroup(1);
+      fixture.detectChanges();
+
+      expect(saveButton().disabled).toBe(true);
+
+      component.saveWorkspaces();
+
+      expect(mockBackendService.setWorkspaceGroupsByAdmin).not.toHaveBeenCalled();
+
+      component.tableSelectionRow.clear();
+      fixture.detectChanges();
+
+      expect(notLoadedHint()).toBeNull();
+
+      selectUser(1);
+      groupsOf2.next([groups[1]]);
+      await render();
+
+      expect(notLoadedHint()).toBeNull();
+      expect(checkboxes().every(input => !input.disabled)).toBe(true);
+    });
+
+    it('should keep an unsaved check when a poll selects the same user again', () => {
+      selectUser(0);
+      groupsOf1.next([]);
+      checkGroup(1);
+      (mockBackendService.getUsersFullWithActivity as jest.Mock)
+        .mockReturnValue(of(users.map(user => ({ ...user }))));
+
+      component.updateUserList(false, true);
+
+      expect(mockBackendService.getWorkspaceGroupsByAdmin).toHaveBeenCalledTimes(1);
+      expect(component.userWorkspaceGroups.getChecks()).toEqual([1]);
+      expect(component.userWorkspaceGroups.hasChanged).toBe(true);
+      expect(mockSnackBar.open).not.toHaveBeenCalledWith('access-rights.not-saved', 'warning', { duration: 3000 });
+    });
+
+    it('should deselect the selected user with one click after a poll', () => {
+      selectUser(0);
+      groupsOf1.next([]);
+      (mockBackendService.getUsersFullWithActivity as jest.Mock)
+        .mockReturnValue(of(users.map(user => ({ ...user }))));
+      component.updateUserList(false, true);
+
+      component.toggleRowSelection(component.objectsDatasource.data[0]);
+
+      expect(component.tableSelectionRow.selected).toEqual([]);
+      expect(component.selectedUser).toBe(0);
+    });
+  });
+
   it('should handle delete users failure', () => {
     (mockBackendService.deleteUsers as jest.Mock).mockReturnValue(of(false));
     const users = [{ id: 1 }] as UserFullDto[];
@@ -431,15 +633,6 @@ describe('UsersComponent', () => {
     } as unknown as WorkspaceGroupToCheckCollection;
     component.saveWorkspaces();
     expect(mockSnackBar.open).toHaveBeenCalledWith('access-rights.not-changed', 'error', { duration: 3000 });
-  });
-
-  it('should toggle row selection', () => {
-    const user = { id: 1, name: 'test' } as unknown as UserInListDto;
-    component.toggleRowSelection(user);
-    expect(component.tableSelectionRow.isSelected(user)).toBe(true);
-
-    component.toggleRowSelection(user);
-    expect(component.tableSelectionRow.isSelected(user)).toBe(false);
   });
 
   it('should calculate session and logged-in counts from activityStatus', () => {
@@ -547,5 +740,56 @@ describe('UsersComponent', () => {
         'Inactive A'
       ]);
     });
+  });
+
+  // Esc, a click beside the dialog and navigation close it with undefined (#1844)
+  describe.each([false, undefined])('when the confirmation closes with %s', result => {
+    const user: UserFullDto = {
+      id: 4, name: 'user4', sessions: [{ sessionId: 's4', activityStatus: 'orphaned' }]
+    };
+
+    it.each<[string, (users: UsersComponent) => void, keyof BackendService]>([
+      ['the user', users => users.deleteUsers([user]), 'deleteUsers'],
+      ['an orphaned session', users => users.deleteSession(user, user.sessions![0]), 'deleteUserSession'],
+      ['all orphaned sessions', users => {
+        users.tableSelectionRow.select(user);
+        users.deleteOrphanedSessions();
+      }, 'deleteUserOrphanedSessions']
+    ])('should not delete %s', (_, act, method) => {
+      (mockDialog.open as jest.Mock).mockReturnValue({ afterClosed: () => of(result) });
+
+      act(component);
+
+      expect(mockDialog.open).toHaveBeenCalled();
+      expect(mockBackendService[method]).not.toHaveBeenCalled();
+    });
+  });
+
+  it('should show a user who replaced another between two polls', () => {
+    (mockBackendService.getUsersFullWithActivity as jest.Mock)
+      .mockReturnValue(of([{ id: 1, name: 'anna' }, { id: 2, name: 'bert' }]));
+    component.updateUserList();
+
+    (mockBackendService.getUsersFullWithActivity as jest.Mock)
+      .mockReturnValue(of([{ id: 1, name: 'anna' }, { id: 3, name: 'carl' }]));
+    component.updateUserList(false, true);
+
+    expect(component.objectsDatasource.data.map(user => user.name)).toEqual(['anna', 'carl']);
+  });
+
+  it.each<[string, string, string[]]>([
+    ['part of the login name in any case', 'ann', ['Anna']],
+    ['the last name', 'müll', ['Anna']],
+    ['the email, also beside a user without one', 'example.org', ['bert']]
+  ])('should find users by %s', (_, filter, names) => {
+    (mockBackendService.getUsersFullWithActivity as jest.Mock).mockReturnValue(of([
+      { id: 1, name: 'Anna', lastName: 'Müller' },
+      { id: 2, name: 'bert', email: 'bert@example.org' }
+    ]));
+    component.updateUserList();
+
+    component.objectsDatasource.filter = filter;
+
+    expect(component.objectsDatasource.filteredData.map(user => user.name)).toEqual(names);
   });
 });

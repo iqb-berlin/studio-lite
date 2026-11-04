@@ -211,9 +211,20 @@ describe('mapBookletConfigToModernKeys', () => {
     expect(keys).toContain('navbar_page_controls_hidden');
     expect(keys).not.toContain('controller_design');
   });
+
+  it('should export nothing for an unknown unitScreenHeader', () => {
+    expect(mapBookletConfigToModernKeys({ unitScreenHeader: 'WITH_LOGO' })).toEqual([]);
+  });
 });
 
 describe('normalizeLegacyBookletConfig', () => {
+  it.each<[string, BookletConfigDto]>([
+    ['unitNaviButtons', { unitNaviButtons: 'MERGED' }],
+    ['pageNaviButtons', { pageNaviButtons: 'MERGED' }]
+  ])('should drop an unknown value of %s without deriving anything from it', (_, config) => {
+    expect(normalizeLegacyBookletConfig(config)).toEqual({});
+  });
+
   it('should return empty object unchanged', () => {
     expect(normalizeLegacyBookletConfig({})).toEqual({});
   });

@@ -2,49 +2,72 @@ import { UnitMetadataValues, UnitPropertiesDto } from '@studio-lite-lib/api-dto'
 import { EventEmitter, Signal, signal } from '@angular/core';
 import { dropSavedChanges } from '../utils/saved-changes.utils';
 
+const TEXT_FIELDS = [
+  'key', 'name', 'description', 'groupName', 'transcript', 'reference', 'state', 'player', 'editor', 'schemer'
+] as const;
+type TextField = typeof TEXT_FIELDS[number];
+
+/**
+ * Metadata edited again while their save was under way, with the uuids the save gave its new items. Named
+ * without them, the next save would have the server delete these items and create them anew, links and all
+ * (#1830). The server keeps the item's id, so the new items are found by it, each uuid given out once.
+ */
+function withSavedItemUuids(edited: UnitMetadataValues, saved: UnitMetadataValues): UnitMetadataValues {
+  if (!edited.items) return edited;
+  const known = new Set(edited.items.map(item => item.uuid).filter(uuid => uuid));
+  const created = (saved.items || []).filter(item => item.uuid && !known.has(item.uuid));
+  return {
+    ...edited,
+    items: edited.items.map(item => {
+      if (item.uuid || item.id === undefined) return item;
+      const index = created.findIndex(savedItem => savedItem.id === item.id);
+      if (index < 0) return item;
+      const [savedItem] = created.splice(index, 1);
+      return { ...item, uuid: savedItem.uuid };
+    })
+  };
+}
+
 /**
  * The unit's properties and metadata while they are being edited, in the same shape as
- * {@link UnitDefinitionStore}: the loaded state, and beside it the fields that differ from it. The
- * id is always carried, since it names what is to be patched. {@link changed} holds whether
- * anything is unsaved as a signal, {@link dataChange} reports each edit as an event.
+ * {@link UnitDefinitionStore}: the loaded state, and beside it the latest value entered for each
+ * field. A field is a change while that value differs from what is saved, which is measured again
+ * after each save: set back to the old value while the save was under way, it differs from the
+ * value just saved (#2087). The id is always carried, since it names what is to be patched.
+ * {@link changed} holds whether anything is unsaved as a signal, {@link dataChange} reports each
+ * edit as an event.
  */
 export class UnitMetadataStore {
   dataChange: EventEmitter<void> = new EventEmitter<void>();
   private readonly changedState = signal(false);
   readonly changed: Signal<boolean> = this.changedState.asReadonly();
   private originalData: UnitPropertiesDto;
+  private reported: Partial<UnitPropertiesDto> = {};
+  // computed once per change: comparing the metadata runs over all of it
   private changedData: UnitPropertiesDto;
 
-  constructor(originalData: UnitPropertiesDto) {
+  /**
+   * @param loaded false for the store of a unit the server did not answer for: it holds the id alone,
+   * and what it lacks is not empty but unknown (#2004).
+   */
+  constructor(originalData: UnitPropertiesDto, readonly loaded = true) {
     this.originalData = originalData;
-    this.changedData = <UnitPropertiesDto>{ id: originalData.id };
+    this.changedData = { id: originalData.id };
   }
 
   setPlayer(newPlayer: string): void {
-    if (newPlayer === this.originalData.player) {
-      if (this.changedData.player) delete this.changedData.player;
-    } else {
-      this.changedData.player = newPlayer;
-    }
-    this.notifyChange();
+    this.setField('player', newPlayer);
+    this.notifyChange(false);
   }
 
   setEditor(newEditor: string): void {
-    if (newEditor === this.originalData.editor) {
-      if (this.changedData.editor) delete this.changedData.editor;
-    } else {
-      this.changedData.editor = newEditor;
-    }
-    this.notifyChange();
+    this.setField('editor', newEditor);
+    this.notifyChange(false);
   }
 
   setSchemer(newSchemer: string): void {
-    if (newSchemer === this.originalData.schemer) {
-      if (this.changedData.schemer) delete this.changedData.schemer;
-    } else {
-      this.changedData.schemer = newSchemer;
-    }
-    this.notifyChange();
+    this.setField('schemer', newSchemer);
+    this.notifyChange(false);
   }
 
   setBasicData(
@@ -56,50 +79,18 @@ export class UnitMetadataStore {
     newReference: string,
     newState:string
   ) {
-    if (newKey === this.originalData.key) {
-      if (this.changedData.key) delete this.changedData.key;
-    } else {
-      this.changedData.key = newKey;
-    }
-    if (newName === this.originalData.name) {
-      if (this.changedData.name) delete this.changedData.name;
-    } else {
-      this.changedData.name = newName;
-    }
-    if (newDescription === this.originalData.description) {
-      if (this.changedData.description) delete this.changedData.description;
-    } else {
-      this.changedData.description = newDescription;
-    }
-    if (newGroup === this.originalData.groupName) {
-      if (this.changedData.groupName) delete this.changedData.groupName;
-    } else {
-      this.changedData.groupName = newGroup;
-    }
-    if (newTranscript === this.originalData.transcript) {
-      if (this.changedData.transcript) delete this.changedData.transcript;
-    } else {
-      this.changedData.transcript = newTranscript;
-    }
-    if (newReference === this.originalData.reference) {
-      if (this.changedData.reference) delete this.changedData.reference;
-    } else {
-      this.changedData.reference = newReference;
-    }
-    if (newState === this.originalData.state) {
-      if (this.changedData.state) delete this.changedData.state;
-    } else {
-      this.changedData.state = newState;
-    }
-    this.notifyChange();
+    this.setField('key', newKey);
+    this.setField('name', newName);
+    this.setField('description', newDescription);
+    this.setField('groupName', newGroup);
+    this.setField('transcript', newTranscript);
+    this.setField('reference', newReference);
+    this.setField('state', newState);
+    this.notifyChange(false);
   }
 
   setMetadata(newMetadata: UnitMetadataValues): void {
-    if (JSON.stringify(newMetadata) === JSON.stringify(this.originalData.metadata)) {
-      if (this.changedData.metadata) delete this.changedData.metadata;
-    } else {
-      this.changedData.metadata = JSON.parse(JSON.stringify(newMetadata));
-    }
+    this.reported.metadata = JSON.parse(JSON.stringify(newMetadata));
     this.notifyChange();
   }
 
@@ -123,13 +114,39 @@ export class UnitMetadataStore {
   }
 
   /**
+   * The id and the fields entered that differ from what is saved. A value set back to the loaded
+   * one is no change any more, whatever it was changed to before: an empty one was kept, and saving
+   * emptied the field (#1992). The metadata are compared again only when they or the saved ones
+   * may have changed: the comparison runs over all of them, and the text fields report every keystroke.
+   */
+  private computeChangedData(measureMetadata: boolean): UnitPropertiesDto {
+    const changes = <UnitPropertiesDto>{ id: this.originalData.id };
+    TEXT_FIELDS.forEach(field => {
+      const value = this.reported[field];
+      if (value !== undefined && value !== this.originalData[field]) changes[field] = value;
+    });
+    const metadata = measureMetadata ? this.changedMetadata() : this.changedData.metadata;
+    if (metadata !== undefined) changes.metadata = metadata;
+    return changes;
+  }
+
+  private changedMetadata(): UnitMetadataValues | undefined {
+    const metadata = this.reported.metadata;
+    if (metadata === undefined || JSON.stringify(metadata) === JSON.stringify(this.originalData.metadata)) {
+      return undefined;
+    }
+    return metadata;
+  }
+
+  /**
    * Takes what was sent as saved. Fields edited again since then stay changes: nobody sent their
-   * new values yet, and taking them as saved lost them (#1845).
+   * new values yet, and taking them as saved lost them (#1845). What was entered and sent is not
+   * needed any more: {@link reloadMetadata} replaces the metadata sent with the server's, which carry
+   * the uuids of new items, and the sent ones would count as a change against them (#1830).
    */
   applyChanges(sent: UnitPropertiesDto): void {
     this.originalData = { ...this.originalData, ...sent };
-    dropSavedChanges(this.changedData, sent);
-    this.changedData.id = this.originalData.id;
+    dropSavedChanges(this.reported, sent);
     this.notifyChange();
   }
 
@@ -142,15 +159,21 @@ export class UnitMetadataStore {
    */
   reloadMetadata(metadata: UnitMetadataValues): void {
     this.originalData = { ...this.originalData, metadata };
+    if (this.reported.metadata) this.reported.metadata = withSavedItemUuids(this.reported.metadata, metadata);
     this.notifyChange();
   }
 
   restore(): void {
-    this.changedData = <UnitPropertiesDto>{ id: this.originalData.id };
+    this.reported = {};
     this.notifyChange();
   }
 
-  private notifyChange(): void {
+  private setField(field: TextField, newValue: string): void {
+    this.reported[field] = newValue;
+  }
+
+  private notifyChange(measureMetadata = true): void {
+    this.changedData = this.computeChangedData(measureMetadata);
     this.changedState.set(this.isChanged());
     this.dataChange.emit();
   }

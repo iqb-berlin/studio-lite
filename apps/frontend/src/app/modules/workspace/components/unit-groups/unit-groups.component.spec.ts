@@ -29,10 +29,6 @@ describe('UnitGroupsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('expands all groups when expand button is clicked', () => {
     component.numberOfGroups = 2;
     component.expandedGroups = 0;

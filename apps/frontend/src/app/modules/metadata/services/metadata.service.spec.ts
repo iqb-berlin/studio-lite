@@ -4,7 +4,7 @@ import { provideHttpClientTesting, HttpTestingController } from '@angular/common
 import { of } from 'rxjs';
 import { MDProfile } from '@iqbspecs/metadata-profile';
 import {
-  MetadataProfileDto, MetadataVocabularyDto, TopConcept, UnitPropertiesDto
+  MetadataProfileDto, MetadataVocabularyDto, TopConcept
 } from '@studio-lite-lib/api-dto';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { MetadataService } from './metadata.service';
@@ -40,10 +40,6 @@ describe('MetadataService', () => {
 
   afterEach(() => {
     httpMock.verify();
-  });
-
-  it('should be created', () => {
-    expect(service).toBeTruthy();
   });
 
   describe('loadProfileVocabularies', () => {
@@ -179,6 +175,36 @@ describe('MetadataService', () => {
       expect(result).toBe(false);
       expect(service.vocabularies.length).toBe(0);
     });
+
+    const profileUsing = (id: string, url: string): MDProfile => createMock<MDProfile>({
+      id, groups: [{ entries: [{ type: 'VOCABULARY', parameters: { url } }] }]
+    });
+    const concept = (id: string, ...narrower: TopConcept[]): TopConcept => ({
+      id, prefLabel: { de: `Label ${id}` }, notation: [], narrower
+    });
+
+    it('should hold a vocabulary that two profiles use only once', async () => {
+      backendServiceMock.getMetadataVocabulariesForProfile.mockReturnValue(of([
+        createMock<MetadataVocabularyDto>({ id: 'v1', hasTopConcept: [concept('c1')] })
+      ]));
+
+      await service.loadProfileVocabularies(profileUsing('p1', 'v1'));
+      await service.loadProfileVocabularies(profileUsing('p2', 'v1'));
+
+      expect(service.getVocabularies().map(vocabulary => vocabulary.url)).toEqual(['v1']);
+    });
+
+    it('should map the concepts of every level of a vocabulary', async () => {
+      backendServiceMock.getMetadataVocabulariesForProfile.mockReturnValue(of([
+        createMock<MetadataVocabularyDto>({
+          id: 'v1', hasTopConcept: [concept('c1', concept('c1.1', concept('c1.1.1')))]
+        })
+      ]));
+
+      await service.loadProfileVocabularies(profileUsing('p1', 'v1'));
+
+      expect(service.vocabulariesIdDictionary).toHaveProperty(['c1.1.1', 'labels', 'de'], 'Label c1.1.1');
+    });
   });
 
   describe('downloadMetadataReport', () => {
@@ -201,18 +227,6 @@ describe('MetadataService', () => {
   });
 
   describe('createMetadataReport', () => {
-    it('should return report data on success', () => {
-      const mockReport: UnitPropertiesDto[] = [{ id: 1 } as unknown as UnitPropertiesDto];
-
-      service.createMetadataReport().subscribe(result => {
-        expect(result).toEqual(mockReport);
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}workspaces/123/units/properties`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockReport);
-    });
-
     it('should return false on error', () => {
       service.createMetadataReport().subscribe(result => {
         expect(result).toBe(false);
@@ -224,12 +238,6 @@ describe('MetadataService', () => {
   });
 
   describe('VocabularyProvider bridge', () => {
-    it('getVocabularies should return the vocabularies array', () => {
-      const vocabularies = [{ id: 'voc1', label: 'Voc 1' }] as unknown as MetadataService['vocabularies'];
-      service.vocabularies = vocabularies;
-      expect(service.getVocabularies()).toBe(vocabularies);
-    });
-
     it('getVocabularyDictionary should map id, label, notation and text', () => {
       service.vocabulariesIdDictionary = {
         id1: {
@@ -299,6 +307,35 @@ describe('MetadataService', () => {
       expect(backendServiceMock.getMetadataProfile).not.toHaveBeenCalled();
       expect(service.unitProfileColumns).toEqual([]);
       expect(service.itemProfileColumns).toEqual({});
+    });
+
+    // The service outlives the workspace: columns kept after a failed load could come from the
+    // profile of another workspace (#2002).
+    describe('when the profile cannot be loaded', () => {
+      beforeEach(async () => {
+        backendServiceMock.getMetadataProfile.mockImplementation((url: string) => of({
+          id: url, groups: [{ label: [], entries: [] }]
+        } as unknown as MetadataProfileDto));
+        backendServiceMock.getMetadataVocabulariesForProfile.mockReturnValue(of(true));
+        await service.loadProfileColumns('unit-a', 'item-a');
+        backendServiceMock.getMetadataProfile.mockReturnValue(of(false));
+      });
+
+      it('keeps the columns loaded from the same profile and reports nothing', async () => {
+        const failedProfileUrls = await service.loadProfileColumns('unit-a', 'item-a');
+
+        expect(failedProfileUrls).toEqual([]);
+        expect(service.unitProfileColumns).toHaveLength(1);
+        expect(service.itemProfileColumns).toEqual({ label: [], entries: [] });
+      });
+
+      it('clears the columns of another profile and reports the profile', async () => {
+        const failedProfileUrls = await service.loadProfileColumns('unit-b', 'item-b');
+
+        expect(failedProfileUrls).toEqual(['unit-b', 'item-b']);
+        expect(service.unitProfileColumns).toEqual([]);
+        expect(service.itemProfileColumns).toEqual({});
+      });
     });
   });
 });

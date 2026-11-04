@@ -77,8 +77,10 @@ export class ReviewService {
       throw new ReviewUnprocessableException(0, 'POST');
     }
     const timeStamp = new Date();
+    // Only what the body may decide: nothing validates it, and an `id` sent along had `save`
+    // overwrite that review, also one of another workspace, which then moved into this one (#2030).
     const newReview = this.reviewRepository.create({
-      ...createReview,
+      name: createReview.name,
       workspaceId,
       link: uuIdv4(),
       createdAt: timeStamp,
@@ -111,9 +113,7 @@ export class ReviewService {
       where: {
         id: review.workspaceId
       },
-      relations: [
-        'workspaceGroup'
-      ]
+      relations: { workspaceGroup: true }
     });
     return {
       ...review,
@@ -131,7 +131,7 @@ export class ReviewService {
   /** The unit's properties, without its metadata when the review does not show metadata (#1784). */
   async findUnitProperties(unitId: number, reviewId: number): Promise<UnitPropertiesDto> {
     const review = await this.reviewRepository
-      .findOne({ where: { id: reviewId }, select: ['workspaceId', 'settings'] });
+      .findOne({ where: { id: reviewId }, select: { workspaceId: true, settings: true } });
     const properties = await this.unitService.findOnesProperties(unitId, review.workspaceId);
     return review.settings?.reviewConfig?.showMetadata === true ?
       properties :
@@ -175,9 +175,7 @@ export class ReviewService {
       where: {
         id: In(workspacesIdList)
       },
-      relations: [
-        'workspaceGroup'
-      ]
+      relations: { workspaceGroup: true }
     });
     const workspaceInfo: { [key: string]: {
       name: string;

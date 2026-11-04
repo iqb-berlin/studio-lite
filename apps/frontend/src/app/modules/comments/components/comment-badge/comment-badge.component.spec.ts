@@ -18,10 +18,6 @@ describe('CommentBadgeComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should display acronym for "Lastname, Firstname"', () => {
     component.userName = 'Doe, John';
     component.ngOnInit();

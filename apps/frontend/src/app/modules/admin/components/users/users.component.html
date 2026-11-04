@@ -2,6 +2,7 @@
   <div class="object-list fx-column-start-stretch fx-flex-row-60">
     <studio-lite-users-menu [selectedUser]="selectedUser"
       [selectedRows]="tableSelectionRow.selected"
+      [ownUserId]="ownUserId"
       (userAdded)="addUser($event)"
       (userEdited)="editUser($event)"
       (orphanedSessionsCleared)="deleteOrphanedSessions()">
@@ -36,12 +37,14 @@
           {{'user.sessions' | translate}}
         </mat-header-cell>
         <mat-cell *matCellDef="let element">
-          @if ((element.sessions | countSessionsWithStatus: 'active') === 0) {
+          @if ((element.sessions | countSessionsWithStatus: 'active' : 'passive') === 0) {
             <span class="inactive-dot" [matTooltip]="'user.inactive' | translate"></span>
           } @else {
             @for (session of element.sessions; track session.sessionId) {
               @if (session.activityStatus === 'active') {
                 <span class="active-dot" [matTooltip]="('user.active' | translate) + (session.lastActivity ? ' (' + (session.lastActivity | date: 'dd.MM., HH:mm') + ')' : '')"></span>
+              } @else if (session.activityStatus === 'passive') {
+                <span class="passive-dot" [matTooltip]="('user.passive' | translate) + (session.lastActivity ? ' (' + (session.lastActivity | date: 'dd.MM., HH:mm') + ')' : '')"></span>
               }
             }
           }
@@ -126,14 +129,16 @@
       <ng-container matColumnDef="delete">
         <mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="true" class="header-right"></mat-header-cell>
         <mat-cell *matCellDef="let row" class="cell-right">
-          <button mat-icon-button
-                  [matTooltip]="'admin.delete-name' | translate: { name: row.name }"
-                  [color]="'warn'"
-                  matTooltipPosition="above"
-                  (click)="$event.stopPropagation(); deleteUsers([row])"
-                  data-cy="admin-users-delete-user">
-            <mat-icon>delete</mat-icon>
-          </button>
+          @if (row.id !== ownUserId) {
+            <button mat-icon-button
+                    [matTooltip]="'admin.delete-name' | translate: { name: row.name }"
+                    [color]="'warn'"
+                    matTooltipPosition="above"
+                    (click)="$event.stopPropagation(); deleteUsers([row])"
+                    data-cy="admin-users-delete-user">
+              <mat-icon>delete</mat-icon>
+            </button>
+          }
         </mat-cell>
       </ng-container>
 
@@ -161,23 +166,30 @@
               [matTooltip]="'save' | translate"
               matTooltipPosition="above"
               [color]="'primary'"
-              [disabled]="!userWorkspaceGroups.hasChanged"
-              (click)="saveWorkspaces()">
+              [disabled]="!userWorkspaceGroups.hasChanged || groupsLocked()"
+              (click)="saveWorkspaces()"
+              data-cy="admin-users-save-button">
         <mat-icon>save</mat-icon>
       </button>
     </div>
 
     <div class="scroll-area fx-column-start-stretch">
-      @for (wsg of userWorkspaceGroups.entries; track wsg; let index = $index;) {
-        @if (userWorkspaceGroups.checkedCount > 0 && index === userWorkspaceGroups.checkedCount) {
-          <studio-lite-entries-divider></studio-lite-entries-divider>
+      @if (groupsNotLoaded()) {
+        <p class="info" data-cy="admin-users-groups-not-loaded">
+          {{'access-rights.groups-not-loaded' | translate}}
+        </p>
+      } @else {
+        @for (wsg of userWorkspaceGroups.entries; track wsg; let index = $index;) {
+          @if (userWorkspaceGroups.checkedCount > 0 && index === userWorkspaceGroups.checkedCount) {
+            <studio-lite-entries-divider></studio-lite-entries-divider>
+          }
+          <mat-checkbox
+            [(ngModel)]="wsg.isChecked"
+            [disabled]="!selectedUser || loadingGroups()"
+            (change)="userWorkspaceGroups.updateHasChanged()">
+            {{wsg.name}}
+          </mat-checkbox>
         }
-        <mat-checkbox
-          [(ngModel)]="wsg.isChecked"
-          [disabled]="!selectedUser"
-          (change)="userWorkspaceGroups.updateHasChanged()">
-          {{wsg.name}}
-        </mat-checkbox>
       }
     </div>
   </div>

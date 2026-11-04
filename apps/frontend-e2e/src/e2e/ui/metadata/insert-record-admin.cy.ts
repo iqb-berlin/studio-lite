@@ -3,9 +3,7 @@ import { IqbProfile } from '../../../support/metadata/iqbProfile';
 import { AccessLevel, metadataMathIIWorkspace } from '../../../support/testData';
 import {
   addFirstUser,
-  createGroup,
-  deleteFirstUser,
-  deleteGroup
+  createGroup
 } from '../../../support/helpers';
 import {
   createWs,
@@ -30,10 +28,5 @@ describe('Metadata Profile Management from Admin', () => {
     selectProfileForGroupFromAdmin(group, IqbProfile.DEi);
     selectProfileForGroupFromAdmin(group, IqbProfile.MAu);
     selectProfileForGroupFromAdmin(group, IqbProfile.MAi);
-  });
-
-  it('cleans up test data', () => {
-    deleteGroup(group);
-    deleteFirstUser();
   });
 });

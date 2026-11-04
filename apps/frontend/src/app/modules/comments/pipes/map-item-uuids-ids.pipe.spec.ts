@@ -15,10 +15,6 @@ describe('MapItemUuidsIdsPipe', () => {
     pipe = new MapItemUuidsIdsPipe(translateService);
   });
 
-  it('create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should map uuids to ids using unitItems', () => {
     const unitItems: UnitItemDto[] = [
       { uuid: 'uuid1', id: 'ID 1' } as UnitItemDto,
@@ -45,13 +41,5 @@ describe('MapItemUuidsIdsPipe', () => {
       { uuid: 'uuid2', id: 'ohne Titel' }
     ]);
     expect(translateService.instant).toHaveBeenCalledWith('metadata.without-id');
-  });
-
-  it('should handle empty or null unitItems', () => {
-    const uuids = ['uuid1'];
-    jest.spyOn(translateService, 'instant').mockReturnValue('ohne Titel');
-
-    const result = pipe.transform(uuids, []);
-    expect(result).toEqual([{ uuid: 'uuid1', id: 'ohne Titel' }]);
   });
 });

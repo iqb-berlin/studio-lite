@@ -3,7 +3,7 @@
 ARG REGISTRY_PATH=""
 
 
-FROM ${REGISTRY_PATH}postgres:16.11-alpine3.23
+FROM ${REGISTRY_PATH}postgres:16.15-alpine3.24
 
 RUN --mount=type=cache,target=/var/cache/apk \
     apk add --update musl musl-utils musl-locales tzdata

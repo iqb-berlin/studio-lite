@@ -3,9 +3,6 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   CreateUnitCommentDto,
   UnitCommentDto,
-  UpdateUnitCommentDto,
-  UpdateUnitCommentUnitItemsDto,
-  UpdateUnitCommentVisibilityDto,
   UpdateUnitUserDto
 } from '@studio-lite-lib/api-dto';
 import { AuthService } from '../services/auth.service';
@@ -29,7 +26,6 @@ describe('WorkspaceUnitCommentController', () => {
   let controller: WorkspaceUnitCommentController;
   let unitUserService: UnitUserService;
   let unitCommentService: UnitCommentService;
-  let itemCommentService: ItemCommentService;
   let usersService: UsersService;
 
   beforeEach(async () => {
@@ -82,12 +78,7 @@ describe('WorkspaceUnitCommentController', () => {
     controller = module.get<WorkspaceUnitCommentController>(WorkspaceUnitCommentController);
     unitUserService = module.get<UnitUserService>(UnitUserService);
     unitCommentService = module.get<UnitCommentService>(UnitCommentService);
-    itemCommentService = module.get<ItemCommentService>(ItemCommentService);
     usersService = module.get<UsersService>(UsersService);
-  });
-
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
   });
 
   // The access guards ask about the workspace in the path alone; the unit has to be held to it
@@ -158,45 +149,6 @@ describe('WorkspaceUnitCommentController', () => {
       expect(await controller.createComment({ user: { id: 7, name: 'max' } }, 1, dto)).toBe(1);
       expect(usersService.commentAuthorOf).toHaveBeenCalledWith(7);
       expect(unitCommentService.createCommentAs).toHaveBeenCalledWith({ id: 7, name: 'Muster, Max' }, 1, dto);
-    });
-  });
-
-  describe('patchCommentBody', () => {
-    it('should patch comment body', async () => {
-      const dto: UpdateUnitCommentDto = { body: 'new body', userId: 1 };
-      jest.spyOn(unitCommentService, 'patchCommentBody').mockResolvedValue(undefined);
-
-      await controller.patchCommentBody(1, dto);
-      expect(unitCommentService.patchCommentBody).toHaveBeenCalledWith(1, dto);
-    });
-  });
-
-  describe('patchCommentItems', () => {
-    it('should patch comment items', async () => {
-      const dto: UpdateUnitCommentUnitItemsDto = { unitItemUuids: ['item-uuid'], userId: 1 };
-      jest.spyOn(itemCommentService, 'updateCommentItems').mockResolvedValue(undefined);
-
-      await controller.patchCommentItems(1, 1, dto);
-      expect(itemCommentService.updateCommentItems).toHaveBeenCalledWith(1, 1, ['item-uuid']);
-    });
-  });
-
-  describe('removeComment', () => {
-    it('should remove a comment', async () => {
-      jest.spyOn(unitCommentService, 'removeComment').mockResolvedValue(undefined);
-
-      await controller.removeComment(1);
-      expect(unitCommentService.removeComment).toHaveBeenCalledWith(1);
-    });
-  });
-
-  describe('patchCommentVisibility', () => {
-    it('should patch comment visibility', async () => {
-      const dto: UpdateUnitCommentVisibilityDto = { hidden: true, userId: 1 };
-      jest.spyOn(unitCommentService, 'patchCommentVisibility').mockResolvedValue(undefined);
-
-      await controller.patchCommentVisibility(1, dto);
-      expect(unitCommentService.patchCommentVisibility).toHaveBeenCalledWith(1, dto);
     });
   });
 });

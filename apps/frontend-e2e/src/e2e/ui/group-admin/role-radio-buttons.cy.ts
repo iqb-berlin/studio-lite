@@ -7,20 +7,13 @@ import {
   secondaryWorkspace
 } from '../../../support/testData';
 import {
-  addFirstUser,
-  createGroup,
-  createNewUser,
-  deleteFirstUser,
-  deleteGroup,
-  deleteUser,
-  makeAdminOfGroup,
   clickIndexTabWsgAdmin,
   openWsTab,
   openUsersTab,
   waitForSuccess
 } from '../../../support/helpers';
+import { createGroupAdminBaseAPI } from '../../../support/helpers/test-base';
 import {
-  createWs,
   assertRoleRadioChecked,
   clickAccessRightsSaveButton,
   getRoleRadio,
@@ -36,14 +29,7 @@ import {
 
 describe('Role Radio Buttons – wsg-admin access rights', () => {
   before(() => {
-    addFirstUser();
-    createNewUser(standardUser);
-    createNewUser(secondaryUser);
-    createGroup(baseGroup);
-    createWs(primaryWorkspace, baseGroup);
-    createWs(secondaryWorkspace, baseGroup);
-    // makeAdminOfGroup navigates away — call last so it doesn't break createWs above
-    makeAdminOfGroup(baseGroup, [Cypress.expose('username')]);
+    createGroupAdminBaseAPI({ users: [{ user: standardUser }, { user: secondaryUser }] });
   });
 
   beforeEach(() => {
@@ -411,12 +397,5 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       assertRoleRadioChecked(secondaryWorkspace, AccessLevel.Admin, true);
       assertRoleRadioChecked(secondaryWorkspace, AccessLevel.Basic, false);
     });
-  });
-
-  after(() => {
-    deleteUser(standardUser.username);
-    deleteUser(secondaryUser.username);
-    deleteGroup(baseGroup);
-    deleteFirstUser();
   });
 });

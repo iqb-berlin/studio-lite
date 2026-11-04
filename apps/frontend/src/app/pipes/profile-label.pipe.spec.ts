@@ -3,10 +3,6 @@ import { ProfileLabelPipe } from './profile-label.pipe';
 describe('ProfileLabelPipe', () => {
   const pipe = new ProfileLabelPipe();
 
-  it('should be defined', () => {
-    expect(pipe).toBeDefined();
-  });
-
   it('should return empty string for null or undefined', () => {
     expect(pipe.transform(null)).toBe('');
     expect(pipe.transform(undefined)).toBe('');

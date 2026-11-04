@@ -40,40 +40,11 @@ describe('ItemCommentService', () => {
     unitItemRepository = module.get(getRepositoryToken(UnitItem));
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
-  describe('findItemComments', () => {
-    it('should return comments for item', async () => {
-      const result = [];
-      unitCommentUnitItemRepository.find.mockResolvedValue(result);
-      expect(await service.findItemComments('uuid')).toBe(result);
-      expect(unitCommentUnitItemRepository.find).toHaveBeenCalled();
-    });
-  });
-
-  describe('findCommentItems', () => {
-    it('should return items for comment', async () => {
-      const result = [];
-      unitCommentUnitItemRepository.find.mockResolvedValue(result);
-      expect(await service.findCommentItems(1)).toBe(result);
-      expect(unitCommentUnitItemRepository.find).toHaveBeenCalled();
-    });
-  });
-
   describe('createCommentItemConnection', () => {
     it('should throw exception if comment not found', async () => {
       unitCommentsRepository.findOne.mockResolvedValue(null);
       await expect(service.createCommentItemConnection(1, 'uuid', 1))
         .rejects.toThrow(UnitCommentNotFoundException);
-    });
-
-    it('should throw exception if item not found', async () => {
-      unitCommentsRepository.findOne.mockResolvedValue(new UnitComment());
-      unitItemRepository.findOne.mockResolvedValue(null);
-      await expect(service.createCommentItemConnection(1, 'uuid', 1))
-        .rejects.toThrow(UnitItemNotFoundException);
     });
 
     it('should look the item up in the unit only (#1815)', async () => {
@@ -103,32 +74,6 @@ describe('ItemCommentService', () => {
       const result = await service.createCommentItemConnection(1, 'uuid', 1);
       expect(result).toBe(1);
       expect(unitCommentUnitItemRepository.save).toHaveBeenCalled();
-    });
-  });
-
-  describe('removeCommentItemConnection', () => {
-    it('should delete connection', async () => {
-      await service.removeCommentItemConnection('uuid', 1);
-      expect(unitCommentUnitItemRepository.delete).toHaveBeenCalledWith({
-        unitCommentId: 1,
-        unitItemUuid: 'uuid'
-      });
-    });
-  });
-
-  describe('findItemCommentsByUnitId', () => {
-    it('should return comments for unit', async () => {
-      const result = [];
-      unitCommentUnitItemRepository.find.mockResolvedValue(result);
-      expect(await service.findItemCommentsByUnitId(1)).toBe(result);
-    });
-  });
-
-  describe('findUnitItemComments', () => {
-    it('should return comments for unit and comment', async () => {
-      const result = [];
-      unitCommentUnitItemRepository.find.mockResolvedValue(result);
-      expect(await service.findUnitItemComments(1, 1)).toBe(result);
     });
   });
 

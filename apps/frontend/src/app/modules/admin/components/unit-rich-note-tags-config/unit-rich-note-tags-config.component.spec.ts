@@ -1,13 +1,17 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, TestBed, fakeAsync
+} from '@angular/core/testing';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import {
+  MatSnackBar, MatSnackBarModule, MatSnackBarRef, TextOnlySnackBar
+} from '@angular/material/snack-bar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { createMock } from '@golevelup/ts-jest';
+import { UnitRichNoteTagDto } from '@studio-lite-lib/api-dto';
 import { UnitRichNoteTagsConfigComponent } from './unit-rich-note-tags-config.component';
 import { BackendService } from '../../services/backend.service';
 
@@ -31,7 +35,6 @@ describe('UnitRichNoteTagsConfigComponent', () => {
         MatFormFieldModule,
         MatInputModule,
         MatIconModule,
-        NoopAnimationsModule,
         UnitRichNoteTagsConfigComponent
       ],
       providers: [
@@ -42,12 +45,12 @@ describe('UnitRichNoteTagsConfigComponent', () => {
 
     fixture = TestBed.createComponent(UnitRichNoteTagsConfigComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+  const fieldValues = (): string[] => Array.from(fixture.nativeElement.querySelectorAll('input'))
+    .map(input => (input as HTMLInputElement).value);
+
+  const infoShown = (): boolean => fixture.nativeElement.querySelector('.info') !== null;
 
   it('should load config on init', () => {
     const config = ['http://test.url'];
@@ -55,6 +58,18 @@ describe('UnitRichNoteTagsConfigComponent', () => {
     component.loadData();
     expect(backendServiceMock.getUnitRichNoteTagsConfig).toHaveBeenCalled();
     expect(component.urls.at(0).value).toBe('http://test.url');
+  });
+
+  // Saving the empty field shown after a failed load would replace the stored URLs (#1993).
+  it('should offer no saving of URLs that could not be loaded', () => {
+    backendServiceMock.getUnitRichNoteTagsConfig.mockReturnValue(of(null));
+    component.isGlobal = true;
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-cy="admin-unit-rich-note-tags-not-loaded"]'))
+      .not.toBeNull();
+    expect(fixture.nativeElement.querySelector('input')).toBeNull();
+    expect(fixture.nativeElement.querySelector('button')).toBeNull();
   });
 
   it('should add and remove urls', () => {
@@ -110,4 +125,65 @@ describe('UnitRichNoteTagsConfigComponent', () => {
 
     expect(updateFormSpy).toHaveBeenCalledWith(['http://url2']);
   });
+
+  const tag: UnitRichNoteTagDto = { id: 'tag-1', label: [{ lang: 'de', value: 'Tag 1' }] };
+
+  // The settings of a group hold URLs, older ones the tags themselves.
+  it.each<[string, UnitRichNoteTagDto[] | string[] | null, string[]]>([
+    ['its urls without the empty ones', ['http://a.org', '', ' ', 'http://b.org'], ['http://a.org', 'http://b.org']],
+    ['tags stored as such in one field', [tag], [JSON.stringify([tag])]],
+    ['no field for a group without urls', null, []]
+  ])('should show %s', (_, config, fields) => {
+    fixture.componentRef.setInput('config', config);
+    fixture.detectChanges();
+
+    expect(fieldValues()).toEqual(fields);
+    expect(infoShown()).toBe(fields.length === 0);
+  });
+
+  // The settings of a group arrive after the form was created, when the page is opened directly.
+  it('should show the urls of a group that arrive after the form was created', () => {
+    fixture.componentRef.setInput('config', null);
+    fixture.detectChanges();
+
+    fixture.componentRef.setInput('config', ['http://a.org', 'http://b.org']);
+    fixture.detectChanges();
+
+    expect(fieldValues()).toEqual(['http://a.org', 'http://b.org']);
+  });
+
+  it('should not save an entry that is no url', () => {
+    component.addUrl('ftp://a.org');
+
+    component.saveData();
+
+    expect(backendServiceMock.setUnitRichNoteTags).not.toHaveBeenCalled();
+  });
+
+  it('should say when the urls could not be saved', () => {
+    const snackBar = fixture.debugElement.injector.get(MatSnackBar);
+    jest.spyOn(snackBar, 'open').mockReturnValue(createMock<MatSnackBarRef<TextOnlySnackBar>>());
+    backendServiceMock.setUnitRichNoteTags.mockReturnValue(of(false));
+    component.addUrl('http://a.org');
+
+    component.saveData();
+
+    expect(snackBar.open).toHaveBeenCalledWith('workspace.tags-saved-error', 'error', { duration: 3000 });
+    expect(component.dataChanged).toBe(true);
+  });
+
+  // #2094: what is entered while the save is under way was not sent, and a second save waits
+  it('keeps an entry made while saving unsaved and does not save twice meanwhile', fakeAsync(() => {
+    const answer = new Subject<boolean>();
+    backendServiceMock.setUnitRichNoteTags.mockReturnValue(answer);
+    component.urls.clear();
+    component.addUrl('http://gesendet');
+    component.saveData();
+    component.addUrl('http://danach');
+    component.saveData();
+    answer.next(true);
+
+    expect(backendServiceMock.setUnitRichNoteTags).toHaveBeenCalledTimes(1);
+    expect(component.dataChanged).toBe(true);
+  }));
 });

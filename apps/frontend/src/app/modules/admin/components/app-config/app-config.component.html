@@ -1,4 +1,6 @@
-@if (appConfig) {
+@if (configNotLoaded()) {
+  <p class="info" data-cy="admin-app-config-not-loaded">{{'config.config-data-not-loaded' | translate}}</p>
+} @else {
   <form [formGroup]="configForm"
         class="fx-column-start-stretch">
     <div class="fx-column-start-stretch">
@@ -73,8 +75,9 @@
       }
       <button mat-raised-button
               color="primary"
-              [disabled]="!dataChanged"
-              (click)="saveData()">
+              [disabled]="!dataChanged || save.saving()"
+              (click)="saveData()"
+              data-cy="admin-app-config-save-button">
         {{'save' | translate}}
       </button>
     </div>

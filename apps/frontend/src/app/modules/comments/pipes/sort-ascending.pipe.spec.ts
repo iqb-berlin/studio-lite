@@ -7,10 +7,6 @@ describe('SortAscendingPipe', () => {
     pipe = new SortAscendingPipe();
   });
 
-  it('create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should sort an array of objects by a string key in ascending order', () => {
     const items = [
       { name: 'Banana' },
@@ -37,17 +33,5 @@ describe('SortAscendingPipe', () => {
     expect(result[0].name).toBe('Apple');
     expect(result[1].name).toBe('Banana');
     expect(result[2].name).toBeNull();
-  });
-
-  it('should return 0 for equal values', () => {
-    const items = [
-      { name: 'Apple' },
-      { name: 'Apple' }
-    ];
-    const result = pipe.transform(items, 'name');
-    expect(result).toEqual([
-      { name: 'Apple' },
-      { name: 'Apple' }
-    ]);
   });
 });

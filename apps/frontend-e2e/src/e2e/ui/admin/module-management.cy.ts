@@ -1,7 +1,6 @@
 import {
   addFirstUser,
   addModules,
-  deleteFirstUser,
   deleteAllModules,
   clickIndexTabAdmin
 } from '../../../support/helpers';
@@ -10,10 +9,6 @@ import { modules } from '../../../support/testData';
 describe('Verona Module Management', () => {
   before(() => {
     addFirstUser();
-  });
-
-  after(() => {
-    deleteFirstUser();
   });
 
   it('uploads Verona modules successfully', () => {
@@ -38,7 +33,7 @@ describe('Verona Module Management', () => {
 
     // Verify Schemer module
     cy.contains('mat-row', 'Schemer').within(() => {
-      cy.contains('2.8.4').should('exist');
+      cy.contains('2.9.0').should('exist');
     });
 
     // Verify Aspect modules (editor and player)

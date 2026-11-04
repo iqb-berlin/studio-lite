@@ -6,7 +6,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
@@ -15,7 +15,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { UntypedFormGroup, FormControl } from '@angular/forms';
 import { provideHttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { WorkspaceGroupsComponent } from './workspace-groups.component';
 import { environment } from '../../../../../environments/environment';
 import { AppService } from '../../../../services/app.service';
@@ -111,19 +111,6 @@ describe('WorkspaceGroupsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('should load initial data', () => {
-    jest.useFakeTimers();
-    component.ngOnInit();
-    jest.runAllTimers();
-    expect(mockBackendService.getUsers).toHaveBeenCalled();
-    expect(mockBackendService.getWorkspaceGroupList).toHaveBeenCalled();
-    jest.useRealTimers();
-  });
-
   it('should add group', () => {
     const groupData = new UntypedFormGroup({ name: new FormControl('newGroup') });
     component.addGroup(groupData);
@@ -132,20 +119,12 @@ describe('WorkspaceGroupsComponent', () => {
     expect(mockBackendService.getWorkspaceGroupList).toHaveBeenCalled();
   });
 
-  it('should edit group', () => {
+  // Settings sent along would be laid over the stored ones and wipe the group's profiles (#1960).
+  it('should send the new name of a group and none of its settings', () => {
     const group = { id: 1, name: 'oldGroup' } as WorkspaceGroupInListDto;
     const groupData = new UntypedFormGroup({ name: new FormControl('newGroup') });
     component.editGroup({ selection: [group], group: groupData });
-    expect(mockBackendService.changeWorkspaceGroup)
-      .toHaveBeenCalledWith(expect.objectContaining({ id: 1, name: 'newGroup' }));
-    expect(mockSnackBar.open).toHaveBeenCalledWith('admin.group-edited', '', expect.anything());
-  });
-
-  it('should edit group settings', () => {
-    component.editGroupSettings({ states: [], profiles: [], selectedRow: 1 });
-    expect(mockBackendService.setWorkspaceGroupProfiles).toHaveBeenCalledWith(
-      expect.anything(), 1
-    );
+    expect(mockBackendService.changeWorkspaceGroup).toHaveBeenCalledWith({ id: 1, name: 'newGroup' });
     expect(mockSnackBar.open).toHaveBeenCalledWith('admin.group-edited', '', expect.anything());
   });
 
@@ -154,6 +133,12 @@ describe('WorkspaceGroupsComponent', () => {
     component.deleteGroups(groups);
     expect(mockBackendService.deleteWorkspaceGroups).toHaveBeenCalledWith([1]);
     expect(mockSnackBar.open).toHaveBeenCalledWith('admin.groups-deleted', '', expect.anything());
+  });
+
+  it('should show a failed deletion of groups for three seconds', () => {
+    (mockBackendService.deleteWorkspaceGroups as jest.Mock).mockReturnValueOnce(of(false));
+    component.deleteGroups([{ id: 1 }] as WorkspaceGroupInListDto[]);
+    expect(mockSnackBar.open).toHaveBeenCalledWith('admin.groups-not-deleted', 'error', { duration: 3000 });
   });
 
   it('should save users', () => {
@@ -196,5 +181,238 @@ describe('WorkspaceGroupsComponent', () => {
     (component as unknown as { updateUserList: () => void }).updateUserList();
 
     expect(mockBackendService.getWorkspaceGroupAdmins).toHaveBeenCalledWith(123);
+  });
+
+  const anna: UserInListDto = { id: 1, name: 'anna', isAdmin: false };
+  const bert: UserInListDto = { id: 2, name: 'bert', isAdmin: false };
+  const group5: WorkspaceGroupInListDto = { id: 5, name: 'group5' };
+  const group6: WorkspaceGroupInListDto = { id: 6, name: 'group6' };
+
+  const selectGroupWithAdmin = (): void => {
+    (mockBackendService.getUsers as jest.Mock).mockReturnValue(of([anna, bert]));
+    (mockBackendService.getWorkspaceGroupAdmins as jest.Mock).mockReturnValue(of([bert]));
+    component.createUserList();
+    component.tableSelectionRow.select(group5);
+  };
+
+  it('should check the admins of a selected group and nobody once it is deselected', () => {
+    selectGroupWithAdmin();
+
+    expect(mockBackendService.getWorkspaceGroupAdmins).toHaveBeenCalledWith(5);
+    expect(component.workspaceUsers.getChecks()).toEqual([2]);
+
+    component.tableSelectionRow.deselect(group5);
+
+    expect(component.workspaceUsers.getChecks()).toEqual([]);
+  });
+
+  it('should warn about unsaved admins when another group is selected', () => {
+    selectGroupWithAdmin();
+    component.workspaceUsers.entries.find(user => user.id === 1)!.isChecked = true;
+    component.workspaceUsers.updateHasChanged();
+
+    component.tableSelectionRow.select(group6);
+
+    expect(mockSnackBar.open).toHaveBeenCalledWith('access-rights.not-saved', 'warning', { duration: 3000 });
+  });
+
+  it('should keep the admins unsaved when saving them fails', () => {
+    (mockBackendService.setWorkspaceGroupAdmins as jest.Mock).mockReturnValue(of(false));
+    selectGroupWithAdmin();
+    component.workspaceUsers.entries.find(user => user.id === 1)!.isChecked = true;
+    component.workspaceUsers.updateHasChanged();
+
+    component.saveUsers();
+    fixture.detectChanges();
+
+    expect(mockSnackBar.open).toHaveBeenCalledWith('access-rights.not-changed', 'error', { duration: 3000 });
+    expect(fixture.nativeElement
+      .querySelector('[data-cy="admin-workspace-groups-save-button"]').disabled).toBe(false);
+  });
+
+  // A check set before the admins of the selected group arrived was reset by them (#2056).
+  describe('while the admins of the selected group load', () => {
+    let adminsOf5: Subject<UserInListDto[] | null>;
+    let adminsOf6: Subject<UserInListDto[] | null>;
+
+    const checkboxes = (): HTMLInputElement[] => Array.from(
+      fixture.nativeElement.querySelectorAll('mat-checkbox input[type="checkbox"]')
+    );
+    const saveButton = (): HTMLButtonElement => fixture.nativeElement
+      .querySelector('[data-cy="admin-workspace-groups-save-button"]');
+    // ngModel hands a changed disabled on to the checkbox in a promise of its own, which
+    // fakeAsync does not reach
+    const render = async (): Promise<void> => {
+      fixture.detectChanges();
+      await Promise.resolve();
+      fixture.detectChanges();
+    };
+
+    beforeEach(() => {
+      adminsOf5 = new Subject<UserInListDto[] | null>();
+      adminsOf6 = new Subject<UserInListDto[] | null>();
+      (mockBackendService.getUsers as jest.Mock).mockReturnValue(of([anna, bert]));
+      (mockBackendService.getWorkspaceGroupAdmins as jest.Mock)
+        .mockImplementation((id: number) => (id === 5 ? adminsOf5 : adminsOf6));
+      component.createUserList();
+    });
+
+    it('should lock the checks until the admins have arrived', async () => {
+      await render();
+      component.tableSelectionRow.select(group5);
+      fixture.detectChanges();
+
+      expect(checkboxes()).toHaveLength(2);
+      expect(checkboxes().every(input => input.disabled)).toBe(true);
+
+      adminsOf5.next([bert]);
+      await render();
+
+      expect(checkboxes().every(input => !input.disabled)).toBe(true);
+    });
+
+    it('should not save the checks of the group before onto the one still loading', () => {
+      component.tableSelectionRow.select(group5);
+      adminsOf5.next([]);
+      component.workspaceUsers.entries.find(user => user.id === 1)!.isChecked = true;
+      component.workspaceUsers.updateHasChanged();
+      component.tableSelectionRow.select(group6);
+      fixture.detectChanges();
+
+      expect(saveButton().disabled).toBe(true);
+
+      component.saveUsers();
+
+      expect(mockBackendService.setWorkspaceGroupAdmins).not.toHaveBeenCalled();
+    });
+
+    it('should drop the late admins of the group selected before', () => {
+      component.tableSelectionRow.select(group5);
+      component.tableSelectionRow.select(group6);
+
+      adminsOf5.next([bert]);
+
+      expect(component.workspaceUsers.getChecks()).toEqual([]);
+
+      adminsOf6.next([anna]);
+
+      expect(component.workspaceUsers.getChecks()).toEqual([1]);
+      expect(mockAppService.dataLoading).toBe(false);
+    });
+
+    it('should take the spinner down when the page is left before the admins arrive', () => {
+      component.tableSelectionRow.select(group5);
+
+      fixture.destroy();
+
+      expect(mockAppService.dataLoading).toBe(false);
+    });
+
+    // Without them the group showed no admins, and saving one check replaced the stored ones (#2070).
+    it('should keep the checks locked when the admins could not be loaded', async () => {
+      const notLoadedHint = (): HTMLElement | null => fixture.nativeElement
+        .querySelector('[data-cy="admin-workspace-groups-admins-not-loaded"]');
+      await render();
+      component.tableSelectionRow.select(group5);
+      adminsOf5.next(null);
+      await render();
+
+      expect(notLoadedHint()).not.toBeNull();
+      expect(checkboxes()).toHaveLength(0);
+      expect(mockAppService.dataLoading).toBe(false);
+
+      component.workspaceUsers.entries.find(user => user.id === 1)!.isChecked = true;
+      component.workspaceUsers.updateHasChanged();
+      fixture.detectChanges();
+
+      expect(saveButton().disabled).toBe(true);
+
+      component.saveUsers();
+
+      expect(mockBackendService.setWorkspaceGroupAdmins).not.toHaveBeenCalled();
+
+      component.tableSelectionRow.clear();
+      fixture.detectChanges();
+
+      expect(notLoadedHint()).toBeNull();
+
+      component.tableSelectionRow.select(group6);
+      adminsOf6.next([anna]);
+      await render();
+
+      expect(notLoadedHint()).toBeNull();
+      expect(checkboxes().every(input => !input.disabled)).toBe(true);
+    });
+  });
+
+  const groupForm = new UntypedFormGroup({ name: new FormControl('newGroup') });
+
+  type GroupChange = 'addWorkspaceGroup' | 'changeWorkspaceGroup' | 'setWorkspaceGroupProfiles';
+  it.each<[string, (groups: WorkspaceGroupsComponent) => void, GroupChange, string]>([
+    ['adding a group', groups => groups.addGroup(groupForm), 'addWorkspaceGroup', 'admin.group-not-created'],
+    [
+      'renaming a group',
+      groups => groups.editGroup({ selection: [group5], group: groupForm }),
+      'changeWorkspaceGroup',
+      'admin.group-not-edited'
+    ],
+    [
+      'changing the profiles of a group',
+      groups => groups.editGroupSettings({ profiles: [], selectedRow: 5 }),
+      'setWorkspaceGroupProfiles',
+      'admin.group-not-edited'
+    ]
+  ])('should say when %s fails and keep the list', (_, act, method, message) => {
+    (mockBackendService[method] as jest.Mock).mockReturnValue(of(false));
+    (mockBackendService.getWorkspaceGroupList as jest.Mock).mockClear();
+
+    act(component);
+
+    expect(mockSnackBar.open).toHaveBeenCalledWith(message, 'error', { duration: 3000 });
+    expect(mockBackendService.getWorkspaceGroupList).not.toHaveBeenCalled();
+  });
+
+  it('should reload the groups after the profiles of one were changed', () => {
+    (mockBackendService.getWorkspaceGroupList as jest.Mock).mockClear();
+
+    component.editGroupSettings({ profiles: [], selectedRow: 5 });
+
+    expect(mockSnackBar.open).toHaveBeenCalledWith('admin.group-edited', '', { duration: 1000 });
+    expect(mockBackendService.getWorkspaceGroupList).toHaveBeenCalled();
+  });
+
+  const closeConfirmationWith = (result: boolean | undefined) => jest
+    .spyOn(fixture.debugElement.injector.get(MatDialog), 'open')
+    .mockReturnValue({ afterClosed: () => of(result) } as MatDialogRef<unknown>);
+
+  it('should delete a group once its deletion is confirmed', () => {
+    closeConfirmationWith(true);
+
+    component.openDeleteDialog(group5);
+
+    expect(mockBackendService.deleteWorkspaceGroups).toHaveBeenCalledWith([5]);
+  });
+
+  // Esc, a click beside the dialog and navigation close it with undefined (#1844)
+  it.each([false, undefined])('should not delete a group when its confirmation closes with %s', result => {
+    closeConfirmationWith(result);
+
+    component.openDeleteDialog(group5);
+
+    expect(mockBackendService.deleteWorkspaceGroups).not.toHaveBeenCalled();
+  });
+
+  it.each<[string, string, string[]]>([
+    ['part of the name in any case', 'math', ['Mathematik']],
+    ['the id', '12', ['Deutsch']]
+  ])('should find groups by %s', (_, filter, names) => {
+    (mockBackendService.getWorkspaceGroupList as jest.Mock).mockReturnValue(of([
+      { id: 3, name: 'Mathematik' }, { id: 12, name: 'Deutsch' }
+    ]));
+    component.createUserList();
+
+    component.objectsDatasource.filter = filter;
+
+    expect(component.objectsDatasource.filteredData.map(group => group.name)).toEqual(names);
   });
 });

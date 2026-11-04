@@ -135,13 +135,6 @@ describe('SelectUnitComponent', () => {
     fixture.detectChanges();
   };
 
-  it('should create', async () => {
-    await setup();
-
-    expect(component)
-      .toBeTruthy();
-  });
-
   it('should create a form when selecting from other workspaces', async () => {
     await setup({ fromOtherWorkspacesToo: true });
 

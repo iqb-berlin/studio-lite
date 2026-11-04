@@ -6,6 +6,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { TranslateModule } from '@ngx-translate/core';
 import { provideHttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
+import { saveAs } from 'file-saver-es';
 import {
   Component, Input, Output, EventEmitter
 } from '@angular/core';
@@ -17,6 +18,8 @@ import { environment } from '../../../../../environments/environment';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { WorkspacesMenuComponent } from '../workspaces-menu/workspaces-menu.component';
 import { I18nService } from '../../../../services/i18n.service';
+
+jest.mock('file-saver-es', () => ({ saveAs: jest.fn() }));
 
 describe('WorkspacesComponent', () => {
   let component: WorkspacesComponent;
@@ -75,11 +78,6 @@ describe('WorkspacesComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    fixture.detectChanges();
-    expect(component).toBeTruthy();
-  });
-
   it('should load workspaces on init', async () => {
     fixture.detectChanges();
     await fixture.whenStable();
@@ -103,8 +101,14 @@ describe('WorkspacesComponent', () => {
     expect(component.isRouteHidden(ws, 'editor')).toBe(false);
   });
 
-  it('should download workspaces report', () => {
+  // A failed report never reached the component, and the spinner stayed (#2106)
+  it('should save no file and take the spinner down when the report could not be loaded', () => {
+    jest.mocked(saveAs).mockClear();
+    (mockBackendService.getXlsWorkspaces as jest.Mock).mockReturnValue(of(null));
+
     component.xlsxDownloadWorkspaceReport();
-    expect(mockBackendService.getXlsWorkspaces).toHaveBeenCalled();
+
+    expect(saveAs).not.toHaveBeenCalled();
+    expect(mockAppService.dataLoading).toBe(false);
   });
 });

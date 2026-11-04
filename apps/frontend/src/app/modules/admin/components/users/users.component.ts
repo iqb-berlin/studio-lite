@@ -4,7 +4,7 @@ import {
 } from '@angular/material/table';
 import { DatePipe } from '@angular/common';
 import {
-  ViewChild, Component, OnInit, OnDestroy
+  ViewChild, Component, OnInit, OnDestroy, computed, inject, signal
 } from '@angular/core';
 import {
   fromEvent, Subject, Subscription, timer
@@ -14,7 +14,7 @@ import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { UntypedFormGroup, FormsModule } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
 import {
-  CreateUserDto, UserFullDto, UserInListDto, WorkspaceGroupInListDto, UserSessionInfoDto
+  CreateUserDto, UserFullDto, WorkspaceGroupInListDto, UserSessionInfoDto
 } from '@studio-lite-lib/api-dto';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -24,6 +24,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIcon } from '@angular/material/icon';
 import { startWith, takeUntil } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { ADMIN_USER_LIST_POLL_INTERVAL_MS } from '@studio-lite/shared-code';
 import { WorkspaceGroupToCheckCollection } from '../../models/workspace-group-to-check-collection.class';
 import { IsSelectedIdPipe } from '../../../../pipes/is-selected-id.pipe';
@@ -33,10 +34,12 @@ import { EntriesDividerComponent } from '../../../../components/entries-divider/
 import {
   BackendService
 } from '../../services/backend.service';
+import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { HeartbeatService } from '../../../../services/heartbeat.service';
 import { DeleteDialogComponent } from '../../../../components/delete-dialog/delete-dialog.component';
 import { CountSessionsWithStatusPipe } from '../../../../pipes/count-sessions-with-status.pipe';
+import { ChangeResultService } from '../../../../services/change-result.service';
 
 /**
  * The user administration: every account with its sessions and what it may administer, and the acts
@@ -62,10 +65,23 @@ export class UsersComponent implements OnInit, OnDestroy {
   activeSessionCount = 0;
   passiveSessionCount = 0;
   orphanedSessionCount = 0;
+  // Its row offers no delete button, its dialog no way to give up the administrator right: the
+  // API refuses both (#1949, #1950).
+  readonly ownUserId: number;
+  private readonly loadingGroupsState = signal(false);
+  // A check set before the groups of the selected user arrive would be reset by them (#2056).
+  readonly loadingGroups = this.loadingGroupsState.asReadonly();
+  private readonly groupsNotLoadedState = signal(false);
+  // Saving a check onto the empty list would replace the stored groups (#2070).
+  readonly groupsNotLoaded = this.groupsNotLoadedState.asReadonly();
+  readonly groupsLocked = computed(() => this.loadingGroups() || this.groupsNotLoaded());
+  private groupsRequest?: Subscription;
   private pollingSubscription: Subscription | null = null;
   private readonly ngUnsubscribe = new Subject<void>();
 
   @ViewChild(MatSort) sort = new MatSort();
+
+  private changeResult = inject(ChangeResultService);
 
   constructor(
     private appService: AppService,
@@ -73,15 +89,18 @@ export class UsersComponent implements OnInit, OnDestroy {
     private heartbeatService: HeartbeatService,
     private snackBar: MatSnackBar,
     private translateService: TranslateService,
-    private deleteConfirmDialog: MatDialog
+    private deleteConfirmDialog: MatDialog,
+    private appBackendService: AppBackendService,
+    private router: Router
   ) {
+    this.ownUserId = this.appService.authData.userId;
     this.tableSelectionRow.changed.pipe(takeUntil(this.ngUnsubscribe)).subscribe(
       r => {
-        if (r.added.length > 0) {
-          this.selectedUser = r.added[0].id;
-        } else {
-          this.selectedUser = 0;
-        }
+        const selectedUser = r.added.length > 0 ? r.added[0].id : 0;
+        // A poll selects the fresh row of the user already selected; loading the user's groups
+        // again would reset the checks not saved yet (#2056).
+        if (selectedUser && selectedUser === this.selectedUser) return;
+        this.selectedUser = selectedUser;
         this.updateWorkspaceGroupList();
       }
     );
@@ -112,6 +131,8 @@ export class UsersComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stopPolling();
+    // The requests cancelled below cannot take the spinner down any more (#2105)
+    this.appService.dataLoading = false;
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
   }
@@ -130,18 +151,7 @@ export class UsersComponent implements OnInit, OnDestroy {
     this.backendService.addUser(user).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
       respOk => {
         this.updateUserList();
-        if (respOk) {
-          this.snackBar.open(
-            this.translateService.instant('admin.user-created'),
-            '',
-            { duration: 1000 }
-          );
-        } else {
-          this.snackBar.open(
-            this.translateService.instant('admin.user-not-created'),
-            this.translateService.instant('error'),
-            { duration: 3000 });
-        }
+        this.changeResult.show(respOk, 'admin.user-created', 'admin.user-not-created');
       }
     );
   }
@@ -166,20 +176,27 @@ export class UsersComponent implements OnInit, OnDestroy {
     if (newIsAdmin !== value.selection[0].isAdmin) changedData.isAdmin = newIsAdmin;
     this.backendService.changeUserData(id, changedData).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
       respOk => {
-        this.updateUserList();
-        if (respOk) {
-          this.snackBar.open(
-            this.translateService.instant('admin.user-edited'),
-            '',
-            { duration: 1000 }
-          );
-        } else {
-          this.snackBar.open(
-            this.translateService.instant('admin.user-not-edited'),
-            this.translateService.instant('error'),
-            { duration: 3000 });
+        if (respOk && changedData.password && id === this.ownUserId) {
+          this.logOutAfterOwnPasswordChange();
+          return;
         }
+        this.updateUserList();
+        this.changeResult.show(respOk, 'admin.user-edited', 'admin.user-not-edited');
       }
+    );
+  }
+
+  // The server has ended every session of the account, the administrator's own included (#1901).
+  // Leaving first, as LogoutDirective does, keeps the open list from firing requests without a token.
+  private logOutAfterOwnPasswordChange(): void {
+    this.appService.dataLoading = false;
+    this.router.navigate(['/']).then(done => {
+      if (done) this.appBackendService.logout();
+    });
+    this.snackBar.open(
+      this.translateService.instant('user-profile.new-password'),
+      this.translateService.instant('user-profile.ok'),
+      { duration: 3000 }
     );
   }
 
@@ -201,17 +218,10 @@ export class UsersComponent implements OnInit, OnDestroy {
         users.forEach((r: UserFullDto) => usersToDelete.push(r.id));
         this.backendService.deleteUsers(usersToDelete).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
           respOk => {
+            this.changeResult.show(respOk, 'admin.users-deleted', 'admin.users-not-deleted');
             if (respOk) {
-              this.snackBar.open(
-                this.translateService.instant('admin.users-deleted'),
-                '',
-                { duration: 1000 });
               this.updateUserList();
             } else {
-              this.snackBar.open(
-                this.translateService.instant('admin.users-not-deleted'),
-                this.translateService.instant('error'),
-                { duration: 3000 });
               this.appService.dataLoading = false;
             }
           }
@@ -291,20 +301,34 @@ export class UsersComponent implements OnInit, OnDestroy {
         { duration: 3000 }
       );
     }
+    // A late answer for the user selected before would overwrite the groups of this one.
+    if (this.loadingGroups()) {
+      this.groupsRequest?.unsubscribe();
+      this.loadingGroupsState.set(false);
+      this.appService.dataLoading = false;
+    }
+    this.groupsNotLoadedState.set(false);
     if (this.selectedUser > 0) {
       this.appService.dataLoading = true;
-      this.backendService.getWorkspaceGroupsByAdmin(this.selectedUser).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
-        (workspaceGroups: WorkspaceGroupInListDto[]) => {
-          this.userWorkspaceGroups.setChecks(workspaceGroups);
-          this.appService.dataLoading = false;
-        }
-      );
+      this.loadingGroupsState.set(true);
+      this.groupsRequest = this.backendService.getWorkspaceGroupsByAdmin(this.selectedUser)
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(
+          (workspaceGroups: WorkspaceGroupInListDto[] | null) => {
+            this.userWorkspaceGroups.setChecks(workspaceGroups ?? undefined);
+            this.groupsNotLoadedState.set(!workspaceGroups);
+            this.loadingGroupsState.set(false);
+            this.appService.dataLoading = false;
+          }
+        );
     } else {
       this.userWorkspaceGroups.setChecks();
     }
   }
 
   saveWorkspaces(): void {
+    // The entries hold the checks of the user selected before, or of no group.
+    if (this.groupsLocked()) return;
     if (this.selectedUser > 0) {
       if (this.userWorkspaceGroups.hasChanged) {
         this.appService.dataLoading = true;
@@ -312,20 +336,10 @@ export class UsersComponent implements OnInit, OnDestroy {
           this.selectedUser, this.userWorkspaceGroups.getChecks()
         ).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
           respOk => {
+            this.changeResult.show(respOk, 'access-rights.changed', 'access-rights.not-changed');
             if (respOk) {
-              this.snackBar.open(
-                this.translateService.instant('access-rights.changed'),
-                '',
-                { duration: 1000 }
-              );
               this.userWorkspaceGroups.setHasChangedFalse();
               this.userWorkspaceGroups.sortEntries();
-            } else {
-              this.snackBar.open(
-                this.translateService.instant('access-rights.not-changed'),
-                this.translateService.instant('error'),
-                { duration: 3000 }
-              );
             }
             this.appService.dataLoading = false;
           }
@@ -468,7 +482,13 @@ export class UsersComponent implements OnInit, OnDestroy {
     });
   }
 
-  toggleRowSelection(row: UserInListDto): void {
-    this.tableSelectionRow.toggle(row);
+  // After a poll the selection holds the fresh row of the user and the table the one it updated in
+  // place: told apart by identity, a click on the selected row would select it again (#2056).
+  toggleRowSelection(row: UserFullDto): void {
+    if (this.tableSelectionRow.selected[0]?.id === row.id) {
+      this.tableSelectionRow.clear();
+    } else {
+      this.tableSelectionRow.select(row);
+    }
   }
 }

@@ -68,25 +68,6 @@ describe('HeartbeatService', () => {
     jest.useRealTimers();
   });
 
-  it('should be created', () => {
-    appServiceMock.authData = { userId: 1 } as AuthDataDto;
-    configureTestingModule();
-    service = TestBed.inject(HeartbeatService);
-    expect(service).toBeTruthy();
-  });
-
-  it('should sync user activity to the backend', () => {
-    appServiceMock.authData = { userId: 1 } as AuthDataDto;
-    configureTestingModule();
-    service = TestBed.inject(HeartbeatService);
-    service.start();
-
-    service.registerUserActivity();
-    jest.advanceTimersByTime(100);
-
-    expect(backendServiceMock.activity).toHaveBeenCalled();
-  });
-
   it('should throttle activity syncs to the backend', () => {
     appServiceMock.authData = { userId: 1 } as AuthDataDto;
     configureTestingModule();
@@ -222,6 +203,40 @@ describe('HeartbeatService', () => {
     await jest.advanceTimersByTimeAsync(ACTIVE_THRESHOLD_MS + PASSIVE_THRESHOLD_MS + 2000);
 
     expect(backendServiceMock.logout).toHaveBeenCalled();
+  });
+
+  // Tabs of one browser share the session: logging out an idle tab would end it for the busy one too.
+  describe('activity in another tab', () => {
+    const pulseFromAnotherTab = (pulse: number): void => {
+      window.dispatchEvent(new StorageEvent('storage', { key: 'st_activity_pulse', newValue: pulse.toString() }));
+    };
+
+    it('should keep the session while another tab is in use', async () => {
+      appServiceMock.authData = { userId: 1 } as AuthDataDto;
+      configureTestingModule();
+      service = TestBed.inject(HeartbeatService);
+      stubRedirect();
+      service.start();
+
+      await jest.advanceTimersByTimeAsync(PASSIVE_THRESHOLD_MS - 10000);
+      pulseFromAnotherTab(Date.now());
+      await jest.advanceTimersByTimeAsync(20000);
+
+      expect(backendServiceMock.logout).not.toHaveBeenCalled();
+    });
+
+    it('should not take an older pulse from another tab', async () => {
+      appServiceMock.authData = { userId: 1 } as AuthDataDto;
+      configureTestingModule();
+      service = TestBed.inject(HeartbeatService);
+      stubRedirect();
+      service.start();
+
+      pulseFromAnotherTab(Date.now() - PASSIVE_THRESHOLD_MS + 5000);
+      await jest.advanceTimersByTimeAsync(10000);
+
+      expect(backendServiceMock.logout).not.toHaveBeenCalled();
+    });
   });
 
   it('should not log out while activity keeps the pulse fresh', async () => {

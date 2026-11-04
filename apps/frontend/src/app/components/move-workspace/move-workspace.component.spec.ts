@@ -7,7 +7,7 @@ import { By } from '@angular/platform-browser';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatSelectModule } from '@angular/material/select';
 import { BehaviorSubject } from 'rxjs';
-import { WorkspaceGroupFullDto } from '@studio-lite-lib/api-dto';
+import { WorkspaceGroupDto } from '@studio-lite-lib/api-dto';
 import { WsgAdminService } from '../../modules/wsg-admin/services/wsg-admin.service';
 import { MoveWorkspaceComponent, MoveComponentData } from './move-workspace.component';
 
@@ -24,9 +24,9 @@ describe('MoveWorkspaceComponent', () => {
     default: '1',
     okButtonLabel: 'Move OK',
     workspaceGroups: [
-      { id: 1, name: 'Group 1' } as WorkspaceGroupFullDto,
-      { id: 2, name: 'Group 2' } as WorkspaceGroupFullDto,
-      { id: 3, name: 'Group 3' } as WorkspaceGroupFullDto
+      { id: 1, name: 'Group 1' } as WorkspaceGroupDto,
+      { id: 2, name: 'Group 2' } as WorkspaceGroupDto,
+      { id: 3, name: 'Group 3' } as WorkspaceGroupDto
     ],
     selectedRows: []
   };
@@ -63,24 +63,11 @@ describe('MoveWorkspaceComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should filter out the currently selected workspace group from typedData.workspaceGroups', () => {
     expect(component.typedData.workspaceGroups.length).toBe(2);
     expect(component.typedData.workspaceGroups.find(wsg => wsg.id === 1)).toBeUndefined();
     expect(component.typedData.workspaceGroups.find(wsg => wsg.id === 2)).toBeDefined();
     expect(component.typedData.workspaceGroups.find(wsg => wsg.id === 3)).toBeDefined();
-  });
-
-  it('should render the correct title, content, and warning', () => {
-    const titleElement = fixture.debugElement.query(By.css('h1[mat-dialog-title]')).nativeElement;
-    const contentElements = fixture.debugElement.queryAll(By.css('mat-dialog-content p'));
-
-    expect(titleElement.textContent).toContain(mockDialogData.title);
-    expect(contentElements[0].nativeElement.textContent).toContain(mockDialogData.content);
-    expect(contentElements[1].nativeElement.textContent).toContain(mockDialogData.warning);
   });
 
   it('should populate mat-select with filtered workspace groups', async () => {

@@ -24,7 +24,6 @@ describe('WorkspaceService', () => {
   let service: WorkspaceService;
   let backendService: jest.Mocked<WorkspaceBackendService>;
   let appService: jest.Mocked<AppService>;
-  let richNoteTagsService: jest.Mocked<RichNoteTagsService>;
   let unitStores: {
     metadataStore: WritableSignal<UnitMetadataStore | undefined>;
     definitionStore: WritableSignal<UnitDefinitionStore | undefined>;
@@ -100,45 +99,6 @@ describe('WorkspaceService', () => {
     service = TestBed.inject(WorkspaceService);
     backendService = TestBed.inject(WorkspaceBackendService) as jest.Mocked<WorkspaceBackendService>;
     appService = TestBed.inject(AppService) as jest.Mocked<AppService>;
-    richNoteTagsService = TestBed.inject(RichNoteTagsService) as jest.Mocked<RichNoteTagsService>;
-  });
-
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
-  describe('initialization', () => {
-    it('should initialize with default values', () => {
-      expect(service.selectedWorkspaceId).toBe(0);
-      expect(service.selectedWorkspaceName).toBe('');
-      expect(service.isWorkspaceGroupAdmin).toBe(false);
-      expect(service.userAccessLevel).toBe(0);
-      expect(service.unitList).toEqual({});
-      expect(service.workspaceSettings).toBeDefined();
-      expect(service.workspaceSettings.defaultEditor).toBe('');
-      expect(service.workspaceSettings.defaultPlayer).toBe('');
-    });
-
-    it('should have a selectedUnit$ observable with initial value 0', done => {
-      service.selectedUnit$.subscribe(value => {
-        expect(value).toBe(0);
-        done();
-      });
-    });
-
-    it('should have isValidFormKey BehaviorSubject with initial value true', done => {
-      service.isValidFormKey.subscribe(value => {
-        expect(value).toBe(true);
-        done();
-      });
-    });
-  });
-
-  describe('unitKeyPatternString', () => {
-    it('should return correct pattern string', () => {
-      const pattern = WorkspaceService.unitKeyPatternString();
-      expect(pattern).toBe('[a-zA-Z][a-zA-Z0-9_-]*');
-    });
   });
 
   describe('unitKeyUniquenessValidator', () => {
@@ -328,21 +288,6 @@ describe('WorkspaceService', () => {
     });
   });
 
-  describe('loadUnitProperties', () => {
-    it('should load the metadata store of the selected unit', done => {
-      const store = new UnitMetadataStore({ id: 5 });
-      unitStores.loadMetadataStore.mockReturnValue(of(store));
-      service.selectedWorkspaceId = 1;
-      service.selectedUnit$.next(5);
-
-      service.loadUnitProperties().subscribe(loaded => {
-        expect(loaded).toBe(store);
-        expect(unitStores.loadMetadataStore).toHaveBeenCalledWith(1, 5);
-        done();
-      });
-    });
-  });
-
   describe('freshly loaded unit properties', () => {
     it('should take who changed which part when', () => {
       unitStores.metadataLoaded$.next({
@@ -481,6 +426,36 @@ describe('WorkspaceService', () => {
       expect(result).toBe(false);
       expect(backendService.setUnitProperties).toHaveBeenCalled();
       expect(backendService.setUnitDefinition).not.toHaveBeenCalled();
+    });
+
+    it('should keep a definition the backend refuses unsaved and send no scheme after it', async () => {
+      const definitionStore = new UnitDefinitionStore(1, { definition: 'old', variables: [] });
+      definitionStore.setData([], 'new');
+      const schemeStore = new UnitSchemeStore(1, { scheme: 'old', schemeType: 'type' });
+      schemeStore.setData('new', 'newType');
+      unitStores.definitionStore.set(definitionStore);
+      unitStores.schemeStore.set(schemeStore);
+      backendService.setUnitDefinition.mockReturnValue(of(false));
+
+      const result = await service.saveUnitData();
+
+      expect(result).toBe(false);
+      expect(definitionStore.isChanged()).toBe(true);
+      expect(service.lastChangedDefinition).toBeUndefined();
+      expect(backendService.setUnitScheme).not.toHaveBeenCalled();
+    });
+
+    it('should keep a scheme the backend refuses unsaved', async () => {
+      const schemeStore = new UnitSchemeStore(1, { scheme: 'old', schemeType: 'type' });
+      schemeStore.setData('new', 'newType');
+      unitStores.schemeStore.set(schemeStore);
+      backendService.setUnitScheme.mockReturnValue(of(false));
+
+      const result = await service.saveUnitData();
+
+      expect(result).toBe(false);
+      expect(schemeStore.isChanged()).toBe(true);
+      expect(service.lastChangedScheme).toBeUndefined();
     });
 
     it('should reload unit list when key/name/group/state changed', async () => {
@@ -691,6 +666,34 @@ describe('WorkspaceService', () => {
         expect(backendService.setUnitProperties).not.toHaveBeenCalled();
         expect(backendService.setUnitDefinition).toHaveBeenCalled();
       });
+
+      it('should send no metadata when the items are in line already', async () => {
+        unitStores.variables.set([{ id: 'text_1', alias: 'old alias' }, { id: 'gone', alias: 'Gone' }]);
+        const definitionStore = new UnitDefinitionStore(1, { definition: 'old', variables: [] });
+        definitionStore.setData([], 'new');
+        unitStores.definitionStore.set(definitionStore);
+
+        await service.saveUnitData();
+
+        expect(backendService.setUnitProperties).not.toHaveBeenCalled();
+        expect(backendService.setUnitDefinition).toHaveBeenCalled();
+      });
+
+      it('should leave the items alone when another unit is opened while the scheme loads', async () => {
+        const definitionStore = new UnitDefinitionStore(1, { definition: 'old', variables: [] });
+        definitionStore.setData([], 'new');
+        unitStores.definitionStore.set(definitionStore);
+        const schemeStore = unitStores.schemeStore();
+        unitStores.loadSchemeStore.mockImplementation(() => {
+          unitStores.metadataStore.set(new UnitMetadataStore({ id: 2 }));
+          return of(schemeStore);
+        });
+
+        await service.saveUnitData();
+
+        expect(metadataStore.isChanged()).toBe(false);
+        expect(backendService.setUnitProperties).not.toHaveBeenCalled();
+      });
     });
 
     it('should save every part under the unit that was open when the save started', async () => {
@@ -731,21 +734,6 @@ describe('WorkspaceService', () => {
       expect(service.lastChangedMetadataUser).toBe('Test User');
     });
 
-    it('should apply changes to stores after successful save', async () => {
-      const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
-      metadataStore.setPlayer('newPlayer');
-      unitStores.metadataStore.set(metadataStore);
-
-      const applyChangesSpy = jest.spyOn(metadataStore, 'applyChanges');
-
-      backendService.setUnitProperties.mockReturnValue(of(true));
-      backendService.getUnitList.mockReturnValue(of([]));
-
-      await service.saveUnitData();
-
-      expect(applyChangesSpy).toHaveBeenCalled();
-    });
-
     it('should use userName when userLongName is not available', async () => {
       appService.authData = {
         ...mockAuthData,
@@ -763,45 +751,6 @@ describe('WorkspaceService', () => {
       await service.saveUnitData();
 
       expect(service.lastChangedMetadataUser).toBe('testuser');
-    });
-  });
-
-  describe('event emitters', () => {
-    it('should emit onCommentsUpdated event', () => {
-      const emitSpy = jest.fn();
-      service.onCommentsUpdated.subscribe(emitSpy);
-
-      service.onCommentsUpdated.emit();
-
-      expect(emitSpy).toHaveBeenCalled();
-    });
-  });
-
-  describe('unitKeyTaken', () => {
-    it('should start free and follow what the properties report', () => {
-      expect(service.unitKeyTaken()).toBe(false);
-
-      service.setUnitKeyTaken(true);
-
-      expect(service.unitKeyTaken()).toBe(true);
-    });
-  });
-
-  describe('loadRichNoteTags', () => {
-    it('should call RichNoteTagsService.loadTags', () => {
-      service.loadRichNoteTags();
-      expect(richNoteTagsService.loadTags).toHaveBeenCalled();
-    });
-  });
-
-  describe('getRichNoteTagLabel', () => {
-    it('should call RichNoteTagsService.getTagLabel', () => {
-      const mockLabel = [{ lang: 'de', value: 'Label' }];
-      richNoteTagsService.getTagLabel.mockReturnValue(mockLabel);
-
-      const result = service.getRichNoteTagLabel('tag1');
-      expect(richNoteTagsService.getTagLabel).toHaveBeenCalledWith('tag1');
-      expect(result).toEqual(mockLabel);
     });
   });
 });

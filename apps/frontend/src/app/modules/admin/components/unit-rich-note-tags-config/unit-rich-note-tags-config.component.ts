@@ -1,5 +1,5 @@
 import {
-  Component, OnInit, OnDestroy, OnChanges, Input, Output, EventEmitter, SimpleChanges
+  Component, OnInit, OnDestroy, OnChanges, Input, Output, EventEmitter, SimpleChanges, signal
 } from '@angular/core';
 import {
   FormBuilder, FormGroup, FormArray, FormsModule, ReactiveFormsModule, Validators
@@ -16,6 +16,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { UnitRichNoteTagDto } from '@studio-lite-lib/api-dto';
 
 import { BackendService } from '../../services/backend.service';
+import { SaveLock } from '../../../../classes/save-lock.class';
 
 /**
  * The editor for the rich-note tags: either the tags themselves, or the URL of a vocabulary they are
@@ -47,6 +48,11 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy, OnCha
 
   configForm: FormGroup;
   dataChanged = false;
+  // One save at a time, and what it sent: what is entered meanwhile stays a change (#2094).
+  readonly save = new SaveLock();
+  private readonly configNotLoadedState = signal(false);
+  // Without the stored URLs the form is not shown: saving it would replace them (#1993).
+  readonly configNotLoaded = this.configNotLoadedState.asReadonly();
   private ngUnsubscribe = new Subject<void>();
   private isUpdatingForm = false;
 
@@ -100,7 +106,8 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy, OnCha
     this.backendService.getUnitRichNoteTagsConfig()
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(config => {
-        this.updateForm(config);
+        this.configNotLoadedState.set(config === null);
+        if (config !== null) this.updateForm(config);
       });
   }
 
@@ -154,16 +161,18 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy, OnCha
   saveData(): void {
     if (this.configForm.valid) {
       const urls = this.urls.value;
+      if (!this.save.start(urls)) return;
       this.backendService.setUnitRichNoteTags(urls)
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(success => {
+          this.save.finish();
           if (success) {
             this.snackBar.open(
               this.translateService.instant('workspace.tags-saved-success'),
               '',
               { duration: 3000 }
             );
-            this.dataChanged = false;
+            this.dataChanged = this.save.differsFromSent(this.urls.value);
           } else {
             this.snackBar.open(
               this.translateService.instant('workspace.tags-saved-error'),

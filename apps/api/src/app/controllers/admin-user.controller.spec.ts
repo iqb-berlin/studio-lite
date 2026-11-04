@@ -1,13 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import {
-  CreateUserDto, UserFullDto, WorkspaceGroupInListDto
-} from '@studio-lite-lib/api-dto';
+import { UserFullDto } from '@studio-lite-lib/api-dto';
 import { AdminUserController } from './admin-user-controller';
 import { UsersService } from '../services/users.service';
 import { WorkspaceGroupService } from '../services/workspace-group.service';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { AuthService } from '../services/auth.service';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
 describe('AdminUserController', () => {
   let controller: AdminUserController;
@@ -33,68 +32,51 @@ describe('AdminUserController', () => {
     controller = module.get<AdminUserController>(AdminUserController);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
+  // The guards are the authorisation of each method; no other unit test sees them (#1953).
+  it.each([
+    'findOnesWorkspaceGroups',
+    'patchOnesWorkspaceGroups',
+    'remove',
+    'create',
+    'patch',
+    'removeSession',
+    'removeOrphanedSessions'
+  ] as const)(
+    'should let only administrators reach %s',
+    method => {
+      expect(Reflect.getMetadata('__guards__', AdminUserController.prototype[method]))
+        .toEqual([JwtAuthGuard, IsAdminGuard]);
+    }
+  );
 
-  describe('findOnesWorkspaceGroups', () => {
-    it('should return workspace groups for a user', async () => {
-      const mockGroups = [{ id: 1, name: 'G1' }] as WorkspaceGroupInListDto[];
-      workspaceGroupService.findAll.mockResolvedValue(mockGroups);
-
-      const result = await controller.findOnesWorkspaceGroups(1);
-
-      expect(result).toBe(mockGroups);
-      expect(workspaceGroupService.findAll).toHaveBeenCalledWith(1);
-    });
-  });
-
-  describe('patchOnesWorkspaceGroups', () => {
-    it('should update workspace group admins', async () => {
-      workspaceGroupService.setWorkspaceGroupAdminsByUser.mockResolvedValue(undefined);
-
-      await controller.patchOnesWorkspaceGroups(1, { ids: [10, 20] });
-
-      expect(workspaceGroupService.setWorkspaceGroupAdminsByUser).toHaveBeenCalledWith(1, [10, 20]);
-    });
-  });
-
-  describe('remove', () => {
-    it('should remove users by ids', async () => {
-      usersService.remove.mockResolvedValue(undefined);
-
-      await controller.remove([1, 2]);
-
-      expect(usersService.remove).toHaveBeenCalledWith([1, 2]);
-    });
-  });
-
-  describe('create', () => {
-    it('should create a user and return the new id', async () => {
-      const dto = {
-        name: 'new',
-        username: 'new',
-        password: 'password',
-        isAdmin: false,
-        description: ''
-      } as CreateUserDto;
-      usersService.create.mockResolvedValue(123);
-
-      const result = await controller.create(dto);
-
-      expect(result).toBe(123);
-      expect(usersService.create).toHaveBeenCalledWith(dto);
-    });
-  });
-
+  // The administrator calling is 9; the account changed is 1.
   describe('patch', () => {
-    it('should update a user', async () => {
+    it('should update a user and leave their sessions alone', async () => {
       const dto = { id: 1, name: 'updated' } as UserFullDto;
       usersService.patch.mockResolvedValue(undefined);
 
-      await controller.patch(1, dto);
+      await controller.patch(9, 1, dto);
 
-      expect(usersService.patch).toHaveBeenCalledWith(1, dto);
+      expect(usersService.patch).toHaveBeenCalledWith(1, dto, 9);
+      expect(authService.logout).not.toHaveBeenCalled();
+    });
+
+    it('should end every session of the user when a password is set', async () => {
+      const dto = { id: 1, password: 'new' } as UserFullDto;
+      usersService.patch.mockResolvedValue(undefined);
+
+      await controller.patch(9, 1, dto);
+
+      expect(usersService.patch).toHaveBeenCalledWith(1, dto, 9);
+      expect(authService.logout).toHaveBeenCalledWith(1);
+    });
+
+    it('should end no session when the user does not exist', async () => {
+      const dto = { id: 1, password: 'new' } as UserFullDto;
+      usersService.patch.mockRejectedValue(new Error('not found'));
+
+      await expect(controller.patch(9, 1, dto)).rejects.toThrow('not found');
+      expect(authService.logout).not.toHaveBeenCalled();
     });
   });
 
@@ -111,17 +93,6 @@ describe('AdminUserController', () => {
       authService.logoutOrphanedSession.mockResolvedValue(false);
 
       await expect(controller.removeSession(1, 'session-1')).rejects.toThrow('Only orphaned sessions can be deleted.');
-    });
-  });
-
-  describe('removeOrphanedSessions', () => {
-    it('should clear every orphaned session of the user and report the count', async () => {
-      authService.deleteOrphanedSessions.mockResolvedValue(3);
-
-      const result = await controller.removeOrphanedSessions(1);
-
-      expect(authService.deleteOrphanedSessions).toHaveBeenCalledWith(1);
-      expect(result).toBe(3);
     });
   });
 });

@@ -57,10 +57,6 @@ describe('CommentDeleteGuard', () => {
     authService.isWorkspaceGroupAdmin.mockResolvedValue(false);
   });
 
-  it('should be defined', () => {
-    expect(guard).toBeDefined();
-  });
-
   it('should return true for the author of the comment', async () => {
     unitCommentService.findOneComment.mockResolvedValue(ownComment);
 

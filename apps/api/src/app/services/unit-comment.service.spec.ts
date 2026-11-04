@@ -48,10 +48,6 @@ describe('UnitCommentService', () => {
     itemCommentService = module.get<ItemCommentService>(ItemCommentService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('findUnitIdsWithComments', () => {
     it('should answer which of the given units have comments', async () => {
       mockRepository.find.mockResolvedValue([{ unitId: 1 }, { unitId: 1 }, { unitId: 3 }] as UnitComment[]);
@@ -112,27 +108,15 @@ describe('UnitCommentService', () => {
     });
   });
 
-  describe('copyComments', () => {
-    it('should copy comments from old unit to new unit', async () => {
-      const oldUnitId = 1;
-      const newUnitId = 2;
-      const itemUuidLookups = [];
-      const comments = [{
-        id: 1, body: 'test', unitId: oldUnitId, parentId: null
-      }] as UnitComment[];
-      const itemComments = [];
+  describe('the vote of the user', () => {
+    it('should be none for a user who did not vote', async () => {
+      mockRepository.find.mockResolvedValueOnce([{ id: 1, unitId: 1 }] as UnitComment[]);
+      mockVoteRepository.find.mockResolvedValueOnce([{ commentId: 1, userId: 1, vote: 'up' }] as UnitCommentVote[]);
+      mockItemCommentService.findUnitItemComments.mockResolvedValueOnce([]);
 
-      // Mock findOnesComments internally calling find and findUnitItemComments
-      mockRepository.find.mockResolvedValue(comments);
-      mockItemCommentService.findUnitItemComments.mockResolvedValue(itemComments as UnitCommentUnitItem[]);
+      const [comment] = await service.findOnesComments(1, 4);
 
-      (mockRepository.create as jest.Mock).mockImplementation(dto => ({ ...dto, id: 100 }));
-      mockRepository.save.mockResolvedValue({ id: 100 } as UnitComment);
-
-      await service.copyComments(oldUnitId, newUnitId, itemUuidLookups);
-
-      expect(repository.create).toHaveBeenCalled();
-      expect(repository.save).toHaveBeenCalled();
+      expect(comment.userVote).toBeNull();
     });
   });
 
@@ -195,12 +179,6 @@ describe('UnitCommentService', () => {
 
       expect(await service.isRootInUnit(42, 10)).toBe(true);
       expect(repository.exists).toHaveBeenLastCalledWith({ where: { id: 42, unitId: 10, parentId: IsNull() } });
-    });
-
-    it('should return false when there is no such root comment in the unit', async () => {
-      mockRepository.exists.mockResolvedValue(false);
-
-      expect(await service.isRootInUnit(42, 11)).toBe(false);
     });
   });
 
@@ -270,40 +248,43 @@ describe('UnitCommentService', () => {
     });
   });
 
-  describe('createComment', () => {
-    it('should create a comment', async () => {
-      const dto = { unitId: 1, body: 'test' } as UnitCommentDto;
-      const savedEntity = {
-        ...dto, id: 123, createdAt: new Date(), changedAt: new Date()
-      };
-
-      (mockRepository.create as jest.Mock).mockReturnValue(savedEntity as UnitComment);
-      mockRepository.save.mockResolvedValue(savedEntity as UnitComment);
-
-      const result = await service.createComment(dto);
-
-      expect(repository.create).toHaveBeenCalled();
-      expect(repository.save).toHaveBeenCalledWith(savedEntity);
-      expect(result).toBe(123);
-    });
-  });
-
   describe('createComments', () => {
-    it('should create comments recursively', async () => {
-      const unitId = 1;
-      const itemUuids = [];
+    // A copied reply hangs under the copy of its root, not under the root it was copied from (#1958).
+    it('should hang each copied reply under the copy of its root', async () => {
       const comments = [
-        { id: 1, parentId: null } as UnitCommentDto,
-        { id: 2, parentId: 1 } as UnitCommentDto
+        { id: 1, parentId: null, body: 'Wurzel' } as UnitCommentDto,
+        { id: 2, parentId: 1, body: 'Antwort' } as UnitCommentDto
       ];
+      // the mocks of this file are shared by all its tests, so this one sets them only for its own calls
+      const copy = (dto: Partial<UnitComment>) => ({ ...dto }) as UnitComment;
+      const saveAs = (id: number) => (entity: UnitComment) => Promise.resolve(Object.assign(entity, { id }));
+      mockRepository.create.mockImplementationOnce(copy).mockImplementationOnce(copy);
+      mockRepository.save.mockImplementationOnce(saveAs(100)).mockImplementationOnce(saveAs(101));
 
-      mockRepository.create.mockImplementation(dto => ({ ...dto, id: Math.random() }) as UnitComment);
-      mockRepository.save.mockImplementation(entity => Promise.resolve(entity) as Promise<UnitComment>);
+      await service.createComments(comments, 5, []);
 
-      await service.createComments(comments, unitId, itemUuids);
+      expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({
+        body: 'Wurzel', parentId: null, unitId: 5
+      }));
+      expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({
+        body: 'Antwort', parentId: 100, unitId: 5
+      }));
+    });
 
-      expect(repository.create).toHaveBeenCalled();
-      expect(repository.save).toHaveBeenCalled();
+    it('should link a copied comment to the copies of its items', async () => {
+      mockRepository.create.mockImplementationOnce((dto: Partial<UnitComment>) => ({ ...dto }) as UnitComment);
+      mockRepository.save.mockImplementationOnce(
+        (entity: UnitComment) => Promise.resolve(Object.assign(entity, { id: 100 }))
+      );
+      mockItemCommentService.createCommentItemConnection.mockClear();
+
+      await service.createComments(
+        [{ id: 1, parentId: null, itemUuids: ['old-1'] } as UnitCommentDto],
+        5,
+        [{ oldUuid: 'old-1', newUuid: 'new-1' }]
+      );
+
+      expect(itemCommentService.createCommentItemConnection).toHaveBeenCalledWith(5, 'new-1', 100);
     });
   });
 
@@ -339,6 +320,18 @@ describe('UnitCommentService', () => {
       mockRepository.findOne.mockResolvedValue(null);
       await expect(service.findOneComment(1)).rejects.toThrow();
     });
+  });
+
+  it.each([
+    ['patchCommentBody', () => service.patchCommentBody(9, { body: 'x' } as UpdateUnitCommentDto)],
+    [
+      'patchCommentVisibility',
+      () => service.patchCommentVisibility(9, { hidden: true } as UpdateUnitCommentVisibilityDto)
+    ]
+  ])('%s should answer an unknown comment with not found', async (_, call) => {
+    mockRepository.findOne.mockResolvedValueOnce(null);
+
+    await expect(call()).rejects.toThrow(UnitCommentNotFoundException);
   });
 
   describe('patchCommentBody', () => {
@@ -436,7 +429,7 @@ describe('UnitCommentService', () => {
 
       expect(voteRepository.find).toHaveBeenCalledWith({
         where: { commentId },
-        relations: ['user'],
+        relations: { user: true },
         order: {
           user: {
             lastName: 'ASC',

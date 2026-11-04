@@ -1,9 +1,11 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component, OnDestroy, OnInit, signal
+} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   UntypedFormBuilder, UntypedFormGroup, FormsModule, ReactiveFormsModule
 } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
@@ -14,6 +16,7 @@ import { MatIcon } from '@angular/material/icon';
 
 import { BackendService as ReadBackendService } from '../../../../services/backend.service';
 import { BackendService as WriteBackendService } from '../../services/backend.service';
+import { SaveLock } from '../../../../classes/save-lock.class';
 
 @Component({
   selector: 'studio-lite-app-logo',
@@ -38,7 +41,14 @@ import { BackendService as WriteBackendService } from '../../services/backend.se
 export class AppLogoComponent implements OnInit, OnDestroy {
   configForm: UntypedFormGroup;
   dataChanged = false;
+  // One save at a time, and what it sent: what is entered meanwhile stays a change (#2094).
+  readonly save = new SaveLock();
   private configDataChangedSubscription: Subscription | null = null;
+  private readonly logoLoadState = signal<'pending' | 'loaded' | 'failed'>('pending');
+  // Saving replaces the stored logo and colours. The form is shown only once they are in: before,
+  // or after they failed to load, it would offer empty ones in their place (#1969).
+  readonly logoLoad = this.logoLoadState.asReadonly();
+  private ngUnsubscribe = new Subject<void>();
   imageError: string | null = '';
   logoImageBase64 = '';
 
@@ -62,11 +72,16 @@ export class AppLogoComponent implements OnInit, OnDestroy {
   }
 
   updateFormFields(): void {
-    this.readBackendService.getAppLogo().subscribe(appLogo => {
+    this.readBackendService.getAppLogo().pipe(takeUntil(this.ngUnsubscribe)).subscribe(appLogo => {
       if (this.configDataChangedSubscription !== null) {
         this.configDataChangedSubscription.unsubscribe();
         this.configDataChangedSubscription = null;
       }
+      if (appLogo === false) {
+        this.logoLoadState.set('failed');
+        return;
+      }
+      this.logoLoadState.set('loaded');
       if (appLogo) {
         if (appLogo.data && appLogo.data.length > 0) this.logoImageBase64 = appLogo.data;
         this.configForm.setValue({
@@ -87,18 +102,21 @@ export class AppLogoComponent implements OnInit, OnDestroy {
 
   saveData(): void {
     if (this.configForm) {
+      // the image is not part of the form
+      if (!this.save.start([this.configForm.getRawValue(), this.logoImageBase64])) return;
       this.writeBackendService.setAppLogo({
         data: this.logoImageBase64,
         bodyBackground: this.configForm.get('bodyBackground')?.value,
         boxBackground: this.configForm.get('boxBackground')?.value
       }).subscribe(isOk => {
+        this.save.finish();
         if (isOk) {
           this.snackBar.open(
             this.translateService.instant('logo.logo-and-colors-saved'),
             '',
             { duration: 3000 }
           );
-          this.dataChanged = false;
+          this.dataChanged = this.save.differsFromSent([this.configForm.getRawValue(), this.logoImageBase64]);
         } else {
           this.snackBar.open(
             this.translateService.instant('logo.logo-and-colors-not-saved'),
@@ -148,7 +166,7 @@ export class AppLogoComponent implements OnInit, OnDestroy {
             const imgTargetElement = rs.currentTarget as HTMLImageElement;
             const imgHeight = imgTargetElement.height;
             const imgWidth = imgTargetElement.width;
-            if (imgHeight > maxHeight && imgWidth > maxWidth) {
+            if (imgHeight > maxHeight || imgWidth > maxWidth) {
               this.imageError = this.translateService.instant(
                 'logo.not-allowed-image-size',
                 { maxHeight: maxHeight, maxWidth: maxWidth }
@@ -175,5 +193,7 @@ export class AppLogoComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.configDataChangedSubscription !== null) this.configDataChangedSubscription.unsubscribe();
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }

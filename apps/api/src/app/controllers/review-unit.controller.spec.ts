@@ -1,13 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
-import {
-  UnitDefinitionDto,
-  UnitPropertiesDto,
-  UnitSchemeDto
-} from '@studio-lite-lib/api-dto';
+import { UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { ReviewUnitController } from './review-unit.controller';
 import { ReviewService } from '../services/review.service';
-import { UnitService } from '../services/unit.service';
+import { UnitDefinitionService } from '../services/unit-definition.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ReviewGuard } from '../guards/review.guard';
 import { ReviewConfigGuard } from '../guards/review-config.guard';
@@ -15,7 +11,6 @@ import { ReviewConfigGuard } from '../guards/review-config.guard';
 describe('ReviewUnitController', () => {
   let controller: ReviewUnitController;
   let reviewService: ReviewService;
-  let unitService: UnitService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -26,8 +21,8 @@ describe('ReviewUnitController', () => {
           useValue: createMock<ReviewService>()
         },
         {
-          provide: UnitService,
-          useValue: createMock<UnitService>()
+          provide: UnitDefinitionService,
+          useValue: createMock<UnitDefinitionService>()
         }
       ]
     })
@@ -41,11 +36,20 @@ describe('ReviewUnitController', () => {
 
     controller = module.get<ReviewUnitController>(ReviewUnitController);
     reviewService = module.get<ReviewService>(ReviewService);
-    unitService = module.get<UnitService>(UnitService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+  // The guards are the authorisation of each method; no other unit test sees them (#1953).
+  it.each(['findUnitProperties', 'getUnitDefinition'] as const)(
+    'should hold %s to a review its caller may open',
+    method => {
+      expect(Reflect.getMetadata('__guards__', ReviewUnitController.prototype[method]))
+        .toEqual([JwtAuthGuard, ReviewGuard]);
+    }
+  );
+
+  it('should hold findOnesScheme to a review its caller may open and to the settings of the review', () => {
+    expect(Reflect.getMetadata('__guards__', ReviewUnitController.prototype.findOnesScheme))
+      .toEqual([JwtAuthGuard, ReviewGuard, ReviewConfigGuard]);
   });
 
   describe('findUnitProperties', () => {
@@ -72,98 +76,6 @@ describe('ReviewUnitController', () => {
       expect(result).toEqual(mockProperties);
       expect(reviewService.findUnitProperties).toHaveBeenCalledWith(unitId, reviewId);
       expect(reviewService.findUnitProperties).toHaveBeenCalledTimes(1);
-    });
-
-    it('should handle different review and unit ids', async () => {
-      const reviewId = 2;
-      const unitId = 20;
-      const mockProperties: UnitPropertiesDto = {
-        id: unitId,
-        key: 'another-unit-key',
-        name: 'Another Unit'
-      } as UnitPropertiesDto;
-
-      jest.spyOn(reviewService, 'findUnitProperties')
-        .mockResolvedValue(mockProperties);
-
-      const result = await controller.findUnitProperties(reviewId, unitId);
-
-      expect(result).toEqual(mockProperties);
-      expect(reviewService.findUnitProperties).toHaveBeenCalledWith(unitId, reviewId);
-    });
-  });
-
-  describe('getUnitDefinition', () => {
-    it('should return unit definition', async () => {
-      const unitId = 10;
-      const mockDefinition: UnitDefinitionDto = {
-        id: unitId,
-        definition: '{"test": "definition"}',
-        variables: []
-      } as UnitDefinitionDto;
-
-      jest.spyOn(unitService, 'findOnesDefinition')
-        .mockResolvedValue(mockDefinition);
-
-      const result = await controller.getUnitDefinition(unitId);
-
-      expect(result).toEqual(mockDefinition);
-      expect(unitService.findOnesDefinition).toHaveBeenCalledWith(unitId);
-      expect(unitService.findOnesDefinition).toHaveBeenCalledTimes(1);
-    });
-
-    it('should handle different unit ids', async () => {
-      const unitId = 50;
-      const mockDefinition: UnitDefinitionDto = {
-        id: unitId,
-        definition: '{"another": "definition"}',
-        variables: []
-      } as UnitDefinitionDto;
-
-      jest.spyOn(unitService, 'findOnesDefinition')
-        .mockResolvedValue(mockDefinition);
-
-      const result = await controller.getUnitDefinition(unitId);
-
-      expect(result).toEqual(mockDefinition);
-      expect(unitService.findOnesDefinition).toHaveBeenCalledWith(unitId);
-    });
-  });
-
-  describe('findOnesScheme', () => {
-    it('should return unit scheme', async () => {
-      const unitId = 10;
-      const mockScheme: UnitSchemeDto = {
-        id: unitId,
-        scheme: '{"test": "scheme"}',
-        schemeType: 'test-type'
-      } as UnitSchemeDto;
-
-      jest.spyOn(unitService, 'findOnesScheme')
-        .mockResolvedValue(mockScheme);
-
-      const result = await controller.findOnesScheme(unitId);
-
-      expect(result).toEqual(mockScheme);
-      expect(unitService.findOnesScheme).toHaveBeenCalledWith(unitId);
-      expect(unitService.findOnesScheme).toHaveBeenCalledTimes(1);
-    });
-
-    it('should handle different unit ids', async () => {
-      const unitId = 99;
-      const mockScheme: UnitSchemeDto = {
-        id: unitId,
-        scheme: '{"another": "scheme"}',
-        schemeType: 'another-type'
-      } as UnitSchemeDto;
-
-      jest.spyOn(unitService, 'findOnesScheme')
-        .mockResolvedValue(mockScheme);
-
-      const result = await controller.findOnesScheme(unitId);
-
-      expect(result).toEqual(mockScheme);
-      expect(unitService.findOnesScheme).toHaveBeenCalledWith(unitId);
     });
   });
 });

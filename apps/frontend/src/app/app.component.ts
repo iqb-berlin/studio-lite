@@ -22,6 +22,7 @@ import { I18nService } from './services/i18n.service';
 import { UserMenuComponent } from './components/user-menu/user-menu.component';
 import { WrappedIconComponent } from './components/wrapped-icon/wrapped-icon.component';
 import { HeartbeatService } from './services/heartbeat.service';
+import { isNoAnswer } from './utils/no-answer.utils';
 
 /**
  * The shell around everything: the bar with the session's remaining time and the user menu, the
@@ -104,7 +105,8 @@ export class AppComponent implements OnInit {
             this.appService.authData = authData;
             if (authData.userId) this.heartbeatService.start();
           }),
-          catchError(() => {
+          catchError(error => {
+            this.appService.setAuthCheckFailed(isNoAnswer(error));
             this.appService.authInitializationStatus$.next('complete');
             return of(null);
           })

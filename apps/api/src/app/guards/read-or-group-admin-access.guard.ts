@@ -1,9 +1,8 @@
-import {
-  CanActivate, ExecutionContext, ForbiddenException, Injectable
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { WorkspaceService } from '../services/workspace.service';
 import { WorkspaceUserService } from '../services/workspace-user.service';
+import { AccessLevelOrGroupAdminGuard } from './access-level-or-group-admin.guard';
 
 /**
  * Reading a workspace, for the two kinds of people who may: someone assigned to it, and someone
@@ -14,40 +13,16 @@ import { WorkspaceUserService } from '../services/workspace-user.service';
  * workspace at all and would fail the plain guards.
  */
 @Injectable()
-export class ReadOrGroupAdminAccessGuard implements CanActivate {
+export class ReadOrGroupAdminAccessGuard extends AccessLevelOrGroupAdminGuard {
   constructor(
-    private authService: AuthService,
-    private workspaceService: WorkspaceService,
-    private workspaceUserService: WorkspaceUserService
-  ) {}
-
-  /**
-   * Passes for an assigned user, an administrator, or the group admin. A route without
-   * `workspace_id` never passes: there is no workspace to be admin of.
-   */
-  async canActivate(
-    context: ExecutionContext
+    authService: AuthService,
+    workspaceService: WorkspaceService,
+    workspaceUserService: WorkspaceUserService
   ) {
-    const req = context.switchToHttp().getRequest();
-    const userId = req.user.id;
-    const workspaceId = req.params.workspace_id;
-
-    if (workspaceId) {
-      // Check for normal Read access (Entry exists)
-      const hasAccess = await this.workspaceUserService.hasAccess(userId, workspaceId);
-      if (hasAccess) return true;
-
-      // Check for Admin or Workspace Group Admin
-      const isAdmin = await this.authService.isAdminUser(userId);
-      if (isAdmin) return true;
-
-      const workspaceData = await this.workspaceService.findOne(workspaceId);
-      if (workspaceData) {
-        const isGroupAdmin = await this.authService.isWorkspaceGroupAdmin(userId, workspaceData.groupId);
-        if (isGroupAdmin) return true;
-      }
-    }
-
-    throw new ForbiddenException();
+    super(
+      authService,
+      workspaceService,
+      (userId, workspaceId) => workspaceUserService.hasAccess(userId, workspaceId)
+    );
   }
 }

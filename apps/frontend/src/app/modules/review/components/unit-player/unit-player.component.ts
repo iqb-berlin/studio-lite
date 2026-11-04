@@ -1,22 +1,14 @@
-import {
-  Component, ElementRef, ViewChild, AfterViewInit
-} from '@angular/core';
-import { takeUntil, Subject } from 'rxjs';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import { takeUntil } from 'rxjs';
 import { ActivatedRoute, Params } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
-import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
-import { ModuleService } from '../../../../services/module.service';
-import { AppService } from '../../../../services/app.service';
 import { ReviewService } from '../../services/review.service';
 import { UnitData } from '../../models/unit-data.class';
 import { ReviewBackendService } from '../../services/review-backend.service';
 import { PageNavigationComponent } from '../../../../components/page-navigation/page-navigation.component';
 import { UnitInfoComponent } from '../unit-info/unit-info.component';
 import { PreviewDirective } from '../../../../directives/preview.directive';
-import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
-import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { UnitState } from '../../../../models/verona.interface';
 import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
 
@@ -31,7 +23,7 @@ import { TrackIframeActivityDirective } from '../../../../directives/track-ifram
   styleUrls: ['./unit-player.component.scss'],
   imports: [UnitInfoComponent, PageNavigationComponent, TrackIframeActivityDirective]
 })
-export class UnitPlayerComponent extends PreviewDirective implements AfterViewInit {
+export class UnitPlayerComponent extends PreviewDirective {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
   unitData: UnitData = {
     databaseId: 0,
@@ -44,21 +36,14 @@ export class UnitPlayerComponent extends PreviewDirective implements AfterViewIn
 
   constructor(
     private route: ActivatedRoute,
-    public snackBar: MatSnackBar,
-    public backendService: WorkspaceBackendService,
     private reviewBackendService: ReviewBackendService,
-    public appService: AppService,
-    public moduleService: ModuleService,
-    public workspaceService: WorkspaceService,
     public reviewService: ReviewService,
-    public translateService: TranslateService,
     public override errorDialog: MatDialog
   ) {
     super();
   }
 
-  ngAfterViewInit(): void {
-    this.setHostingIframe();
+  protected startSubscriptions(): void {
     this.subscribeForPostMessages();
     this.subscribeForRouteChanges();
   }
@@ -96,12 +81,7 @@ export class UnitPlayerComponent extends PreviewDirective implements AfterViewIn
         this.onLoadUnitProperties();
       }
     } else {
-      this.ngUnsubscribe.next();
-      this.ngUnsubscribe.complete();
-      this.ngUnsubscribe = new Subject<void>();
-      this.unitLoaded.next(true);
-      this.subscribeForPostMessages();
-      this.subscribeForRouteChanges();
+      this.renewSubscriptions();
     }
   }
 
@@ -123,18 +103,12 @@ export class UnitPlayerComponent extends PreviewDirective implements AfterViewIn
             unitProperties.name ? ` - ${unitProperties.name}` : ''
           }`;
           this.reviewService.setHeaderText(this.unitData.name);
-
-          if (playerId) {
-            if (playerId === this.lastVeronaModuleId && this.postMessageTarget) {
-              this.sendChangeData();
-            } else {
-              this.postMessageTarget = undefined;
-              this.buildVeronaModule(playerId, 'player');
-            }
-          } else {
-            this.message = this.translateService.instant('workspace.no-player');
-            this.postMessageTarget = undefined;
-          }
+          this.showVeronaModule(playerId, 'player', () => this.sendChangeData());
+        } else {
+          // The route already names this unit, and a comment goes to it: the player and the header
+          // must not go on showing the unit before (#2003).
+          this.showNoModule(this.translateService.instant('workspace.unit-not-found'));
+          this.reviewService.setHeaderText(this.unitData.name);
         }
       });
   }
@@ -162,13 +136,8 @@ export class UnitPlayerComponent extends PreviewDirective implements AfterViewIn
             this.unitData.definitionType = ued.definitionType;
             this.postStore(this.unitData.definition);
           } else {
-            this.snackBar.open(
-              this.translateService.instant(
-                'workspace.unit-definition-not-loaded'
-              ),
-              this.translateService.instant('workspace.error'),
-              { duration: 3000 }
-            );
+            // a player kept running for the unit before still showed it (#2003)
+            this.showNoModule(this.translateService.instant('workspace.unit-definition-not-loaded'));
           }
         });
     }
@@ -192,23 +161,19 @@ export class UnitPlayerComponent extends PreviewDirective implements AfterViewIn
           sessionId: this.sessionId,
           unitState: {
             dataParts: this.unitData.responses || {},
-            presentationProgress: 'none',
-            responseProgress: 'none'
+            presentationProgress: this.toPlayerValue('none'),
+            responseProgress: this.toPlayerValue('none')
           },
           playerConfig: {
             ...this.legacyStateReportPolicy(),
-            pagingMode: this.reviewService.bookletConfig?.pagingMode,
-            enabledNavigationTargets: [
-              'next',
-              'previous',
-              'first',
-              'last',
-              'end'
-            ],
+            pagingMode: this.toPlayerValue(this.reviewService.bookletConfig?.pagingMode),
+            enabledNavigationTargets: ['next', 'previous', 'first', 'last', 'end']
+              .map(target => this.toPlayerValue(target)),
             directDownloadUrl: this.backendService.getDirectDownloadLink(),
             sharedParameters: this.sharedParameters
           },
-          unitDefinition: definition || '',
+          // a unit without a definition sends none, as the testcenter does, not an empty one (#719)
+          ...(definition && { unitDefinition: definition }),
           ...(this.unitData.definitionType && { unitDefinitionType: this.unitData.definitionType })
         },
         '*'
@@ -223,7 +188,9 @@ export class UnitPlayerComponent extends PreviewDirective implements AfterViewIn
 
   gotoUnit(target: string): void {
     const sequenceId = this.reviewService.currentUnitSequenceId;
-    switch (target) {
+    // Player spec 7.0 names the target in capitals, older players in lower case (#2064); anything but a
+    // string from the player gets the message for an unknown target instead of throwing.
+    switch (typeof target === 'string' ? target.toLowerCase() : target) {
       case 'next':
         this.reviewService.setUnitNavigationRequest(sequenceId + 1);
         break;

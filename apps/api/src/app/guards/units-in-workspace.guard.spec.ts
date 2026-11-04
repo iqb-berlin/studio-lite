@@ -36,10 +36,6 @@ describe('UnitsInWorkspaceGuard', () => {
     unitService.idsNotInWorkspace.mockResolvedValue([]);
   });
 
-  it('should be defined', () => {
-    expect(guard).toBeDefined();
-  });
-
   it('should pass when all units of the body are in the workspace of the route', async () => {
     expect(await guard.canActivate(contextFor({ body: { ids: [10, 11], targetId: 7 } }))).toBe(true);
     expect(unitService.idsNotInWorkspace).toHaveBeenCalledWith([10, 11], 3);

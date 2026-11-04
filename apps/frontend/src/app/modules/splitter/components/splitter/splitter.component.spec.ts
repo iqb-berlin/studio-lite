@@ -62,10 +62,6 @@ describe('SplitterComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should update content on AfterViewInit', () => {
     const pane1 = new MockSplitterPaneComponent();
     const pane2 = new MockSplitterPaneComponent();

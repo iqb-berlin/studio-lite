@@ -93,10 +93,6 @@ describe('EditMyDataDirective', () => {
     );
   });
 
-  it('should create an instance', () => {
-    expect(directive).toBeTruthy();
-  });
-
   it('should fetch user data and open dialog when editMyData is called', () => {
     mockBackendService.getMyData.mockReturnValue(of(mockMyData));
     mockDialogRef.afterClosed.mockReturnValue(of(undefined));
@@ -238,9 +234,5 @@ describe('EditMyDataDirective', () => {
     directive.editMyData();
 
     expect(mockAppService.dataLoading).toBe(false);
-  });
-
-  it('should cleanup subscriptions on destroy', () => {
-    directive.ngOnDestroy();
   });
 });

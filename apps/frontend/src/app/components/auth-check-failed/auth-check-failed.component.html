@@ -1,0 +1,22 @@
+<studio-lite-area-title
+  [title]="'home.auth-check-failed-title' | translate">
+</studio-lite-area-title>
+
+<div class="area-container fx-column-start-stretch">
+  <p>{{ 'home.auth-check-failed' | translate }}</p>
+  <div class="fx-row-end-center fx-gap-10">
+    <button mat-button
+            type="button"
+            data-cy="auth-check-logout"
+            studioLiteLogout>
+      {{ 'home.logout' | translate }}
+    </button>
+    <button mat-raised-button
+            type="button"
+            color="primary"
+            data-cy="auth-check-retry"
+            (click)="retry()">
+      {{ 'home.auth-check-retry' | translate }}
+    </button>
+  </div>
+</div>

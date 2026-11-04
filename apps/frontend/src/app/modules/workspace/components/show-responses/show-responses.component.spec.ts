@@ -24,12 +24,6 @@ describe('ShowResponsesComponent', () => {
     fixture.detectChanges();
   };
 
-  it('should create', async () => {
-    await setup({ responses: [], table: false });
-
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize table when data.table is true', async () => {
     const responses = [{ key: 'a', value: 1 }, { key: 'b', value: 2 }];
     await setup({ responses, table: true });
@@ -40,6 +34,13 @@ describe('ShowResponsesComponent', () => {
 
   it('should not initialize table when data.table is false', async () => {
     await setup({ responses: [{ key: 'a' }], table: false });
+
+    expect(component.displayedColumns).toEqual([]);
+    expect(component.dataSource).toEqual([]);
+  });
+
+  it('should show a table without columns when there are no responses', async () => {
+    await setup({ responses: [], table: true });
 
     expect(component.displayedColumns).toEqual([]);
     expect(component.dataSource).toEqual([]);

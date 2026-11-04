@@ -160,6 +160,17 @@ describe('UsersComponent', () => {
     expect(component.selectedUser).toBe(0);
   });
 
+  // Switching to another tab cancelled the list, whose answer alone took the spinner down (#2105)
+  it('should take the spinner down when the page is left while the list loads', () => {
+    mockBackendService.getUsersFull.mockReturnValue(new Subject<UserFullDto[]>());
+    fixture.detectChanges();
+    expect(mockAppService.dataLoading).toBe(true);
+
+    fixture.destroy();
+
+    expect(mockAppService.dataLoading).toBe(false);
+  });
+
   describe('while the rights of the selected user load', () => {
     const user1 = {
       id: 1, name: 'user1', isAdmin: false, description: ''
@@ -167,16 +178,16 @@ describe('UsersComponent', () => {
     const user2 = {
       id: 2, name: 'user2', isAdmin: false, description: ''
     } as UserFullDto;
-    let workspacesOfUser1: Subject<UsersWorkspaceInListDto[]>;
-    let workspacesOfUser2: Subject<UsersWorkspaceInListDto[]>;
+    let workspacesOfUser1: Subject<UsersWorkspaceInListDto[] | null>;
+    let workspacesOfUser2: Subject<UsersWorkspaceInListDto[] | null>;
 
     const radioInputs = (): HTMLInputElement[] => Array.from(
       fixture.nativeElement.querySelectorAll('[data-cy="access-rights-row"] input[type="radio"]')
     );
 
     beforeEach(() => {
-      workspacesOfUser1 = new Subject<UsersWorkspaceInListDto[]>();
-      workspacesOfUser2 = new Subject<UsersWorkspaceInListDto[]>();
+      workspacesOfUser1 = new Subject<UsersWorkspaceInListDto[] | null>();
+      workspacesOfUser2 = new Subject<UsersWorkspaceInListDto[] | null>();
       mockBackendService.getWorkspaces.mockReturnValue(of([{ id: 1, name: 'ws1', groupId: 1 }]));
       mockBackendService.getWorkspacesByUser
         .mockImplementation((id: number) => (id === 1 ? workspacesOfUser1 : workspacesOfUser2));
@@ -251,6 +262,52 @@ describe('UsersComponent', () => {
       expect(mockAppService.dataLoading).toBe(false);
       expect(workspacesOfUser1.observed).toBe(false);
     });
+
+    // Without them the user had no rights in the group, and saving one role removed the user from
+    // every other workspace of the group (#2074).
+    it('should keep the roles locked when the rights could not be loaded', () => {
+      const notLoadedHint = (): HTMLElement | null => fixture.nativeElement
+        .querySelector('[data-cy="wsg-admin-access-rights-not-loaded"]');
+      component.tableSelectionRow.select(user1);
+      workspacesOfUser1.next(null);
+      fixture.detectChanges();
+
+      expect(notLoadedHint()).not.toBeNull();
+      expect(radioInputs()).toHaveLength(0);
+      expect(mockAppService.dataLoading).toBe(false);
+
+      const ws = component.userWorkspaces.entries[0];
+      component.onRoleChange(ws, 2);
+
+      expect(component.userWorkspaces.hasChanged).toBe(false);
+
+      ws.isChecked = true;
+      ws.accessLevel = 2;
+      component.onRoleClick(ws, 2);
+
+      expect(ws.isChecked).toBe(true);
+
+      component.userWorkspaces.updateHasChanged();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement
+        .querySelector('[data-cy="wsg-admin-access-rights-save-button"]').disabled).toBe(true);
+
+      component.saveWorkspaces();
+
+      expect(mockBackendService.setWorkspacesByUser).not.toHaveBeenCalled();
+
+      component.tableSelectionRow.deselect(user1);
+      fixture.detectChanges();
+
+      expect(notLoadedHint()).toBeNull();
+
+      component.tableSelectionRow.select(user2);
+      workspacesOfUser2.next([]);
+      fixture.detectChanges();
+
+      expect(radioInputs().every(input => !input.disabled)).toBe(true);
+    });
   });
 
   it('should save workspaces successfully', () => {
@@ -292,17 +349,6 @@ describe('UsersComponent', () => {
       component.onRoleChange(wsEntry, 2);
 
       expect(wsEntry.accessLevel).toBe(2);
-      expect(wsEntry.isChecked).toBe(true);
-      expect(component.userWorkspaces.updateHasChanged).toHaveBeenCalled();
-    });
-
-    it('should switch role level on role change to a different level', () => {
-      wsEntry.isChecked = true;
-      wsEntry.accessLevel = 1;
-
-      component.onRoleChange(wsEntry, 4);
-
-      expect(wsEntry.accessLevel).toBe(4);
       expect(wsEntry.isChecked).toBe(true);
       expect(component.userWorkspaces.updateHasChanged).toHaveBeenCalled();
     });
@@ -350,5 +396,21 @@ describe('UsersComponent', () => {
       expect(wsEntry.isChecked).toBe(true);
       expect(component.userWorkspaces.updateHasChanged).not.toHaveBeenCalled();
     });
+  });
+
+  it.each<[string, string, string[]]>([
+    ['part of the login name in any case', 'ann', ['Anna']],
+    ['the last name', 'müll', ['Anna']],
+    ['the email, also beside a user without one', 'example.org', ['bert']]
+  ])('should find users by %s', (_, filter, names) => {
+    mockBackendService.getUsersFull.mockReturnValue(of([
+      { id: 1, name: 'Anna', lastName: 'Müller' },
+      { id: 2, name: 'bert', email: 'bert@example.org' }
+    ]));
+    fixture.detectChanges();
+
+    component.objectsDatasource.filter = filter;
+
+    expect(component.objectsDatasource.filteredData.map(user => user.name)).toEqual(names);
   });
 });

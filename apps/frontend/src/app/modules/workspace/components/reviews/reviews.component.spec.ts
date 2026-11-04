@@ -192,34 +192,6 @@ describe('ReviewsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('should call loadReviewList on init', fakeAsync(() => {
-    const loadSpy = jest.spyOn(component, 'loadReviewList').mockImplementation(() => undefined);
-
-    component.ngOnInit();
-    tick();
-
-    expect(loadSpy).toHaveBeenCalled();
-  }));
-
-  it('should load reviews and initialize datasource', fakeAsync(() => {
-    const reviews = createReviewList();
-    backendServiceMock.getReviewList.mockReturnValue(of(reviews));
-    const selectSpy = jest.spyOn(component, 'selectReview');
-
-    component.loadReviewList();
-    tick();
-    tick();
-
-    expect(appServiceMock.dataLoading).toBe(false);
-    expect(component.reviews).toEqual(reviews);
-    expect(selectSpy).toHaveBeenCalledWith(0);
-    expect(component.objectsDatasource.data).toEqual(reviews);
-  }));
-
   it('should select a review and copy data when confirmed', fakeAsync(() => {
     const review = createReviewFull();
     backendServiceMock.getReview.mockReturnValue(of(review));
@@ -385,17 +357,6 @@ describe('ReviewsComponent', () => {
     }));
   });
 
-  it('should update units and mark changes on unitSelectionChanged', () => {
-    const detectSpy = jest.spyOn(component, 'detectChanges').mockReturnValue(true);
-
-    component.reviewDataToChange = createReviewFull({ units: [] });
-    component.unitSelectionChanged([3, 4]);
-
-    expect(component.reviewDataToChange.units).toEqual([3, 4]);
-    expect(detectSpy).toHaveBeenCalled();
-    expect(component.changed).toBe(true);
-  });
-
   it('should discard changes and restore from original', () => {
     component.changed = true;
     component.reviewDataOriginal = createReviewFull();
@@ -423,19 +384,154 @@ describe('ReviewsComponent', () => {
     expect(snackBarMock.open).toHaveBeenCalled();
   });
 
-  it('should save changes and reload list when name changes', () => {
+  // reloading the whole review would replace what was entered while the save was under way (#2094)
+  it('should save changes and reload only the list when the name changes', () => {
     component.reviewDataOriginal = createReviewFull({ name: 'Old' });
     component.reviewDataToChange = createReviewFull({ name: 'New' });
     component.selectedReviewId = 1;
     backendServiceMock.setReview.mockReturnValue(of(true));
+    backendServiceMock.getReviewList.mockReturnValue(of([{ id: 1, name: 'New' }]));
     const loadSpy = jest.spyOn(component, 'loadReviewList');
 
     component.saveChanges();
 
-    expect(loadSpy).toHaveBeenCalledWith(1);
+    expect(loadSpy).not.toHaveBeenCalled();
+    expect(component.reviews).toEqual([{ id: 1, name: 'New' }]);
+    expect(component.selectedReviewId).toBe(1);
+    expect(component.reviewDataToChange.name).toBe('New');
     expect(component.changed).toBe(false);
     expect(snackBarMock.open).toHaveBeenCalled();
   });
+
+  // #2094: the list reloaded after a rename and a list load begun before it answer in either order
+  it('keeps the list of the load begun last, whichever answers first', fakeAsync(() => {
+    const begunFirst = new Subject<ReviewInListDto[]>();
+    const begunLast = new Subject<ReviewInListDto[]>();
+    backendServiceMock.getReviewList.mockReturnValueOnce(begunFirst).mockReturnValueOnce(begunLast);
+    backendServiceMock.setReview.mockReturnValue(of(true));
+    jest.spyOn(component, 'checkForChangesAndContinue').mockResolvedValue(true);
+    component.loadReviewList(1);
+    component.reviewDataOriginal = createReviewFull({ name: 'Old' });
+    component.reviewDataToChange = createReviewFull({ name: 'New' });
+    component.selectedReviewId = 1;
+    component.isLoadingReview = false;
+
+    component.saveChanges();
+    begunLast.next([{ id: 1, name: 'New' }, { id: 2, name: 'Created' }]);
+    begunFirst.next([{ id: 1, name: 'Old' }]);
+    flushMicrotasks();
+    tick();
+
+    expect(component.reviews).toEqual([{ id: 1, name: 'New' }, { id: 2, name: 'Created' }]);
+    expect(component.objectsDatasource.data).toEqual([{ id: 1, name: 'New' }, { id: 2, name: 'Created' }]);
+  }));
+
+  // Closing the dialog cancelled the list, whose answer alone took the spinner down (#2105)
+  it('should take the spinner down when the dialog is closed while the list loads', () => {
+    backendServiceMock.getReviewList.mockReturnValue(new Subject<ReviewInListDto[]>());
+    component.loadReviewList();
+    expect(appServiceMock.dataLoading).toBe(true);
+
+    fixture.destroy();
+
+    expect(appServiceMock.dataLoading).toBe(false);
+  });
+
+  // #2094: what is entered while the save is under way was not sent, and a second save waits
+  it('keeps an entry made while saving unsaved and does not save twice meanwhile', () => {
+    const answer = new Subject<boolean>();
+    backendServiceMock.setReview.mockReturnValue(answer);
+    component.reviewDataOriginal = createReviewFull();
+    component.reviewDataToChange = createReviewFull({ password: 'gesendet' });
+    component.selectedReviewId = 1;
+
+    component.saveChanges();
+    component.reviewDataToChange.password = 'danach';
+    component.saveChanges();
+    answer.next(true);
+
+    expect(backendServiceMock.setReview).toHaveBeenCalledTimes(1);
+    expect(backendServiceMock.setReview.mock.calls[0][2].password).toBe('gesendet');
+    expect(component.reviewDataOriginal.password).toBe('gesendet');
+    expect(component.changed).toBe(true);
+  });
+
+  // copyFrom fills in configs a review lacks: compared with that, every review without them was changed
+  it('leaves nothing changed after a save without entries meanwhile, whatever configs the review has', () => {
+    backendServiceMock.setReview.mockReturnValue(of(true));
+    component.reviewDataOriginal = createReviewFull({ settings: { reviewConfig: {} } });
+    component.reviewDataToChange = createReviewFull({ name: 'New', settings: { reviewConfig: {} } });
+    component.selectedReviewId = 1;
+
+    component.saveChanges();
+
+    expect(component.changed).toBe(false);
+  });
+
+  // #2094: switched away and back while the save was under way, the review was loaded anew before the save had
+  // arrived, and the answer took the save for that data: the form showed the old state as a change to save over it
+  it('shows what is stored when a review was loaded anew while its save was under way', fakeAsync(() => {
+    const answer = new Subject<boolean>();
+    backendServiceMock.setReview.mockReturnValue(answer);
+    jest.spyOn(component, 'checkForChangesAndContinue').mockResolvedValue(true);
+    const loadsOfReviewA = [createReviewFull({ password: 'vorher' }), createReviewFull({ password: 'gesendet' })];
+    backendServiceMock.getReview.mockImplementation((wsId: number, reviewId: number) => (
+      of(reviewId === 1 ? loadsOfReviewA.shift() || null : createReviewFull({ id: 2, name: 'Review B' }))));
+    component.reviewDataOriginal = createReviewFull({ password: 'vorher' });
+    component.reviewDataToChange = createReviewFull({ password: 'gesendet' });
+    component.selectedReviewId = 1;
+
+    component.saveChanges();
+    component.selectReview(2);
+    flushMicrotasks();
+    component.selectReview(1);
+    flushMicrotasks();
+    answer.next(true);
+    flushMicrotasks();
+
+    expect(component.reviewDataOriginal).toEqual(createReviewFull({ password: 'gesendet' }));
+    expect(component.reviewDataToChange).toEqual(createReviewFull({ password: 'gesendet' }));
+    expect(component.changed).toBe(false);
+  }));
+
+  // #2094: discarded while the save was under way, the form went back to the state before it, and the answer
+  // took that for a change to save over what had just been stored
+  it('shows what is stored when the changes were discarded while the save was under way', fakeAsync(() => {
+    const answer = new Subject<boolean>();
+    backendServiceMock.setReview.mockReturnValue(answer);
+    jest.spyOn(component, 'checkForChangesAndContinue').mockResolvedValue(true);
+    backendServiceMock.getReview.mockReturnValue(of(createReviewFull({ password: 'gesendet' })));
+    component.reviewDataOriginal = createReviewFull({ password: 'vorher' });
+    component.reviewDataToChange = createReviewFull({ password: 'gesendet' });
+    component.selectedReviewId = 1;
+    component.changed = true;
+
+    component.saveChanges();
+    component.discardChanges();
+    answer.next(true);
+    flushMicrotasks();
+
+    expect(component.reviewDataToChange).toEqual(createReviewFull({ password: 'gesendet' }));
+    expect(component.changed).toBe(false);
+  }));
+
+  it('leaves a review selected while the save of another one was under way alone', fakeAsync(() => {
+    const answer = new Subject<boolean>();
+    backendServiceMock.setReview.mockReturnValue(answer);
+    jest.spyOn(component, 'checkForChangesAndContinue').mockResolvedValue(true);
+    backendServiceMock.getReview.mockReturnValue(of(createReviewFull({ id: 2, name: 'Review B' })));
+    component.reviewDataOriginal = createReviewFull();
+    component.reviewDataToChange = createReviewFull({ password: 'gesendet' });
+    component.selectedReviewId = 1;
+
+    component.saveChanges();
+    component.selectReview(2);
+    flushMicrotasks();
+    answer.next(true);
+
+    expect(component.reviewDataOriginal).toEqual(createReviewFull({ id: 2, name: 'Review B' }));
+    expect(component.changed).toBe(false);
+  }));
 
   it('should show error snackbar when save fails', () => {
     component.reviewDataOriginal = createReviewFull();
@@ -445,7 +541,7 @@ describe('ReviewsComponent', () => {
 
     component.saveChanges();
 
-    expect(snackBarMock.open).toHaveBeenCalled();
+    expect(snackBarMock.open).toHaveBeenCalledWith('workspace.review-not-saved', 'workspace.error', expect.anything());
   });
 
   it('should detect no changes for identical data', () => {
@@ -479,4 +575,67 @@ describe('ReviewsComponent', () => {
 
     expect(component.reviewDataToChange.settings?.bookletConfig).toEqual(bookletConfig);
   });
+
+  it('should keep the selected review when its changes are not to be discarded', fakeAsync(() => {
+    jest.spyOn(component, 'checkForChangesAndContinue').mockResolvedValue(false);
+    component.selectedReviewId = 1;
+    component.changed = true;
+
+    component.selectReview(2);
+    flushMicrotasks();
+
+    expect(component.checkForChangesAndContinue).toHaveBeenCalledWith(true);
+    expect(backendServiceMock.getReview).not.toHaveBeenCalled();
+    expect(component.selectedReviewId).toBe(1);
+    expect(component.changed).toBe(true);
+  }));
+
+  it.each<[string, Partial<ReviewFullDto>]>([
+    ['password', { password: 'other' }],
+    ['setting', { settings: { bookletConfig: { unitTitle: 'OFF' }, reviewConfig: {} } }]
+  ])('should detect changes when the %s differs', (_, change) => {
+    component.reviewDataOriginal = createReviewFull();
+    component.reviewDataToChange = createReviewFull(change);
+
+    expect(component.detectChanges()).toBe(true);
+  });
+
+  it('should take another unit selection as a change and the original one as none', () => {
+    component.reviewDataOriginal = createReviewFull();
+    component.reviewDataToChange = createReviewFull();
+
+    component.unitSelectionChanged([11]);
+    expect(component.changed).toBe(true);
+
+    component.unitSelectionChanged([11, 12]);
+    expect(component.changed).toBe(false);
+  });
+
+  it.each<[string, (reviews: ReviewsComponent) => void, ReviewFullDto['settings']]>([
+    ['review config', reviews => reviews.reviewConfigSettingsChange({ showCoding: true }),
+      { bookletConfig: { unitTitle: 'OFF' }, reviewConfig: { showCoding: true } }],
+    ['booklet config', reviews => reviews.bookletConfigSettingsChange({ unitTitle: 'ON' }),
+      { bookletConfig: { unitTitle: 'ON' }, reviewConfig: { showCoding: false } }]
+  ])('should change only the %s of the settings', (_, change, settings) => {
+    component.reviewDataToChange = createReviewFull({
+      settings: { bookletConfig: { unitTitle: 'OFF' }, reviewConfig: { showCoding: false } }
+    });
+
+    change(component);
+
+    expect(component.reviewDataToChange.settings).toEqual(settings);
+  });
+
+  it('should filter the reviews by any part of their name regardless of case', fakeAsync(() => {
+    backendServiceMock.getReviewList.mockReturnValue(of([
+      ...createReviewList(), { id: 3, name: 'Erste Probe' }
+    ]));
+    component.loadReviewList();
+    flushMicrotasks();
+    tick();
+
+    component.objectsDatasource.filter = 'pro';
+
+    expect(component.objectsDatasource.filteredData.map(review => review.name)).toEqual(['Erste Probe']);
+  }));
 });

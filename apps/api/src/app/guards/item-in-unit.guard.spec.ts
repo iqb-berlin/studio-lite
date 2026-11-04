@@ -34,10 +34,6 @@ describe('ItemInUnitGuard', () => {
     unitItemService.isInUnit.mockResolvedValue(true);
   });
 
-  it('should be defined', () => {
-    expect(guard).toBeDefined();
-  });
-
   it('should pass when the item in the route is one of the unit in the route', async () => {
     expect(await guard.canActivate(contextFor({ uuid, unit_id: '10' }))).toBe(true);
     expect(unitItemService.isInUnit).toHaveBeenCalledWith(uuid, 10);

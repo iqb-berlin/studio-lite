@@ -60,10 +60,6 @@ describe('MetadataVocabularyService', () => {
     httpService = module.get(HttpService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('getStoredMetadataVocabularyById', () => {
     it('should return stored vocabulary if found', async () => {
       const vocab = new MetadataVocabulary();
@@ -72,6 +68,20 @@ describe('MetadataVocabularyService', () => {
 
       const result = await service.getStoredMetadataVocabularyById('id');
       expect(result).toBe(vocab);
+    });
+
+    // A vocabulary named by its base address is fetched from its index file.
+    it.each([
+      ['https://w3id.org/iqb/v1/', 'https://w3id.org/iqb/v1/index.jsonld'],
+      ['https://example.org/v.json', 'https://example.org/v.json'],
+      ['https://example.org/v.jsonld', 'https://example.org/v.jsonld']
+    ])('should fetch the vocabulary %s from %s', async (id, url) => {
+      metadataVocabularyRepository.findOneBy.mockResolvedValue(null);
+      mockHttpGet(httpService, { id } as MetadataVocabularyDto);
+
+      await service.getStoredMetadataVocabularyById(id);
+
+      expect(httpService.get).toHaveBeenCalledWith(url);
     });
 
     it('should fetch vocabulary if not found', async () => {

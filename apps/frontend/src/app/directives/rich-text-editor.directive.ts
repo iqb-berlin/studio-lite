@@ -8,7 +8,6 @@ import { AnyExtension, Editor } from '@tiptap/core';
 // tiptap exportiert StarterKit als Default UND unter gleichem Namen; der Default ist die dokumentierte Form.
 // eslint-disable-next-line import-x/no-named-as-default
 import StarterKit from '@tiptap/starter-kit';
-import { Underline } from '@tiptap/extension-underline';
 import { Superscript } from '@tiptap/extension-superscript';
 import { Subscript } from '@tiptap/extension-subscript';
 import { TextStyle } from '@tiptap/extension-text-style';
@@ -52,8 +51,17 @@ export abstract class RichTextEditorDirective implements OnInit, OnDestroy {
    */
   protected getExtensions(): AnyExtension[] {
     return [
-      StarterKit,
-      Underline,
+      StarterKit.configure({ link: false, trailingNode: false }),
+      ...this.getFormattingExtensions()
+    ];
+  }
+
+  /**
+   * The formatting every editor offers after the document structure: marks, images, the
+   * placeholder and highlighting, in the order the editors register them.
+   */
+  protected getFormattingExtensions(): AnyExtension[] {
+    return [
       Superscript,
       Subscript,
       TextStyle,

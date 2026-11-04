@@ -1,5 +1,10 @@
 // eslint-disable-next-line max-classes-per-file
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, fakeAsync, flushMicrotasks, TestBed
+} from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { createMock } from '@golevelup/ts-jest';
+import { VeronaModuleMetadataDto } from '@studio-lite-lib/api-dto';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Component, Directive, Input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
@@ -136,19 +141,6 @@ describe('WidgetsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('should load widget list on init', async () => {
-    jest.useFakeTimers();
-    component.ngOnInit();
-    jest.advanceTimersByTime(100);
-
-    expect(mockModuleService.loadWidgets).toHaveBeenCalled();
-    jest.useRealTimers();
-  });
-
   it('should change selected modules correctly', () => {
     const module1 = { metadata: { type: 'WIDGET', model: 'model-a' }, key: 'w1' } as VeronaModuleClass;
     const module2 = { metadata: { type: 'WIDGET', model: 'model-a' }, key: 'w2' } as VeronaModuleClass;
@@ -197,4 +189,24 @@ describe('WidgetsComponent', () => {
 
     expect(mockBackendService.deleteVeronaModules).not.toHaveBeenCalled();
   });
+
+  it('should show one table per widget model, in the order of the models', fakeAsync(() => {
+    const widget = (key: string, model: string) => new VeronaModuleClass({
+      key, sortKey: key, metadata: createMock<VeronaModuleMetadataDto>({ model })
+    });
+    mockModuleService.widgets = {
+      w1: widget('w1', 'model-b'), w2: widget('w2', 'model-a'), w3: widget('w3', 'model-b')
+    };
+
+    component.loadModuleList();
+    flushMicrotasks();
+    fixture.detectChanges();
+
+    const tables = fixture.debugElement.queryAll(By.directive(MockVeronaModulesTableComponent))
+      .map(table => table.componentInstance as MockVeronaModulesTableComponent);
+    expect(tables.map(table => [table.type, Object.keys(table.modules as object)])).toEqual([
+      ['model-a', ['w2']],
+      ['model-b', ['w1', 'w3']]
+    ]);
+  }));
 });

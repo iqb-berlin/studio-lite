@@ -17,7 +17,6 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { UnitSelectionComponent } from '../unit-selection/unit-selection.component';
 
 describe('UnitsAreaComponent', () => {
-  let component: UnitsAreaComponent;
   let fixture: ComponentFixture<UnitsAreaComponent>;
   let workspaceServiceMock: WorkspaceService;
   let paramsSubject: BehaviorSubject<Params>;
@@ -95,12 +94,7 @@ describe('UnitsAreaComponent', () => {
       .compileComponents();
 
     fixture = TestBed.createComponent(UnitsAreaComponent);
-    component = fixture.componentInstance;
     fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
   });
 
   it('should update selected unit when route params change', fakeAsync(() => {

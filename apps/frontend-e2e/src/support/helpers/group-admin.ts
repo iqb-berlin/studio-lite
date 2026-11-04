@@ -226,19 +226,13 @@ export function addState(stateName: string): void {
  * @param stateName - The label of the state to delete
  */
 export function deleteState(stateName: string): void {
-  cy.get('studio-lite-states .state').then($states => {
-    const stateEl = Array.from($states).find(el => {
-      const input = el.querySelector(
-        '.text-form-field input'
-      ) as HTMLInputElement;
-      return input && input.value === stateName;
-    });
-    if (stateEl) {
-      cy.wrap(stateEl).find('button.delete-button').click();
-    } else {
-      throw new Error(`State with name ${stateName} not found`);
-    }
-  });
+  // A chain of queries, which Cypress runs again when the settings render the states anew after
+  // a save; an element taken out of the chain would be detached by then.
+  cy.get('studio-lite-states .state')
+    .filter((_, el) => el.querySelector<HTMLInputElement>('.text-form-field input')?.value === stateName)
+    .should('have.length', 1)
+    .find('button.delete-button')
+    .click();
 
   cy.get('studio-lite-delete-state').should('exist');
   cy.translate(Cypress.expose('locale')).then(json => {

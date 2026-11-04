@@ -43,85 +43,10 @@ describe('UserWorkspacesAreaComponent', () => {
     component.workspaceGroups = [];
     component.warning = '';
     component.isAdmin = false;
+    fixture.detectChanges();
   });
 
   it('should create', () => {
-    fixture.detectChanges();
     expect(component).toBeTruthy();
-  });
-
-  it('should accept workspaceGroups input', () => {
-    component.workspaceGroups = [{
-      id: 1, name: 'Group 1', workspaces: [], isAdmin: false
-    }];
-    fixture.detectChanges();
-
-    expect(component.workspaceGroups.length).toBe(1);
-  });
-
-  it('should accept warning input', () => {
-    component.warning = 'Test warning message';
-    fixture.detectChanges();
-
-    expect(component.warning).toBe('Test warning message');
-  });
-
-  it('should accept isAdmin input', () => {
-    component.isAdmin = true;
-    fixture.detectChanges();
-
-    expect(component.isAdmin).toBe(true);
-  });
-
-  it('should handle empty workspaceGroups array', () => {
-    component.workspaceGroups = [];
-    fixture.detectChanges();
-
-    expect(component.workspaceGroups).toEqual([]);
-    expect(component.workspaceGroups.length).toBe(0);
-  });
-
-  it('should handle multiple workspace groups', () => {
-    component.workspaceGroups = [
-      {
-        id: 1, name: 'Group 1', workspaces: [], isAdmin: false
-      },
-      {
-        id: 2, name: 'Group 2', workspaces: [], isAdmin: true
-      },
-      {
-        id: 3, name: 'Group 3', workspaces: [], isAdmin: false
-      }
-    ];
-    fixture.detectChanges();
-
-    expect(component.workspaceGroups.length).toBe(3);
-  });
-
-  it('should handle empty warning string', () => {
-    component.warning = '';
-    fixture.detectChanges();
-
-    expect(component.warning).toBe('');
-  });
-
-  it('should handle isAdmin as false', () => {
-    component.isAdmin = false;
-    fixture.detectChanges();
-
-    expect(component.isAdmin).toBe(false);
-  });
-
-  it('should accept all inputs together', () => {
-    component.workspaceGroups = [{
-      id: 1, name: 'Test Group', workspaces: [], isAdmin: true
-    }];
-    component.warning = 'Important warning';
-    component.isAdmin = true;
-    fixture.detectChanges();
-
-    expect(component.workspaceGroups.length).toBe(1);
-    expect(component.warning).toBe('Important warning');
-    expect(component.isAdmin).toBe(true);
   });
 });

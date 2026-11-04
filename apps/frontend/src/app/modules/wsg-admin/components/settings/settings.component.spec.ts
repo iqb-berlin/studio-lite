@@ -1,17 +1,17 @@
 /* eslint-disable max-classes-per-file */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
-  Component, Input, Output, EventEmitter
+  Component, Input, Output, EventEmitter, WritableSignal, signal
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateModule } from '@ngx-translate/core';
 import {
   State, WorkspaceGroupSettingsDto
 } from '@studio-lite-lib/api-dto';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
 import { CoreProfile, ProfilesComponent } from '../../../../components/profiles/profiles.component';
-import { WsgAdminService } from '../../services/wsg-admin.service';
+import { SettingsLoad, WsgAdminService } from '../../services/wsg-admin.service';
 import { StatesComponent } from '../states/states.component';
 import {
   UnitRichNoteTagsConfigComponent
@@ -57,6 +57,7 @@ describe('WorkspaceSettingsComponent', () => {
     selectedWorkspaceGroupId: BehaviorSubject<number>;
     setWorkspaceGroupSettings: jest.Mock;
     settingsChanged: boolean;
+    settingsLoad: WritableSignal<SettingsLoad>;
   };
   let mockSnackBar: { open: jest.Mock };
   let mockMatDialogRef: { close: jest.Mock; afterClosed: jest.Mock };
@@ -72,7 +73,8 @@ describe('WorkspaceSettingsComponent', () => {
       }),
       selectedWorkspaceGroupId: new BehaviorSubject<number>(1),
       setWorkspaceGroupSettings: jest.fn().mockReturnValue(of(true)),
-      settingsChanged: false
+      settingsChanged: false,
+      settingsLoad: signal<SettingsLoad>('loaded')
     };
 
     mockSnackBar = {
@@ -108,20 +110,51 @@ describe('WorkspaceSettingsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('should initialize settings from service', () => {
-    expect(component.settings).toEqual(mockWsgAdminService.selectedWorkspaceGroupSettings.value);
-  });
-
   it('should save group settings successfully', () => {
     mockWsgAdminService.setWorkspaceGroupSettings.mockReturnValue(of(true));
     component.saveGroupSettings();
     expect(mockWsgAdminService.setWorkspaceGroupSettings).toHaveBeenCalledWith(1, component.settings);
     expect(mockWsgAdminService.settingsChanged).toBe(false);
     expect(mockSnackBar.open).toHaveBeenCalledWith('wsg-settings.changed', '', { duration: 1000 });
+  });
+
+  // #2094: what is entered while the save is under way was not sent
+  it('keeps an entry made while saving unsaved', () => {
+    const answer = new Subject<boolean>();
+    mockWsgAdminService.setWorkspaceGroupSettings.mockReturnValue(answer);
+    component.richNoteTagsSettingsChange(['http://gesendet']);
+    component.saveGroupSettings();
+    component.richNoteTagsSettingsChange(['http://danach']);
+    answer.next(true);
+
+    expect(mockWsgAdminService.setWorkspaceGroupSettings).toHaveBeenCalledTimes(1);
+    expect(mockWsgAdminService.setWorkspaceGroupSettings.mock.calls[0][1].richNoteTags).toEqual(['http://gesendet']);
+    expect(mockWsgAdminService.settingsChanged).toBe(true);
+    // the page builds its form from what is published: the stored settings would reset the entry
+    expect(component.settings.richNoteTags).toEqual(['http://danach']);
+    expect(mockWsgAdminService.selectedWorkspaceGroupSettings.value.richNoteTags).toEqual(['http://danach']);
+  });
+
+  // #2009 with #2094: deleting a state saves at once; while another save is under way, it waits for that one
+  it('saves a state deleted while saving once that save is answered', () => {
+    const first = new Subject<boolean>();
+    const second = new Subject<boolean>();
+    mockWsgAdminService.setWorkspaceGroupSettings
+      .mockReturnValueOnce(first)
+      .mockReturnValueOnce(second);
+    const kept: State = { id: 1, label: 'State 1', color: '#ffffff' };
+    component.stateSettingsChange([kept, { id: 2, label: 'State 2', color: '#ffffff' }]);
+    component.saveGroupSettings();
+    component.stateSettingsChange([kept]);
+    component.saveGroupSettings();
+
+    expect(mockWsgAdminService.setWorkspaceGroupSettings).toHaveBeenCalledTimes(1);
+    first.next(true);
+
+    expect(mockWsgAdminService.setWorkspaceGroupSettings).toHaveBeenCalledTimes(2);
+    expect(mockWsgAdminService.setWorkspaceGroupSettings.mock.calls[1][1].states).toEqual([kept]);
+    second.next(true);
+    expect(mockWsgAdminService.settingsChanged).toBe(false);
   });
 
   it('should handle save error', () => {
@@ -143,5 +176,33 @@ describe('WorkspaceSettingsComponent', () => {
     component.stateSettingsChange(newStates);
     expect(component.settings.states).toEqual(newStates);
     expect(mockWsgAdminService.settingsChanged).toBe(true);
+  });
+
+  // Units keep the id of a deleted state, so it stays given out (#2009).
+  it('should keep the id of a deleted state as given out', () => {
+    mockWsgAdminService.selectedWorkspaceGroupSettings.next({
+      ...mockWsgAdminService.selectedWorkspaceGroupSettings.value,
+      states: [{ id: 1, label: 'State 1', color: '#ffffff' }, { id: 2, label: 'State 2', color: '#ffffff' }]
+    });
+
+    component.stateSettingsChange([{ id: 1, label: 'State 1', color: '#ffffff' }]);
+
+    expect(component.settings.lastStateId).toBe(2);
+  });
+
+  // Saving settings that were not loaded would lay substitutes over the stored ones (#2010).
+  it('should say that the settings were not loaded and offer nothing to save', () => {
+    mockWsgAdminService.settingsLoad.set('failed');
+    fixture.detectChanges();
+
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelector('[data-cy="wsg-admin-settings-not-loaded"]')).not.toBeNull();
+    expect(element.querySelector('[data-cy="wsg-admin-settings-save-button"]')).toBeNull();
+  });
+
+  it('should offer the settings to save once they are loaded', () => {
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelector('[data-cy="wsg-admin-settings-not-loaded"]')).toBeNull();
+    expect(element.querySelector('[data-cy="wsg-admin-settings-save-button"]')).not.toBeNull();
   });
 });

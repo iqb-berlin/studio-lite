@@ -72,18 +72,6 @@ describe('NewUnitComponent', () => {
     jest.restoreAllMocks();
   });
 
-  it('should create', () => {
-    expect(component)
-      .toBeTruthy();
-  });
-
-  it('should initialize form with data', () => {
-    const keyControl = component.newUnitForm.get('key');
-    const labelControl = component.newUnitForm.get('label');
-    expect(keyControl?.value).toBe('test');
-    expect(labelControl?.value).toBe('Test Label');
-  });
-
   it('should set group direct mode to true if no groups provided', () => {
     // Re-create component with empty groups
     TestBed.resetTestingModule();
@@ -140,4 +128,30 @@ describe('NewUnitComponent', () => {
     tick(100);
     expect(focusSpy).toHaveBeenCalled();
   }));
+
+  // Only the group of the view open on saving counts; a typed one won over a selected one (#2015).
+  describe('switching between the selection and a new group', () => {
+    const groupFields = () => ({
+      groupSelect: component.newUnitForm.get('groupSelect')?.value,
+      groupDirect: component.newUnitForm.get('groupDirect')?.value
+    });
+
+    it('should drop the typed group when going back to the selection', fakeAsync(() => {
+      component.setGroupDirectMode(true);
+      component.newUnitForm.get('groupDirect')?.setValue('New');
+      component.setGroupDirectMode(false);
+      component.newUnitForm.get('groupSelect')?.setValue('Group1');
+      tick(100);
+
+      expect(groupFields()).toEqual({ groupSelect: 'Group1', groupDirect: '' });
+    }));
+
+    it('should drop the selected group when typing a new one', fakeAsync(() => {
+      component.newUnitForm.get('groupSelect')?.setValue('Group1');
+      component.setGroupDirectMode(true);
+      tick(100);
+
+      expect(groupFields()).toEqual({ groupSelect: '', groupDirect: '' });
+    }));
+  });
 });

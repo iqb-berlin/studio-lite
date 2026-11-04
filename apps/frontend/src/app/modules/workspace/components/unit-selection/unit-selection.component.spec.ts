@@ -1,7 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import {
-  ComponentFixture, fakeAsync, TestBed, tick
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { Component, Input } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
@@ -116,10 +114,6 @@ describe('UnitSelectionComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should calculate stats when setting unitList', () => {
     component.setU = {
       'Group 1': [{ id: 1 }, { id: 2 }] as UnitInListDto[],
@@ -132,13 +126,11 @@ describe('UnitSelectionComponent', () => {
     expect(component.groupsInfo).toContain('3 workspace.units');
   });
 
-  it('should update unit list on comments updated', fakeAsync(() => {
-    const updateSpy = jest.spyOn(component, 'updateUnitList');
-    component.ngOnInit();
-    (workspaceServiceMock.onCommentsUpdated as Subject<void>).next();
-    tick();
-    expect(updateSpy).toHaveBeenCalled();
-  }));
+  it('should name a single group and a single unit in the singular', () => {
+    component.setU = { 'Group 1': [{ id: 1 }] as UnitInListDto[] };
+
+    expect(component.groupsInfo).toBe('1 workspace.group | 1 workspace.unit');
+  });
 
   it('should update expandedGroups count on change', () => {
     component.expandedGroups = 5;

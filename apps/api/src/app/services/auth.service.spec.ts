@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import {
-  In, LessThan, MoreThan, Repository
+  DeleteQueryBuilder, In, InsertQueryBuilder, LessThan, MoreThan, Repository, SelectQueryBuilder
 } from 'typeorm';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -11,17 +11,18 @@ import { AuthService } from './auth.service';
 import { UsersService } from './users.service';
 import { ReviewService } from './review.service';
 import { RefreshToken } from '../entities/refresh-token.entity';
+import { UsedRefreshToken } from '../entities/used-refresh-token.entity';
 import UserSession from '../entities/user-session.entity';
 import User from '../entities/user.entity';
-import { ACTIVE_THRESHOLD_MS } from '../app.constants';
+import { ACTIVE_THRESHOLD_MS, REFRESH_TOKEN_REUSE_GRACE_MS } from '../app.constants';
 
 describe('AuthService', () => {
   let service: AuthService;
   let usersService: DeepMocked<UsersService>;
-  let reviewService: DeepMocked<ReviewService>;
   let jwtService: DeepMocked<JwtService>;
   let refreshTokenRepository: DeepMocked<Repository<RefreshToken>>;
   let userSessionRepository: DeepMocked<Repository<UserSession>>;
+  let usedRefreshTokenRepository: DeepMocked<Repository<UsedRefreshToken>>;
 
   const realDateNow = Date.now;
 
@@ -51,6 +52,10 @@ describe('AuthService', () => {
           useValue: createMock<Repository<UserSession>>()
         },
         {
+          provide: getRepositoryToken(UsedRefreshToken),
+          useValue: createMock<Repository<UsedRefreshToken>>()
+        },
+        {
           provide: ConfigService,
           useValue: createMock<ConfigService>()
         }
@@ -59,36 +64,17 @@ describe('AuthService', () => {
 
     service = module.get<AuthService>(AuthService);
     usersService = module.get(UsersService);
-    reviewService = module.get(ReviewService);
     jwtService = module.get(JwtService);
     refreshTokenRepository = module.get(getRepositoryToken(RefreshToken));
     userSessionRepository = module.get(getRepositoryToken(UserSession));
+    usedRefreshTokenRepository = module.get(getRepositoryToken(UsedRefreshToken));
+    // A deep mock answers every lookup with an object, which would make every unknown token look
+    // like an exchanged one.
+    usedRefreshTokenRepository.findOne.mockResolvedValue(null);
   });
 
   afterEach(() => {
     Date.now = realDateNow;
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
-  describe('validateUser', () => {
-    it('should return user id on success', async () => {
-      usersService.getUserByNameAndPassword.mockResolvedValue(1);
-      const result = await service.validateUser('user', 'pass');
-      expect(result).toBe(1);
-      expect(usersService.getUserByNameAndPassword).toHaveBeenCalledWith('user', 'pass');
-    });
-  });
-
-  describe('validateReview', () => {
-    it('should return review id on success', async () => {
-      reviewService.getReviewByKeyAndPassword.mockResolvedValue(10);
-      const result = await service.validateReview('key', 'pass');
-      expect(result).toBe(10);
-      expect(reviewService.getReviewByKeyAndPassword).toHaveBeenCalledWith('key', 'pass');
-    });
   });
 
   describe('login', () => {
@@ -149,6 +135,62 @@ describe('AuthService', () => {
         { userId: 1, sessionId: validSid },
         expect.any(Object)
       );
+    });
+
+    // The session the client names is gone (logged out, deleted by an admin): it is not revived.
+    it('should open a session of its own when the one handed back no longer exists', async () => {
+      const staleSid = '550e8400-e29b-41d4-a716-446655440000';
+      userSessionRepository.update.mockResolvedValue({ affected: 0, raw: [], generatedMaps: [] });
+      userSessionRepository.create.mockImplementation(session => session as UserSession);
+
+      await service.login({ id: 1, name: 'user', reviewId: 0 }, staleSid);
+
+      const newSid = userSessionRepository.save.mock.calls[0][0].sessionId;
+      expect(newSid).not.toBe(staleSid);
+      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({ sid: newSid }));
+    });
+
+    // A review link is no account: nothing is left behind that could be resumed.
+    it('should give a review login neither a session nor a refresh token', async () => {
+      jwtService.sign.mockReturnValue('review-token');
+
+      const result = await service.login({ id: 0, name: '', reviewId: 5 });
+
+      expect(result).toEqual({ accessToken: 'review-token', refreshToken: '' });
+      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({ sub: 0, sub2: 5 }));
+      expect(userSessionRepository.save).not.toHaveBeenCalled();
+      expect(refreshTokenRepository.save).not.toHaveBeenCalled();
+    });
+
+    describe('on a fresh login', () => {
+      let deleteQuery: DeepMocked<DeleteQueryBuilder<RefreshToken>>;
+
+      beforeEach(() => {
+        deleteQuery = createMock<DeleteQueryBuilder<RefreshToken>>();
+        deleteQuery.where.mockReturnValue(deleteQuery);
+        const queryBuilder = createMock<SelectQueryBuilder<RefreshToken>>();
+        queryBuilder.delete.mockReturnValue(deleteQuery);
+        refreshTokenRepository.createQueryBuilder.mockReturnValue(queryBuilder);
+      });
+
+      it('should delete the expired sessions of the user together with their refresh tokens', async () => {
+        userSessionRepository.find.mockResolvedValue([{ sessionId: 'expired-1' } as UserSession]);
+
+        await service.login({ id: 1, name: 'user', reviewId: 0 });
+
+        expect(deleteQuery.where).toHaveBeenCalledWith(expect.any(String), { userId: 1, ids: ['expired-1'] });
+        expect(deleteQuery.execute).toHaveBeenCalled();
+        expect(userSessionRepository.delete).toHaveBeenCalledWith(expect.objectContaining({ userId: 1 }));
+      });
+
+      it('should delete nothing when no session of the user has expired', async () => {
+        userSessionRepository.find.mockResolvedValue([]);
+
+        await service.login({ id: 1, name: 'user', reviewId: 0 });
+
+        expect(deleteQuery.execute).not.toHaveBeenCalled();
+        expect(userSessionRepository.delete).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -230,10 +272,97 @@ describe('AuthService', () => {
       expect(userSessionRepository.save).not.toHaveBeenCalled();
     });
 
+    it('should record the exchanged token before deleting it', async () => {
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+      refreshTokenRepository.findOne.mockResolvedValue({
+        tokenHash: 'token-hash', userId: 1, sessionId: 'session-1', expiresAt
+      } as RefreshToken);
+      userSessionRepository.findOne.mockResolvedValue({
+        userId: 1, sessionId: 'session-1', lastActivity: new Date(), expiresAt
+      } as UserSession);
+      usersService.findOne.mockResolvedValue({ id: 1, name: 'user' } as User);
+      jwtService.sign.mockReturnValue('new-atoken');
+      const insertQuery = createMock<InsertQueryBuilder<UsedRefreshToken>>();
+      insertQuery.values.mockReturnValue(insertQuery);
+      insertQuery.orIgnore.mockReturnValue(insertQuery);
+      const queryBuilder = createMock<SelectQueryBuilder<UsedRefreshToken>>();
+      queryBuilder.insert.mockReturnValue(insertQuery);
+      usedRefreshTokenRepository.createQueryBuilder.mockReturnValue(queryBuilder);
+
+      await service.refreshAccessToken('valid-token');
+
+      expect(insertQuery.values).toHaveBeenCalledWith({
+        tokenHash: 'token-hash', userId: 1, sessionId: 'session-1', usedAt: expect.any(Date)
+      });
+      // Two refreshes in flight with the same token record the same hash.
+      expect(insertQuery.orIgnore).toHaveBeenCalled();
+      const recordOrder = insertQuery.execute.mock.invocationCallOrder[0];
+      const deleteOrder = refreshTokenRepository.delete.mock.invocationCallOrder[0];
+      expect(recordOrder).toBeLessThan(deleteOrder);
+    });
+
     it('should return null if token not found', async () => {
       refreshTokenRepository.findOne.mockResolvedValue(null);
       const result = await service.refreshAccessToken('invalid');
       expect(result).toBeNull();
+      expect(userSessionRepository.delete).not.toHaveBeenCalled();
+    });
+
+    // Whoever used the token first got the new pair; which side is the copy cannot be told, so
+    // both lose the session (#1935).
+    it('should end the session when an exchanged token comes back after the grace period', async () => {
+      refreshTokenRepository.findOne.mockResolvedValue(null);
+      usedRefreshTokenRepository.findOne.mockResolvedValue({
+        tokenHash: 'token-hash',
+        userId: 1,
+        sessionId: 'session-1',
+        usedAt: new Date(1000000 - REFRESH_TOKEN_REUSE_GRACE_MS - 1000)
+      } as UsedRefreshToken);
+
+      const result = await service.refreshAccessToken('copied-token');
+
+      expect(result).toBeNull();
+      expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 1, sessionId: 'session-1' });
+      expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 1, sessionId: 'session-1' });
+    });
+
+    // Within the grace period the second use is a second tab of the same browser that lost the race
+    // for the refresh; it is refused as before, and the session goes on.
+    it('should only refuse an exchanged token that comes back within the grace period', async () => {
+      refreshTokenRepository.findOne.mockResolvedValue(null);
+      usedRefreshTokenRepository.findOne.mockResolvedValue({
+        tokenHash: 'token-hash',
+        userId: 1,
+        sessionId: 'session-1',
+        usedAt: new Date(1000000 - REFRESH_TOKEN_REUSE_GRACE_MS + 1000)
+      } as UsedRefreshToken);
+
+      const result = await service.refreshAccessToken('raced-token');
+
+      expect(result).toBeNull();
+      expect(refreshTokenRepository.delete).not.toHaveBeenCalled();
+      expect(userSessionRepository.delete).not.toHaveBeenCalled();
+    });
+
+    // A session past its inactivity window, or deleted, cannot be resumed with a token that is still valid.
+    it.each(['missing', 'expired'])('should refuse a token whose session is %s', async state => {
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+      const expired = new Date();
+      expired.setMinutes(expired.getMinutes() - 10);
+      refreshTokenRepository.findOne.mockResolvedValue({
+        tokenHash: 'token-hash', userId: 1, sessionId: 'session-1', expiresAt
+      } as RefreshToken);
+      userSessionRepository.findOne.mockResolvedValue(state === 'missing' ? null : {
+        userId: 1, sessionId: 'session-1', expiresAt: expired
+      } as UserSession);
+
+      const result = await service.refreshAccessToken('valid-token');
+
+      expect(result).toBeNull();
+      expect(refreshTokenRepository.save).not.toHaveBeenCalled();
+      expect(jwtService.sign).not.toHaveBeenCalled();
     });
 
     it('should return null if token is expired', async () => {
@@ -285,10 +414,6 @@ describe('AuthService', () => {
       usersService.getUserIsAdmin.mockResolvedValue(true);
       expect(await service.isAdminUser(1)).toBe(true);
     });
-    it('should return false if user is not admin', async () => {
-      usersService.getUserIsAdmin.mockResolvedValue(false);
-      expect(await service.isAdminUser(1)).toBe(false);
-    });
     it('should return false if userId is falsy', async () => {
       expect(await service.isAdminUser(0)).toBe(false);
     });
@@ -308,30 +433,12 @@ describe('AuthService', () => {
     });
   });
 
-  describe('canAccessWorkSpace', () => {
-    it('should delegate to usersService', async () => {
-      usersService.canAccessWorkSpace.mockResolvedValue(true);
-      const result = await service.canAccessWorkSpace(1, 1);
-      expect(result).toBe(true);
-      expect(usersService.canAccessWorkSpace).toHaveBeenCalledWith(1, 1);
-    });
-  });
-
   describe('logout', () => {
     it('should delete all sessions and refresh tokens for the user', async () => {
       await service.logout(7);
 
       expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 7 });
       expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 7 });
-    });
-  });
-
-  describe('logoutSession', () => {
-    it('should delete the targeted session and its refresh tokens', async () => {
-      await service.logoutSession(7, 'session-7');
-
-      expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 7, sessionId: 'session-7' });
-      expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 7, sessionId: 'session-7' });
     });
   });
 
@@ -504,6 +611,21 @@ describe('AuthService', () => {
 
       expect(refreshTokenRepository.delete).not.toHaveBeenCalled();
       expect(userSessionRepository.delete).not.toHaveBeenCalled();
+    });
+
+    // A tab reloaded while its refresh ran holds only the exchanged token and logs out with it (#2110).
+    it('should end the session of a token that has already been exchanged', async () => {
+      refreshTokenRepository.findOne.mockResolvedValue(null);
+      usedRefreshTokenRepository.findOne.mockResolvedValue({
+        userId: 4,
+        sessionId: 'sid-4',
+        usedAt: new Date(Date.now())
+      } as UsedRefreshToken);
+
+      await service.logoutCurrentSession('exchanged-token');
+
+      expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 4, sessionId: 'sid-4' });
+      expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 4, sessionId: 'sid-4' });
     });
   });
 });

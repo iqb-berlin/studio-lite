@@ -28,15 +28,6 @@ export class ItemCommentService {
     private unitItemRepository: Repository<UnitItem>
   ) {}
 
-  async findItemComments(itemUuid: string): Promise<UnitCommentUnitItem[]> {
-    this.logger.log(`Returning comments for item with uuid: ${itemUuid}`);
-    return this.unitCommentUnitItemRepository
-      .find({
-        where: { unitItemUuid: itemUuid },
-        order: { createdAt: 'ASC' }
-      });
-  }
-
   async findCommentItems(commentId: number): Promise<UnitCommentUnitItem[]> {
     this.logger.log(`Returning items for comment with id: ${commentId}`);
     return this.unitCommentUnitItemRepository
@@ -118,7 +109,7 @@ export class ItemCommentService {
       .find({
         where: { unitId: unitId, unitCommentId: commentId },
         order: { createdAt: 'ASC' },
-        select: ['unitItemUuid']
+        select: { unitItemUuid: true }
       });
   }
 

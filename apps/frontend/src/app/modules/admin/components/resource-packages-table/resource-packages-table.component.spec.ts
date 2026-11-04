@@ -48,10 +48,6 @@ describe('ResourcePackagesTableComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('updates selectedResourcePackages from checked rows', () => {
     const checkBoxes = [
       { checked: true } as MatCheckbox,

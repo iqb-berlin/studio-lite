@@ -21,7 +21,13 @@ FROM ${REGISTRY_PATH}nginxinc/nginx-unprivileged:stable AS prod
 ARG PROJECT
 
 USER root
-RUN chown -R nginx:root /usr/share/nginx/html
+# nginx-unprivileged:stable lags behind Debian's security updates, and each fixed CVE it still carries
+# fails the image scan (libbrotli1, CVE-2026-111497). Release builds always run this layer; develop builds
+# take it from the cache of :latest until the base image changes.
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
+    rm -rf /var/lib/apt/lists/* && \
+    chown -R nginx:root /usr/share/nginx/html
 
 USER nginx
 

@@ -43,13 +43,13 @@ export class UnitItemService {
    */
   async getAll(): Promise<UnitItemInViewDto[]> {
     return this.unitItemRepository.find({
-      relations: ['unit', 'unit.workspace']
+      relations: { unit: { workspace: true } }
     }).then(items => items.map(UnitItemService.inView));
   }
 
   async findAllForGroup(workspaceGroupId: number): Promise<UnitItemInViewDto[]> {
     return this.unitItemRepository.find({
-      relations: ['unit', 'unit.workspace'],
+      relations: { unit: { workspace: true } },
       where: { unit: { workspaceId: In(await this.getWorkspaceIds(workspaceGroupId)) } }
     }).then(items => items.map(UnitItemService.inView));
   }
@@ -72,7 +72,7 @@ export class UnitItemService {
   private async getWorkspaceIds(workspaceGroupId: number): Promise<number[]> {
     return this.unitItemRepository.manager.getRepository('Workspace').find({
       where: { groupId: workspaceGroupId },
-      select: ['id']
+      select: { id: true }
     }).then(workspaces => workspaces.map(w => w.id));
   }
 

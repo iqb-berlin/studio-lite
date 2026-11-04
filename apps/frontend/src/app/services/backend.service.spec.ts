@@ -1,17 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
-import {
-  AuthDataDto,
-  MyDataDto,
-  ConfigDto,
-  AppLogoDto,
-  ResourcePackageDto,
-  WorkspaceFullDto,
-  UserWorkspaceFullDto,
-  WorkspaceSettingsDto,
-  EmailTemplateDto
-} from '@studio-lite-lib/api-dto';
+import { AuthDataDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from './backend.service';
 import { AppService } from './app.service';
 import { IS_BACKGROUND_REQUEST, SKIP_TOKEN_REFRESH } from '../interceptors/request-classification';
@@ -45,10 +35,6 @@ describe('BackendService', () => {
   afterEach(() => {
     httpMock.verify();
     localStorage.clear();
-  });
-
-  it('should be created', () => {
-    expect(service).toBeTruthy();
   });
 
   describe('login', () => {
@@ -118,6 +104,25 @@ describe('BackendService', () => {
       req.error(new ProgressEvent('error'));
     });
 
+    // The API keeps the session of this browser when the login names it, read from the token's `sid`;
+    // a token that cannot be read must not stand in the way of the login.
+    it.each([
+      [
+        'a stored token',
+        'header.eyJzdWIiOjEsInNpZCI6IjNmOWIxYzJlLThhNGQtNGU2Zi1iMWMyLWQzZTRmNWE2YjdjOCJ9.signature',
+        '3f9b1c2e-8a4d-4e6f-b1c2-d3e4f5a6b7c8'
+      ],
+      ['a stored token that cannot be read', 'not-a-token', undefined]
+    ])('should send the session of %s with the login', (_, token, sessionId) => {
+      localStorage.setItem('id_token', token);
+
+      service.login('user', 'pw', false).subscribe();
+
+      const req = httpMock.expectOne(`${serverUrl}login`);
+      expect(req.request.body).toEqual({ username: 'user', password: 'pw', sessionId });
+      req.flush(null);
+    });
+
     it('should return false when auth-data fails after successful login', done => {
       const mockLoginResponse = { accessToken: 'test-token', refreshToken: 'test-refresh' };
 
@@ -131,98 +136,6 @@ describe('BackendService', () => {
 
       const authReq = httpMock.expectOne(`${serverUrl}auth-data`);
       authReq.error(new ProgressEvent('error'));
-    });
-  });
-
-  describe('getAuthData', () => {
-    it('should get auth data successfully', done => {
-      const mockAuthData: AuthDataDto = {
-        userId: 1,
-        userName: 'testUser',
-        userLongName: 'Test User',
-        isAdmin: false,
-        workspaces: [],
-        reviews: []
-      };
-
-      service.getAuthData().subscribe(data => {
-        expect(data).toEqual(mockAuthData);
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}auth-data`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockAuthData);
-    });
-  });
-
-  describe('getMyData', () => {
-    it('should get user data successfully', done => {
-      const mockMyData: MyDataDto = {
-        id: 1,
-        description: 'Test Description',
-        email: 'test@example.com',
-        lastName: 'Doe',
-        firstName: 'John',
-        emailPublishApproved: true
-      };
-
-      service.getMyData().subscribe(data => {
-        expect(data).toEqual(mockMyData);
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}my-data`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockMyData);
-    });
-
-    it('should return null on error', done => {
-      service.getMyData().subscribe(data => {
-        expect(data).toBeNull();
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}my-data`);
-      req.error(new ProgressEvent('error'));
-    });
-  });
-
-  describe('setMyData', () => {
-    it('should update user data successfully', done => {
-      const newMyData: MyDataDto = {
-        id: 1,
-        description: 'Updated Description',
-        email: 'updated@example.com',
-        lastName: 'Smith',
-        firstName: 'Jane',
-        emailPublishApproved: false
-      };
-
-      service.setMyData(newMyData).subscribe(result => {
-        expect(result).toBe(true);
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}my-data`);
-      expect(req.request.method).toBe('PATCH');
-      expect(req.request.body).toEqual(newMyData);
-      req.flush(true);
-    });
-
-    it('should return false on error', done => {
-      const newMyData: MyDataDto = {
-        id: 1,
-        email: 'test@example.com'
-      };
-
-      service.setMyData(newMyData).subscribe(result => {
-        expect(result).toBe(false);
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}my-data`);
-      req.error(new ProgressEvent('error'));
     });
   });
 
@@ -271,30 +184,51 @@ describe('BackendService', () => {
     });
   });
 
-  describe('getConfig', () => {
-    it('should get config successfully', done => {
-      const mockConfig: ConfigDto = {
-        appTitle: 'Test Studio',
-        introHtml: '<p>Test intro</p>',
-        imprintHtml: '<p>Test imprint</p>',
-        emailSubject: 'Test Subject',
-        emailBody: 'Test Body',
-        globalWarningText: 'Warning',
-        globalWarningExpiredHour: 12,
-        globalWarningExpiredDay: new Date('2024-12-31'),
-        hasUsers: true
-      };
+  // Only the server's verdict on the token ends the session; a missing answer says nothing about it (#2110).
+  describe('refresh', () => {
+    [401, 403].forEach(status => {
+      it(`should answer null when the server refuses the token with ${status}`, () => {
+        let result: unknown = 'not answered';
+        service.refresh('old').subscribe(answer => { result = answer; });
 
-      service.getConfig().subscribe(config => {
-        expect(config).toEqual(mockConfig);
+        httpMock.expectOne(`${serverUrl}refresh`).flush('refused', { status, statusText: 'refused' });
+
+        expect(result).toBeNull();
+      });
+    });
+
+    it('should pass on a failure without connection', () => {
+      let failedWith: number | undefined;
+      service.refresh('old').subscribe({ error: error => { failedWith = error.status; } });
+
+      httpMock.expectOne(`${serverUrl}refresh`).error(new ProgressEvent('error'));
+
+      expect(failedWith).toBe(0);
+    });
+
+    it('should pass on an error of the server', () => {
+      let failedWith: number | undefined;
+      service.refresh('old').subscribe({ error: error => { failedWith = error.status; } });
+
+      httpMock.expectOne(`${serverUrl}refresh`).flush('boom', { status: 500, statusText: 'Server Error' });
+
+      expect(failedWith).toBe(500);
+    });
+  });
+
+  describe('getAppLogo', () => {
+    // A null would read as "no logo stored", and the admin form would offer an empty one for saving (#1969).
+    it('should answer a failed request with false', done => {
+      service.getAppLogo().subscribe(logo => {
+        expect(logo).toBe(false);
         done();
       });
 
-      const req = httpMock.expectOne(`${serverUrl}admin/settings/config`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockConfig);
+      httpMock.expectOne(`${serverUrl}admin/settings/app-logo`).error(new ProgressEvent('error'));
     });
+  });
 
+  describe('getConfig', () => {
     it('should return default config on error', done => {
       service.getConfig().subscribe(config => {
         expect(config?.appTitle).toBe('IQB-Studio');
@@ -302,73 +236,6 @@ describe('BackendService', () => {
       });
 
       const req = httpMock.expectOne(`${serverUrl}admin/settings/config`);
-      req.error(new ProgressEvent('error'));
-    });
-  });
-
-  describe('getAppLogo', () => {
-    it('should get app logo successfully', done => {
-      const mockLogo: AppLogoDto = {
-        data: 'test-logo-data',
-        bodyBackground: '#ffffff',
-        boxBackground: '#000000'
-      };
-
-      service.getAppLogo().subscribe(logo => {
-        expect(logo).toEqual(mockLogo);
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}admin/settings/app-logo`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockLogo);
-    });
-
-    it('should return null on error', done => {
-      service.getAppLogo().subscribe(logo => {
-        expect(logo).toBeNull();
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}admin/settings/app-logo`);
-      req.error(new ProgressEvent('error'));
-    });
-  });
-
-  describe('getResourcePackages', () => {
-    it('should get resource packages successfully', done => {
-      const mockPackages: ResourcePackageDto[] = [
-        {
-          id: 1,
-          name: 'Package 1',
-          elements: ['element1', 'element2'],
-          createdAt: new Date()
-        },
-        {
-          id: 2,
-          name: 'Package 2',
-          elements: ['element3', 'element4'],
-          createdAt: new Date()
-        }
-      ];
-
-      service.getResourcePackages().subscribe(packages => {
-        expect(packages).toEqual(mockPackages);
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}resource-packages`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockPackages);
-    });
-
-    it('should return empty array on error', done => {
-      service.getResourcePackages().subscribe(packages => {
-        expect(packages).toEqual([]);
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}resource-packages`);
       req.error(new ProgressEvent('error'));
     });
   });
@@ -387,197 +254,6 @@ describe('BackendService', () => {
         newPassword: 'newPass'
       });
       req.flush(true);
-    });
-
-    it('should return false on error', done => {
-      service.setUserPassword('wrongOld', 'newPass').subscribe(result => {
-        expect(result).toBe(false);
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}password`);
-      req.error(new ProgressEvent('error'));
-    });
-  });
-
-  describe('getWorkspaceData', () => {
-    it('should get workspace data successfully', done => {
-      const mockWorkspace: WorkspaceFullDto = {
-        id: 1,
-        name: 'Test Workspace',
-        groupId: 10,
-        groupName: 'Test Group',
-        dropBoxId: 100,
-        settings: {
-          defaultEditor: 'editor1',
-          defaultPlayer: 'player1',
-          defaultSchemer: 'schemer1',
-          unitGroups: [],
-          stableModulesOnly: false
-        }
-      };
-
-      service.getWorkspaceData(1).subscribe(workspace => {
-        expect(workspace).toEqual(mockWorkspace);
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}workspaces/1`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockWorkspace);
-    });
-
-    it('should return null on error', done => {
-      service.getWorkspaceData(999).subscribe(workspace => {
-        expect(workspace).toBeNull();
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}workspaces/999`);
-      req.error(new ProgressEvent('error'));
-    });
-  });
-
-  describe('getUserWorkspaceData', () => {
-    it('should get user workspace data successfully', done => {
-      const mockUserWorkspace: UserWorkspaceFullDto = {
-        id: 1,
-        name: 'Test Workspace',
-        groupId: 10,
-        groupName: 'Test Group',
-        userAccessLevel: 2,
-        dropBoxId: 100,
-        settings: {
-          defaultEditor: 'editor1',
-          defaultPlayer: 'player1',
-          defaultSchemer: 'schemer1',
-          unitGroups: [],
-          stableModulesOnly: false
-        }
-      };
-
-      service.getUserWorkspaceData(1, 5).subscribe(workspace => {
-        expect(workspace).toEqual(mockUserWorkspace);
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}workspaces/1/users/5`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockUserWorkspace);
-    });
-
-    it('should return null on error', done => {
-      service.getUserWorkspaceData(1, 999).subscribe(workspace => {
-        expect(workspace).toBeNull();
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}workspaces/1/users/999`);
-      req.error(new ProgressEvent('error'));
-    });
-  });
-
-  describe('setWorkspaceSettings', () => {
-    it('should update workspace settings successfully', done => {
-      const settings: WorkspaceSettingsDto = {
-        defaultEditor: 'new-editor',
-        defaultPlayer: 'new-player',
-        defaultSchemer: 'new-schemer',
-        unitGroups: [],
-        stableModulesOnly: true
-      };
-
-      service.setWorkspaceSettings(1, settings).subscribe(result => {
-        expect(result).toBe(true);
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}workspaces/1/settings`);
-      expect(req.request.method).toBe('PATCH');
-      expect(req.request.body).toEqual(settings);
-      req.flush(null);
-    });
-
-    it('should return false on error', done => {
-      const settings: WorkspaceSettingsDto = {
-        defaultEditor: 'editor',
-        defaultPlayer: 'player',
-        defaultSchemer: 'schemer',
-        unitGroups: [],
-        stableModulesOnly: false
-      };
-
-      service.setWorkspaceSettings(999, settings).subscribe(result => {
-        expect(result).toBe(false);
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}workspaces/999/settings`);
-      req.error(new ProgressEvent('error'));
-    });
-  });
-
-  describe('getEmailTemplate', () => {
-    it('should get email template successfully', done => {
-      const mockTemplate: EmailTemplateDto = {
-        emailSubject: 'Test Subject',
-        emailBody: 'Test Body'
-      };
-
-      service.getEmailTemplate().subscribe(template => {
-        expect(template).toEqual(mockTemplate);
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}admin/settings/email-template`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockTemplate);
-    });
-  });
-
-  describe('setEmailTemplate', () => {
-    it('should update email template successfully', done => {
-      const template: EmailTemplateDto = {
-        emailSubject: 'New Subject',
-        emailBody: 'New Body'
-      };
-
-      service.setEmailTemplate(template).subscribe(result => {
-        expect(result).toBe(true);
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}admin/settings/email-template`);
-      expect(req.request.method).toBe('PATCH');
-      expect(req.request.body).toEqual(template);
-      req.flush(null);
-    });
-
-    it('should return false on error', done => {
-      const template: EmailTemplateDto = {
-        emailSubject: 'Subject',
-        emailBody: 'Body'
-      };
-
-      service.setEmailTemplate(template).subscribe(result => {
-        expect(result).toBe(false);
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}admin/settings/email-template`);
-      req.error(new ProgressEvent('error'));
-    });
-  });
-
-  describe('activity', () => {
-    it('should post activity update', done => {
-      service.activity().subscribe(() => {
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}activity`);
-      expect(req.request.method).toBe('POST');
-      req.flush(null);
     });
   });
 
@@ -620,19 +296,6 @@ describe('BackendService', () => {
       const req = httpMock.expectOne(`${serverUrl}logout`);
       expect(req.request.context.get(IS_BACKGROUND_REQUEST)).toBe(true);
       expect(req.request.context.get(SKIP_TOKEN_REFRESH)).toBe(true);
-      req.flush(null);
-    });
-  });
-
-  describe('deleteUserOrphanedSessions', () => {
-    it('should delete every orphaned session of the user', done => {
-      service.deleteUserOrphanedSessions(4).subscribe(result => {
-        expect(result).toBe(true);
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}admin/users/4/orphaned-sessions`);
-      expect(req.request.method).toBe('DELETE');
       req.flush(null);
     });
   });

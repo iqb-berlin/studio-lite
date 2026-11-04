@@ -50,7 +50,7 @@ export class VeronaModulesService {
     this.logger.log(`Returning verona module with key: ${key}`);
     const file = await this.veronaModulesRepository.findOne({
       where: { key: key },
-      select: ['file', 'key', 'metadata']
+      select: { file: true, key: true, metadata: true }
     });
     if (file) {
       return <VeronaModuleFileDto>{
@@ -66,7 +66,9 @@ export class VeronaModulesService {
   async findAll(type?: string): Promise<VeronaModuleInListDto[]> {
     this.logger.log('Returning verona modules.');
     const veronaModules = (await this.veronaModulesRepository.find({
-      select: ['key', 'metadata', 'fileSize', 'fileDateTime']
+      select: {
+        key: true, metadata: true, fileSize: true, fileDateTime: true
+      }
     })) ?? [];
     return veronaModules
       .filter(vm => !type || veronaModuleTypesMatch(vm.metadata?.type, type))
@@ -87,10 +89,15 @@ export class VeronaModulesService {
     const fileAsString = fileData.toString('utf8');
     const htmlDocument = cheerio.load(fileAsString);
     const firstScriptElement = htmlDocument('script[type="application/ld+json"]').first();
-    if (firstScriptElement) {
-      const scriptContentAsString = firstScriptElement.contents().toString();
-      const scriptContentAsJson = JSON.parse(scriptContentAsString);
-      const veronaModuleMetadata = VeronaModuleMetadataDto.getFromJsonLd(scriptContentAsJson);
+    // cheerio's first() is an object also when there is no such script, and a script may hold no JSON:
+    // both are invalid metadata, not a server error (#1985)
+    const scriptContentAsJson = firstScriptElement.length > 0 ?
+      VeronaModulesService.parseJson(firstScriptElement.contents().toString()) :
+      undefined;
+    if (scriptContentAsJson && typeof scriptContentAsJson === 'object') {
+      const veronaModuleMetadata = VeronaModuleMetadataDto.getFromJsonLd(
+        scriptContentAsJson as Parameters<typeof VeronaModuleMetadataDto.getFromJsonLd>[0]
+      );
       if (veronaModuleMetadata) {
         if (allowedTypes &&
           !allowedTypes.some(t => veronaModuleTypesMatch(t, veronaModuleMetadata.type))) {
@@ -120,6 +127,14 @@ export class VeronaModulesService {
       }
     }
     throw new NotAcceptableException('verona module metadata invalid');
+  }
+
+  private static parseJson(text: string): unknown {
+    try {
+      return JSON.parse(text);
+    } catch {
+      return undefined;
+    }
   }
 
   async remove(key: string | string[]): Promise<void> {

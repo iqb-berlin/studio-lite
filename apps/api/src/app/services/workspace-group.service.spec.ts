@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -43,10 +44,6 @@ describe('WorkspaceGroupService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('findAll', () => {
     it('should return all groups if no user provided', async () => {
       const groups = [{ id: 1, name: 'g1' }] as WorkspaceGroup[];
@@ -71,6 +68,15 @@ describe('WorkspaceGroupService', () => {
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe(1);
     });
+
+    // An empty selection must not fall through to "all groups".
+    it('should return no group to a user who administers none', async () => {
+      mockRepository.find.mockImplementation(args => Promise.resolve(
+        args?.where?.userId ? [] : [{ id: 1, name: 'g1' }] as WorkspaceGroup[]
+      ));
+
+      expect(await service.findAll(1)).toEqual([]);
+    });
   });
 
   describe('findOne', () => {
@@ -85,18 +91,6 @@ describe('WorkspaceGroupService', () => {
     it('should throw if not found', async () => {
       mockRepository.findOne.mockResolvedValue(null);
       await expect(service.findOne(1)).rejects.toThrow();
-    });
-  });
-
-  describe('create', () => {
-    it('should create group', async () => {
-      const dto = { name: 'g1', settings: {} } as CreateWorkspaceGroupDto;
-      const saved = { id: 1, ...dto } as WorkspaceGroup;
-      mockRepository.create.mockReturnValue(saved);
-      mockRepository.save.mockResolvedValue(saved);
-
-      const result = await service.create(dto);
-      expect(result).toBe(1);
     });
   });
 
@@ -127,6 +121,24 @@ describe('WorkspaceGroupService', () => {
           })
         })
       );
+    });
+
+    // Nothing validates the body: an id sent along had save overwrite that group (#2030)
+    it('should take nothing from the body but the name and the settings', async () => {
+      mockRepository.create.mockImplementation(group => group as WorkspaceGroup);
+      mockRepository.save.mockResolvedValue({ id: 7 } as WorkspaceGroup);
+      const body: CreateWorkspaceGroupDto & { id: number } = { name: 'neu', settings: {}, id: 99 };
+
+      await service.create(body);
+
+      expect(mockRepository.create.mock.calls[0][0]).toEqual({ name: 'neu', settings: {} });
+    });
+
+    // #2091: the migrations on the settings column take them for an object; the body is mistyped on purpose
+    it.each([[['a']], ['text'], [null]])('should refuse settings that are no object: %j', async settings => {
+      await expect(service.create({ name: 'neu', settings } as CreateWorkspaceGroupDto))
+        .rejects.toThrow(BadRequestException);
+      expect(mockRepository.save).not.toHaveBeenCalled();
     });
   });
 
@@ -181,12 +193,67 @@ describe('WorkspaceGroupService', () => {
 
       expect(group.settings).toMatchObject({ defaultEditor: 'e' });
     });
-  });
 
-  describe('remove', () => {
-    it('should delete group', async () => {
-      await service.remove([1]);
-      expect(groupRepository.delete).toHaveBeenCalledWith([1]);
+    // A rename and a change of the settings are sent on their own; neither may reset the other (#1960).
+    it('should keep the name when only settings are sent, and add them to the stored ones', async () => {
+      const group = { id: 1, name: 'g', settings: { defaultEditor: 'e' } } as WorkspaceGroup;
+      mockRepository.findOne.mockResolvedValue(group);
+
+      await service.patch(1, { id: 1, settings: { defaultPlayer: 'p' } } as WorkspaceGroupFullDto);
+
+      expect(group.name).toBe('g');
+      expect(group.settings).toEqual({ defaultEditor: 'e', defaultPlayer: 'p' });
+    });
+
+    it('should keep the settings when only the name is sent', async () => {
+      const group = { id: 1, name: 'g', settings: { defaultEditor: 'e' } } as WorkspaceGroup;
+      mockRepository.findOne.mockResolvedValue(group);
+
+      await service.patch(1, { id: 1, name: 'neu' } as WorkspaceGroupFullDto);
+
+      expect(group.name).toBe('neu');
+      expect(group.settings).toEqual({ defaultEditor: 'e' });
+    });
+
+    // #2091: spread into the stored settings, a list or a text left keys "0", "1", ... there. The body is
+    // mistyped on purpose, and it is refused before the group is read, so a missing group answers 400 as well.
+    it.each([[['a']], ['text'], [null]])('should refuse settings that are no object: %j', async settings => {
+      mockRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.patch(1, { id: 1, name: 'g', settings } as unknown as WorkspaceGroupFullDto))
+        .rejects.toThrow(BadRequestException);
+      expect(mockRepository.save).not.toHaveBeenCalled();
+    });
+
+    // #2092: the interface trips over these: the unit list and the states page over states, the settings
+    // dialogs over profiles, the tags form over a list that mixes texts with anything else
+    it.each([
+      [{ states: 'x' }], [{ states: [null] }], [{ states: [{ label: 'a' }] }], [{ states: [{ id: 'abc' }] }],
+      [{ profiles: 5 }], [{ profiles: ['id'] }], [{ profiles: [{ id: 5 }] }],
+      [{ lastStateId: 'abc' }], [{ richNoteTags: ['https://a.example', 5] }]
+    ])('should refuse malformed fields in the settings: %j', async settings => {
+      mockRepository.findOne.mockResolvedValue({ id: 1, name: 'g', settings: {} });
+
+      await expect(service.patch(1, { id: 1, settings } as unknown as WorkspaceGroupFullDto))
+        .rejects.toThrow(BadRequestException);
+      expect(mockRepository.save).not.toHaveBeenCalled();
+    });
+
+    // #2092: older data holds state ids as text, rich note tags may name a vocabulary by its URL,
+    // and every reader takes null for none
+    it('should take state ids as text, a vocabulary URL as tags, and null', async () => {
+      const group = { id: 1, name: 'g', settings: {} } as WorkspaceGroup;
+      mockRepository.findOne.mockResolvedValue(group);
+      const settings = {
+        states: [{ id: '3', label: 'alt' }],
+        profiles: null,
+        lastStateId: null,
+        richNoteTags: 'https://example.org/vocabulary'
+      };
+
+      await service.patch(1, { id: 1, settings } as unknown as WorkspaceGroupFullDto);
+
+      expect(group.settings).toEqual(settings);
     });
   });
 

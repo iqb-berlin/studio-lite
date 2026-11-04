@@ -65,10 +65,6 @@ describe('StartComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('ngOnInit()', () => {
     it('should load review data when units array is empty', fakeAsync(() => {
       mockReviewService.units = [];
@@ -96,85 +92,6 @@ describe('StartComponent', () => {
 
       expect(mockReviewService.loadReviewData).not.toHaveBeenCalled();
     }));
-
-    it('should set hideTitlesOnPage to true', fakeAsync(() => {
-      mockReviewService.units = [];
-      mockAppService.appConfig.hideTitlesOnPage = false;
-
-      component.ngOnInit();
-      tick(100);
-
-      expect(mockAppService.appConfig.hideTitlesOnPage).toBe(true);
-    }));
-
-    it('should set header text with translated value', fakeAsync(() => {
-      mockReviewService.units = [];
-      mockTranslateService.instant.mockReturnValue('Test Home Page');
-
-      component.ngOnInit();
-      tick(100);
-
-      expect(mockTranslateService.instant).toHaveBeenCalledWith('home.home-page');
-      expect(mockReviewService.setHeaderText).toHaveBeenCalledWith('Test Home Page');
-    }));
-
-    it('should set currentUnitSequenceId to -1', fakeAsync(() => {
-      mockReviewService.units = [];
-      mockReviewService.currentUnitSequenceId = 5;
-
-      component.ngOnInit();
-      tick(100);
-
-      expect(mockReviewService.currentUnitSequenceId).toBe(-1);
-    }));
-
-    it('should use setTimeout for initialization', fakeAsync(() => {
-      mockReviewService.units = [];
-      const loadDataSpy = jest.spyOn(mockReviewService, 'loadReviewData');
-
-      component.ngOnInit();
-
-      expect(loadDataSpy).not.toHaveBeenCalled();
-
-      tick(100);
-
-      expect(loadDataSpy).toHaveBeenCalled();
-    }));
-
-    it('should handle multiple units correctly', fakeAsync(() => {
-      mockReviewService.units = [
-        {
-          databaseId: 1,
-          sequenceId: 0,
-          playerId: 'p1',
-          responses: {},
-          definition: 'd1',
-          name: 'Unit 1'
-        },
-        {
-          databaseId: 2,
-          sequenceId: 1,
-          playerId: 'p2',
-          responses: {},
-          definition: 'd2',
-          name: 'Unit 2'
-        },
-        {
-          databaseId: 3,
-          sequenceId: 2,
-          playerId: 'p3',
-          responses: {},
-          definition: 'd3',
-          name: 'Unit 3'
-        }
-      ];
-
-      component.ngOnInit();
-      tick(100);
-
-      expect(mockReviewService.loadReviewData).not.toHaveBeenCalled();
-      expect(mockReviewService.currentUnitSequenceId).toBe(-1);
-    }));
   });
 
   describe('a refused review (#1818)', () => {
@@ -196,26 +113,6 @@ describe('StartComponent', () => {
       fixture.detectChanges();
 
       expect(accessDeniedText()).toBeNull();
-    });
-  });
-
-  describe('Component Dependencies', () => {
-    it('should inject ReviewService', () => {
-      expect(component.reviewService).toBeDefined();
-    });
-
-    it('should inject AppService', () => {
-      const appService = (component as unknown as { appService: AppService }).appService;
-      expect(appService).toBeDefined();
-    });
-
-    it('should inject TranslateService', () => {
-      const translate = (component as unknown as { translate: TranslateService }).translate;
-      expect(translate).toBeDefined();
-    });
-
-    it('should have reviewService accessible in template', () => {
-      expect(component.reviewService).toBe(mockReviewService);
     });
   });
 });

@@ -17,11 +17,16 @@
  * not drifted from the committed pair, so forgetting to run this script fails
  * the image build with instructions instead of silently shipping stale deps.
  *
- * Run after changing backend dependencies:
+ * Run after changing backend dependencies or the root's overrides:
  *
  *   node scripts/update-api-runtime-deps.mjs
  *
  * (builds the api first, so dist/apps/api/package.json is current).
+ *
+ * With --check it writes nothing and fails if the run would change the
+ * dependencies or overrides of runtime-package.json. Every branch pipeline
+ * runs it, so that a drift no longer shows only in the image build after the
+ * merge, and a changed override not at all (#1878).
  *
  * EXTRA_DEPENDENCIES lists runtime requirements nx cannot see because no
  * static import names them: typeorm loads its database driver dynamically.
@@ -36,6 +41,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const EXTRA_DEPENDENCIES = ['pg'];
+const CHECK = process.argv.includes('--check');
 
 const repoRoot = join(import.meta.dirname, '..');
 const generatedPath = join(repoRoot, 'dist/apps/api/package.json');
@@ -46,6 +52,7 @@ console.log('Building api so dist/apps/api/package.json is current ...');
 execSync('npx nx run api:build', { cwd: repoRoot, stdio: 'inherit' });
 
 const generated = JSON.parse(readFileSync(generatedPath, 'utf8'));
+const rootPackage = JSON.parse(readFileSync(join(repoRoot, 'package.json'), 'utf8'));
 const rootLock = JSON.parse(readFileSync(join(repoRoot, 'package-lock.json'), 'utf8'));
 
 const extraDependencies = Object.fromEntries(EXTRA_DEPENDENCIES.map(name => {
@@ -63,18 +70,44 @@ const runtimePackage = {
     ...generated.dependencies,
     ...extraDependencies
   }).sort(([a], [b]) => a.localeCompare(b))),
-  // Settles the one known optional-peer conflict: @nestjs/microservices
-  // (an optional peer of @nestjs/core) accepts any ioredis, typeorm pins
-  // ^5.0.4, and ioredis 6.0.0 satisfies only the former. The override makes
-  // both ranges agree so npm's DEFAULT resolution goes through -- which is
-  // essential, because the default is what installs REQUIRED peers such as
-  // axios (for @nestjs/axios). --legacy-peer-deps looked like the obvious
-  // fix and skipped those too: the image built green and crashed on its
-  // first require (#1587, #1592). ioredis itself still ends up NOT
-  // installed -- optional peers never are; the override only exists for the
-  // resolver's consistency check.
-  overrides: { ioredis: '^5.0.4' }
+  // The root's overrides, so the image gets the same security floors as the
+  // tree the monorepo tests against. @nestjs/platform-express, for one, pins
+  // multer exactly, so only an override gets the image a fixed version.
+  //
+  // The ioredis override among them settles the one known optional-peer
+  // conflict: @nestjs/microservices (an optional peer of @nestjs/core)
+  // accepts any ioredis, typeorm pins ^5.0.4, and ioredis 6.0.0 satisfies
+  // only the former. The override makes both ranges agree so npm's DEFAULT
+  // resolution goes through -- which is essential, because the default is
+  // what installs REQUIRED peers such as axios (for @nestjs/axios).
+  // --legacy-peer-deps looked like the obvious fix and skipped those too: the
+  // image built green and crashed on its first require (#1587, #1592).
+  // ioredis itself still ends up NOT installed -- optional peers never are;
+  // the override only exists for the resolver's consistency check.
+  overrides: rootPackage.overrides
 };
+
+if (CHECK) {
+  // name, version and description are left out: the version only moves with a release
+  const committed = JSON.parse(readFileSync(runtimePath, 'utf8'));
+  const drift = ['dependencies', 'overrides'].flatMap(field => {
+    const expected = runtimePackage[field] || {};
+    const actual = committed[field] || {};
+    return [...new Set([...Object.keys(expected), ...Object.keys(actual)])]
+      .filter(name => JSON.stringify(expected[name]) !== JSON.stringify(actual[name]))
+      .map(name => `  ${field} ${name}: expected ${JSON.stringify(expected[name])}, `
+        + `committed ${JSON.stringify(actual[name])}`);
+  });
+  if (drift.length) {
+    console.error(`${runtimePath} has drifted:`);
+    drift.forEach(line => console.error(line));
+    console.error('Run: node scripts/update-api-runtime-deps.mjs');
+    process.exit(1);
+  }
+  console.log(`${runtimePath} is current.`);
+  process.exit(0);
+}
+
 writeFileSync(runtimePath, `${JSON.stringify(runtimePackage, null, 2)}\n`);
 
 // npm resolves the lockfile in an empty temp directory so that neither the

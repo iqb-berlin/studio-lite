@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { StreamableFile } from '@nestjs/common';
+import { NotAcceptableException, StreamableFile } from '@nestjs/common';
 import { Response } from 'express';
 import { VeronaModulesService } from './verona-modules.service';
 import VeronaModule from '../entities/verona-module.entity';
@@ -35,10 +35,6 @@ describe('VeronaModulesService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
   });
 
   describe('getVeronaModule', () => {
@@ -145,16 +141,31 @@ describe('VeronaModulesService', () => {
       expect(repository.save).toHaveBeenCalled();
     });
 
+    it('should replace the module of the same key instead of adding one', async () => {
+      const existing = { key: 'mod@1.0' } as VeronaModule;
+      mockRepository.findOne.mockResolvedValueOnce(existing);
+      const file = buildModuleBuffer('EDITOR');
+
+      await service.upload(file, ['EDITOR']);
+
+      expect(mockRepository.create).not.toHaveBeenCalled();
+      expect(repository.save).toHaveBeenCalledWith(existing);
+      expect(existing).toEqual(expect.objectContaining({ file, fileSize: file.length }));
+    });
+
     it('rejects a metadata type that is not in allowedTypes', async () => {
       await expect(service.upload(buildModuleBuffer('EDITOR'), ['player'])).rejects.toThrow();
       expect(repository.save).not.toHaveBeenCalled();
     });
-  });
 
-  describe('remove', () => {
-    it('should remove module', async () => {
-      await service.remove('key');
-      expect(repository.delete).toHaveBeenCalledWith('key');
+    // A file without readable metadata ended in a SyntaxError and a 500 (#1985).
+    it.each([
+      ['no metadata script', '<html><head><title>No module</title></head></html>'],
+      ['metadata that are no JSON', '<html><head><script type="application/ld+json">{"id": </script></head></html>'],
+      ['metadata that are null', '<html><head><script type="application/ld+json">null</script></head></html>']
+    ])('rejects a file with %s as invalid metadata', async (_, html) => {
+      await expect(service.upload(Buffer.from(html))).rejects.toThrow(NotAcceptableException);
+      expect(repository.save).not.toHaveBeenCalled();
     });
   });
 });

@@ -1,10 +1,11 @@
-import { Component, OnDestroy, Input } from '@angular/core';
+import {
+  Component, OnDestroy, Input, inject
+} from '@angular/core';
 import { CreateUnitDto, UnitInListDto } from '@studio-lite-lib/api-dto';
 import {
   lastValueFrom, map, Subject, Subscription
 } from 'rxjs';
 import { UntypedFormGroup } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
@@ -24,6 +25,7 @@ import {
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { NewUnitData } from '../../models/new-unit.interface';
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
+import { ChangeResultService } from '../../../../services/change-result.service';
 
 /**
  * Adding units: a new one, a copy of an existing one, or units imported from a file. All three end
@@ -50,13 +52,14 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
 
   @Input() selectedUnitId!: number;
   @Input() disabled!: boolean;
+  private changeResult = inject(ChangeResultService);
+
   constructor(
     public workspaceService: WorkspaceService,
     public router: Router,
     public route: ActivatedRoute,
     private appService: AppService,
     public backendService: WorkspaceBackendService,
-    private snackBar: MatSnackBar,
     private appBackendService: AppBackendService,
     private selectUnitDialog: MatDialog,
     private newUnitDialog: MatDialog,
@@ -91,20 +94,15 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
                   createUnitDto
                 )
                 .subscribe(respOk => {
+                  this.changeResult.show(
+                    !!respOk,
+                    'workspace.unit-added',
+                    'workspace.unit-not-added',
+                    'workspace.error'
+                  );
                   if (respOk) {
-                    this.snackBar.open(
-                      this.translateService.instant('workspace.unit-added'),
-                      '',
-                      { duration: 1000 }
-                    );
                     this.addUnitGroup(createUnitDto.groupName);
                     this.updateUnitList(respOk);
-                  } else {
-                    this.snackBar.open(
-                      this.translateService.instant('workspace.unit-not-added'),
-                      this.translateService.instant('workspace.error'),
-                      { duration: 3000 }
-                    );
                   }
                   this.appService.dataLoading = false;
                 });
@@ -134,20 +132,10 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
         this.backendService
           .addUnit(this.workspaceService.selectedWorkspaceId, createUnitDto)
           .subscribe(respOk => {
+            this.changeResult.show(!!respOk, 'workspace.unit-added', 'workspace.unit-not-added', 'workspace.error');
             if (respOk) {
-              this.snackBar.open(
-                this.translateService.instant('workspace.unit-added'),
-                '',
-                { duration: 1000 }
-              );
               this.addUnitGroup(createUnitDto.groupName);
               this.updateUnitList(respOk);
-            } else {
-              this.snackBar.open(
-                this.translateService.instant('workspace.unit-not-added'),
-                this.translateService.instant('workspace.error'),
-                { duration: 3000 }
-              );
             }
             this.appService.dataLoading = false;
           });
@@ -168,13 +156,7 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
           this.workspaceService.workspaceSettings
         )
         .subscribe(isOK => {
-          this.snackBar.open(
-            isOK ?
-              this.translateService.instant('workspace.group-saved') :
-              this.translateService.instant('workspace.group-not-saved'),
-            isOK ? '' : this.translateService.instant('workspace.error'),
-            { duration: 3000 }
-          );
+          this.changeResult.show(isOK, 'workspace.group-saved', 'workspace.group-not-saved', 'workspace.error');
         });
     }
   }
@@ -290,6 +272,9 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
               }
             }
           });
+        // The files are in the request already. Without this, choosing the same file again raised no
+        // change, and an upload that had failed could not be retried with it (#1994).
+        inputElement.value = '';
       }
     }
   }
@@ -305,5 +290,7 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
     if (this.uploadSubscription !== null) {
       this.uploadSubscription.unsubscribe();
     }
+    // The upload cancelled above cannot take the spinner down any more (#2105)
+    this.appService.dataLoading = false;
   }
 }

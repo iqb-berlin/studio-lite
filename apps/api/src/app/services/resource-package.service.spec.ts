@@ -58,26 +58,6 @@ describe('ResourcePackageService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
-  describe('findResourcePackages', () => {
-    it('should return packages', async () => {
-      const result = [new ResourcePackage()];
-      resourcePackageRepository.find.mockResolvedValue(result);
-      expect(await service.findResourcePackages()).toBe(result);
-    });
-  });
-
-  describe('removeResourcePackages', () => {
-    it('should remove multiple packages', async () => {
-      const spy = jest.spyOn(service, 'removeResourcePackage').mockResolvedValue(undefined);
-      await service.removeResourcePackages([1, 2]);
-      expect(spy).toHaveBeenCalledTimes(2);
-    });
-  });
-
   describe('removeResourcePackage', () => {
     it('should throw if not found', async () => {
       resourcePackageRepository.findOne.mockResolvedValue(null);
@@ -160,14 +140,6 @@ describe('ResourcePackageService', () => {
       });
 
       await expect(service.create(file)).rejects.toThrow(UnprocessableEntityException);
-    });
-  });
-
-  describe('getZippedResourcePackage', () => {
-    it('should return buffer', () => {
-      (fs.readFileSync as jest.Mock).mockReturnValue(Buffer.from('content'));
-      const result = service.getZippedResourcePackage('pkg');
-      expect(result).toBeInstanceOf(Buffer);
     });
   });
 });

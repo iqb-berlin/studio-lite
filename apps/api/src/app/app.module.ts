@@ -48,10 +48,12 @@ import ResourcePackage from './entities/resource-package.entity';
 import Review from './entities/review.entity';
 import ReviewUnit from './entities/review-unit.entity';
 import { RefreshToken } from './entities/refresh-token.entity';
+import { UsedRefreshToken } from './entities/used-refresh-token.entity';
 import UserSession from './entities/user-session.entity';
 import { ResourcePackageService } from './services/resource-package.service';
 import { UsersService } from './services/users.service';
 import { WorkspaceService } from './services/workspace.service';
+import { WorkspaceImportService } from './services/workspace-import.service';
 import { WorkspaceGroupService } from './services/workspace-group.service';
 import { WorkspaceUserService } from './services/workspace-user.service';
 import { UnitService } from './services/unit.service';
@@ -77,6 +79,7 @@ import UnitMetadata from './entities/unit-metadata.entity';
 import { UnitItemMetadataService } from './services/unit-item-metadata.service';
 import { UnitItemMetadataController } from './controllers/unit-item-metadata.controller';
 import { UnitMetadataService } from './services/unit-metadata.service';
+import { UnitDefinitionService } from './services/unit-definition.service';
 import UnitMetadataToDelete from './entities/unit-metadata-to-delete.entity';
 import { UnitMetadataToDeleteService } from './services/unit-metadata-to-delete.service';
 import { ItemCommentService } from './services/item-comment.service';
@@ -95,6 +98,41 @@ import UnitRichNoteUnitItem from './entities/unit-rich-note-unit-item.entity';
 import { UnitRichNoteService } from './services/unit-rich-note.service';
 import { ItemRichNoteService } from './services/item-rich-note.service';
 import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-rich-note.controller';
+
+/** Every entity of the database, for the connection and for the repositories injected from it. */
+const ENTITIES = [
+  User,
+  KeycloakUser,
+  Workspace,
+  WorkspaceGroup,
+  WorkspaceUser,
+  UnitDefinition,
+  VeronaModule,
+  ResourcePackage,
+  Setting,
+  Unit,
+  UnitComment,
+  UnitCommentVote,
+  UnitCommentUnitItem,
+  UnitRichNote,
+  UnitRichNoteUnitItem,
+  UnitDropBoxHistory,
+  MetadataProfile,
+  MetadataVocabulary,
+  MetadataProfileRegistry,
+  RegisteredMetadataProfile,
+  UnitUser,
+  WorkspaceGroupAdmin,
+  Review,
+  ReviewUnit,
+  RefreshToken,
+  UsedRefreshToken,
+  UserSession,
+  UnitItem,
+  UnitItemMetadata,
+  UnitMetadata,
+  UnitMetadataToDelete
+];
 
 @Module({
   imports: [
@@ -152,74 +190,12 @@ import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-ri
         username: configService.get('POSTGRES_USER'),
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DB'),
-        entities: [
-          User,
-          KeycloakUser,
-          Workspace,
-          WorkspaceGroup,
-          WorkspaceUser,
-          UnitDefinition,
-          VeronaModule,
-          ResourcePackage,
-          Setting,
-          Unit,
-          UnitComment,
-          UnitCommentVote,
-          UnitCommentUnitItem,
-          UnitRichNote,
-          UnitRichNoteUnitItem,
-          UnitDropBoxHistory,
-          MetadataProfile,
-          MetadataVocabulary,
-          MetadataProfileRegistry,
-          RegisteredMetadataProfile,
-          UnitUser,
-          WorkspaceGroupAdmin,
-          Review,
-          ReviewUnit,
-          RefreshToken,
-          UserSession,
-          UnitItem,
-          UnitItemMetadata,
-          UnitMetadata,
-          UnitMetadataToDelete
-        ],
+        entities: ENTITIES,
         synchronize: false
       }),
       inject: [ConfigService]
     }),
-    TypeOrmModule.forFeature([
-      User,
-      KeycloakUser,
-      Workspace,
-      WorkspaceGroup,
-      WorkspaceUser,
-      UnitDefinition,
-      VeronaModule,
-      ResourcePackage,
-      Setting,
-      Unit,
-      UnitComment,
-      UnitCommentVote,
-      UnitCommentUnitItem,
-      UnitRichNote,
-      UnitRichNoteUnitItem,
-      UnitDropBoxHistory,
-      MetadataProfile,
-      MetadataVocabulary,
-      MetadataProfileRegistry,
-      RegisteredMetadataProfile,
-      UnitUser,
-      WorkspaceGroupAdmin,
-      Review,
-      ReviewUnit,
-      RefreshToken,
-      UserSession,
-      UnitItem,
-      UnitItemMetadata,
-      UnitMetadata,
-      UnitMetadataToDelete
-    ]),
+    TypeOrmModule.forFeature(ENTITIES),
     MulterModule
   ],
   controllers: [
@@ -266,6 +242,7 @@ import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-ri
     ResourcePackageService,
     UsersService,
     WorkspaceService,
+    WorkspaceImportService,
     WorkspaceGroupService,
     WorkspaceUserService,
     UnitService,
@@ -283,6 +260,7 @@ import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-ri
     UnitItemService,
     UnitItemMetadataService,
     UnitMetadataService,
+    UnitDefinitionService,
     UnitMetadataToDeleteService,
     WriteOrGroupAdminAccessGuard,
     ReadOrGroupAdminAccessGuard,

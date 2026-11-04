@@ -5,12 +5,15 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { In, LessThan, Repository } from 'typeorm';
 import { RefreshToken } from '../entities/refresh-token.entity';
+import { UsedRefreshToken } from '../entities/used-refresh-token.entity';
 import UserSession from '../entities/user-session.entity';
 import { findOrphanedSessionIds } from '../utils/orphaned-sessions';
+import { PASSIVE_THRESHOLD_MS } from '../app.constants';
 
 /**
  * Sweeps up what login and logout leave behind: sessions past their expiry, refresh tokens past
- * theirs, and sessions nobody can return to any more (see `findOrphanedSessionIds`).
+ * theirs, records of exchanged refresh tokens older than the inactivity window, and sessions nobody
+ * can return to any more (see `findOrphanedSessionIds`).
  *
  * Runs every hour and once at start-up, because a server that was down over the expiry of a row
  * would otherwise carry it until the next tick.
@@ -23,7 +26,9 @@ export class SessionCleanupService implements OnApplicationBootstrap {
     @Inject(getRepositoryToken(UserSession))
     private userSessionRepository: Repository<UserSession>,
     @Inject(getRepositoryToken(RefreshToken))
-    private refreshTokenRepository: Repository<RefreshToken>
+    private refreshTokenRepository: Repository<RefreshToken>,
+    @Inject(getRepositoryToken(UsedRefreshToken))
+    private usedRefreshTokenRepository: Repository<UsedRefreshToken>
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -41,12 +46,19 @@ export class SessionCleanupService implements OnApplicationBootstrap {
       const now = new Date();
       const sessions = await this.userSessionRepository.delete({ expiresAt: LessThan(now) });
       const tokens = await this.refreshTokenRepository.delete({ expiresAt: LessThan(now) });
+      // A record is kept for as long as the token it stands for could have lived: past that, the
+      // token has expired, and a browser still holding it could not have refreshed with it either.
+      const usedTokens = await this.usedRefreshTokenRepository.delete({
+        usedAt: LessThan(new Date(now.getTime() - PASSIVE_THRESHOLD_MS))
+      });
       const orphanCount = await this.deleteOrphanedSessions();
       const sessionCount = sessions.affected || 0;
       const tokenCount = tokens.affected || 0;
-      if (sessionCount > 0 || tokenCount > 0 || orphanCount > 0) {
+      const usedTokenCount = usedTokens.affected || 0;
+      if (sessionCount > 0 || tokenCount > 0 || usedTokenCount > 0 || orphanCount > 0) {
         this.logger.log(
           `Removed ${sessionCount} expired user session(s) and ${tokenCount} expired refresh token(s)` +
+          `${usedTokenCount > 0 ? `, plus ${usedTokenCount} record(s) of exchanged refresh tokens` : ''}` +
           `${orphanCount > 0 ? `, plus ${orphanCount} session(s) no token could resume` : ''}.`
         );
       }

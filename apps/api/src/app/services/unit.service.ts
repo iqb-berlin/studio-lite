@@ -1,58 +1,35 @@
 import { BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
-  EntityManager, In, Not, QueryFailedError, Repository
+  In, Not, QueryFailedError, Repository
 } from 'typeorm';
 import {
   CreateUnitDto,
-  MetadataValuesEntry,
-  ProfileValues,
   RequestReportDto,
   UnitInViewDto,
-  UnitDefinitionDto,
-  UnitDefinitionFullDto,
-  UnitFullMetadataDto,
   UnitInListDto,
-  UnitItemWithMetadataDto,
-  UnitMetadataDto,
   UnitMetadataValues,
-  UnitPropertiesDto,
-  UnitSchemeDto
+  UnitPropertiesDto
 } from '@studio-lite-lib/api-dto';
-import { LanguageCodedText } from '@iqbspecs/metadata-profile';
-import {
-  orderFromCurrent, profileIdsMatch, reconcileProfilesByProfileId, toVariableInfoListV1, toW3idProfileId
-} from '@studio-lite/shared-code';
-import { combineNotationAndLabel } from '../classes/metadata-value.util';
 import Workspace from '../entities/workspace.entity';
 import Unit from '../entities/unit.entity';
-import UnitDefinition from '../entities/unit-definition.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import { UnitUserService } from './unit-user.service';
 import { UnitCommentService } from './unit-comment.service';
 import User from '../entities/user.entity';
 import UnitDropBoxHistory from '../entities/unit-drop-box-history.entity';
-import { UnitMetadataService } from './unit-metadata.service';
+import { ProfileFetchCache, UnitMetadataService } from './unit-metadata.service';
+import { UnitDefinitionService } from './unit-definition.service';
 import { UnitItemService } from './unit-item.service';
-import { MetadataProfileService } from './metadata-profile.service';
 import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
 import { UnitNotFoundException } from '../exceptions/unit-not-found.exception';
 import { UnitKeyExistsException } from '../exceptions/unit-key-exists.exception';
-import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
-
-// Dedupes profile lookups within a single request (a units list shares the same
-// profiles across units). Caches the pending promise so parallel unit reads
-// under Promise.all reuse one DB fetch instead of each firing its own.
-type ProfileFetchCache = Map<string, ReturnType<MetadataProfileService['getStoredMetadataProfileFromDb']>>;
 
 /**
- * The units and everything a unit is made of: properties, definition, scheme, metadata, items --
- * plus copying a unit, moving it to another workspace, and submitting it to a drop box.
- *
- * Metadata has two homes and this service knows which one holds the truth for a given unit: the
- * older jsonb column on {@link Unit}, or the normalized tables, once the unit carries the marker
- * {@link UnitMetadataToDelete}. Reads ask the marker first; the write path fills the tables and
- * sets the marker in the same transaction.
+ * The units and their properties -- plus creating and copying a unit, moving it to another
+ * workspace, and submitting it to a drop box. What a unit is made of has services of its own:
+ * {@link UnitMetadataService} for its metadata and items, {@link UnitDefinitionService} for its
+ * definition and coding scheme.
  *
  * Copying is the operation with the most to keep straight: a copy needs new items with new uuids,
  * and comments and notes that pointed at the old ones have to be rewritten to the new -- hence the
@@ -66,8 +43,6 @@ export class UnitService {
     private usersRepository: Repository<User>,
     @InjectRepository(Unit)
     private unitsRepository: Repository<Unit>,
-    @InjectRepository(UnitDefinition)
-    private unitDefinitionsRepository: Repository<UnitDefinition>,
     @InjectRepository(WorkspaceUser)
     private workspaceUserRepository: Repository<WorkspaceUser>,
     @InjectRepository(Workspace)
@@ -79,7 +54,7 @@ export class UnitService {
     private unitMetadataService: UnitMetadataService,
     private unitItemService: UnitItemService,
     private unitMetadataToDeleteService: UnitMetadataToDeleteService,
-    private metadataProfileService: MetadataProfileService
+    private unitDefinitionService: UnitDefinitionService
   ) {}
 
   async findOne(id: number): Promise<Unit> {
@@ -99,7 +74,7 @@ export class UnitService {
     if (distinctIds.length === 0) return [];
     const found = await this.unitsRepository.find({
       where: { id: In(distinctIds), workspaceId: workspaceId },
-      select: ['id']
+      select: { id: true }
     });
     const foundIds = new Set(found.map(unit => unit.id));
     return distinctIds.filter(id => !foundIds.has(id));
@@ -111,7 +86,7 @@ export class UnitService {
     if (distinctIds.length === 0) return new Map();
     const units = await this.unitsRepository.find({
       where: { id: In(distinctIds) },
-      select: ['id', 'workspaceId']
+      select: { id: true, workspaceId: true }
     });
     return new Map(units.map(unit => [unit.id, unit.workspaceId]));
   }
@@ -120,14 +95,14 @@ export class UnitService {
     const units = await this.unitsRepository
       .find({
         where: { workspaceId: workspaceId },
-        select: ['id']
+        select: { id: true }
       });
     return units.map(unit => unit.id);
   }
 
   async getAllUnits(): Promise<UnitInViewDto[]> {
     this.logger.log('Retrieving all units');
-    return this.unitsRepository.find({
+    const units = await this.unitsRepository.find({
       order: { id: 'ASC' },
       select: {
         key: true,
@@ -144,7 +119,14 @@ export class UnitService {
         metadata: false,
         variables: false
       }
-    });
+    }) as UnitInViewDto[];
+    // The admin's unit list exports it in its CSV (#2012).
+    const workspaces = await this.workspaceRepository.find({ select: { id: true, name: true } });
+    const workspaceNames = new Map(workspaces.map(workspace => [workspace.id, workspace.name]));
+    return units.map(unit => ({
+      ...unit,
+      workspaceName: workspaceNames.get(unit.workspaceId) || ''
+    }));
   }
 
   async findAll(): Promise<UnitInViewDto[]> {
@@ -178,7 +160,7 @@ export class UnitService {
   async findAllForGroup(workspaceGroupId: number): Promise<UnitInViewDto[]> {
     const workspaces = await this.workspaceRepository.find({
       where: { groupId: workspaceGroupId },
-      select: ['id', 'name']
+      select: { id: true, name: true }
     });
     const workspaceIds = workspaces.map(w => w.id);
     if (workspaceIds.length === 0) return [];
@@ -277,9 +259,11 @@ export class UnitService {
   }
 
   async create(workspaceId: number, unit: CreateUnitDto, user: User, addComments: boolean): Promise<number> {
+    // TypeORM throws on an undefined key in the lookup below; a request without one is the caller's error (#2095)
+    if (!unit.key) throw new BadRequestException('A unit needs a key.');
     const existingUnitId = await this.unitsRepository.findOne({
       where: { workspaceId: workspaceId, key: unit.key },
-      select: ['id']
+      select: { id: true }
     });
     if (existingUnitId) return 0;
     // A unit is created here, never overwritten: an id sent along would have save() update that
@@ -293,10 +277,25 @@ export class UnitService {
     if (unit.createFrom) {
       const unitSourceData = await this.unitsRepository.findOne({
         where: { id: unit.createFrom },
-        select: ['id', 'key', 'editor', 'schemer', 'metadata', 'schemeType',
-          'player', 'description', 'reference', 'transcript',
-          'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme',
-          'lastChangedMetadataUser', 'lastChangedDefinitionUser', 'lastChangedSchemeUser']
+        select: {
+          id: true,
+          key: true,
+          editor: true,
+          schemer: true,
+          metadata: true,
+          scheme: true,
+          schemeType: true,
+          player: true,
+          description: true,
+          reference: true,
+          transcript: true,
+          lastChangedMetadata: true,
+          lastChangedDefinition: true,
+          lastChangedScheme: true,
+          lastChangedMetadataUser: true,
+          lastChangedDefinitionUser: true,
+          lastChangedSchemeUser: true
+        }
       });
       if (unitSourceData) {
         newUnit.description = unitSourceData.description;
@@ -306,6 +305,9 @@ export class UnitService {
         newUnit.metadata = unitSourceData.metadata;
         newUnit.editor = unitSourceData.editor;
         newUnit.schemer = unitSourceData.schemer;
+        // Taken over as it is, not through patchScheme: that refuses a scheme without a list of codings,
+        // as units from before 9.3.0 may carry, and failed the copy halfway (#2057)
+        newUnit.scheme = unitSourceData.scheme;
         newUnit.schemeType = unitSourceData.schemeType;
         newUnit.lastChangedDefinitionUser = unitSourceData.lastChangedDefinitionUser;
         newUnit.lastChangedMetadataUser = await this.getLastChangedMetadataUser(unitSourceData, newUnit.key, user);
@@ -315,30 +317,22 @@ export class UnitService {
         newUnit.lastChangedScheme = unitSourceData.lastChangedScheme || null;
         await this.unitsRepository.save(newUnit);
 
-        const rawMetadata = await this.getMetadataOfUnit(newUnit, unit.createFrom);
+        const rawMetadata = await this.unitMetadataService.getMetadataOfUnit(newUnit, unit.createFrom);
         const workspace = await this.workspaceRepository.findOne({ where: { id: workspaceId } });
-        const metadata = UnitService.setCurrentProfiles(
+        const metadata = UnitMetadataService.setCurrentProfiles(
           workspace.settings?.unitMDProfile,
           workspace.settings?.itemMDProfile,
           rawMetadata
         );
-        const itemUuidLookups = await this.copyItemsWithMetadata(newUnit.id, metadata);
+        const itemUuidLookups = await this.unitMetadataService.copyItemsWithMetadata(newUnit.id, metadata);
 
-        const unitSourceDefinition = await this.findOnesDefinition(unit.createFrom);
+        const unitSourceDefinition = await this.unitDefinitionService.findOnesDefinition(unit.createFrom);
         if (unitSourceDefinition.definition || newUnit.lastChangedDefinition) {
-          await this.patchDefinition(
+          await this.unitDefinitionService.patchDefinition(
             newUnit.id,
             unitSourceDefinition,
             newUnit.lastChangedDefinitionUser,
             newUnit.lastChangedDefinition);
-        }
-        const unitSourceScheme = await this.findOnesScheme(unit.createFrom);
-        if (unitSourceScheme && unitSourceScheme.scheme) {
-          await this.patchScheme(
-            newUnit.id,
-            unitSourceScheme,
-            newUnit.lastChangedSchemeUser,
-            newUnit.lastChangedScheme);
         }
         if (addComments) await this.unitCommentService.copyComments(unit.createFrom, newUnit.id, itemUuidLookups);
       }
@@ -380,7 +374,7 @@ export class UnitService {
   async adoptUuidIfFree(unitId: number, uuid: string): Promise<void> {
     const existing = await this.unitsRepository.findOne({
       where: { uuid },
-      select: ['id']
+      select: { id: true }
     });
     if (existing) return;
     try {
@@ -399,7 +393,7 @@ export class UnitService {
     return this.unitsRepository.manager.transaction(async manager => {
       const unit = await manager.findOne(Unit, {
         where: { id: unitId },
-        select: ['id', 'uuid'],
+        select: { id: true, uuid: true },
         lock: { mode: 'pessimistic_write' }
       });
       if (!unit) throw new UnitNotFoundException(unitId, 0, 'GET');
@@ -414,18 +408,34 @@ export class UnitService {
     this.logger.log(`Returning metadata for unit wit id: ${unitId}`);
     const unit = await this.unitsRepository.findOne({
       where: { id: unitId, workspaceId: workspaceId },
-      select: [
-        'id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
-        'player', 'description', 'transcript', 'reference', 'uuid',
-        'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme', 'state',
-        'lastChangedMetadataUser', 'lastChangedDefinitionUser', 'lastChangedSchemeUser'
-      ]
+      select: {
+        id: true,
+        key: true,
+        name: true,
+        groupName: true,
+        editor: true,
+        schemer: true,
+        metadata: true,
+        schemeType: true,
+        player: true,
+        description: true,
+        transcript: true,
+        reference: true,
+        uuid: true,
+        lastChangedMetadata: true,
+        lastChangedDefinition: true,
+        lastChangedScheme: true,
+        state: true,
+        lastChangedMetadataUser: true,
+        lastChangedDefinitionUser: true,
+        lastChangedSchemeUser: true
+      }
     });
     if (!unit) throw new UnitNotFoundException(unitId, workspaceId, 'GET');
     const workspace = await this.workspaceRepository.findOne({
       where: { id: workspaceId }
     });
-    return this.getModifiedMetadataForUnit(unit, workspace);
+    return this.unitMetadataService.getModifiedMetadataForUnit(unit, workspace);
   }
 
   async findAllWithProperties(workspaceId: number): Promise<UnitPropertiesDto[]> {
@@ -435,15 +445,33 @@ export class UnitService {
     const units = await this.unitsRepository.find({
       where: { workspaceId: workspaceId },
       order: { key: 'ASC' },
-      select: [
-        'id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
-        'player', 'description', 'transcript', 'reference', 'scheme', 'variables',
-        'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme', 'state',
-        'lastChangedMetadataUser', 'lastChangedDefinitionUser', 'lastChangedSchemeUser'
-      ]
+      select: {
+        id: true,
+        key: true,
+        name: true,
+        groupName: true,
+        editor: true,
+        schemer: true,
+        metadata: true,
+        schemeType: true,
+        player: true,
+        description: true,
+        transcript: true,
+        reference: true,
+        scheme: true,
+        variables: true,
+        lastChangedMetadata: true,
+        lastChangedDefinition: true,
+        lastChangedScheme: true,
+        state: true,
+        lastChangedMetadataUser: true,
+        lastChangedDefinitionUser: true,
+        lastChangedSchemeUser: true
+      }
     });
     const profileCache: ProfileFetchCache = new Map();
-    return Promise.all(units.map(async unit => this.getModifiedMetadataForUnit(unit, workspace, profileCache)));
+    return Promise.all(units.map(async unit => this.unitMetadataService
+      .getModifiedMetadataForUnit(unit, workspace, profileCache)));
   }
 
   /**
@@ -460,7 +488,7 @@ export class UnitService {
   ): Promise<{ id: number; metadata: UnitMetadataValues; scheme: string }[]> {
     const units = await this.unitsRepository.find({
       where: { workspaceId: workspaceId },
-      select: ['id', 'metadata', 'scheme']
+      select: { id: true, metadata: true, scheme: true }
     });
     const markedUnitIds = await this.unitMetadataToDeleteService
       .findMarkedUnitIds(units.map(unit => unit.id));
@@ -481,48 +509,6 @@ export class UnitService {
     }));
   }
 
-  private async getModifiedMetadataForUnit(
-    unit: Unit,
-    workspace: Workspace,
-    profileCache?: ProfileFetchCache
-  ): Promise<Unit> {
-    const unitMetadataToDelete = await this.unitMetadataToDeleteService.getOneByUnit(unit.id);
-    if (unitMetadataToDelete) {
-      // findOnesMetadata already backfills valueAsText.
-      unit.metadata = await this.findOnesMetadata(unit.id);
-    } else {
-      unit.metadata = await this.resolveValueAsText(
-        UnitService.setCurrentProfiles(
-          workspace.settings?.unitMDProfile,
-          workspace.settings?.itemMDProfile,
-          unit.metadata
-        ),
-        profileCache
-      );
-    }
-    return unit;
-  }
-
-  static setCurrentProfiles(
-    unitProfile: string, itemProfile: string, metadata: UnitMetadataValues
-  ): UnitMetadataValues {
-    if (!metadata) return metadata;
-    return {
-      ...metadata,
-      ...(metadata.profiles && {
-        profiles: metadata.profiles.map(profile => UnitService.setCurrentProfile(unitProfile, profile))
-      }),
-      ...(metadata.items && {
-        items: metadata.items.map(item => ({
-          ...item,
-          ...(item.profiles && {
-            profiles: item.profiles.map(profile => UnitService.setCurrentProfile(itemProfile, profile))
-          })
-        }))
-      })
-    };
-  }
-
   async getDisplayNameForUser(id: number): Promise<string> {
     const user = await this.usersRepository.findOne({
       where: { id: id }
@@ -535,250 +521,11 @@ export class UnitService {
     return user.firstName && user.firstName.trim() ? `${displayName}, ${user.firstName.trim()}` : displayName;
   }
 
-  // Also canonicalizes the profile id to its w3id form (#1570). setCurrentProfiles
-  // sits on every path that reads or writes a metadata block — the units read
-  // (including the legacy unit.metadata blob, which the 19.0.0 migration deliberately
-  // leaves alone: rewriting its two nested profile arrays in jsonb would be the
-  // riskiest statement of the changelog, for data that is canonical on every read
-  // anyway and moves into the normalized tables on the next save), the metadata
-  // save, the unit copy and the import — so a single rewrite
-  // here is what makes the form, hideNumbering and the export agree on one
-  // spelling even for units whose metadata was never re-saved.
-  private static setCurrentProfile<T extends ProfileValues>(profileId: string, profile: T): T {
-    return {
-      ...profile,
-      profileId: toW3idProfileId(profile.profileId),
-      order: orderFromCurrent(profileIdsMatch(profile.profileId, profileId))
-    };
-  }
-
-  /**
-   * Backfill a display text (valueAsText) for entries that have none, e.g. rows stored before
-   * valueAsText was populated. Only structured values carry their own text: vocabulary entries hold
-   * it in `text`, multilingual free text is already language-coded. A plain string cannot be
-   * resolved here (a coded value needs its vocabulary, free text carries no language), so it is
-   * left empty rather than guessed. Returns new objects; the stored entities are not mutated.
-   *
-   * `hideNumbering` maps profileId -> entryId -> true when that vocabulary field hides the
-   * numbering. Empty (the default) keeps the numbering everywhere, which matches the behaviour
-   * before hideNumbering was honoured server-side.
-   */
-  static ensureValueAsText(
-    metadata: UnitMetadataValues,
-    hideNumbering: Record<string, Record<string, boolean>> = {}
-  ): UnitMetadataValues {
-    if (!metadata) return metadata;
-    const forProfile = <T extends ProfileValues>(profile: T): T => UnitService.fillProfileValueAsText(
-      profile,
-      hideNumbering[profile.profileId ?? ''] ?? {}
-    );
-    return {
-      ...metadata,
-      ...(metadata.profiles && { profiles: metadata.profiles.map(forProfile) }),
-      ...(metadata.items && {
-        items: metadata.items.map(item => ({
-          ...item,
-          ...(item.profiles && { profiles: item.profiles.map(forProfile) })
-        }))
-      })
-    };
-  }
-
-  private static fillProfileValueAsText<T extends ProfileValues>(
-    profile: T,
-    hideNumberingByEntry: Record<string, boolean>
-  ): T {
-    if (!profile.entries) return profile;
-    return {
-      ...profile,
-      entries: profile.entries.map(
-        entry => UnitService.fillEntryValueAsText(entry, hideNumberingByEntry[entry.id] ?? false)
-      )
-    };
-  }
-
-  private static fillEntryValueAsText(entry: MetadataValuesEntry, hideNumbering: boolean): MetadataValuesEntry {
-    const { value } = entry;
-    const isVocabulary = Array.isArray(value) &&
-      value.some(item => !!item && typeof item === 'object' && 'id' in item);
-    // Vocabulary display text is always recomputed so hideNumbering applies even
-    // when a valueAsText was already stored (e.g. imported units); other value
-    // types keep their stored valueAsText and are only backfilled when empty.
-    if (isVocabulary) {
-      return { ...entry, valueAsText: UnitService.getEntryValueAsText(value, hideNumbering) };
-    }
-    const hasText = Array.isArray(entry.valueAsText) ? entry.valueAsText.length > 0 : !!entry.valueAsText;
-    if (hasText) return entry;
-    return { ...entry, valueAsText: UnitService.getEntryValueAsText(value) };
-  }
-
-  private static getEntryValueAsText(
-    value: MetadataValuesEntry['value'],
-    hideNumbering = false
-  ): MetadataValuesEntry['valueAsText'] {
-    // metadata-values@3.x simple value { raw, asText } (form-created; the legacy
-    // form stored a plain string instead and has no asText to recover).
-    if (value && typeof value === 'object' && !Array.isArray(value)) {
-      return (value as unknown as { asText?: MetadataValuesEntry['valueAsText'] }).asText ?? [];
-    }
-    if (!Array.isArray(value)) return [];
-    if (value.some(item => item && typeof item === 'object' && 'id' in item)) {
-      // vocabulary entries: metadata-values@3.x carries the pure label in `label`
-      // (legacy internal form in `text`) and the numbering in `annotation`; the
-      // display text combines numbering + label.
-      return value.flatMap(item => {
-        if (!item || typeof item !== 'object' || !('id' in item)) return [];
-        const vocab = item as {
-          label?: LanguageCodedText[]; text?: LanguageCodedText[]; annotation?: LanguageCodedText[];
-        };
-        const texts = vocab.label ?? vocab.text;
-        return hideNumbering ? (texts ?? []) : combineNotationAndLabel(vocab.annotation, texts);
-      }) as MetadataValuesEntry['valueAsText'];
-    }
-    // no vocabulary entries -> already multilingual free text
-    return value as MetadataValuesEntry['valueAsText'];
-  }
-
-  // Applies valueAsText (incl. hideNumbering) for display. The hideNumbering
-  // flags come from the stored profile definitions, so vocabulary numbering is
-  // suppressed consistently in every read-only view that consumes valueAsText.
-  private async resolveValueAsText(
-    metadata: UnitMetadataValues,
-    profileCache?: ProfileFetchCache
-  ): Promise<UnitMetadataValues> {
-    const hideNumbering = await this.buildHideNumberingMap(metadata, profileCache);
-    return UnitService.ensureValueAsText(metadata, hideNumbering);
-  }
-
-  /**
-   * Builds profileId -> entryId -> hideNumbering from the DB-stored profile definitions of every
-   * profile referenced by the metadata (unit and item profiles). DB-only reads keep this cheap on
-   * list endpoints. Public so the XML export can fold the numbering back the same way (see
-   * toLegacyMetadataBlob).
-   */
-  async buildHideNumberingMap(
-    metadata: UnitMetadataValues | undefined,
-    profileCache: ProfileFetchCache = new Map()
-  ): Promise<Record<string, Record<string, boolean>>> {
-    if (!metadata) return {};
-    const profileIds = new Set<string>();
-    (metadata.profiles ?? []).forEach(profile => {
-      if (profile.profileId) profileIds.add(profile.profileId);
-    });
-    (metadata.items ?? []).forEach(item => (item.profiles ?? []).forEach(profile => {
-      if (profile.profileId) profileIds.add(profile.profileId);
-    }));
-    const map: Record<string, Record<string, boolean>> = {};
-    await Promise.all([...profileIds].map(async profileId => {
-      let pending = profileCache.get(profileId);
-      if (!pending) {
-        pending = this.metadataProfileService.getStoredMetadataProfileFromDb(profileId);
-        profileCache.set(profileId, pending);
-      }
-      const profile = await pending;
-      if (!profile?.groups) return;
-      const entryMap: Record<string, boolean> = {};
-      profile.groups.forEach(group => (group.entries ?? []).forEach(entry => {
-        const parameters = entry.parameters as { hideNumbering?: boolean } | null;
-        if (parameters?.hideNumbering) entryMap[entry.id] = true;
-      }));
-      map[profileId] = entryMap;
-    }));
-    return map;
-  }
-
-  // Reconcile unit metadata by profileId (the profile form re-emits without the
-  // row id), so an edit updates the existing row instead of delete + re-insert.
-  async patchUnitMetadata(unitId: number, profiles: UnitMetadataDto[], manager?: EntityManager): Promise<void> {
-    const existingProfiles = await this.unitMetadataService.getAllByUnitId(unitId, manager);
-    await reconcileProfilesByProfileId(existingProfiles, profiles, {
-      remove: id => this.unitMetadataService.removeMetadata(id, manager),
-      update: (id, metadata) => this.unitMetadataService.updateMetadata(id, metadata, manager),
-      add: metadata => this.unitMetadataService.addMetadata(unitId, metadata, manager)
-    });
-  }
-
-  /**
-   * Brings the unit's items in line with a save. An item the save names by a uuid the unit does not
-   * have -- another unit's, or one deleted since -- is left alone and logged: it used to be updated
-   * wherever it was (#1816). Skipping rather than refusing keeps a save that raced a deletion.
-   */
-  async patchItemsMetadata(
-    unitId: number,
-    items: UnitItemWithMetadataDto[],
-    manager?: EntityManager,
-    userName?: string | null
-  ): Promise<void> {
-    const itemsToUpdate = await this.unitItemService.getAllByUnitIdWithMetadata(unitId, manager);
-    const {
-      unchanged, removed, added, unknown
-    } = UnitItemService.compare(itemsToUpdate, items, 'uuid');
-    if (unknown.length) {
-      this.logger.warn(`Metadata save of unit ${unitId} by ${userName || 'unknown user'} names items ` +
-        `the unit does not have, left alone: ${unknown.map(item => item.uuid).join(', ')}`);
-    }
-    await Promise.all([
-      ...unchanged.map(item => this.unitItemService.updateItem(item.uuid, item, manager)),
-      ...removed.map(item => this.unitItemService.removeItem(item.uuid, manager)),
-      ...added.map(item => this.unitItemService.addItem(unitId, item, manager))
-    ]);
-  }
-
-  // Takes the internal write shape: id and unitItemUuid do not exist yet —
-  // addItem/addItemMetadata generate or discard them — hence the casts at the
-  // DTO boundary below.
-  async copyItemsWithMetadata(
-    unitId: number,
-    metadata: UnitMetadataValues
-  ): Promise<ItemUuidLookup[]> {
-    const profiles = metadata.profiles || [];
-    await Promise.all(profiles
-      .map(profile => this.unitMetadataService
-        .addMetadata(unitId, profile as UnitMetadataDto)));
-    const items = metadata.items || [];
-    const itemUuids = await Promise.all(items
-      .map(async item => ({
-        newUuid: await this.unitItemService
-          .addItem(unitId, item as unknown as UnitItemWithMetadataDto),
-        oldUuid: item.uuid
-      })));
-    await this.unitMetadataToDeleteService.upsertOneForUnit(unitId);
-    return itemUuids;
-  }
-
-  /**
-   * The whole metadata save runs in one transaction so a mid-sequence failure (e.g. a constraint
-   * error on one profile) rolls back every write instead of leaving the unit's profiles/items
-   * half-updated.
-   *
-   * The profile form re-emits profiles without `order`, so the current profile must be flagged here
-   * from the workspace settings — otherwise a newly stored profile keeps the -1 (hidden) insert
-   * default and, because the read path uses the normalized tables (permanent
-   * unit_metadata_to_delete marker) without re-deriving, it would be read back as hidden.
-   */
-  async patchMetadata(unitId: number, metadata: UnitMetadataValues, userName?: string | null): Promise<void> {
-    const unit = await this.unitsRepository.findOne({ where: { id: unitId } });
-    if (!unit) throw new UnitNotFoundException(unitId, 0, 'PATCH');
-    const workspace = await this.workspaceRepository.findOne({ where: { id: unit.workspaceId } });
-    const withOrder = UnitService.setCurrentProfiles(
-      workspace?.settings?.unitMDProfile,
-      workspace?.settings?.itemMDProfile,
-      metadata
-    );
-    const profiles = withOrder.profiles || [];
-    const items = withOrder.items || [];
-    await this.unitsRepository.manager.transaction(async manager => {
-      await this.patchUnitMetadata(unitId, profiles as UnitMetadataDto[], manager);
-      await this.patchItemsMetadata(unitId, items as unknown as UnitItemWithMetadataDto[], manager, userName);
-      await this.unitMetadataToDeleteService.upsertOneForUnit(unitId, manager);
-    });
-  }
-
   async patchUnit(unitId: number, newData: UnitPropertiesDto, userName: string | null): Promise<void> {
     await this.patchUnitProperties(unitId, newData, userName);
     const dataKeys = Object.keys(newData);
     if (dataKeys.indexOf('metadata') >= 0) {
-      await this.patchMetadata(unitId, newData.metadata, userName);
+      await this.unitMetadataService.patchMetadata(unitId, newData.metadata, userName);
     }
   }
 
@@ -827,7 +574,7 @@ export class UnitService {
     const normalisedKey = key.toUpperCase().trim();
     const unitsOfWorkspace = await this.unitsRepository.find({
       where: { workspaceId: unit.workspaceId },
-      select: ['id', 'key']
+      select: { id: true, key: true }
     });
     if (unitsOfWorkspace.some(other => other.id !== unit.id && other.key?.toUpperCase().trim() === normalisedKey)) {
       throw new UnitKeyExistsException(unit.id, unit.workspaceId, key);
@@ -852,14 +599,13 @@ export class UnitService {
         where: { unitId: unitId, targetWorkspaceId: workspaceId, returned: false },
         order: { changedAt: 'DESC' }
       });
-      if (!submission) {
-        // Created in the drop box, moved into it, or the workspace it came from is gone along with
-        // its submission: there is nowhere to return it to (#1793)
-        const unit = await this.unitsRepository.findOne({ where: { id: unitId }, select: ['key'] });
-        return <RequestReportDto>{
-          source: 'unit-return-submitted',
-          messages: [{ objectKey: unit?.key ?? `${unitId}`, messageKey: 'unit-patch.not-submitted' }]
-        };
+      // Created in the drop box, moved into it, or the workspace it came from is gone along with
+      // its submission: there is nowhere to return it to (#1793)
+      if (!submission) return this.notReturned(unitId, 'unit-patch.not-submitted');
+      // Submitting and returning stay within a group (#1805). After either workspace has been moved
+      // into another group the unit stays in the drop box; moving it is what crosses groups (#2027).
+      if (!await this.inSameGroup(submission.sourceWorkspaceId, workspaceId)) {
+        return this.notReturned(unitId, 'unit-patch.other-group');
       }
       return this.patchWorkspace([unitId], submission.sourceWorkspaceId, user, workspaceId, 'return');
     }));
@@ -867,6 +613,23 @@ export class UnitService {
       source: 'unit-return-submitted',
       messages: reports.map(r => r.messages).flat()
     };
+  }
+
+  private async notReturned(unitId: number, messageKey: string): Promise<RequestReportDto> {
+    const unit = await this.unitsRepository.findOne({ where: { id: unitId }, select: { key: true } });
+    return {
+      source: 'unit-return-submitted',
+      messages: [{ objectKey: unit?.key ?? `${unitId}`, messageKey }]
+    };
+  }
+
+  /** Whether the two workspaces belong to one group -- trivially so when they are the same. */
+  private async inSameGroup(workspaceId: number, otherWorkspaceId: number): Promise<boolean> {
+    const workspaces = await this.workspaceRepository.find({
+      where: { id: In([workspaceId, otherWorkspaceId]) },
+      select: { id: true, groupId: true }
+    });
+    return new Set(workspaces.map(workspace => workspace.groupId)).size === 1;
   }
 
   async patchWorkspace(unitIds: number[],
@@ -878,11 +641,13 @@ export class UnitService {
     const reports = await Promise.all(unitIds.map(async unitId => {
       const unit = await this.unitsRepository.findOne({
         where: { id: unitId },
-        select: ['id', 'key', 'workspaceId', 'variables', 'metadata']
+        select: {
+          id: true, key: true, workspaceId: true, variables: true, metadata: true
+        }
       });
       const existingUnit = await this.unitsRepository.findOne({
         where: { workspaceId: newWorkspaceId, key: unit.key },
-        select: ['id']
+        select: { id: true }
       });
       if (existingUnit) {
         return <RequestReportDto>{
@@ -899,7 +664,7 @@ export class UnitService {
       unit.groupName = '';
       const newWorkspace = await this.workspaceRepository.findOne({
         where: { id: newWorkspaceId },
-        select: ['groupId', 'settings']
+        select: { groupId: true, settings: true }
       });
       if ((action === 'submit' || action === 'return') && workspaceId) {
         await this.unitDropBoxHistoryRepository.upsert({
@@ -913,14 +678,14 @@ export class UnitService {
         await this.unitDropBoxHistoryRepository.delete({ unitId: unit.id });
         const workspace = await this.workspaceRepository.findOne({
           where: { id: workspaceId },
-          select: ['groupId']
+          select: { groupId: true }
         });
         if (workspace.groupId !== newWorkspace.groupId) {
           unit.state = '0';
         }
       }
 
-      await this.patchMetadataCurrentProfile(
+      await this.unitMetadataService.patchMetadataCurrentProfile(
         unit.id, newWorkspace.settings?.unitMDProfile, newWorkspace.settings?.itemMDProfile
       );
       await this.unitsRepository.save(unit);
@@ -937,19 +702,6 @@ export class UnitService {
       if (r.messages.length > 0) report.messages = [...report.messages, ...r.messages];
     });
     return report;
-  }
-
-  async patchMetadataCurrentProfile(unitId: number, unitProfile: string = '', itemProfile: string = ''): Promise<void> {
-    await this.patchUnitMetadataCurrentProfile(unitId, unitProfile);
-    await this.unitItemService.patchItemMetadataCurrentProfile(unitId, itemProfile);
-  }
-
-  private async patchUnitMetadataCurrentProfile(unitId: number, unitProfile: string): Promise<void> {
-    const profilesToUpdate: UnitMetadataDto[] = await this.unitMetadataService.getAllByUnitId(unitId);
-    await Promise.all(profilesToUpdate.map(metadata => {
-      metadata.order = orderFromCurrent(profileIdsMatch(metadata.profileId, unitProfile));
-      return this.unitMetadataService.updateMetadata(metadata.id, metadata);
-    }));
   }
 
   async copy(unitIds: number[], newWorkspace: number, user: User, addComments: boolean): Promise<RequestReportDto> {
@@ -991,45 +743,6 @@ export class UnitService {
     await this.unitsRepository.delete(id);
   }
 
-  async findUnitDefinitionByUnitId(unitId: number): Promise<UnitDefinitionFullDto> {
-    return this.unitDefinitionsRepository.findOne({
-      where: { unitId: unitId }
-    });
-  }
-
-  async findOnesDefinition(unitId: number): Promise<UnitDefinitionDto> {
-    const unit = await this.unitsRepository.findOne({
-      where: { id: unitId }
-    });
-    this.logger.log(`Retrieving unit definition for unit with id ${unitId} and workspaceId ${unit.workspaceId}`);
-    const returnUnit: UnitDefinitionDto = {
-      variables: unit.variables, definition: ''
-    };
-    const unitDefinition = await this.findUnitDefinitionByUnitId(unitId);
-    if (unitDefinition) {
-      returnUnit.definition = unitDefinition.data;
-      if (unitDefinition.type) returnUnit.definitionType = unitDefinition.type;
-    }
-    return returnUnit;
-  }
-
-  /**
-   * The scheme with the variables it codes. These go to the schemer, which still reads only the
-   * VariableInfo 1.x spelling (iqb-berlin/coding-components#238), so a list stored in 2.x is handed
-   * out in 1.x (#1708).
-   */
-  async findOnesScheme(unitId: number): Promise<UnitSchemeDto> {
-    const unit = await this.unitsRepository.findOne({
-      where: { id: unitId },
-      select: ['scheme', 'schemeType', 'variables']
-    });
-    return {
-      variables: unit.variables && toVariableInfoListV1(unit.variables),
-      scheme: unit.scheme,
-      schemeType: unit.schemeType
-    };
-  }
-
   async patchUnitGroup(id: number, groupName: string, units: number[]): Promise<void> {
     await this.unitsRepository.update({
       workspaceId: id,
@@ -1046,128 +759,5 @@ export class UnitService {
     {
       groupName: groupName
     });
-  }
-
-  async removeUnitState(id: number): Promise<void> {
-    const unitToUpdate = await this.unitsRepository.findOne({ where: { id: id } });
-    await this.unitsRepository.save({ ...unitToUpdate, state: '0' }
-    );
-  }
-
-  async patchDefinition(unitId: number,
-                        unitDefinitionDto: UnitDefinitionDto,
-                        userName: string | null,
-                        definitionDate: Date | null): Promise<void> {
-    const unitToUpdate = await this.unitsRepository.findOne({
-      where: { id: unitId }
-    });
-
-    unitToUpdate.lastChangedDefinition = definitionDate;
-    unitToUpdate.lastChangedDefinitionUser = userName;
-
-    const unitDefinitionToUpdate = await this.findUnitDefinitionByUnitId(unitId);
-    // The type describes the definition it came with, so it is written only together with one, and
-    // a definition without a type takes the stored one away: an editor that does not report the
-    // format has just written a definition the old type may no longer describe. Without a
-    // definition (only the variables changed) neither is touched -- undefined is skipped on save.
-    const definitionType = unitDefinitionDto.definition === undefined ?
-      undefined :
-      unitDefinitionDto.definitionType || null;
-
-    if (unitDefinitionToUpdate) {
-      unitDefinitionToUpdate.data = unitDefinitionDto.definition;
-      unitDefinitionToUpdate.type = definitionType;
-      await this.unitDefinitionsRepository.save(unitDefinitionToUpdate);
-    } else {
-      const newUnitDefinition = this.unitDefinitionsRepository
-        .create({ data: unitDefinitionDto.definition, type: definitionType, unitId });
-      await this.unitDefinitionsRepository.save(newUnitDefinition);
-    }
-    if (unitDefinitionDto.variables) {
-      // Stored in the spelling the editor or the imported file used, VariableInfo 1.x or 2.x (#1708).
-      // Readers that still need 1.x get it where the list leaves the studio (findOnesScheme, the
-      // unit export). Saving from the editor and importing both come through this method.
-      unitToUpdate.variables = unitDefinitionDto.variables;
-      const aliasIds = unitDefinitionDto.variables.map(item => ({
-        id: item.id,
-        alias: item.alias || item.id
-      }));
-      if (unitToUpdate.scheme) {
-        unitToUpdate.scheme = UnitService.getUpdatedScheme(unitToUpdate.scheme, aliasIds);
-      }
-    }
-    await this.unitsRepository.save(unitToUpdate);
-  }
-
-  private static getUpdatedScheme(scheme: string, variableAliasId: { id: string; alias: string }[]): string {
-    const schemeObject = JSON.parse(scheme);
-    if (schemeObject.variableCodings) {
-      schemeObject.variableCodings = schemeObject.variableCodings.reduce((acc, item) => {
-        if (item.sourceType === 'BASE_NO_VALUE') {
-          const found = variableAliasId.find(v => v.id === item.id);
-          if (found) {
-            item.alias = found.alias;
-            acc.push(item);
-          }
-        } else if (item.sourceType === 'BASE') {
-          const found = variableAliasId.find(v => v.id === item.id);
-          if (found) {
-            item.alias = found.alias;
-          }
-          acc.push(item);
-        } else {
-          acc.push(item);
-        }
-        return acc;
-      }, []);
-      return JSON.stringify(schemeObject);
-    }
-    return scheme;
-  }
-
-  private static isCodingScheme(text: string): boolean {
-    try {
-      return Array.isArray(JSON.parse(text)?.variableCodings);
-    } catch {
-      return false;
-    }
-  }
-
-  async patchScheme(unitId: number,
-                    unitSchemeDto: UnitSchemeDto,
-                    userName: string | null,
-                    schemeDate: Date | null): Promise<void> {
-    // Only a scheme with its list of variable codings is stored: getUpdatedScheme parses it on every
-    // later save of the definition, and the coding check in the preview reads the list.
-    if (!UnitService.isCodingScheme(unitSchemeDto.scheme)) {
-      throw new BadRequestException('The coding scheme has no list of variable codings');
-    }
-    const unitToUpdate = await this.unitsRepository.findOne({
-      where: { id: unitId }
-    });
-    unitToUpdate.scheme = unitSchemeDto.scheme;
-    unitToUpdate.schemeType = unitSchemeDto.schemeType;
-    unitToUpdate.lastChangedScheme = schemeDate;
-    unitToUpdate.lastChangedSchemeUser = userName;
-    await this.unitsRepository.save(unitToUpdate);
-  }
-
-  private async getMetadataOfUnit(unit: Unit, createFrom: number): Promise<UnitMetadataValues> {
-    const unitMetadataToDelete = await this.unitMetadataToDeleteService.getOneByUnit(createFrom);
-    if (unitMetadataToDelete) {
-      // the read DTO is a runtime superset of the internal write shape; only
-      // the index signature of ItemsMetadataValues blocks direct assignment
-      return await this.findOnesMetadata(createFrom) as unknown as UnitMetadataValues;
-    }
-    return this.resolveValueAsText(unit.metadata as UnitMetadataValues);
-  }
-
-  async findOnesMetadata(unitId: number): Promise<UnitFullMetadataDto> {
-    const metadata: UnitMetadataValues = {
-      profiles: await this.unitMetadataService.getAllByUnitId(unitId),
-      items: await this.unitItemService
-        .getAllByUnitIdWithMetadata(unitId) as unknown as UnitMetadataValues['items']
-    };
-    return await this.resolveValueAsText(metadata) as unknown as UnitFullMetadataDto;
   }
 }

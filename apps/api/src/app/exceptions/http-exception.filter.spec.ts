@@ -9,10 +9,6 @@ describe('HttpExceptionFilter', () => {
     filter = new HttpExceptionFilter();
   });
 
-  it('should be defined', () => {
-    expect(filter).toBeDefined();
-  });
-
   it('should catch HttpException and return formatted response', () => {
     const mockResponse = {
       status: jest.fn().mockReturnThis(),

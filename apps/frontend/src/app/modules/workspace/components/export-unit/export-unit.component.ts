@@ -5,6 +5,7 @@ import {
 } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
+import { ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import {
   MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle
 } from '@angular/material/expansion';
@@ -52,6 +53,9 @@ export class ExportUnitComponent {
   };
 
   bookletConfigSettings: BookletConfigDto | undefined;
+
+  // The download button locks while the booklet id is invalid, so the reason shows while typing, not only on blur.
+  readonly showErrorWhileTyping = new ShowOnDirtyErrorStateMatcher();
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { units: number[], bookletConfigSettings: BookletConfigDto },

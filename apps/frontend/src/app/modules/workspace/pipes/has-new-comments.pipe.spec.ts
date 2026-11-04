@@ -8,10 +8,6 @@ describe('HasNewCommentsPipe', () => {
     pipe = new HasNewCommentsPipe();
   });
 
-  it('should create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should return true when lastCommentChangedAt is after lastSeenCommentChangedAt', () => {
     const unit: UnitInListDto = {
       id: 1,
@@ -73,15 +69,6 @@ describe('HasNewCommentsPipe', () => {
       key: 'unit1',
       lastCommentChangedAt: undefined,
       lastSeenCommentChangedAt: undefined
-    };
-
-    expect(pipe.transform(unit)).toBe(false);
-  });
-
-  it('should handle minimal unit object', () => {
-    const unit: UnitInListDto = {
-      id: 1,
-      key: 'unit1'
     };
 
     expect(pipe.transform(unit)).toBe(false);

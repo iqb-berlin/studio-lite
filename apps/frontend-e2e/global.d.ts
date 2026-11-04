@@ -38,30 +38,31 @@ declare namespace Cypress {
     loginAPI(username: string, password: string): Chainable<Response>; // 2
     refreshTokenAPI(refreshToken: string): Chainable<Response>; // 2a
     logoutAPI(token: string, refreshToken: string): Chainable<Response>; // 2b
+    logoutSilentAPI(refreshToken: string): Chainable<Response>; // 2c
     getUserIdAPI(token: string): Chainable<Response>; // 3
     updatePasswordAPI(token: string, oldPass: string, newPass: string): Chainable<Response>; // 4
     loginWithKeycloakAPI(user: UserData): Chainable<Response>; // 5
     createUserAPI(userData: UserData, token: string): Chainable<Response>; // 6
     getUsersAPI(token: string): Chainable<Response>; // 7
     getUsersFullAPI(full: boolean, token: string): Chainable<Response>; // 8
-    updateUserAPI(id:string, user: UserData, credentials: boolean, token: string): Chainable<Response>; // 9
+    updateUserAPI(id:string, user: UserData, credentials: boolean, token: string, password?: string): Chainable<Response>; // 9
     deleteSessionAPI(userId: string, sessionId: string, token: string): Chainable<Response>; // 9a
     deleteOrphanedSessionsAPI(userId: string, token: string): Chainable<Response>; // 9b
-    createGroupAPI(group: GroupData, token: string): Chainable<Response>; // 10
+    createGroupAPI(group: GroupData, token: string, settings?: unknown): Chainable<Response>; // 10
     getGroupByIdAPI(groupId: string, token: string): Chainable<Response>; // 11
     getWsGroupsAPI(token: string): Chainable<Response>; // 12
 
     updateGroupAPI(groupId:string, newGroupName: string, token: string): Chainable<Response>; // 13
     setAdminsOfGroupAPI(userIds: string[], groupId: string, token: string): Chainable<Response>; // 14
     getAdminOfGroupAPI(groupId: string, token: string): Chainable<Response>; // 15
-    createWsAPI(groupId: string, ws: WsData, token: string): Chainable<Response>; // 16
-    moveWsAPI(ws: string, newGroup: string, token: string): Chainable<Response>; // 17
+    createWsAPI(groupId: string, ws: WsData, token: string, extra?: object): Chainable<Response>; // 16
+    moveWsAPI(ws: string | string[], newGroup: string, token: string): Chainable<Response>; // 17
     getWsAPI(wsId: string, token: string): Chainable<Response>; // 18
     updateUsersOfWsAPI(wsId: string, level: AccessLevel, userId: string, token: string): Chainable<Response>; // 19
     updateUserListOfWsAPI(wsId: string, list: AccessUser[], token: string): Chainable<Response>; // 19a
     getUsersOfWsAPI(wsId: string, token: string): Chainable<Response>; // 20
     getWsByGroupAPI(groupId: string, token: string): Chainable<Response>; // 21
-    addModuleAPI(module:string, token:string): Chainable<Response>; // 22
+    addModuleAPI(module:string, token:string, types?: string[]): Chainable<Response>; // 22
     getModulesAPI(token: string): Chainable<Response>; // 23
     getModuleAPI(module: string, token: string): Chainable<Response>; // 24
     createUnitAPI(wsId: string, unit: UnitData, token: string): Chainable<Response>; // 25
@@ -90,6 +91,7 @@ declare namespace Cypress {
     getWsSchemeAPI(wsId: string, token:string): Chainable<Response>; // 48
     getWsCodingBookAPI(units: string[], wsId: string, token:string): Chainable<Response>; // 49
     updateGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 50
+    updateGroupSettingsAPI(groupId: string, settings: unknown, token: string): Chainable<Response>; // 50a
     getGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 51
     updateUnitStateAPI(wsId: string, unitId: string, state: string, token:string): Chainable<Response>; // 52
     getUnitMetadataAPI(wsId: string, unitId: string, token:string): Chainable<Response>; // 53
@@ -145,6 +147,7 @@ declare namespace Cypress {
     exportUnitsAPI(wsId: string, downloadQuery: string, token: string): Chainable<Response>;
     importUnitsAPI(wsId: string, zipContent: string, token: string): Chainable<Response>;
     getUnitExportContentsAPI(wsId: string, token: string): Chainable<Response>;
+    getAdminUnitsAPI(token: string): Chainable<Response>;
     getAdminUnitItemsAPI(token: string): Chainable<Response>;
     getGroupsByUserAPI(id: string, token: string): Chainable<Response>; // 85
     updateGroupsByUserAPI(id: string, groupIds: string[], token: string): Chainable<Response>; // 86

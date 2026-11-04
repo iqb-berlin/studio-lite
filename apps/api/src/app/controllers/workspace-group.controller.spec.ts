@@ -40,8 +40,10 @@ describe('WorkspaceGroupController', () => {
     unitService = module.get<UnitService>(UnitService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+  // The guards are the authorisation of each method; no other unit test sees them (#1953).
+  it('should let only admins of the group reach patch', () => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceGroupController.prototype.patch))
+      .toEqual([JwtAuthGuard, IsWorkspaceGroupAdminGuard]);
   });
 
   describe('findOne', () => {
@@ -73,16 +75,6 @@ describe('WorkspaceGroupController', () => {
         'Content-Disposition': 'attachment; filename="iqb-studio-workspace-report.xlsx"'
       });
       expect(result).toBeInstanceOf(StreamableFile);
-    });
-  });
-
-  describe('patch', () => {
-    it('should update a workspace group', async () => {
-      const dto: WorkspaceGroupFullDto = { id: 1, name: 'New Name' };
-      jest.spyOn(workspaceGroupService, 'patch').mockResolvedValue(undefined);
-
-      await controller.patch(1, dto);
-      expect(workspaceGroupService.patch).toHaveBeenCalledWith(1, dto);
     });
   });
 });

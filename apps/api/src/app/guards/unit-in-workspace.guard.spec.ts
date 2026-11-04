@@ -31,10 +31,6 @@ describe('UnitInWorkspaceGuard', () => {
     unitService = module.get(UnitService);
   });
 
-  it('should be defined', () => {
-    expect(guard).toBeDefined();
-  });
-
   it('should pass when the unit is in the workspace of the route', async () => {
     unitService.isInWorkspace.mockResolvedValue(true);
 

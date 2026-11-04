@@ -39,7 +39,6 @@ export class UnitPrintLayoutComponent implements OnInit {
   @Input() printOptions!: PrintOption[];
 
   @Output() heightChange: EventEmitter<number> = new EventEmitter<number>();
-  message = '';
   unitProperties!: UnitPropertiesDto;
   playerId: string = '';
 

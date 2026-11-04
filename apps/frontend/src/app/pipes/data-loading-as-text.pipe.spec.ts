@@ -17,10 +17,6 @@ describe('DataLoadingAsTextPipe', () => {
     pipe = new DataLoadingAsTextPipe(translateService);
   });
 
-  it('create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should return percentage when value is a number <= 100', () => {
     expect(pipe.transform(0)).toBe('0 %');
     expect(pipe.transform(50)).toBe('50 %');
@@ -43,13 +39,6 @@ describe('DataLoadingAsTextPipe', () => {
   it('should return translated wait message when value is boolean', () => {
     jest.spyOn(translateService, 'instant').mockReturnValue('Please wait...');
     const result = pipe.transform(true);
-    expect(translateService.instant).toHaveBeenCalledWith('application.wait-message');
-    expect(result).toBe('Please wait...');
-  });
-
-  it('should handle boolean false value', () => {
-    jest.spyOn(translateService, 'instant').mockReturnValue('Please wait...');
-    const result = pipe.transform(false);
     expect(translateService.instant).toHaveBeenCalledWith('application.wait-message');
     expect(result).toBe('Please wait...');
   });

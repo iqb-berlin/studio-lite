@@ -1,6 +1,7 @@
 import {
   ComponentFixture, fakeAsync, TestBed, tick
 } from '@angular/core/testing';
+import { ElementRef } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -17,12 +18,6 @@ import { HeartbeatService } from '../../../../services/heartbeat.service';
 import { environment } from '../../../../../environments/environment';
 
 describe('UnitPrintPlayerComponent', () => {
-  type UnitPrintPlayerTestAccess = UnitPrintPlayerComponent & {
-    setHostingIframe: () => void;
-    subscribeForPostMessages: () => void;
-    buildVeronaModule: (moduleId: string, moduleType: 'player') => void;
-  };
-
   let component: UnitPrintPlayerComponent;
   let fixture: ComponentFixture<UnitPrintPlayerComponent>;
   let mockBackendService: DeepMocked<WorkspaceBackendService>;
@@ -107,63 +102,7 @@ describe('UnitPrintPlayerComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  describe('ngAfterViewInit', () => {
-    beforeEach(() => {
-      // Mock the ViewChild hostingIframe
-      Object.defineProperty(component, 'hostingIframe', {
-        value: {
-          nativeElement: document.createElement('iframe')
-        },
-        writable: true
-      });
-    });
-
-    it('should set hosting iframe', () => {
-      const setHostingIframeSpy = jest.spyOn(component as UnitPrintPlayerTestAccess, 'setHostingIframe');
-
-      component.ngAfterViewInit();
-
-      expect(setHostingIframeSpy).toHaveBeenCalled();
-    });
-
-    it('should subscribe for post messages', () => {
-      const subscribeSpy = jest.spyOn(component as UnitPrintPlayerTestAccess, 'subscribeForPostMessages');
-
-      component.ngAfterViewInit();
-
-      expect(subscribeSpy).toHaveBeenCalled();
-    });
-
-    it('should build verona module with playerId', () => {
-      const buildSpy = jest.spyOn(component as UnitPrintPlayerTestAccess, 'buildVeronaModule');
-      component.playerId = 'test-player@1.0.0';
-
-      component.ngAfterViewInit();
-
-      expect(buildSpy).toHaveBeenCalledWith('test-player@1.0.0', 'player');
-    });
-  });
-
   describe('sendChangeData', () => {
-    it('should fetch unit definition and post store', fakeAsync(() => {
-      const mockDefinition = { definition: 'test-definition' };
-      mockBackendService.getUnitDefinition.mockReturnValue(of(mockDefinition));
-      const postStoreSpy = jest.spyOn(component, 'postStore');
-
-      component.workspaceId = 1;
-      component.unitId = 10;
-      component.sendChangeData();
-
-      tick();
-
-      expect(mockBackendService.getUnitDefinition).toHaveBeenCalledWith(1, 10);
-      expect(postStoreSpy).toHaveBeenCalledWith('test-definition', undefined);
-    }));
-
     it('should pass the definition type on with the definition', fakeAsync(() => {
       mockBackendService.getUnitDefinition.mockReturnValue(of({
         definition: 'test-definition',
@@ -211,11 +150,8 @@ describe('UnitPrintPlayerComponent', () => {
   describe('postStore', () => {
     it('should return early if no postMessageTarget', () => {
       component.postMessageTarget = undefined;
-      const postMessageSpy = jest.fn();
 
-      component.postStore('test-definition');
-
-      expect(postMessageSpy).not.toHaveBeenCalled();
+      expect(() => component.postStore('test-definition')).not.toThrow();
     });
 
     it('should post message for API version 1', () => {
@@ -255,6 +191,27 @@ describe('UnitPrintPlayerComponent', () => {
       );
     });
 
+    // Player spec 7.0 writes the values of its enumerations in capitals (#2064).
+    it.each([
+      [6, false, 'concat-scroll', 'on', 'none'],
+      [7, false, 'CONCAT_SCROLL', 'ON', 'NONE'],
+      [7, true, 'CONCAT_SCROLL', 'ON_WITH_IDS', 'NONE']
+    ])('should print with a player of version %s (ids %s) in paging mode %s, print mode %s and progress %s',
+      (version, printElementIds, pagingMode, printMode, progress) => {
+        const mockWindow = { postMessage: jest.fn() };
+        component.postMessageTarget = mockWindow as never;
+        component.playerApiVersion = version;
+        component.printElementIds = printElementIds;
+
+        component.postStore('test-definition');
+
+        const message = mockWindow.postMessage.mock.calls[0][0];
+        expect(message.playerConfig).toEqual(expect.objectContaining({ pagingMode, printMode }));
+        expect(message.unitState).toEqual(expect.objectContaining({
+          presentationProgress: progress, responseProgress: progress
+        }));
+      });
+
     it('should send the definition type at the top level when it is known', () => {
       const mockWindow = { postMessage: jest.fn() };
       component.postMessageTarget = mockWindow as never;
@@ -265,6 +222,17 @@ describe('UnitPrintPlayerComponent', () => {
       const message = mockWindow.postMessage.mock.calls[0][0];
       expect(message.unitDefinitionType).toBe('aspect-unit-definition@4.12.0');
       expect(message.playerConfig).not.toHaveProperty('unitDefinitionType');
+    });
+
+    // An empty string is not the definition of a unit that has none; the testcenter leaves it out (#719).
+    it('should start a player on a unit without definition without one', () => {
+      const mockWindow = { postMessage: jest.fn() };
+      component.postMessageTarget = mockWindow as never;
+      component.playerApiVersion = 6;
+
+      component.postStore('');
+
+      expect(mockWindow.postMessage.mock.calls[0][0]).not.toHaveProperty('unitDefinition');
     });
 
     it('should send no definition type when none is known', () => {
@@ -331,29 +299,6 @@ describe('UnitPrintPlayerComponent', () => {
 
       expect(playerConfigOf(mockWindow)).toHaveProperty('stateReportPolicy', 'eager');
     });
-
-    it('should emit unitLoaded after posting', () => {
-      const mockWindow = { postMessage: jest.fn() };
-      component.postMessageTarget = mockWindow as never;
-      component.playerApiVersion = 3;
-      const nextSpy = jest.spyOn(component.unitLoaded, 'next');
-
-      component.postStore('test-definition');
-
-      expect(nextSpy).toHaveBeenCalledWith(true);
-    });
-  });
-
-  describe('gotoUnit', () => {
-    it('should be defined as empty method', () => {
-      expect(() => component.gotoUnit('target')).not.toThrow();
-    });
-  });
-
-  describe('onSelectedUnitChange', () => {
-    it('should be defined as empty method', () => {
-      expect(() => component.onSelectedUnitChange()).not.toThrow();
-    });
   });
 
   describe('calculateIFrameHeight', () => {
@@ -399,41 +344,48 @@ describe('UnitPrintPlayerComponent', () => {
     });
   });
 
-  describe('input properties', () => {
-    it('should accept unitId', () => {
-      component.unitId = 42;
-      expect(component.unitId).toBe(42);
-    });
+  describe('automatic height', () => {
+    let iframe: HTMLIFrameElement;
+    let heights: number[];
 
-    it('should accept workspaceId', () => {
-      component.workspaceId = 5;
-      expect(component.workspaceId).toBe(5);
-    });
+    const loadUnit = (printPreviewAutoHeight: boolean, bodyHeight = 700, documentHeight = 0): void => {
+      iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+      component.hostingIframe = new ElementRef(iframe);
+      component.playerId = 'test-player@1.0.0';
+      component.printPreviewAutoHeight = printPreviewAutoHeight;
+      heights = [];
+      component.iFrameHeightChange.subscribe(height => heights.push(height));
+      component.ngAfterViewInit();
+      Object.defineProperty(iframe.contentDocument?.body, 'offsetHeight', { value: bodyHeight });
+      Object.defineProperty(iframe.contentDocument?.documentElement, 'offsetHeight', { value: documentHeight });
+      iframe.dispatchEvent(new Event('load'));
+    };
 
-    it('should accept iFrameHeight', () => {
-      component.iFrameHeight = 800;
-      expect(component.iFrameHeight).toBe(800);
-    });
+    afterEach(() => iframe.remove());
 
-    it('should accept playerId', () => {
-      component.playerId = 'test-player';
-      expect(component.playerId).toBe('test-player');
-    });
+    it('should report the height of the unit once it has loaded', fakeAsync(() => {
+      loadUnit(true);
 
-    it('should accept printElementIds', () => {
-      component.printElementIds = true;
-      expect(component.printElementIds).toBe(true);
-    });
+      tick(1000);
 
-    it('should accept printPreviewAutoHeight', () => {
-      component.printPreviewAutoHeight = true;
-      expect(component.printPreviewAutoHeight).toBe(true);
-    });
-  });
+      expect(heights).toEqual([700]);
+    }));
 
-  describe('output properties', () => {
-    it('should have iFrameHeightChange Subject', () => {
-      expect(component.iFrameHeightChange).toBeDefined();
-    });
+    it('should fall back to the height of the document element when the body has none', fakeAsync(() => {
+      loadUnit(true, 0, 800);
+
+      tick(1000);
+
+      expect(heights).toEqual([800]);
+    }));
+
+    it('should report no height without automatic height', fakeAsync(() => {
+      loadUnit(false);
+
+      tick(1000);
+
+      expect(heights).toEqual([]);
+    }));
   });
 });

@@ -1,4 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { ChangePasswordDto, MyDataDto } from '@studio-lite-lib/api-dto';
@@ -9,6 +9,9 @@ import { WorkspaceService } from '../services/workspace.service';
 import { ReviewService } from '../services/review.service';
 import UserEntity from '../entities/user.entity';
 import Review from '../entities/review.entity';
+import { AppVersionGuard } from '../guards/app-version.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { LocalAuthGuard } from '../guards/local-auth.guard';
 
 describe('AppController', () => {
   let controller: AppController;
@@ -37,9 +40,32 @@ describe('AppController', () => {
     controller = module.get<AppController>(AppController);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+  // The guards are the authorisation of each method; no other unit test sees them (#1953).
+  it('should check the password and the app version at login', () => {
+    expect(Reflect.getMetadata('__guards__', AppController.prototype.login))
+      .toEqual([LocalAuthGuard, AppVersionGuard]);
   });
+
+  it.each(['logout', 'setPassword', 'setMyData', 'activity'] as const)(
+    'should let any signed-in user reach %s',
+    method => {
+      expect(Reflect.getMetadata('__guards__', AppController.prototype[method]))
+        .toEqual([JwtAuthGuard]);
+    }
+  );
+
+  it('should only ask for a current app version at initLogin', () => {
+    expect(Reflect.getMetadata('__guards__', AppController.prototype.initLogin))
+      .toEqual([AppVersionGuard]);
+  });
+
+  it.each(['findCanDos', 'findMydata'] as const)(
+    'should let any signed-in user of a current app version reach %s',
+    method => {
+      expect(Reflect.getMetadata('__guards__', AppController.prototype[method]))
+        .toEqual([JwtAuthGuard, AppVersionGuard]);
+    }
+  );
 
   describe('login', () => {
     it('should return a token', async () => {
@@ -51,6 +77,15 @@ describe('AppController', () => {
 
       expect(result).toBe(mockTokens);
       expect(authService.login).toHaveBeenCalledWith(mockUser, undefined);
+    });
+  });
+
+  describe('refresh', () => {
+    // The client takes a 401 as the sign to log in again.
+    it('should answer a refresh token that cannot be exchanged with 401', async () => {
+      authService.refreshAccessToken.mockResolvedValue(null);
+
+      await expect(controller.refresh({ refreshToken: 'stale' })).rejects.toThrow(UnauthorizedException);
     });
   });
 
@@ -149,14 +184,25 @@ describe('AppController', () => {
   });
 
   describe('setPassword', () => {
-    it('should call userService.setPassword', async () => {
+    it('should change the password and end every session of the account', async () => {
       const dto: ChangePasswordDto = { oldPassword: 'old', newPassword: 'new' };
       usersService.setPassword.mockResolvedValue(true);
 
-      const result = await controller.setPassword({ user: { id: 1 } }, dto);
+      const result = await controller.setPassword({ user: { id: 1, sessionId: 'sid-1' } }, dto);
 
       expect(result).toBe(true);
       expect(usersService.setPassword).toHaveBeenCalledWith(1, 'old', 'new');
+      expect(authService.logout).toHaveBeenCalledWith(1);
+    });
+
+    it('should leave the sessions alone when the old password is wrong', async () => {
+      const dto: ChangePasswordDto = { oldPassword: 'wrong', newPassword: 'new' };
+      usersService.setPassword.mockResolvedValue(false);
+
+      const result = await controller.setPassword({ user: { id: 1, sessionId: 'sid-1' } }, dto);
+
+      expect(result).toBe(false);
+      expect(authService.logout).not.toHaveBeenCalled();
     });
   });
 

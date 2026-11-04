@@ -30,6 +30,10 @@ export interface UnitData {
   name: string;
   /** Group the unit belongs to */
   group: string;
+  /** Key of the player the unit is created with, such as `verona-test-player@2.0` */
+  player?: string;
+  /** Key of the editor the unit is created with, such as `verona-test-editor@1.0` */
+  editor?: string;
 }
 
 /**
@@ -209,20 +213,19 @@ export const resource = 'GeoGebra.itcr.zip';
  * Verona modules for testing
  */
 export const modules: string[] = [
-  'iqb-schemer-2.8.4.html',
-  'iqb-editor-aspect-3.0.1.html',
+  'iqb-schemer-2.9.0.html',
+  'iqb-editor-aspect-3.1.0.html',
   'iqb-editor-speedtest-3.2.0.html',
-  'iqb-player-aspect-3.0.1.html',
+  'iqb-player-aspect-3.1.0.html',
   'iqb-player-speedtest-3.3.0.html',
   'iqb-player-stars-0.6.26.html'
 ];
 
 /**
- * Widgets for testing
+ * Widgets for testing: written against the widget API, not a release of a real widget (#1763)
  */
 export const widgets: string[] = [
-  'molecule-editor-widget-0.2.0.html',
-  'periodic-system-select-widget-0.2.0.html'
+  'verona-test-widget-1.0.0.html'
 ];
 
 // =============================================================================
@@ -318,22 +321,21 @@ export const lightUnit: UnitData = {
 // =============================================================================
 
 /**
- * Units used in `basic-unit.ts` – core CRUD operations (create, from-existing, delete,
- * save-or-discard dialog).
+ * Units created through the API for `basic-unit.cy.ts` and `unit-print.cy.ts`.
  */
 export const unitCrudUnits = {
-  /** First unit created: tests basic creation & deletion */
+  /** Deleted through the interface in basic-unit */
   crud1: { shortname: 'CRUD_D1', name: 'CRUD Unit 1', group: 'Gruppe D' } as UnitData,
-  /** Second unit created: tests multi-unit creation */
-  crud2: { shortname: 'CRUD_E1', name: 'CRUD Unit 2', group: 'Gruppe E' } as UnitData,
-  /** Third unit: used for print preview with coding & comments */
-  crudPrint: { shortname: 'CRUD_D2', name: 'CRUD Print Unit', group: 'Gruppe D' } as UnitData,
-  /** Unit created from an existing unit */
-  crudFromExisting: { shortname: 'CRUD_EX1', name: 'CRUD Unit From Existing', group: 'Gruppe D' } as UnitData
+  /** Left with unsaved changes in basic-unit */
+  unsaved: { shortname: 'CRUD_U1', name: 'CRUD Unsaved Unit', group: 'Gruppe D' } as UnitData,
+  /** Switched to while the changes of `unsaved` wait in basic-unit */
+  switchedTo: { shortname: 'CRUD_U2', name: 'CRUD Next Unit', group: 'Gruppe D' } as UnitData,
+  /** Printed with coding & comments in unit-print */
+  crudPrint: { shortname: 'CRUD_D2', name: 'CRUD Print Unit', group: 'Gruppe D' } as UnitData
 };
 
 /**
- * Units used in `unit-move-copy.ts` – move / copy across workspaces.
+ * Units used in `unit-move-copy.cy.ts` – move / copy across workspaces.
  */
 export const moveCopyUnits = {
   /** Source unit for the copy-from-existing test */
@@ -347,7 +349,7 @@ export const moveCopyUnits = {
 };
 
 /**
- * Units used in `unit-export.ts` – export & report operations.
+ * Units used in `unit-export.cy.ts` – export & report operations.
  */
 export const exportUnits = {
   /** Primary export test unit */
@@ -356,30 +358,18 @@ export const exportUnits = {
   exportUnit2: { shortname: 'EXP_U2', name: 'Export Unit 2', group: 'Group D' } as UnitData
 };
 
-/**
- * Units used in `unit-groups.ts` – group creation, rename, delete & user list.
- */
-export const groupUnits = {
-  /** First unit created inside a new group */
-  groupUnit1: { shortname: 'GRP_U1', name: 'Group Test Unit 1', group: 'Neue Testgruppe' } as UnitData,
-  /** Second unit added to the same group */
-  groupUnit2: { shortname: 'GRP_U2', name: 'Group Test Unit 2', group: 'Neue Testgruppe' } as UnitData
-};
-
-/** Group names used specifically in unit-groups.ts tests */
+/** Group names used specifically in `unit-groups.cy.ts` tests */
 export const groupTestNames = {
   /** Group created from the add-unit dialog */
   newGroup: 'Neue Testgruppe',
   /** Group created from the group management dialog */
   dialogGroup: 'Dialog Testgruppe',
   /** Renamed version of dialogGroup */
-  dialogGroupRenamed: 'Dialog Testgruppe Umbenannt',
-  /** Custom state added in settings */
-  customState: 'In Bearbeitung'
+  dialogGroupRenamed: 'Dialog Testgruppe Umbenannt'
 } as const;
 
 /**
- * Units used in `unit-properties.ts` – properties panel CRUD.
+ * Units used in `unit-properties.cy.ts` – properties panel CRUD.
  */
 export const propertiesUnits = {
   /** Primary unit for property edit/save/persist tests */
@@ -388,7 +378,7 @@ export const propertiesUnits = {
   propUnit2: { shortname: 'PROP_U2', name: 'Properties Unit 2', group: 'Gruppe B' } as UnitData
 };
 
-/** Constants used specifically in unit-properties.ts tests */
+/** Constants used specifically in `unit-properties.cy.ts` tests */
 export const propertiesTestNames = {
   /** Custom state created for state-field tests */
   stateName: 'Fertig',
@@ -397,7 +387,7 @@ export const propertiesTestNames = {
 } as const;
 
 /**
- * Units & names used in `unit-rich-note-tags.ts` – rich notes CRUD & tag config.
+ * Units & names used in `unit-rich-note-tags.cy.ts` – rich notes CRUD & tag config.
  */
 export const richNotesTestNames = {
   /** Temporary group created for the rich-note-tags config block */
@@ -407,7 +397,7 @@ export const richNotesTestNames = {
 } as const;
 
 /**
- * Review name used in `reviews.ts`.
+ * Review name used in `reviews.cy.ts`.
  */
 export const reviewTestNames = {
   /** The single review created and exercised in the reviews suite */
@@ -415,12 +405,12 @@ export const reviewTestNames = {
 } as const;
 
 /**
- * Test units used in `unit-print.ts` – print preview for unit properties & last changes.
+ * Test units used in `unit-print.cy.ts` – print preview for unit properties & last changes.
  */
 export const printUnits = ['M6_AK0011', 'M6_AK0012'] as const;
 
 /**
- * Unit used in `definitions.ts`, `coding.ts`, and `preview.ts` – tests all Aspect elements, coding, and preview.
+ * Unit used in `unit-definition-coding-preview.cy.ts` – tests all Aspect elements, coding, and preview.
  */
 export const definitionAllElementsUnit: UnitData = {
   shortname: 'DEF_ALL1',

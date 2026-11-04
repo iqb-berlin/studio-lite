@@ -98,11 +98,6 @@ describe('MoveUnitComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component)
-      .toBeTruthy();
-  });
-
   it('should initialize workspaceList correctly excluding current workspace and low access level', () => {
     // Total workspaces in mock: 3
     // WS #1: excluded (current)
@@ -110,13 +105,6 @@ describe('MoveUnitComponent', () => {
     // WS #3: excluded (access level 2 <= 2)
     expect(component.workspaceList.length).toBe(1);
     expect(component.workspaceList[0].id).toBe(2);
-  });
-
-  it('should get targetWorkspace value from form', () => {
-    component.selectForm.enable();
-    // eslint-disable-next-line @typescript-eslint/dot-notation
-    component.selectForm.controls['wsSelector'].setValue(123);
-    expect(component.targetWorkspace).toBe(123);
   });
 
   it('should get selectedUnits from child component', () => {

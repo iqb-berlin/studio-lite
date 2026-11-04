@@ -10,8 +10,9 @@ import { isSubmissionBody } from '../utils/unit-request-body';
  * Handing units in takes nothing more than comment access, because it hands them to the one drop
  * box the group admin chose for the workspace -- a workspace the caller need not be able to enter.
  * The target of the body therefore has to be that drop box (#1780); any other is forbidden, and
- * nothing is handed in. A return names no target and passes: it goes back to where the unit came
- * from.
+ * nothing is handed in. A drop box that is none by the rule of #1805 -- in another group, as a
+ * move before #2027 could leave it, or gone -- is answered as none. A return names no target and
+ * passes: it goes back to where the unit came from.
  */
 @Injectable()
 export class DropBoxTargetGuard implements CanActivate {

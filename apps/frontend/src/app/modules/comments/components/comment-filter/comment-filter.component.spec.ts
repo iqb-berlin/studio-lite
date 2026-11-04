@@ -41,10 +41,6 @@ describe('CommentFilterComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('Badge logic', () => {
     it('should display the correct count when items are filtered', () => {
       component.filteredItems = ['uuid-1'];
@@ -71,26 +67,6 @@ describe('CommentFilterComponent', () => {
 
       const badgeContainer = fixture.nativeElement.querySelector('.mat-badge-hidden');
       expect(badgeContainer).toBeTruthy();
-    });
-  });
-
-  describe('Interactions', () => {
-    it('should emit filteredItemsChange when selection changes', () => {
-      jest.spyOn(component.filteredItemsChange, 'emit');
-      const newFilters = ['uuid-1'];
-
-      component.filteredItemsChange.emit(newFilters);
-      expect(component.filteredItemsChange.emit).toHaveBeenCalledWith(newFilters);
-    });
-
-    it('should toggle showHiddenComments when slide toggle changes', () => {
-      const currentValue = component.showHiddenComments.value;
-      jest.spyOn(component.showHiddenComments, 'next');
-
-      // Simulating what ngModelChange does in the template
-      component.showHiddenComments.next(!currentValue);
-
-      expect(component.showHiddenComments.next).toHaveBeenCalledWith(!currentValue);
     });
   });
 

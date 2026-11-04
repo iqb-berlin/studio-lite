@@ -75,6 +75,15 @@ describe('Auth API tests', () => {
   });
 
   describe('4. PATCH /api/password', () => {
+    // A new password ends the session of the stored token as well, and its access token with it
+    // (#2115). The tests after a change need a token of a session that still exists.
+    const renewAdminToken = (): void => {
+      cy.loginAPI(Cypress.expose('username'), Cypress.expose('password')).then(resp => {
+        expect(resp.status).to.equal(201);
+        Cypress.expose(`token_${Cypress.expose('username')}`, resp.body.accessToken);
+      });
+    };
+
     it('200 positive test: should allow the logged-in user to change their password', () => {
       cy.updatePasswordAPI(
         Cypress.expose(`token_${Cypress.expose('username')}`),
@@ -85,22 +94,43 @@ describe('Auth API tests', () => {
         expect(resp.body).to.equal(true);
       });
 
-      cy.loginAPI(Cypress.expose('username'), '4567').then(resp => {
-        Cypress.expose(
-          `token_${Cypress.expose('username')}`,
-          resp.body.accessToken
-        );
-        expect(resp.status).to.equal(201);
+      // The token of the new login is passed inside then(): an argument read from Cypress.expose
+      // is read when the command is queued, before the login has stored anything.
+      cy.loginAPI(Cypress.expose('username'), '4567').then(login => {
+        expect(login.status).to.equal(201);
+        cy.updatePasswordAPI(login.body.accessToken, '4567', Cypress.expose('password')).then(resp => {
+          expect(resp.status).to.equal(200);
+          expect(resp.body).to.equal(true);
+        });
+      });
+      renewAdminToken();
+    });
+
+    // A copy of a refresh token must not outlive the old password, not even one of the session the
+    // password was changed in (#1901).
+    it('200 positive test: should end every session of the account when the password changes', () => {
+      const refreshStatuses: number[] = [];
+      cy.loginAPI(Cypress.expose('username'), Cypress.expose('password')).then(sessionA => {
+        cy.loginAPI(Cypress.expose('username'), Cypress.expose('password')).then(sessionB => {
+          cy.updatePasswordAPI(sessionA.body.accessToken, Cypress.expose('password'), '4567').then(resp => {
+            expect(resp.status).to.equal(200);
+            expect(resp.body).to.equal(true);
+          });
+          cy.refreshTokenAPI(sessionA.body.refreshToken).then(resp => refreshStatuses.push(resp.status));
+          cy.refreshTokenAPI(sessionB.body.refreshToken).then(resp => refreshStatuses.push(resp.status));
+        });
       });
 
-      cy.updatePasswordAPI(
-        Cypress.expose(`token_${Cypress.expose('username')}`),
-        '4567',
-        Cypress.expose('password')
-      ).then(resp => {
-        expect(resp.status).to.equal(200);
-        expect(resp.body).to.equal(true);
+      // Reset before asserting: a failed assertion would otherwise leave the changed password behind
+      // for every later spec.
+      cy.loginAPI(Cypress.expose('username'), '4567').then(resp => {
+        expect(resp.status).to.equal(201);
+        cy.updatePasswordAPI(resp.body.accessToken, '4567', Cypress.expose('password')).then(reset => {
+          expect(reset.body).to.equal(true);
+        });
       });
+      renewAdminToken();
+      cy.wrap(refreshStatuses).should('deep.equal', [401, 401]);
     });
 
     it('500/200 negative test: should fail to update password if the old password is incorrect', () => {
@@ -120,6 +150,58 @@ describe('Auth API tests', () => {
           expect(resp.status).to.equal(401);
         }
       );
+    });
+  });
+
+  // ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
+  // A refresh token that comes back after its exchange was copied, and the server cannot tell which
+  // side is the copy: more than 30 seconds after the exchange, the session ends for both (#1935).
+  // Sooner, the second use is taken for a second tab of the same browser and only refused.
+  describe('5. POST /api/refresh', () => {
+    it('401 negative test: should end the session when an exchanged refresh token comes back', () => {
+      cy.loginAPI(Cypress.expose('username'), Cypress.expose('password')).then(login => {
+        expect(login.status).to.equal(201);
+        const exchangedToken = login.body.refreshToken;
+        cy.refreshTokenAPI(exchangedToken).then(first => {
+          expect(first.status).to.equal(201);
+          cy.refreshTokenAPI(exchangedToken).then(raced => {
+            expect(raced.status).to.equal(401);
+          });
+          // The session survived the second use within the grace period.
+          cy.refreshTokenAPI(first.body.refreshToken).then(second => {
+            expect(second.status).to.equal(201);
+            // One second past REFRESH_TOKEN_REUSE_GRACE_MS in time.constants.ts.
+            cy.wait(31000);
+            cy.refreshTokenAPI(exchangedToken).then(copied => {
+              expect(copied.status).to.equal(401);
+            });
+            // The token that took the copied one's place goes with the session.
+            cy.refreshTokenAPI(second.body.refreshToken).then(replacement => {
+              expect(replacement.status).to.equal(401);
+            });
+          });
+        });
+      });
+    });
+  });
+
+  // A tab reloaded or closed while its refresh ran never received the new pair and logs out with the
+  // exchanged token. The session must not outlive that by the token nobody holds (#2110).
+  describe('6. POST /api/logout-silent', () => {
+    it('201 positive test: should end the session with a refresh token that was already exchanged', () => {
+      cy.loginAPI(Cypress.expose('username'), Cypress.expose('password')).then(login => {
+        expect(login.status).to.equal(201);
+        const exchangedToken = login.body.refreshToken;
+        cy.refreshTokenAPI(exchangedToken).then(refreshed => {
+          expect(refreshed.status).to.equal(201);
+          cy.logoutSilentAPI(exchangedToken).then(logout => {
+            expect(logout.status).to.equal(201);
+          });
+          cy.refreshTokenAPI(refreshed.body.refreshToken).then(replacement => {
+            expect(replacement.status).to.equal(401);
+          });
+        });
+      });
     });
   });
 });

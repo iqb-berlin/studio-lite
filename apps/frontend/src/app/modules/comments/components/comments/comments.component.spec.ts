@@ -7,15 +7,17 @@ import { By } from '@angular/platform-browser';
 import {
   Component, EventEmitter, Input, Output, Pipe, PipeTransform
 } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { of, Subject } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
+import { createMock } from '@golevelup/ts-jest';
 import { CommentsComponent } from './comments.component';
 import { BackendService } from '../../services/backend.service';
 import { Comment } from '../../models/comment.interface';
-import { ActiveComment, ActiveCommentType } from '../../models/active-comment.interface';
+import { ActiveComment } from '../../models/active-comment.interface';
 import { CommentService } from '../../services/comment.service';
+import { RootCommentsWithRepliesPipe } from '../../pipes/root-comments-with-replies.pipe';
 
 @Pipe({
   name: 'filteredComments',
@@ -168,7 +170,8 @@ describe('CommentsComponent', () => {
             MockCommentFilterComponent,
             MockFilteredCommentsPipe,
             MockFilteredRootCommentsPipe,
-            MockHiddenCommentsCountPipe
+            MockHiddenCommentsCountPipe,
+            RootCommentsWithRepliesPipe
           ],
           providers: [
             { provide: BackendService, useValue: backendServiceSpy },
@@ -184,10 +187,6 @@ describe('CommentsComponent', () => {
     component.unitId = 1;
     component.userId = 1;
     fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
   });
 
   describe('focusEditor (#1785)', () => {
@@ -232,13 +231,16 @@ describe('CommentsComponent', () => {
     });
   });
 
-  it('should fetch comments on init', fakeAsync(() => {
+  it('should show the fetched comments as threads', fakeAsync(() => {
     component.ngOnInit();
     tick();
+    fixture.detectChanges();
+    const threads = fixture.debugElement.queryAll(By.directive(MockCommentComponent))
+      .map(debugElement => debugElement.componentInstance as MockCommentComponent);
+
     expect(backendServiceSpy.getComments).toHaveBeenCalled();
-    expect(component.comments.length).toBe(2);
-    expect(component.rootCommentsWithReplies.length).toBe(1);
-    expect(component.rootCommentsWithReplies[0].replies.length).toBe(1);
+    expect(threads.map(thread => ({ comment: thread.comment.id, replies: thread.replies.map(reply => reply.id) })))
+      .toEqual([{ comment: 1, replies: [2] }]);
   }));
 
   it('should update comment visibility', () => {
@@ -247,6 +249,14 @@ describe('CommentsComponent', () => {
       1, { hidden: true, userId: 1 }, 1, 1, 0
     );
     expect(snackBarSpy.open).toHaveBeenCalledWith('comment.visibility-updated', '', expect.any(Object));
+  });
+
+  // The success message opened right after the failure replaced it (#1962).
+  it('should show only the failure when the visibility of a comment was not changed', () => {
+    backendServiceSpy.updateCommentVisibility.mockReturnValueOnce(of(false));
+    component.updateCommentVisibility(1, true);
+    expect(snackBarSpy.open).toHaveBeenCalledTimes(1);
+    expect(snackBarSpy.open).toHaveBeenCalledWith('comment.visibility-not-updated', 'error', { duration: 3000 });
   });
 
   it('should update comment', () => {
@@ -284,23 +294,89 @@ describe('CommentsComponent', () => {
     expect(spy).toHaveBeenCalledWith(1, true);
   });
 
-  it('should set active comment', () => {
-    const mockActive: ActiveComment = { id: 1, type: ActiveCommentType.replying };
-    component.setActiveComment(mockActive);
-    expect(component.activeComment).toBe(mockActive);
+  it('should say that an edit was not saved, and link no items to it', () => {
+    backendServiceSpy.updateComment.mockReturnValueOnce(of(false));
+
+    component.updateComment({ text: 'updated', commentId: 1, items: ['item1'] });
+
+    expect(snackBarSpy.open).toHaveBeenCalledWith('comment.not-updated', 'error', { duration: 3000 });
+    expect(backendServiceSpy.updateCommentItemConnections).not.toHaveBeenCalled();
   });
 
-  it('should handle onVoteComment', () => {
-    component.onVoteComment({ commentId: 1, vote: 'up' });
-    expect(backendServiceSpy.toggleVote).toHaveBeenCalledWith(1, 1, 0, 1, 'up');
-    expect(backendServiceSpy.getComments).toHaveBeenCalledTimes(2); // once on init, once after vote
+  it('should say that a comment was not sent, and link no items to it', () => {
+    backendServiceSpy.createComment.mockReturnValueOnce(of(null));
+
+    component.addComment({ text: 'new', parentId: null, items: ['item1'] });
+
+    expect(snackBarSpy.open).toHaveBeenCalledWith('comment.not-sent', 'error', { duration: 3000 });
+    expect(backendServiceSpy.updateCommentItemConnections).not.toHaveBeenCalled();
   });
 
-  it('should handle onShowVoters', () => {
-    const mockVoters = [{ userName: 'User 1', vote: 'up' as const }];
-    backendServiceSpy.getCommentVoters.mockReturnValue(of(mockVoters));
-    component.onShowVoters(1);
-    expect(backendServiceSpy.getCommentVoters).toHaveBeenCalledWith(1, 1, 0, 1);
-    expect(dialogSpy.open).toHaveBeenCalled();
+  it.each([
+    [0, 'comments.comment-delete-title', 'comments.comment-delete-question'],
+    [2, 'comments.comments-delete-title', 'comments.comments-delete-question']
+  ])('should ask about deleting a comment with %i replies in its own words', (numberOfReplies, title, content) => {
+    component.deleteComment({ commentId: 1, numberOfReplies });
+
+    expect(dialogSpy.open).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ data: { title, content } })
+    );
+  });
+
+  it.each([false, undefined])('should delete nothing when the delete dialog closes with %s', result => {
+    dialogSpy.open.mockReturnValueOnce(createMock<MatDialogRef<unknown>>({ afterClosed: () => of(result) }));
+
+    component.deleteComment({ commentId: 1, numberOfReplies: 0 });
+
+    expect(backendServiceSpy.deleteComment).not.toHaveBeenCalled();
+  });
+
+  describe('opening the discussion', () => {
+    const comment = (id: number, changedAt: string): Comment => createMock<Comment>({
+      id, parentId: null, changedAt: new Date(changedAt)
+    });
+
+    const open = (inputs: { reviewId?: number; newCommentOnly?: boolean } = {}): CommentsComponent => {
+      jest.clearAllMocks();
+      const discussion = TestBed.createComponent(CommentsComponent);
+      Object.entries({
+        workspaceId: 1, unitId: 1, userId: 1, userName: 'user', ...inputs
+      }).forEach(([name, value]) => discussion.componentRef.setInput(name, value));
+      discussion.detectChanges();
+      return discussion.componentInstance;
+    };
+
+    it('should mark the most recently changed comment as seen, wherever it is in the list', () => {
+      backendServiceSpy.getComments.mockReturnValue(of([
+        comment(1, '2024-01-02'), comment(2, '2024-03-01'), comment(3, '2024-01-01')
+      ]));
+
+      open();
+
+      expect(backendServiceSpy.updateComments).toHaveBeenCalledWith(
+        { lastSeenCommentChangedAt: new Date('2024-03-01'), userId: 1 }, 1, 1
+      );
+    });
+
+    it('should not mark the comments of a review as seen, as a review has no workspace user', () => {
+      const discussion = open({ reviewId: 5 });
+
+      expect(discussion.comments).toHaveLength(2);
+      expect(backendServiceSpy.updateComments).not.toHaveBeenCalled();
+    });
+
+    // The review's comment dialog closes on that announcement when the others' comments are not to be shown.
+    it('should announce a sent comment without loading the others where only a new one may be written', () => {
+      const discussion = open({ newCommentOnly: true });
+      const updated = jest.fn();
+      discussion.onCommentsUpdated.subscribe(updated);
+
+      discussion.addComment({ text: 'new', parentId: null, items: [] });
+
+      expect(backendServiceSpy.createComment).toHaveBeenCalled();
+      expect(backendServiceSpy.getComments).not.toHaveBeenCalled();
+      expect(updated).toHaveBeenCalledTimes(1);
+    });
   });
 });

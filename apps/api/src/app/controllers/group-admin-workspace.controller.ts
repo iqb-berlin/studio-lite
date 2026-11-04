@@ -21,9 +21,7 @@ import { WorkspaceService } from '../services/workspace.service';
 import { UsersService } from '../services/users.service';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
-import { User } from '../decorators/user.decorator';
 import { UserId } from '../decorators/user-id.decorator';
-import UserEntity from '../entities/user.entity';
 import { AnyWorkspaceGroupAdmin } from '../decorators/any-workspace-group-admin.decorator';
 import { UserWorkspaceGroupNotAdminException } from '../exceptions/user-workspace-group-not-admin.exception';
 
@@ -91,14 +89,15 @@ export class GroupAdminWorkspaceController {
   })
   async remove(@UserId() userId: number,
     @Query('id', new ParseArrayPipe({ items: Number, separator: ',' })) ids: number[]): Promise<void> {
-    await this.assertAdministersWorkspaces(userId, ids);
+    await this.assertAdministersWorkspaces(userId, ids, 'DELETE');
     return this.workspaceService.remove(ids);
   }
 
   /**
-   * Moves workspaces into another group. Both ends are asked about, in two places: the target group
-   * here -- the guard cannot, it stands in the body -- and the group they are moved OUT of in the
-   * service, which is why the user is passed on.
+   * Moves workspaces into another group. Both ends are asked about here, before anything is
+   * changed -- the guard cannot, they stand in the body: the target group, and every group the
+   * workspaces are moved out of. A move resets the state of their units and drops drop boxes
+   * across the new group boundary, so a refused request must not get as far as the service (#1984).
    */
   @Patch('group-id')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
@@ -108,9 +107,10 @@ export class GroupAdminWorkspaceController {
   @ApiForbiddenResponse({ description: 'Forbidden. No privileges in the origin or the target group' })
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('group-admin workspace')
-  async patchGroups(@User() user: UserEntity, @Body() body: MoveToDto): Promise<void> {
-    await this.assertAdministersGroup(user.id, body.targetId, 'PATCH');
-    return this.workspaceService.patchWorkspaceGroups(body.ids, body.targetId, user);
+  async patchGroups(@UserId() userId: number, @Body() body: MoveToDto): Promise<void> {
+    await this.assertAdministersGroup(userId, body.targetId, 'PATCH');
+    await this.assertAdministersWorkspaces(userId, body.ids, 'PATCH');
+    return this.workspaceService.patchWorkspaceGroups(body.ids, body.targetId);
   }
 
   @Post()
@@ -146,10 +146,10 @@ export class GroupAdminWorkspaceController {
    * those, and reading them one by one would turn a workspace a colleague has just deleted into a
    * 404 for the whole request.
    */
-  private async assertAdministersWorkspaces(userId: number, workspaceIds: number[]): Promise<void> {
+  private async assertAdministersWorkspaces(userId: number, workspaceIds: number[], method: string): Promise<void> {
     if (await this.userService.getUserIsAdmin(userId)) return;
     const groupIds = await this.workspaceService.findGroupIdsOfWorkspaces(workspaceIds);
-    await Promise.all(groupIds.map(groupId => this.assertIsGroupAdmin(userId, groupId, 'DELETE')));
+    await Promise.all(groupIds.map(groupId => this.assertIsGroupAdmin(userId, groupId, method)));
   }
 
   /**

@@ -8,10 +8,6 @@ describe('CanReturnUnitPipe', () => {
     pipe = new CanReturnUnitPipe();
   });
 
-  it('should create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should return true when unit has sourceWorkspaceId and is not returned', () => {
     const unitId = 1;
     const unitList: { [key: string]: UnitInListDto[] } = {

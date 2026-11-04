@@ -139,10 +139,6 @@ describe('CommentComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('ngOnInit', () => {
     it('should set ownComment to true if userId matches comment.userId', () => {
       component.userId = 1;
@@ -173,21 +169,6 @@ describe('CommentComponent', () => {
   });
 
   describe('Event Emissions', () => {
-    it('should emit toggleVisibility when visibility button is clicked', () => {
-      jest.spyOn(component.toggleVisibility, 'emit');
-      component.ownComment = true;
-      fixture.detectChanges();
-
-      component.toggleVisibility.emit(component.comment);
-      expect(component.toggleVisibility.emit).toHaveBeenCalledWith(component.comment);
-    });
-
-    it('should emit setActiveComment with replying type', () => {
-      jest.spyOn(component.setActiveComment, 'emit');
-      component.setActiveComment.emit({ id: 1, type: ActiveCommentType.replying });
-      expect(component.setActiveComment.emit).toHaveBeenCalledWith({ id: 1, type: ActiveCommentType.replying });
-    });
-
     it('should have delete button if ownComment is true', () => {
       component.ownComment = true;
       fixture.detectChanges();

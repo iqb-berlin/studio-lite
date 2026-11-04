@@ -13,18 +13,17 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSelectModule } from '@angular/material/select';
 import { Pipe, PipeTransform } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { ConfigDto } from '@studio-lite-lib/api-dto';
 import { AppConfigComponent } from './app-config.component';
 import { environment } from '../../../../../environments/environment';
-import { BackendService as ReadBackendService } from '../../../../services/backend.service';
-import { BackendService as WriteBackendService } from '../../services/backend.service';
+import { BackendService } from '../../services/backend.service';
+import { defaultAppConfig } from '../../../../services/app.service';
 
 describe('AppConfigComponent', () => {
   let component: AppConfigComponent;
   let fixture: ComponentFixture<AppConfigComponent>;
-  let readBackendService: jest.Mocked<ReadBackendService>;
-  let writeBackendService: jest.Mocked<WriteBackendService>;
+  let backendService: jest.Mocked<BackendService>;
   let snackBar: jest.Mocked<MatSnackBar>;
 
   @Pipe({
@@ -39,11 +38,8 @@ describe('AppConfigComponent', () => {
   }
 
   beforeEach(async () => {
-    const readBackendServiceMock = {
-      getConfig: jest.fn()
-    };
-
-    const writeBackendServiceMock = {
+    const backendServiceMock = {
+      getAppConfig: jest.fn(),
       setAppConfig: jest.fn()
     };
 
@@ -68,8 +64,7 @@ describe('AppConfigComponent', () => {
       ],
       providers: [
         provideHttpClient(),
-        { provide: ReadBackendService, useValue: readBackendServiceMock },
-        { provide: WriteBackendService, useValue: writeBackendServiceMock },
+        { provide: BackendService, useValue: backendServiceMock },
         { provide: MatSnackBar, useValue: snackBarMock },
         {
           provide: 'SERVER_URL',
@@ -78,8 +73,7 @@ describe('AppConfigComponent', () => {
       ]
     }).compileComponents();
 
-    readBackendService = TestBed.inject(ReadBackendService) as jest.Mocked<ReadBackendService>;
-    writeBackendService = TestBed.inject(WriteBackendService) as jest.Mocked<WriteBackendService>;
+    backendService = TestBed.inject(BackendService) as jest.Mocked<BackendService>;
     snackBar = TestBed.inject(MatSnackBar) as jest.Mocked<MatSnackBar>;
 
     const mockConfig: ConfigDto = {
@@ -93,36 +87,10 @@ describe('AppConfigComponent', () => {
       globalWarningExpiredHour: 12,
       hasUsers: true
     };
-    readBackendService.getConfig.mockReturnValue(of(mockConfig));
+    backendService.getAppConfig.mockReturnValue(of(mockConfig));
 
     fixture = TestBed.createComponent(AppConfigComponent);
     component = fixture.componentInstance;
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('should initialize form with empty values', () => {
-    expect(component.configForm).toBeDefined();
-    expect(component.configForm.get('appTitle')).toBeDefined();
-    expect(component.configForm.get('introHtml')).toBeDefined();
-    expect(component.configForm.get('imprintHtml')).toBeDefined();
-    expect(component.configForm.get('globalWarningText')).toBeDefined();
-    expect(component.configForm.get('globalWarningExpiredDay')).toBeDefined();
-    expect(component.configForm.get('globalWarningExpiredHour')).toBeDefined();
-  });
-
-  it('should have expiredHours array with 24 elements', () => {
-    expect(component.expiredHours).toBeDefined();
-    expect(component.expiredHours.length).toBe(24);
-    expect(component.expiredHours[0]).toBe(0);
-    expect(component.expiredHours[23]).toBe(23);
-  });
-
-  it('should load config data on init', () => {
-    fixture.detectChanges();
-    expect(readBackendService.getConfig).toHaveBeenCalled();
   });
 
   it('should update form fields with loaded data', () => {
@@ -145,13 +113,86 @@ describe('AppConfigComponent', () => {
       globalWarningExpiredHour: 12,
       hasUsers: true
     };
-    readBackendService.getConfig.mockReturnValue(of(stringConfig as unknown as ConfigDto));
+    backendService.getAppConfig.mockReturnValue(of(stringConfig as unknown as ConfigDto));
     const stringFixture = TestBed.createComponent(AppConfigComponent);
     const stringComponent = stringFixture.componentInstance;
     stringFixture.detectChanges();
 
     expect(stringComponent.appConfig.globalWarningExpiredDay).toBeInstanceOf(Date);
     expect(stringComponent.configForm.get('globalWarningExpiredDay')?.value).toBeInstanceOf(Date);
+  });
+
+  it('should offer the default expiry day for a config without one', () => {
+    backendService.getAppConfig.mockReturnValue(of({
+      appTitle: 'Test App',
+      introHtml: '',
+      imprintHtml: '',
+      emailSubject: '',
+      emailBody: '',
+      globalWarningText: 'Test Warning',
+      hasUsers: true
+    }));
+
+    fixture.detectChanges();
+
+    expect(component.configForm.get('globalWarningExpiredDay')?.value)
+      .toEqual(defaultAppConfig.globalWarningExpiredDay);
+  });
+
+  describe('the shared default config (#1964)', () => {
+    const editAndSave = (): void => {
+      fixture.detectChanges();
+      component.configForm.get('appTitle')?.setValue('New Title');
+      backendService.setAppConfig.mockReturnValue(of(true));
+      component.saveData();
+    };
+
+    it('should stay untouched when a config is loaded and saved', () => {
+      editAndSave();
+      expect(defaultAppConfig.appTitle).toBe('IQB-Studio');
+    });
+
+    it('should stay untouched when no config arrives and the form is saved', () => {
+      backendService.getAppConfig.mockReturnValue(of(null));
+      editAndSave();
+      expect(defaultAppConfig.appTitle).toBe('IQB-Studio');
+    });
+  });
+
+  // Saving a form without the stored config would replace that config (#1968).
+  it('should say that the config was not loaded and offer no form to save', () => {
+    backendService.getAppConfig.mockReturnValue(of(null));
+    fixture.detectChanges();
+
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelector('[data-cy="admin-app-config-not-loaded"]')).not.toBeNull();
+    expect(element.querySelector('[data-cy="admin-app-config-save-button"]')).toBeNull();
+  });
+
+  it('should offer the form to save once the config is loaded', () => {
+    fixture.detectChanges();
+
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelector('[data-cy="admin-app-config-not-loaded"]')).toBeNull();
+    expect(element.querySelector('[data-cy="admin-app-config-save-button"]')).not.toBeNull();
+  });
+
+  it('should show a text emptied on the server as empty (#1964)', () => {
+    backendService.getAppConfig.mockReturnValue(of({ ...defaultAppConfig, introHtml: '' }));
+    fixture.detectChanges();
+
+    expect(component.configForm.get('introHtml')?.value).toBe('');
+  });
+
+  it('should save the parts of the config the form does not show (#1964)', () => {
+    fixture.detectChanges();
+    backendService.setAppConfig.mockReturnValue(of(true));
+    component.saveData();
+
+    expect(backendService.setAppConfig).toHaveBeenCalledWith(expect.objectContaining({
+      emailSubject: 'Test Email Subject',
+      emailBody: 'Test Email Body'
+    }));
   });
 
   it('should set dataChanged flag when form values change', fakeAsync(() => {
@@ -163,13 +204,13 @@ describe('AppConfigComponent', () => {
   }));
 
   it('should save config data successfully', fakeAsync(() => {
-    writeBackendService.setAppConfig.mockReturnValue(of(true));
+    backendService.setAppConfig.mockReturnValue(of(true));
     fixture.detectChanges();
 
     component.dataChanged = true;
     component.saveData();
 
-    expect(writeBackendService.setAppConfig).toHaveBeenCalled();
+    expect(backendService.setAppConfig).toHaveBeenCalled();
     tick(50);
     expect(snackBar.open).toHaveBeenCalledWith(
       expect.any(String),
@@ -180,12 +221,12 @@ describe('AppConfigComponent', () => {
   }));
 
   it('should show error message when save fails', fakeAsync(() => {
-    writeBackendService.setAppConfig.mockReturnValue(of(false));
+    backendService.setAppConfig.mockReturnValue(of(false));
     fixture.detectChanges();
 
     component.saveData();
 
-    expect(writeBackendService.setAppConfig).toHaveBeenCalled();
+    expect(backendService.setAppConfig).toHaveBeenCalled();
     tick(50);
     expect(snackBar.open).toHaveBeenCalledWith(
       expect.any(String),
@@ -207,7 +248,7 @@ describe('AppConfigComponent', () => {
       globalWarningExpiredHour: 12,
       hasUsers: true
     };
-    readBackendService.getConfig.mockReturnValue(of(pastConfig));
+    backendService.getAppConfig.mockReturnValue(of(pastConfig));
 
     const newFixture = TestBed.createComponent(AppConfigComponent);
     const newComponent = newFixture.componentInstance;
@@ -215,4 +256,20 @@ describe('AppConfigComponent', () => {
 
     expect(newComponent.warningIsExpired).toBe(true);
   });
+
+  // #2094: what is entered while the save is under way was not sent, and a second save waits
+  it('keeps an entry made while saving unsaved and does not save twice meanwhile', fakeAsync(() => {
+    const answer = new Subject<boolean>();
+    backendService.setAppConfig.mockReturnValue(answer);
+    fixture.detectChanges();
+    tick(50);
+    component.configForm.get('appTitle')?.setValue('Gesendet');
+    component.saveData();
+    component.configForm.get('appTitle')?.setValue('Danach');
+    component.saveData();
+    answer.next(true);
+
+    expect(backendService.setAppConfig).toHaveBeenCalledTimes(1);
+    expect(component.dataChanged).toBe(true);
+  }));
 });

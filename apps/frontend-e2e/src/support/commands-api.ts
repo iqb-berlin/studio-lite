@@ -78,6 +78,19 @@ Cypress.Commands.add('logoutAPI', (token: string, refreshToken: string) => {
   });
 });
 
+// 2c: the logout of a browser whose access token has expired, with nothing but its refresh token.
+Cypress.Commands.add('logoutSilentAPI', (refreshToken: string) => {
+  cy.request({
+    method: 'POST',
+    url: '/api/logout-silent',
+    headers: {
+      'app-version': Cypress.expose('version')
+    },
+    body: { refreshToken },
+    failOnStatusCode: false
+  });
+});
+
 // 3
 // ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add('getUserIdAPI', (token: string) => {
@@ -184,9 +197,9 @@ Cypress.Commands.add('getUsersFullAPI',
     });
   });
 
-// 9
+// 9: a password sent along ends every session of the user (#1901)
 Cypress.Commands.add('updateUserAPI',
-  (id: string, user:UserData, credentials: boolean, token:string) => {
+  (id: string, user:UserData, credentials: boolean, token:string, password?: string) => {
     const authorization = `bearer ${token}`;
     const nu = parseInt(`${Cypress.expose(`id_${user.username}`)}`, 10);
     cy.request({
@@ -198,7 +211,8 @@ Cypress.Commands.add('updateUserAPI',
       },
       body: {
         id: nu,
-        isAdmin: credentials
+        isAdmin: credentials,
+        ...(password ? { password } : {})
       },
       failOnStatusCode: false
     });
@@ -234,7 +248,7 @@ Cypress.Commands.add('deleteOrphanedSessionsAPI', (userId: string, token: string
 });
 
 // 10
-Cypress.Commands.add('createGroupAPI', (group:GroupData, token:string) => {
+Cypress.Commands.add('createGroupAPI', (group:GroupData, token:string, settings?: unknown) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'POST',
@@ -245,7 +259,7 @@ Cypress.Commands.add('createGroupAPI', (group:GroupData, token:string) => {
     },
     body: {
       name: `${group.name}`,
-      setting: {}
+      ...(settings === undefined ? {} : { settings })
     },
     failOnStatusCode: false
   });
@@ -327,7 +341,8 @@ Cypress.Commands.add('getAdminOfGroupAPI', (groupId: string, token:string) => {
 });
 
 // 16
-Cypress.Commands.add('createWsAPI', (groupId: string, ws:WsData, token:string) => {
+// `extra` adds fields to the body that the route must not take over (#2029)
+Cypress.Commands.add('createWsAPI', (groupId: string, ws:WsData, token:string, extra?: object) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'POST',
@@ -337,6 +352,7 @@ Cypress.Commands.add('createWsAPI', (groupId: string, ws:WsData, token:string) =
       authorization
     },
     body: {
+      ...extra,
       groupId: `${groupId}`,
       name: `${ws.name}`
     },
@@ -345,7 +361,7 @@ Cypress.Commands.add('createWsAPI', (groupId: string, ws:WsData, token:string) =
 });
 
 // 17
-Cypress.Commands.add('moveWsAPI', (ws:string, newGroup: string, token:string) => {
+Cypress.Commands.add('moveWsAPI', (ws: string | string[], newGroup: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
@@ -355,7 +371,7 @@ Cypress.Commands.add('moveWsAPI', (ws:string, newGroup: string, token:string) =>
       authorization
     },
     body: {
-      ids: [`${ws}`],
+      ids: (Array.isArray(ws) ? ws : [ws]).map(id => `${id}`),
       targetId: `${newGroup}`
     },
     failOnStatusCode: false
@@ -454,8 +470,8 @@ Cypress.Commands.add('getWsByGroupAPI',
     });
   });
 
-// 22
-Cypress.Commands.add('addModuleAPI', (module:string, token: string) => {
+// 22: a widget only with types ['WIDGET'] -- the API turns away a module of a type it was not offered
+Cypress.Commands.add('addModuleAPI', (module:string, token: string, types = ['editor', 'player', 'schemer']) => {
   const authorization = `bearer ${token}`;
   cy.fixture(module, 'binary')
     .then(fileContent => {
@@ -463,7 +479,7 @@ Cypress.Commands.add('addModuleAPI', (module:string, token: string) => {
       formData.append('file', new Blob([fileContent], { type: 'html' }), module);
       cy.request({
         method: 'POST',
-        url: '/api/admin/verona-modules?type=editor&type=player&type=schemer',
+        url: `/api/admin/verona-modules?${types.map(type => `type=${type}`).join('&')}`,
         headers: {
           'app-version': Cypress.expose('version'),
           'Content-Type': 'multipart/form-data',
@@ -516,7 +532,9 @@ Cypress.Commands.add('createUnitAPI', (wsId:string, unit: UnitData, token:string
     body: {
       key: `${unit.shortname}`,
       name: `${unit.name}`,
-      groupName: `${unit.group}`
+      groupName: `${unit.group}`,
+      ...(unit.player && { player: unit.player }),
+      ...(unit.editor && { editor: unit.editor })
     },
     failOnStatusCode: false
   });
@@ -795,12 +813,15 @@ function postUnitFiles(wsId: string, formData: FormData, token: string) {
   }).then(resp => ({ ...resp, body: JSON.parse(new TextDecoder().decode(resp.body)) }));
 }
 
-// Uploads fixture files side by side and unzipped, e.g. a unit XML with its definition
+// Uploads fixture files side by side and unzipped, e.g. a unit XML or JSON index with its definition
 Cypress.Commands.add('uploadUnitFilesAPI', (wsId: string, fixtures: string[], token: string) => {
   const formData = new FormData();
   fixtures.forEach(fixture => {
     cy.fixture(fixture, 'binary').then(content => {
-      const mimeType = fixture.endsWith('.xml') ? 'text/xml' : 'application/octet-stream';
+      // the import tells a unit XML and a JSON unit index by the type a browser sends with them
+      let mimeType = 'application/octet-stream';
+      if (fixture.endsWith('.xml')) mimeType = 'text/xml';
+      if (fixture.endsWith('.json')) mimeType = 'application/json';
       formData.append('files', Cypress.Blob.binaryStringToBlob(content, mimeType), fixture.split('/').pop());
     });
   });
@@ -1350,6 +1371,24 @@ Cypress.Commands.add('updateGroupPropertiesAPI', (groupId: string, token:string)
   });
 });
 
+// 50a: the settings as given, to send what the interface never would
+Cypress.Commands.add('updateGroupSettingsAPI', (groupId: string, settings: unknown, token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/workspace-groups/${groupId}`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    body: {
+      id: `${groupId}`,
+      settings
+    },
+    failOnStatusCode: false
+  });
+});
+
 // 51
 // ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add('getGroupPropertiesAPI', (groupId: string, token:string) => {
@@ -1452,7 +1491,8 @@ Cypress.Commands.add('postCommentAPI', (wsId: string, unitId: string, comment: C
       body: `${comment.body}`,
       userName: `${comment.userName}`,
       userId: `${comment.userId}`,
-      unitId: `${comment.unitId}`
+      unitId: `${comment.unitId}`,
+      ...(comment.parentId ? { parentId: comment.parentId } : {})
     },
     failOnStatusCode: false
   });
@@ -1695,7 +1735,7 @@ Cypress.Commands.add('updateReviewAPI', (wsId:string, review: ReviewData, token:
             showOthersComments: true
           }
         },
-        units: [review.units[0]]
+        units: review.units
       },
       failOnStatusCode: false
     });
@@ -2108,6 +2148,20 @@ Cypress.Commands.add('getUnitExportContentsAPI', (wsId: string, token: string) =
   cy.request({
     method: 'GET',
     url: `/api/workspaces/${wsId}/units/export-contents`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// All units, as the admin view "Aufgaben" lists and exports them
+Cypress.Commands.add('getAdminUnitsAPI', (token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: '/api/admin/units',
     headers: {
       'app-version': Cypress.expose('version'),
       authorization

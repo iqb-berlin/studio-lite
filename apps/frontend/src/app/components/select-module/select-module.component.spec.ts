@@ -55,10 +55,6 @@ describe('SelectModuleComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('Inputs', () => {
     it('should set moduleList from modules input', () => {
       component.modules = mockModules;
@@ -81,6 +77,18 @@ describe('SelectModuleComponent', () => {
       expect(component.moduleList.find(m => m.key === 'mod-2')).toBeDefined();
     });
 
+    // #2001: the unit properties set the module of the unit only after the list and stableOnly
+    it('should keep an unstable module in the list when it is selected after stableOnly is set', () => {
+      component.modules = mockModules;
+      component.stableOnly = true;
+      component.value = 'mod-2';
+
+      expect(component.moduleList.find(m => m.key === 'mod-2')).toBeDefined();
+      expect(component.isValid).toBe(true);
+      expect(component.moduleSubstitute).toBe('');
+      expect(component.moduleForm.get('moduleSelector')?.value).toBe('mod-2');
+    });
+
     it('should update selection when value input changes', () => {
       component.modules = mockModules;
       component.value = 'mod-1';
@@ -94,12 +102,6 @@ describe('SelectModuleComponent', () => {
   describe('Validation Logic', () => {
     beforeEach(() => {
       component.modules = mockModules;
-    });
-
-    it('should be valid when selected module exists', () => {
-      component.value = 'mod-1';
-      expect(component.isValid).toBe(true);
-      expect(component.moduleSubstitute).toBe('');
     });
 
     it('should be invalid when selected module does not exist and no substitute found', () => {

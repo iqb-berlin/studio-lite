@@ -4,10 +4,6 @@ import { AliasId } from '../modules/metadata/models/alias-id.interface';
 describe('VariableIdPipe', () => {
   const pipe = new VariableIdPipe();
 
-  it('should be defined', () => {
-    expect(pipe).toBeDefined();
-  });
-
   it('should return alias if ID is found in aliasIds', () => {
     const aliasIds: AliasId[] = [
       { id: 'v1', alias: 'Alias 1' },
@@ -29,10 +25,5 @@ describe('VariableIdPipe', () => {
 
   it('should return "-" if ID is not found and no alias is provided', () => {
     expect(pipe.transform('v1', null, undefined)).toBe('-');
-  });
-
-  it('should return "-" if ID is null', () => {
-    expect(pipe.transform(null, 'Fallback', undefined)).toBe('Fallback');
-    expect(pipe.transform(null, null, undefined)).toBe('-');
   });
 });

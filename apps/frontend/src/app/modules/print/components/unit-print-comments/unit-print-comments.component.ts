@@ -2,20 +2,22 @@ import {
   Component, Input, OnChanges, OnDestroy, SimpleChanges
 } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
-import { MatIcon } from '@angular/material/icon';
-import { DatePipe } from '@angular/common';
 import { ItemsMetadataValues } from '@studio-lite-lib/api-dto';
 import { Subject, takeUntil } from 'rxjs';
 import { Comment } from '../../../comments/models/comment.interface';
 import { BackendService } from '../../../comments/services/backend.service';
-import { SortAscendingPipe } from '../../../comments/pipes/sort-ascending.pipe';
-import { MapItemUuidsIdsPipe } from '../../../comments/pipes/map-item-uuids-ids.pipe';
+import { RootCommentsWithRepliesPipe } from '../../../comments/pipes/root-comments-with-replies.pipe';
+import { UnitPrintCommentComponent } from '../unit-print-comment/unit-print-comment.component';
 
+/**
+ * The comments of a unit as read-only threads, for the printout and for the info panel of a review:
+ * each comment with its replies right below it, as in the discussion (#2109).
+ */
 @Component({
   selector: 'studio-lite-unit-print-comments',
   templateUrl: './unit-print-comments.component.html',
   styleUrls: ['./unit-print-comments.component.scss'],
-  imports: [MatIcon, DatePipe, TranslateModule, SortAscendingPipe, MapItemUuidsIdsPipe],
+  imports: [TranslateModule, RootCommentsWithRepliesPipe, UnitPrintCommentComponent],
   providers: [BackendService]
 })
 export class UnitPrintCommentsComponent implements OnChanges, OnDestroy {

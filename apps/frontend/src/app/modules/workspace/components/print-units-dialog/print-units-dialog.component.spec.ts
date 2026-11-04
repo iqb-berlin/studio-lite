@@ -54,10 +54,6 @@ describe('PrintUnitsDialogComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should set print settings correctly', () => {
     // Mocking PrintOption structure based on usage
     const options: PrintOptions[] = [

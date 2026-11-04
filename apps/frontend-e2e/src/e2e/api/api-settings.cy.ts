@@ -29,20 +29,6 @@ describe('Admin settings API tests', () => {
           });
       });
   });
-  after(() => {
-    cy.deleteUsersAPI([Cypress.expose(`id_${userGroupAdmin.username}`)],
-      Cypress.expose(`token_${Cypress.expose('username')}`))
-      .then(resp => {
-        expect(resp.status).to.equal(200);
-      });
-    cy.deleteUsersAPI([Cypress.expose(`id_${Cypress.expose('username')}`)],
-      Cypress.expose(`token_${Cypress.expose('username')}`))
-      .then(resp => {
-        Cypress.expose('token_admin', '');
-        expect(resp.status).to.equal(200);
-      });
-    // cy.resetDb();
-  });
 
   describe('100. GET /api/admin/settings/config', () => {
     it('200 positive test: should successfully retrieve the current configuration ' +

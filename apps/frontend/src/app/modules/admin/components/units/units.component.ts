@@ -112,18 +112,15 @@ export class UnitsComponent implements OnInit, AfterViewInit {
 
   downloadUnits(): void {
     this.appService.dataLoading = true;
-    try {
-      this.backendService.getAllUnits()
-        .subscribe(units => {
-          if (Array.isArray(units)) {
-            const items = UnitsComponent.cleanUnitsData(units as UnitInViewDto[]);
-            const csv = UnitsComponent.toCSV(items);
-            this.saveFile(csv);
-          }
-          this.appService.dataLoading = false;
-        });
-    } catch {
-      this.appService.dataLoading = false;
-    }
+    this.backendService.getAllUnits()
+      .subscribe(units => {
+        // Without units toCSV has no row to read the header from, and there is nothing to save (#2106)
+        if (Array.isArray(units) && units.length) {
+          const items = UnitsComponent.cleanUnitsData(units as UnitInViewDto[]);
+          const csv = UnitsComponent.toCSV(items);
+          this.saveFile(csv);
+        }
+        this.appService.dataLoading = false;
+      });
   }
 }

@@ -1,16 +1,18 @@
+// The API runs in UTC, as no time zone is set for it; its tests see the dates as it does (#2082).
+// Set here because the workers inherit it; in a spec process.env is a copy and TZ has no effect.
+process.env.TZ = 'UTC';
+
 export default {
   displayName: 'api',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
+  globalSetup: '<rootDir>/../../jest.vm-modules.cjs',
   setupFiles: ['<rootDir>/jest.setup.esm.ts'],
   transform: {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json', useESM: true }]
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  transformIgnorePatterns: [
-    'node_modules/(?!mathml2omml/)'
-  ],
   coverageDirectory: '../../coverage/apps/api',
   // Without this jest counts only the files a spec happens to import, so untested files
   // are missing from the report altogether and the percentage flatters. The bootstrap and

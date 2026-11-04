@@ -7,10 +7,6 @@ describe('HasTakersPipe', () => {
     pipe = new HasTakersPipe();
   });
 
-  it('should create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should return false when all counts are 0', () => {
     expect(pipe.transform(0, 0, 0)).toBe(false);
   });

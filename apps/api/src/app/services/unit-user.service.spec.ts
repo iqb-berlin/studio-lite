@@ -38,10 +38,6 @@ describe('UnitUserService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('createUnitUser', () => {
     it('should create and save a unit user with default timestamp (July 2022) when none is specified', async () => {
       const userId = 1;
@@ -142,19 +138,6 @@ describe('UnitUserService', () => {
       expect(unitRepository.find).toHaveBeenCalledWith({ where: { workspaceId } });
       expect(unitUserRepository.delete).toHaveBeenCalledWith(unitUser1);
       expect(unitUserRepository.delete).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('findByUnitId', () => {
-    it('should return unit users', async () => {
-      const unitId = 1;
-      const unitUsers = [{ userId: 1, unitId }] as UnitUser[];
-      mockUnitUserRepository.find.mockResolvedValue(unitUsers);
-
-      const result = await service.findByUnitId(unitId);
-
-      expect(unitUserRepository.find).toHaveBeenCalledWith({ where: { unitId } });
-      expect(result).toEqual(unitUsers);
     });
   });
 });

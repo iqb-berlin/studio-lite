@@ -1,13 +1,16 @@
 // eslint-disable-next-line max-classes-per-file
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, fakeAsync, TestBed, tick
+} from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
 import { BookletConfigDto } from '@studio-lite-lib/api-dto';
-import { MatExpansionModule } from '@angular/material/expansion';
+import { MatExpansionModule, MatExpansionPanel } from '@angular/material/expansion';
 import { provideHttpClient } from '@angular/common/http';
+import { createMock } from '@golevelup/ts-jest';
 import { By } from '@angular/platform-browser';
 import { ExportUnitComponent } from './export-unit.component';
 import { environment } from '../../../../../environments/environment';
@@ -16,6 +19,7 @@ import { ExportTestTakerConfigComponent } from '../export-test-taker-config/expo
 import { BookletConfigEditComponent } from '../booklet-config-edit/booklet-config-edit.component';
 import { ExportUnitFileConfigComponent } from '../export-unit-file-config/export-unit-file-config.component';
 import { ExportFileSelection } from '../../utils/export-file-options.utils';
+import { WorkspaceService } from '../../services/workspace.service';
 
 describe('ExportUnitComponent', () => {
   let component: ExportUnitComponent;
@@ -112,10 +116,6 @@ describe('ExportUnitComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should pass the export format down and adopt changes from the file config', () => {
     const fileConfig = fixture.debugElement
       .query(By.directive(MockExportUnitFileConfigComponent))
@@ -129,15 +129,66 @@ describe('ExportUnitComponent', () => {
     expect(fileConfig.exportFormat).toBe('json');
   });
 
-  it('should adopt the unit selection from the unit list', () => {
-    const unitList = fixture.debugElement
-      .query(By.directive(MockSelectUnitListComponent))
-      .componentInstance as MockSelectUnitListComponent;
+  // Booklet and test takers stay XML beside JSON units, so the JSON format keeps the logins
+  it('should keep the logins and the open panel in the JSON format (#2099)', () => {
+    const fileConfig = fixture.debugElement
+      .query(By.directive(MockExportUnitFileConfigComponent))
+      .componentInstance as MockExportUnitFileConfigComponent;
+    component.unitExportSettings.addTestTakersReview = 1;
+    component.unitExportSettings.addTestTakersHot = 2;
+    component.unitExportSettings.addTestTakersMonitor = 3;
 
-    unitList.selectionChanged.emit([3, 7]);
+    fileConfig.exportFormatChange.emit('json');
+    fixture.detectChanges();
 
-    expect(component.unitExportSettings.unitIdList).toEqual([3, 7]);
+    const panel = fixture.debugElement.query(By.css('[data-cy="export-test-taker-panel"]'))
+      .injector.get(MatExpansionPanel);
+    expect(component.unitExportSettings.addTestTakersReview).toBe(1);
+    expect(component.unitExportSettings.addTestTakersHot).toBe(2);
+    expect(component.unitExportSettings.addTestTakersMonitor).toBe(3);
+    expect(panel.disabled).toBe(false);
+    expect(panel.expanded).toBe(true);
   });
+
+  it('should point out that logins without players need the players in the testcenter', () => {
+    const hint = () => fixture.debugElement.query(By.css('[data-cy="export-test-takers-without-players"]'));
+    expect(hint()).toBeNull();
+
+    component.unitExportSettings.addTestTakersHot = 1;
+    fixture.detectChanges();
+    expect(hint()).not.toBeNull();
+
+    component.unitExportSettings.addPlayers = true;
+    fixture.detectChanges();
+    expect(hint()).toBeNull();
+  });
+
+  // The export would otherwise replace the characters silently (UnitDownloadClass.safeBookletId)
+  it('should not download a booklet id the export would have to rewrite', fakeAsync(() => {
+    const input = fixture.debugElement.query(By.css('input[name="bookletId"]')).nativeElement as HTMLInputElement;
+    const button = fixture.debugElement.query(By.css('[data-cy="workspace-export-unit-button"]'))
+      .nativeElement as HTMLButtonElement;
+    const enterBookletId = (id: string) => {
+      input.value = id;
+      input.dispatchEvent(new Event('input'));
+      tick();
+      fixture.detectChanges();
+    };
+    component.unitExportSettings.unitIdList = [1];
+    component.unitExportSettings.addTestTakersHot = 1;
+
+    enterBookletId('Heft_1-a');
+    expect(button.disabled).toBe(false);
+
+    enterBookletId('Heft 1');
+    expect(button.disabled).toBe(true);
+    // shown while the field still has the focus, not only once it is left
+    expect(fixture.nativeElement.querySelector('mat-error')?.textContent)
+      .toContain('unit-download.dialog.booklet-id-pattern');
+
+    enterBookletId('Heft-ä');
+    expect(button.disabled).toBe(true);
+  }));
 
   it('should pass the unit selection on to the file config', () => {
     const unitList = fixture.debugElement
@@ -215,10 +266,15 @@ describe('ExportUnitComponent', () => {
     expect(component.unitExportSettings.bookletSettings.map(s => s.key)).toContain('toolbar_show_unit_title');
   });
 
-  it('should prefill bookletId, bookletLabel and groupLabel', () => {
-    expect(component.unitExportSettings.bookletId).toBe('booklet1');
-    expect(component.unitExportSettings.bookletLabel).toBe('Testheft 1');
-    expect(component.unitExportSettings.groupLabel).toBe('Gruppe 1');
+  it('should start the export of a review from its booklet config, in the current keys', () => {
+    const exportOfReview = new ExportUnitComponent(
+      { units: [1], bookletConfigSettings: { unitTitle: 'ON' } },
+      createMock<WorkspaceService>()
+    );
+
+    expect(exportOfReview.bookletConfigSettings).toEqual({ toolbarShowUnitTitle: 'TRUE' });
+    expect(exportOfReview.unitExportSettings.bookletSettings)
+      .toEqual([{ key: 'toolbar_show_unit_title', value: 'TRUE' }]);
   });
 
   it('should map booklet config to modern keys on setBookletConfigSettings', () => {

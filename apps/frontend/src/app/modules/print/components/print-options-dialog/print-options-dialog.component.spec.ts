@@ -44,42 +44,12 @@ describe('PrintOptionsDialogComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  describe('constructor', () => {
-    it('should initialize with dialogRef', () => {
-      expect(component.dialogRef).toBeDefined();
-      expect(component.dialogRef).toBe(mockDialogRef);
-    });
-  });
-
   describe('cancel', () => {
     it('should close the dialog without data', () => {
       component.cancel();
 
       expect(mockDialogRef.close).toHaveBeenCalledTimes(1);
       expect(mockDialogRef.close).toHaveBeenCalledWith();
-    });
-
-    it('should close the dialog when called multiple times', () => {
-      component.cancel();
-      component.cancel();
-
-      expect(mockDialogRef.close).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  describe('dialogRef property', () => {
-    it('should be publicly accessible', () => {
-      expect(component.dialogRef).toBe(mockDialogRef);
-    });
-
-    it('should allow calling close directly', () => {
-      component.dialogRef.close('test-data');
-
-      expect(mockDialogRef.close).toHaveBeenCalledWith('test-data');
     });
   });
 });

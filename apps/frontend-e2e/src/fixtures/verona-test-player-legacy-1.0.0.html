@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Verona-Testplayer (alt)</title>
+  <!--
+    A player for the e2e tests of the studio as host, written against the player API 3.0 as the aspect
+    players of the 1.x line still in use are (#1607). Its metadata are in the old JSON-LD form, and it
+    reports its state only when the start command asks for it with stateReportPolicy 'eager' -- without
+    the parameter those players send no vopStateChangedNotification at all.
+  -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://w3id.org/iqb/verona-modules",
+      "@type": "player",
+      "@id": "verona-test-player-legacy",
+      "name": {
+        "de": "Verona-Testplayer (alt)",
+        "en": "Verona test player (legacy)"
+      },
+      "version": "1.0.0",
+      "apiVersion": "3.0.0"
+    }
+  </script>
+</head>
+<body>
+  <p id="status">waiting</p>
+  <script>
+    // The frame is a srcdoc of the host and shares its origin: messages go there and nowhere else
+    const hostOrigin = window.parent.location.origin;
+
+    window.addEventListener('message', event => {
+      if (event.source !== window.parent) return;
+      const message = event.data;
+      if (message.type !== 'vopStartCommand') return;
+      document.getElementById('status').textContent = 'started';
+      if (message.playerConfig?.stateReportPolicy === 'eager') {
+        window.parent.postMessage({
+          type: 'vopStateChangedNotification',
+          sessionId: message.sessionId,
+          timeStamp: Date.now(),
+          unitState: { presentationProgress: 'some', responseProgress: 'some' }
+        }, hostOrigin);
+      }
+    });
+
+    window.parent.postMessage({ type: 'vopReadyNotification', apiVersion: '3.0.0' }, hostOrigin);
+  </script>
+</body>
+</html>

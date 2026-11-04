@@ -1,8 +1,10 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, TestBed, fakeAsync
+} from '@angular/core/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatInputModule } from '@angular/material/input';
 import { BackendService } from '../../services/backend.service';
@@ -48,10 +50,6 @@ describe('MissingsProfilesConfigComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('updates form fields and marks dataChanged on value change', () => {
     backendService.getMissingsProfiles.mockReturnValue(of([
       { label: 'IQB-Standard', missings: '[1]' }
@@ -63,6 +61,15 @@ describe('MissingsProfilesConfigComponent', () => {
     expect(component.dataChanged).toBe(false);
 
     component.configForm.get('iqbStandardMissings')?.setValue('[2]');
+    expect(component.dataChanged).toBe(true);
+  });
+
+  // An empty list is also what a failed load answers, and the form stays usable then (#1943).
+  it('lets a profile be entered when none is stored', () => {
+    component.updateFormFields();
+
+    component.configForm.get('iqbStandardMissings')?.setValue('[1]');
+
     expect(component.dataChanged).toBe(true);
   });
 
@@ -108,4 +115,18 @@ describe('MissingsProfilesConfigComponent', () => {
       { duration: 3000 }
     );
   });
+
+  // #2094: what is entered while the save is under way was not sent, and a second save waits
+  it('keeps an entry made while saving unsaved and does not save twice meanwhile', fakeAsync(() => {
+    const answer = new Subject<boolean>();
+    backendService.setMissingsProfiles.mockReturnValue(answer);
+    component.configForm.get('iqbStandardMissings')?.setValue('[]');
+    component.saveData();
+    component.configForm.get('iqbStandardMissings')?.setValue('[1]');
+    component.saveData();
+    answer.next(true);
+
+    expect(backendService.setMissingsProfiles).toHaveBeenCalledTimes(1);
+    expect(component.dataChanged).toBe(true);
+  }));
 });

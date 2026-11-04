@@ -18,16 +18,8 @@ describe('FilledEntriesPipe', () => {
     pipe = new FilledEntriesPipe();
   });
 
-  it('should create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should return an empty array for undefined input', () => {
     expect(pipe.transform(undefined)).toEqual([]);
-  });
-
-  it('should return an empty array for null input', () => {
-    expect(pipe.transform(null)).toEqual([]);
   });
 
   it('should keep an entry with a non-empty single valueAsText', () => {

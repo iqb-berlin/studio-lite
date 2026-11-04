@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import {
   AuthDataDto,
@@ -18,6 +18,8 @@ import { AppService, defaultAppConfig } from './app.service';
 import {
   authRequestContext, backgroundRequestContext, logoutContext, tokenRefreshContext
 } from '../interceptors/request-classification';
+import { succeeded } from '../utils/succeeded.utils';
+import { isNoAnswer } from '../utils/no-answer.utils';
 
 /**
  * The API calls that belong to no single area: logging in and out, the token refresh, the user's own
@@ -72,13 +74,19 @@ export class BackendService {
       );
   }
 
+  /**
+   * Answers null when the server has refused the token: the session cannot be continued. A failure
+   * without an answer -- no connection, or an error of the server -- says nothing about the session
+   * and is passed on, so that a network outage does not log out a browser whose session is fine
+   * (#2110). The start page draws the same line for the check of a stored login (#2112).
+   */
   refresh(refreshToken: string): Observable<{ accessToken: string, refreshToken: string } | null> {
     return this.http.post<{ accessToken: string, refreshToken: string }>(
       `${this.serverUrl}refresh`,
       { refreshToken },
       { context: tokenRefreshContext() }
     ).pipe(
-      catchError(() => of(null))
+      catchError(error => (isNoAnswer(error) ? throwError(() => error) : of(null)))
     );
   }
 
@@ -128,11 +136,13 @@ export class BackendService {
       );
   }
 
-  getAppLogo(): Observable<AppLogoDto | null> {
+  // A failure answers false, not null: null means that no logo is stored, and the admin form must
+  // not offer an empty logo for saving over one it could not load (#1969).
+  getAppLogo(): Observable<AppLogoDto | null | false> {
     return this.http
       .get<AppLogoDto | null>(`${this.serverUrl}admin/settings/app-logo`, {})
       .pipe(
-        catchError(() => of(null))
+        catchError(() => of(false as const))
       );
   }
 
@@ -178,28 +188,7 @@ export class BackendService {
   setWorkspaceSettings(workspaceId: number, settings: WorkspaceSettingsDto): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}workspaces/${workspaceId}/settings`, settings)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
-  }
-
-  deleteUserSession(userId: number, sessionId: string): Observable<boolean> {
-    return this.http
-      .delete(`${this.serverUrl}admin/users/${userId}/sessions/${sessionId}`)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
-  }
-
-  deleteUserOrphanedSessions(userId: number): Observable<boolean> {
-    return this.http
-      .delete(`${this.serverUrl}admin/users/${userId}/orphaned-sessions`)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   getEmailTemplate(): Observable<EmailTemplateDto> {
@@ -210,10 +199,7 @@ export class BackendService {
   setEmailTemplate(emailTemplateDto: EmailTemplateDto): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}admin/settings/email-template`, emailTemplateDto)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   activity(): Observable<void> {

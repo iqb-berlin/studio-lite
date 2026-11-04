@@ -1,7 +1,6 @@
-import {
-  CanActivate, ExecutionContext, ForbiddenException, Injectable
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { WorkspaceUserService } from '../services/workspace-user.service';
+import { AccessLevelGuard } from './access-level.guard';
 
 /**
  * The top of the ladder (see {@link WorkspaceAccessGuard}), and the only rung asked for by an
@@ -9,20 +8,8 @@ import { WorkspaceUserService } from '../services/workspace-user.service';
  * future level above it silently inherits the right to delete.
  */
 @Injectable()
-export class DeleteAccessGuard implements CanActivate {
-  constructor(private workspaceUserService: WorkspaceUserService) {}
-
-  /** Forbidden unless the user holds the highest access level in this workspace. */
-  async canActivate(
-    context: ExecutionContext
-  ) {
-    const req = context.switchToHttp().getRequest();
-    const userId = req.user.id;
-    const workspaceId = req.params.workspace_id;
-    const canAccess = await this.workspaceUserService.canDelete(userId, workspaceId);
-    if (!canAccess) {
-      throw new ForbiddenException();
-    }
-    return canAccess;
+export class DeleteAccessGuard extends AccessLevelGuard {
+  constructor(workspaceUserService: WorkspaceUserService) {
+    super((userId, workspaceId) => workspaceUserService.canDelete(userId, workspaceId));
   }
 }

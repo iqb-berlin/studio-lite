@@ -11,8 +11,8 @@ import { Repository } from 'typeorm';
 import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
 import { Express } from 'express';
 import 'multer';
-// adm-zip is CommonJS with no statically detectable named exports -- see the note on the katex
-// import in download-docx.class.ts.
+// adm-zip is CommonJS with no statically detectable named exports -- see the note on the adm-zip
+// import in workspace-import.service.ts.
 import AdmZip from 'adm-zip';
 import * as fs from 'fs';
 import * as util from 'util';
@@ -127,10 +127,5 @@ export class ResourcePackageService {
       `${this.resourcePackagesPath}/${packageName}/${zippedResourcePackage.originalname}`,
       zippedResourcePackage.buffer as unknown as Uint8Array
     );
-  }
-
-  getZippedResourcePackage(name: string): Buffer {
-    this.logger.log('Returning zipped resource package.');
-    return fs.readFileSync(`${this.resourcePackagesPath}/${name}/${name}.itcr.zip`);
   }
 }

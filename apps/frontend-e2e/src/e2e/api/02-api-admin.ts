@@ -1,4 +1,5 @@
-import type { WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
+import type { UserInListDto, WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
+import { SESSION_ENDED_MESSAGE } from '@studio-lite/shared-code';
 import {
   noId,
   fakeUser,
@@ -111,6 +112,53 @@ describe('Admin API tests', () => {
           expect(resp.status).to.equal(404);
         });
     });
+
+    // Without an administrator no one reaches the system administration any more (#1950)
+    it('400 negative test: should refuse to take the administrator right from the own account (#1950)', () => {
+      const admin = { username: Cypress.expose('username'), password: Cypress.expose('password') };
+      cy.updateUserAPI(Cypress.expose(`id_${admin.username}`),
+        admin,
+        false,
+        Cypress.expose(`token_${admin.username}`))
+        .its('status').should('equal', 400);
+      cy.getUsersAPI(Cypress.expose(`token_${admin.username}`)).then(resp => {
+        expect(resp.status).to.equal(200);
+        const own = (resp.body as UserInListDto[]).find(user => user.name === admin.username);
+        expect(own?.isAdmin, 'still an administrator').to.equal(true);
+      });
+    });
+
+    // A password set by an administrator ends the user's sessions as a change of their own does
+    // (#1901). The value stays the same so that later logins of this user still work; isAdmin stays
+    // as the promotion above left it.
+    it('200 positive test: should end every session of a user whose password an administrator sets, ' +
+      'its access token included (#2115)', () => {
+      cy.loginAPI(userGroupAdmin.username, userGroupAdmin.password).then(session => {
+        expect(session.status).to.equal(201);
+        cy.updateUserAPI(Cypress.expose(`id_${userGroupAdmin.username}`),
+          userGroupAdmin,
+          true,
+          Cypress.expose(`token_${Cypress.expose('username')}`),
+          userGroupAdmin.password)
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+        // The access token went with its session: another browser of the user is logged out at
+        // once, not when the token expires (#2115). The frontend reads the reason off the answer.
+        cy.getUserIdAPI(session.body.accessToken).then(resp => {
+          expect(resp.status).to.equal(401);
+          expect(resp.body.message).to.equal(SESSION_ENDED_MESSAGE);
+        });
+        cy.refreshTokenAPI(session.body.refreshToken).then(resp => {
+          expect(resp.status).to.equal(401);
+        });
+      });
+      // The stored token of the user ended as well; the tests after this one work with it.
+      cy.loginAPI(userGroupAdmin.username, userGroupAdmin.password).then(resp => {
+        expect(resp.status).to.equal(201);
+        Cypress.expose(`token_${userGroupAdmin.username}`, resp.body.accessToken);
+      });
+    });
   });
 
   describe('10. POST /api/admin/workspace-groups', () => {
@@ -134,6 +182,16 @@ describe('Admin API tests', () => {
               expect(resp2.status).to.equal(403);
             });
         });
+    });
+
+    // Settings that are no object broke the migrations on this column (#2091)
+    it('400 negative test: should refuse settings that are no object and create no group (#2091)', () => {
+      const token = Cypress.expose(`token_${Cypress.expose('username')}`);
+      const name = 'settings-no-object';
+      cy.createGroupAPI({ id: '', name }, token, ['a']).its('status').should('equal', 400);
+      cy.getWsGroupsAPI(token).then(resp => {
+        expect((resp.body as WorkspaceGroupInListDto[]).map(group => group.name)).not.to.include(name);
+      });
     });
   });
 

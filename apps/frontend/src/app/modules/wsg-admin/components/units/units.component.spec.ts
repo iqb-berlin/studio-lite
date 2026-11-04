@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, TestBed, fakeAsync, tick
+} from '@angular/core/testing';
 import {
   Component, Input, Output, EventEmitter
 } from '@angular/core';
@@ -7,7 +9,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { UnitInViewDto } from '@studio-lite-lib/api-dto';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import { AppService } from '../../../../services/app.service';
 import { I18nService } from '../../../../services/i18n.service';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
@@ -92,10 +94,6 @@ describe('UnitsComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should update units', () => {
     const units = [{ id: 1, key: 'u1', name: 'unit1' }] as UnitInViewDto[];
     mockBackendService.getAllUnitsForGroup.mockReturnValue(of(units));
@@ -106,6 +104,18 @@ describe('UnitsComponent', () => {
     expect(mockBackendService.getAllUnitsForGroup).toHaveBeenCalledWith(1);
     expect(component.dataSource.data).toEqual(units);
   });
+
+  // Switching to another tab cancelled the list, whose answer alone took the spinner down (#2105)
+  it('should take the spinner down when the page is left while the list loads', fakeAsync(() => {
+    mockBackendService.getAllUnitsForGroup.mockReturnValue(new Subject<UnitInViewDto[]>());
+    component.ngOnInit();
+    tick();
+    expect(mockAppService.dataLoading).toBe(true);
+
+    fixture.destroy();
+
+    expect(mockAppService.dataLoading).toBe(false);
+  }));
 
   it('should delete unit', () => {
     fixture.detectChanges();
@@ -120,5 +130,24 @@ describe('UnitsComponent', () => {
     expect(mockDialog.open).toHaveBeenCalled();
     expect(mockBackendService.deleteWorkspaceUnit).toHaveBeenCalledWith(10, 1);
     expect(mockSnackBar.open).toHaveBeenCalledWith('wsg-admin.unit-deleted', '', expect.anything());
+  });
+
+  // Esc, a click beside the dialog and navigation close it with undefined (#1844)
+  it.each([false, undefined])('should not delete a unit when its confirmation closes with %s', result => {
+    mockDialog.open.mockReturnValue({ afterClosed: () => of(result) });
+
+    component.openDeleteDialog({ id: 1, key: 'u1', workspaceId: 10 });
+
+    expect(mockBackendService.deleteWorkspaceUnit).not.toHaveBeenCalled();
+  });
+
+  it('should say when a unit could not be deleted and keep the list', () => {
+    mockDialog.open.mockReturnValue({ afterClosed: () => of(true) });
+    mockBackendService.deleteWorkspaceUnit.mockReturnValue(of(false));
+
+    component.openDeleteDialog({ id: 1, key: 'u1', workspaceId: 10 });
+
+    expect(mockSnackBar.open).toHaveBeenCalledWith('wsg-admin.unit-not-deleted', 'error', { duration: 3000 });
+    expect(mockBackendService.getAllUnitsForGroup).not.toHaveBeenCalled();
   });
 });

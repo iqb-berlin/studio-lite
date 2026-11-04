@@ -67,9 +67,8 @@ Cypress.Commands.add('getVocabularyMetadataAPI', (profile: string, token:string)
       'app-version': Cypress.expose('version'),
       authorization
     },
-    body: {
-      url: `${profile}`
-    },
+    // The route reads the url from the query; sent in the body, it arrived as no url at all (#2095)
+    qs: { url: profile },
     failOnStatusCode: false
   });
 });

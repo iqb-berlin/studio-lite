@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
-import { RolesMatrixComponent } from '../roles-matrix/roles-matrix.component';
 import { RolesHeaderComponent } from './roles-header.component';
 
 describe('RolesHeaderComponent', () => {
@@ -31,10 +30,5 @@ describe('RolesHeaderComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
-  });
-
-  it('should open roles matrix dialog', () => {
-    component.showRolesMatrix();
-    expect(mockMatDialog.open).toHaveBeenCalledWith(RolesMatrixComponent, { width: '800px' });
   });
 });

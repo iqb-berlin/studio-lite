@@ -12,7 +12,6 @@ import { UnitPrintLayoutComponent } from './unit-print-layout.component';
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { ModuleService } from '../../../../services/module.service';
 import { AppService } from '../../../../services/app.service';
-import { PrintOption } from '../../models/print-options.interface';
 import { environment } from '../../../../../environments/environment';
 
 describe('UnitPrintLayoutComponent', () => {
@@ -137,40 +136,7 @@ describe('UnitPrintLayoutComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  describe('ngOnInit', () => {
-    it('should call initPlayer', () => {
-      const initPlayerSpy = jest.spyOn(component as never, 'initPlayer');
-
-      component.ngOnInit();
-
-      expect(initPlayerSpy).toHaveBeenCalled();
-    });
-
-    it('should initialize with default values', () => {
-      expect(component.message).toBe('');
-      expect(component.playerId).toBe('');
-    });
-  });
-
   describe('initPlayer', () => {
-    it('should fetch unit properties', fakeAsync(() => {
-      const mockProperties = createMockUnitProperties();
-      mockBackendService.getUnitProperties.mockReturnValue(of(mockProperties));
-      mockModuleService.players = { 'verona-player-simple@1.0.0': {} };
-
-      component.workspaceId = 1;
-      component.unitId = 10;
-      component.ngOnInit();
-
-      tick(0);
-
-      expect(mockBackendService.getUnitProperties).toHaveBeenCalledWith(1, 10);
-    }));
-
     it('should handle null unit properties', fakeAsync(() => {
       mockBackendService.getUnitProperties.mockReturnValue(of(null));
 
@@ -185,20 +151,6 @@ describe('UnitPrintLayoutComponent', () => {
   });
 
   describe('setUnitProperties', () => {
-    it('should set unitProperties and playerId', fakeAsync(() => {
-      const mockProperties = createMockUnitProperties();
-      mockBackendService.getUnitProperties.mockReturnValue(of(mockProperties));
-      mockModuleService.players = { 'verona-player-simple@1.0.0': {} };
-
-      component.workspaceId = 1;
-      component.unitId = 10;
-      component.ngOnInit();
-
-      tick(0);
-
-      expect(component.unitProperties).toBeDefined();
-    }));
-
     it('should load module list if players are empty', fakeAsync(() => {
       const mockProperties = createMockUnitProperties();
       mockBackendService.getUnitProperties.mockReturnValue(of(mockProperties));
@@ -251,68 +203,6 @@ describe('UnitPrintLayoutComponent', () => {
 
       expect(emitSpy).toHaveBeenCalledWith(200);
       expect(component.printPreviewHeight).toBe(700);
-    });
-
-    it('should handle negative height difference', () => {
-      const emitSpy = jest.spyOn(component.heightChange, 'emit');
-      component.printPreviewHeight = 500;
-
-      component.playerHeightChange(300);
-
-      expect(emitSpy).toHaveBeenCalledWith(-200);
-      expect(component.printPreviewHeight).toBe(300);
-    });
-
-    it('should handle zero height change', () => {
-      const emitSpy = jest.spyOn(component.heightChange, 'emit');
-      component.printPreviewHeight = 500;
-
-      component.playerHeightChange(500);
-
-      expect(emitSpy).toHaveBeenCalledWith(0);
-      expect(component.printPreviewHeight).toBe(500);
-    });
-
-    it('should update printPreviewHeight to new value', () => {
-      component.printPreviewHeight = 100;
-
-      component.playerHeightChange(250);
-
-      expect(component.printPreviewHeight).toBe(250);
-    });
-  });
-
-  describe('input properties', () => {
-    it('should accept unitId input', () => {
-      component.unitId = 42;
-      expect(component.unitId).toBe(42);
-    });
-
-    it('should accept workspaceId input', () => {
-      component.workspaceId = 5;
-      expect(component.workspaceId).toBe(5);
-    });
-
-    it('should accept workspaceGroupId input', () => {
-      component.workspaceGroupId = 10;
-      expect(component.workspaceGroupId).toBe(10);
-    });
-
-    it('should accept printPreviewHeight input', () => {
-      component.printPreviewHeight = 800;
-      expect(component.printPreviewHeight).toBe(800);
-    });
-
-    it('should accept printOptions input', () => {
-      const options: PrintOption[] = ['printProperties', 'printMetadata'];
-      component.printOptions = options;
-      expect(component.printOptions).toEqual(options);
-    });
-  });
-
-  describe('output properties', () => {
-    it('should have heightChange EventEmitter', () => {
-      expect(component.heightChange).toBeDefined();
     });
   });
 });

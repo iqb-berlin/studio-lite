@@ -1,27 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { UserInListDto } from './user-in-list.dto';
 
-export class WorkspaceUserInListDto {
-  @ApiProperty()
-  id!: number;
-
-  @ApiProperty()
-  name!: string;
-
-  @ApiProperty()
-  isAdmin!: boolean;
-
-  @ApiProperty()
-  description?: string;
-
-  @ApiProperty()
-  displayName?: string;
-
+export class WorkspaceUserInListDto extends UserInListDto {
   @ApiProperty()
   workspaceAccessLevel!: number;
-
-  @ApiProperty()
-  email?: string;
-
-  @ApiProperty()
-  lastActivity?: Date;
 }

@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { BadRequestException } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { MetadataVocabularyDto } from '@studio-lite-lib/api-dto';
 import { MetadataController } from './metadata.controller';
@@ -29,9 +30,14 @@ describe('MetadataController', () => {
     controller = module.get<MetadataController>(MetadataController);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
+  // The guards are the authorisation of each method; no other unit test sees them (#1953).
+  it.each(['getMetadataProfileByUrl', 'getMetadataVocabulariesForProfile', 'getRegistry'] as const)(
+    'should let any signed-in user reach %s',
+    method => {
+      expect(Reflect.getMetadata('__guards__', MetadataController.prototype[method]))
+        .toEqual([JwtAuthGuard]);
+    }
+  );
 
   describe('getMetadataProfileByUrl', () => {
     it('should return metadata profile for a given URL', async () => {
@@ -57,15 +63,11 @@ describe('MetadataController', () => {
     });
   });
 
-  describe('getRegistry', () => {
-    it('should return registered metadata profiles', async () => {
-      const mockRegistry = [{ id: 1 }];
-      registeredMetadataProfileService.getRegisteredMetadataProfiles.mockResolvedValue(mockRegistry as never);
-
-      const result = await controller.getRegistry();
-
-      expect(result).toBe(mockRegistry);
-      expect(registeredMetadataProfileService.getRegisteredMetadataProfiles).toHaveBeenCalled();
-    });
+  // TypeORM 1 throws on an undefined id in the lookup of the stored profile (#2095)
+  it('should refuse both profile routes without a url before asking the service', async () => {
+    await expect(controller.getMetadataProfileByUrl(undefined)).rejects.toBeInstanceOf(BadRequestException);
+    await expect(controller.getMetadataVocabulariesForProfile('')).rejects.toBeInstanceOf(BadRequestException);
+    expect(metadataProfileService.getStoredMetadataProfile).not.toHaveBeenCalled();
+    expect(metadataProfileService.getProfileVocabularies).not.toHaveBeenCalled();
   });
 });

@@ -1,13 +1,15 @@
-import { createMock } from '@golevelup/ts-jest';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import {
-  CreateWorkspaceDto, UserWorkspaceAccessDto, UsersWorkspaceInListDto, WorkspaceSettingsDto, RenameGroupNameDto
+  EntityManager, In, Repository, UpdateResult
+} from 'typeorm';
+import {
+  CodingReportDto, CreateWorkspaceDto, UnitPropertiesDto, UsersWorkspaceInListDto,
+  WorkspaceSettingsDto, RenameGroupNameDto
 } from '@studio-lite-lib/api-dto';
-import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
-import { CodingSchemeProblem } from '@iqb/responses';
 import { WorkspaceService } from './workspace.service';
+import { CodingReportClass } from '../classes/coding-report.class';
 import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroup from '../entities/workspace-group.entity';
@@ -16,12 +18,10 @@ import Unit from '../entities/unit.entity';
 import { WorkspaceUserService } from './workspace-user.service';
 import { UsersService } from './users.service';
 import { UnitService } from './unit.service';
+import { UnitMetadataService } from './unit-metadata.service';
 import { UnitUserService } from './unit-user.service';
-import { UnitCommentService } from './unit-comment.service';
-import { UnitRichNoteService } from './unit-rich-note.service';
-import User from '../entities/user.entity';
-import { FileIo } from '../interfaces/file-io.interface';
 import { AdminWorkspaceNotFoundException } from '../exceptions/admin-workspace-not-found.exception';
+import { GroupAdminUnprocessableWorkspaceException } from '../exceptions/group-admin-unprocessable-workspace.exception';
 
 describe('WorkspaceService', () => {
   let service: WorkspaceService;
@@ -33,9 +33,8 @@ describe('WorkspaceService', () => {
   let workspaceUserService: WorkspaceUserService;
   let usersService: UsersService;
   let unitService: UnitService;
+  let unitMetadataService: UnitMetadataService;
   let unitUserService: UnitUserService;
-  let unitCommentService: UnitCommentService;
-  let unitRichNoteService: UnitRichNoteService;
 
   beforeEach(async () => {
     workspaceRepository = createMock<Repository<Workspace>>();
@@ -46,9 +45,8 @@ describe('WorkspaceService', () => {
     workspaceUserService = createMock<WorkspaceUserService>();
     usersService = createMock<UsersService>();
     unitService = createMock<UnitService>();
+    unitMetadataService = createMock<UnitMetadataService>();
     unitUserService = createMock<UnitUserService>();
-    unitCommentService = createMock<UnitCommentService>();
-    unitRichNoteService = createMock<UnitRichNoteService>();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -61,9 +59,8 @@ describe('WorkspaceService', () => {
         { provide: WorkspaceUserService, useValue: workspaceUserService },
         { provide: UsersService, useValue: usersService },
         { provide: UnitService, useValue: unitService },
-        { provide: UnitUserService, useValue: unitUserService },
-        { provide: UnitCommentService, useValue: unitCommentService },
-        { provide: UnitRichNoteService, useValue: unitRichNoteService }
+        { provide: UnitMetadataService, useValue: unitMetadataService },
+        { provide: UnitUserService, useValue: unitUserService }
       ]
     }).compile();
 
@@ -77,25 +74,12 @@ describe('WorkspaceService', () => {
     workspaceUserService = module.get<WorkspaceUserService>(WorkspaceUserService);
     usersService = module.get<UsersService>(UsersService);
     unitService = module.get<UnitService>(UnitService);
+    unitMetadataService = module.get<UnitMetadataService>(UnitMetadataService);
     unitUserService = module.get<UnitUserService>(UnitUserService);
-    unitCommentService = module.get<UnitCommentService>(UnitCommentService);
-    unitRichNoteService = module.get<UnitRichNoteService>(UnitRichNoteService);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
-  describe('getAllWorkspaces', () => {
-    it('should return all', async () => {
-      (workspaceRepository.find as jest.Mock).mockResolvedValue([]);
-      await service.getAllWorkspaces();
-      expect(workspaceRepository.find).toHaveBeenCalled();
-    });
   });
 
   describe('findAll', () => {
@@ -161,18 +145,24 @@ describe('WorkspaceService', () => {
   });
 
   describe('setWorkspacesByUser', () => {
-    it('should set workspaces', async () => {
-      const userId = 1;
-      const groupId = 2;
-      const workspaces: UserWorkspaceAccessDto[] = [{ id: 1, accessLevel: 1 }];
+    // These rows are the user's access to the workspaces of the group (#1957).
+    it('should replace the access of the user in the group by one row per workspace with its level', async () => {
+      const deleteRows = workspaceUserService.deleteAllByWorkspaceGroup as jest.Mock;
+      const saveRow = workspaceUsersRepository.save as jest.Mock;
+      deleteRows.mockResolvedValue(null);
+      (workspaceUsersRepository.create as jest.Mock).mockImplementation(row => row);
+      (unitService.findAllForWorkspace as jest.Mock)
+        .mockImplementation(async (workspaceId: number) => (workspaceId === 4 ? [{ id: 40 }] : []));
 
-      (workspaceUserService.deleteAllByWorkspaceGroup as jest.Mock).mockResolvedValue(null);
-      (workspaceUsersRepository.create as jest.Mock).mockReturnValue({});
-      (unitService.findAllForWorkspace as jest.Mock).mockResolvedValue([]);
+      await service.setWorkspacesByUser(7, 2, [{ id: 1, accessLevel: 1 }, { id: 4, accessLevel: 3 }]);
 
-      await service.setWorkspacesByUser(userId, groupId, workspaces);
-
-      expect(workspaceUserService.deleteAllByWorkspaceGroup).toHaveBeenCalled();
+      expect(deleteRows).toHaveBeenCalledWith(2, 7);
+      // the old rows go first: deleted afterwards, they would take the new ones with them
+      expect(deleteRows.mock.invocationCallOrder[0]).toBeLessThan(saveRow.mock.invocationCallOrder[0]);
+      expect(saveRow).toHaveBeenCalledTimes(2);
+      expect(saveRow).toHaveBeenCalledWith({ userId: 7, workspaceId: 1, accessLevel: 1 });
+      expect(saveRow).toHaveBeenCalledWith({ userId: 7, workspaceId: 4, accessLevel: 3 });
+      expect(unitUserService.createUnitUser).toHaveBeenCalledWith(7, 40);
     });
   });
 
@@ -187,14 +177,51 @@ describe('WorkspaceService', () => {
       const result = await service.findAllGroupwise(userId);
       expect(result).toBeDefined();
     });
-  });
 
-  describe('findAllByGroup', () => {
-    it('should return workspaces in group', async () => {
-      const groupId = 1;
-      (workspaceRepository.find as jest.Mock).mockResolvedValue([]);
-      await service.findAllByGroup(groupId);
-      expect(workspaceRepository.find).toHaveBeenCalledWith(expect.objectContaining({ where: { groupId } }));
+    // The workspace report of the administration asks without a user (DownloadWorkspacesClass).
+    it('should list every group with every workspace when asked without a user', async () => {
+      (workspaceGroupRepository.find as jest.Mock).mockResolvedValue([{ id: 1, name: 'g1' }, { id: 2, name: 'g2' }]);
+      (workspaceRepository.find as jest.Mock).mockResolvedValue([{ id: 10, groupId: 1 }, { id: 20, groupId: 1 }]);
+      (unitsRepository.find as jest.Mock).mockResolvedValue([]);
+
+      const groups = await service.findAllGroupwise();
+
+      expect(groups.map(({ id, workspaces }) => ({ id, workspaces: workspaces.map(workspace => workspace.id) })))
+        .toEqual([{ id: 1, workspaces: [10, 20] }, { id: 2, workspaces: [] }]);
+      expect(workspaceUsersRepository.find).not.toHaveBeenCalled();
+    });
+
+    describe('for the groups', () => {
+      beforeEach(() => {
+        (workspaceGroupRepository.find as jest.Mock).mockResolvedValue([
+          { id: 1, name: 'administered, empty' },
+          { id: 2, name: 'foreign, empty' },
+          { id: 3, name: 'foreign, with a workspace of the user' }
+        ] as WorkspaceGroup[]);
+        jest.spyOn(service, 'findAll').mockResolvedValue([{ id: 30, groupId: 3 }] as UsersWorkspaceInListDto[]);
+      });
+
+      it('should let an administrator administer every group and list them all', async () => {
+        (usersService.getUserIsAdmin as jest.Mock).mockResolvedValue(true);
+
+        const groups = await service.findAllGroupwise(5);
+
+        expect(groups.map(({ id, isAdmin }) => ({ id, isAdmin }))).toEqual([
+          { id: 1, isAdmin: true }, { id: 2, isAdmin: true }, { id: 3, isAdmin: true }
+        ]);
+      });
+
+      // A group admin has to reach an empty group to fill it; other groups show only where the user works.
+      it('should list the groups a group admin administers, empty or not, and the others only with a workspace',
+        async () => {
+          (usersService.getUserIsAdmin as jest.Mock).mockResolvedValue(false);
+          (workspaceGroupAdminRepository.find as jest.Mock).mockResolvedValue([{ workspaceGroupId: 1 }]);
+
+          const groups = await service.findAllGroupwise(5);
+
+          expect(groups.map(({ id, isAdmin, workspaces }) => ({ id, isAdmin, workspaces: workspaces.length })))
+            .toEqual([{ id: 1, isAdmin: true, workspaces: 0 }, { id: 3, isAdmin: false, workspaces: 1 }]);
+        });
     });
   });
 
@@ -211,12 +238,6 @@ describe('WorkspaceService', () => {
         expect.objectContaining({ select: { groupId: true } })
       );
     });
-
-    it('should return nothing for an empty list', async () => {
-      (workspaceRepository.find as jest.Mock).mockResolvedValue([]);
-
-      expect(await service.findGroupIdsOfWorkspaces([])).toEqual([]);
-    });
   });
 
   describe('findOne', () => {
@@ -231,17 +252,17 @@ describe('WorkspaceService', () => {
     });
   });
 
+  it.each([
+    ['findOne', () => service.findOne(9)],
+    ['findAllWorkspaceGroups', () => service.findAllWorkspaceGroups(9)]
+  ])('should answer %s for an unknown workspace with not found', async (_, call) => {
+    (workspaceRepository.findOne as jest.Mock).mockResolvedValue(null);
+
+    await expect(call()).rejects.toThrow(AdminWorkspaceNotFoundException);
+    expect(workspaceRepository.save).not.toHaveBeenCalled();
+  });
+
   describe('findOneByUser', () => {
-    it('should return workspace for user', async () => {
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, groupId: 2 });
-      (workspaceUserService.accessLevel as jest.Mock).mockResolvedValue(2);
-      (workspaceGroupRepository.findOne as jest.Mock).mockResolvedValue({ name: 'g' });
-
-      const result = await service.findOneByUser(1, 1);
-      expect(result.id).toBe(1);
-      expect(result.userAccessLevel).toBe(2);
-    });
-
     // The frontend opens a workspace with this level; for an unassigned administrator it is the
     // implicit one, where there used to be "workspace not found" (#1571).
     it('should hand on the level WorkspaceUserService grants, the implicit one of an administrator included',
@@ -262,6 +283,18 @@ describe('WorkspaceService', () => {
 
       await expect(service.findOneByUser(1, 5)).rejects.toThrow(AdminWorkspaceNotFoundException);
     });
+
+    // Left in the settings of workspaces where a group was renamed onto another one (#1989)
+    it('should name a group once that the settings hold twice', async () => {
+      (workspaceRepository.findOne as jest.Mock)
+        .mockResolvedValue({ id: 1, groupId: 2, settings: { defaultEditor: 'e', unitGroups: ['B', 'B'] } });
+      (workspaceUserService.accessLevel as jest.Mock).mockResolvedValue(1);
+      (workspaceGroupRepository.findOne as jest.Mock).mockResolvedValue({ name: 'g' });
+
+      const result = await service.findOneByUser(1, 5);
+
+      expect(result.settings).toEqual({ defaultEditor: 'e', unitGroups: ['B'] });
+    });
   });
 
   describe('findAllWorkspaceGroups', () => {
@@ -275,6 +308,68 @@ describe('WorkspaceService', () => {
       const result = await service.findAllWorkspaceGroups(1);
       expect(result).toContain('g1');
       expect(result).toContain('g2');
+    });
+
+    it('should name each group of the units once, sorted, without the empty one', async () => {
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, settings: { unitGroups: ['B'] } });
+      (unitsRepository.find as jest.Mock).mockResolvedValue(
+        [{ groupName: 'C' }, { groupName: '' }, { groupName: 'A' }, { groupName: 'C' }, { groupName: 'B' }]
+      );
+
+      expect(await service.findAllWorkspaceGroups(1)).toEqual(['A', 'B', 'C']);
+    });
+
+    it('should take the groups of the units alone when the settings name none', async () => {
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, settings: {} });
+      (unitsRepository.find as jest.Mock).mockResolvedValue([{ groupName: 'A' }]);
+
+      expect(await service.findAllWorkspaceGroups(1)).toEqual(['A']);
+    });
+
+    // Left in the settings of workspaces where a group was renamed onto another one (#1989)
+    it('should name a group once that the settings hold twice', async () => {
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, settings: { unitGroups: ['B', 'B'] } });
+      (unitsRepository.find as jest.Mock).mockResolvedValue([]);
+
+      expect(await service.findAllWorkspaceGroups(1)).toEqual(['B']);
+    });
+  });
+
+  describe('patchGroupName', () => {
+    const groupName = (name: string, operation: 'add' | 'remove') => service
+      .patchGroupName(1, { groupName: name, operation });
+
+    it.each([
+      ['add a group', 'Beta', ['Alpha', 'Beta'], 1],
+      ['not add a group that differs only in case', 'ALPHA', ['Alpha'], 0]
+    ])('should %s', async (_, name, expected, saves) => {
+      const workspace = { id: 1, settings: { unitGroups: ['Alpha'] } };
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue(workspace);
+
+      await groupName(name, 'add');
+
+      expect(workspace.settings.unitGroups).toEqual(expected);
+      expect(workspaceRepository.save).toHaveBeenCalledTimes(saves);
+    });
+
+    it('should add the first group to a workspace without settings', async () => {
+      const workspace: Partial<Workspace> = { id: 1, settings: null };
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue(workspace);
+
+      await groupName('Alpha', 'add');
+
+      expect(workspace.settings.unitGroups).toEqual(['Alpha']);
+    });
+
+    it('should take a removed group out of the settings and off its units', async () => {
+      const workspace = { id: 1, settings: { unitGroups: ['Alpha', 'Beta'] } };
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue(workspace);
+
+      await groupName('Alpha', 'remove');
+
+      expect(workspace.settings.unitGroups).toEqual(['Beta']);
+      expect(workspaceRepository.save).toHaveBeenCalledWith(workspace);
+      expect(unitsRepository.update).toHaveBeenCalledWith({ workspaceId: 1, groupName: 'Alpha' }, { groupName: '' });
     });
   });
 
@@ -296,36 +391,121 @@ describe('WorkspaceService', () => {
         })
       }));
     });
-  });
 
-  describe('patch', () => {
-    it('should patch workspace', async () => {
-      const ws = { id: 1, name: 'old' };
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue(ws);
+    it('should take nothing from the body but the name and the group (#2029)', async () => {
+      (workspaceGroupRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, name: 'g' });
+      (workspaceRepository.save as jest.Mock).mockResolvedValue({ id: 5 });
+      // What a client can send: nothing strips the fields CreateWorkspaceDto does not name
+      const body: CreateWorkspaceDto & { id: number, dropBoxId: number } = {
+        name: 'w', groupId: 1, settings: {}, id: 99, dropBoxId: 98
+      };
 
-      await service.patch({ id: 1, name: 'new' });
-      expect(ws.name).toBe('new');
+      await service.create(body);
+
+      const created = (workspaceRepository.create as jest.Mock).mock.calls[0][0];
+      expect(created).toEqual(expect.objectContaining({ name: 'w', groupId: 1 }));
+      expect(created.id).toBeUndefined();
+      expect(created.dropBoxId).toBeUndefined();
+    });
+
+    describe('in a group holding workspaces already', () => {
+      const givenGroup = (name: string, workspaces: number) => {
+        (workspaceGroupRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, name });
+        (workspaceRepository.find as jest.Mock).mockResolvedValue(new Array(workspaces).fill({}));
+        (workspaceRepository.save as jest.Mock).mockResolvedValue({ id: 5 });
+      };
+      const create = () => service.create({ name: 'w', groupId: 1 } as CreateWorkspaceDto);
+
+      // The frontend keeps the same limit; this is the one that holds.
+      it('should refuse an eleventh workspace in a backup group', async () => {
+        givenGroup('Backup 2024', 10);
+
+        await expect(create()).rejects.toThrow(GroupAdminUnprocessableWorkspaceException);
+        expect(workspaceRepository.save).not.toHaveBeenCalled();
+      });
+
+      it.each([
+        ['a tenth workspace in a backup group', 'Backup 2024', 9],
+        ['an eleventh workspace in another group', 'Mathe', 10]
+      ])('should create %s', async (_, name, workspaces) => {
+        givenGroup(name, workspaces);
+
+        expect(await create()).toBe(5);
+      });
     });
   });
 
   describe('patchWorkspaceGroups', () => {
-    it('should patch group id', async () => {
-      const IDs = [1];
-      const newGroupId = 2;
-      const user = { id: 1 } as User;
-      const ws = { id: 1, groupId: 1 };
-      const group = { id: 1, name: 'g' };
+    let manager: DeepMocked<EntityManager>;
 
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValueOnce(ws);
-      (workspaceGroupRepository.findOne as jest.Mock).mockResolvedValueOnce(group);
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValueOnce(ws);
+    beforeEach(() => {
+      (workspaceRepository.find as jest.Mock).mockResolvedValue([
+        createMock<Workspace>({ id: 1, groupId: 1 }),
+        createMock<Workspace>({ id: 2, groupId: 2 })
+      ]);
+      manager = createMock<EntityManager>();
+      Object.defineProperty(workspaceRepository, 'manager', {
+        value: {
+          transaction: jest.fn().mockImplementation(
+            (work: (entityManager: EntityManager) => Promise<void>) => work(manager)
+          )
+        },
+        configurable: true
+      });
+    });
 
-      (unitService.findAllForWorkspace as jest.Mock).mockResolvedValue([]);
-      (usersService.isWorkspaceGroupAdmin as jest.Mock).mockResolvedValue(true);
+    it('should move the workspaces and reset the states of their units', async () => {
+      await service.patchWorkspaceGroups([1, 2], 3);
 
-      await service.patchWorkspaceGroups(IDs, newGroupId, user);
+      expect(manager.update).toHaveBeenCalledWith(Workspace, { id: In([1, 2]) }, { groupId: 3 });
+      expect(manager.update).toHaveBeenCalledWith(Unit, { workspaceId: In([1, 2]) }, { state: '0' });
+    });
 
-      expect(workspaceRepository.save).toHaveBeenCalled();
+    it('should leave a workspace that is already in the target group as it is', async () => {
+      await service.patchWorkspaceGroups([1, 2], 2);
+
+      expect(manager.update).toHaveBeenCalledWith(Workspace, { id: In([1]) }, { groupId: 2 });
+      expect(manager.update).toHaveBeenCalledWith(Unit, { workspaceId: In([1]) }, { state: '0' });
+      expect(manager.update).not.toHaveBeenCalledWith(
+        Workspace,
+        expect.objectContaining({ id: In([1, 2]) }),
+        expect.anything()
+      );
+      expect(manager.update).not.toHaveBeenCalledWith(Unit, { workspaceId: In([1, 2]) }, expect.anything());
+    });
+
+    it('should recognise the target group when it is sent as a string', async () => {
+      await service.patchWorkspaceGroups([1, 2], '2' as unknown as number);
+
+      expect(manager.update).toHaveBeenCalledWith(Workspace, { id: In([1]) }, { groupId: 2 });
+      expect(manager.update).toHaveBeenCalledWith(Unit, { workspaceId: In([1]) }, { state: '0' });
+    });
+
+    it('should change nothing when no workspace leaves its group', async () => {
+      (workspaceRepository.find as jest.Mock).mockResolvedValue([createMock<Workspace>({ id: 2, groupId: 2 })]);
+
+      await service.patchWorkspaceGroups([2], 2);
+
+      expect(workspaceRepository.manager.transaction).not.toHaveBeenCalled();
+      expect(workspaceRepository.update).not.toHaveBeenCalled();
+      expect(unitsRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('should not be done before the states are reset (#1984)', async () => {
+      let resetDone: () => void = () => undefined;
+      manager.update.mockImplementation((target: unknown) => (target === Unit ?
+        new Promise(resolve => { resetDone = () => resolve(createMock<UpdateResult>()); }) :
+        Promise.resolve(createMock<UpdateResult>())));
+      let moved = false;
+
+      const move = service.patchWorkspaceGroups([1], 3).then(() => { moved = true; });
+      await new Promise(process.nextTick);
+      expect(manager.update).toHaveBeenCalledWith(Unit, expect.anything(), { state: '0' });
+      expect(moved).toBe(false);
+
+      resetDone();
+      await move;
+      expect(moved).toBe(true);
     });
   });
 
@@ -345,27 +525,53 @@ describe('WorkspaceService', () => {
       expect(workspaceRepository.save).toHaveBeenCalled();
       expect(unitsRepository.update).toHaveBeenCalled();
     });
-  });
 
-  describe('patchName', () => {
-    it('should patch name', async () => {
-      const ws = { id: 1 } as Workspace;
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue(ws);
-      await service.patchName(1, 'new');
-      expect(ws.name).toBe('new');
+    // The name stood twice in the settings and in every list of groups (#1989)
+    it('should merge a group renamed onto an existing one', async () => {
+      const ws = { id: 1, settings: { unitGroups: ['Alpha', 'Beta'] } };
+      jest.spyOn(workspaceRepository, 'findOne').mockResolvedValue(ws as unknown as Workspace);
+      jest.spyOn(workspaceRepository, 'save').mockResolvedValue({} as never);
+      jest.spyOn(unitsRepository, 'update').mockResolvedValue({} as never);
+
+      await service.patchGroupName(1, {
+        operation: 'rename',
+        groupName: 'Alpha',
+        newGroupName: 'Beta'
+      } as unknown as RenameGroupNameDto);
+
+      expect(ws.settings.unitGroups).toEqual(['Beta']);
+      expect(unitsRepository.update).toHaveBeenCalledWith(
+        { workspaceId: 1, groupName: 'Alpha' },
+        { groupName: 'Beta' }
+      );
     });
   });
 
   describe('dropBoxIdOf', () => {
-    it('should return the drop box of the workspace', async () => {
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, dropBoxId: 7 } as Workspace);
+    const lookup = (workspaces: Workspace[]) => (workspaceRepository.findOne as jest.Mock)
+      .mockImplementation(async ({ where }) => workspaces.find(w => w.id === where.id) ?? null);
 
-      expect(await service.dropBoxIdOf(1)).toBe(7);
-      expect(workspaceRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 }, select: ['id', 'dropBoxId'] });
+    it('should return the drop box of the workspace', async () => {
+      lookup([
+        createMock<Workspace>({ id: 1, groupId: 7, dropBoxId: 100 }),
+        createMock<Workspace>({ id: 100, groupId: 7 })
+      ]);
+
+      expect(await service.dropBoxIdOf(1)).toBe(100);
     });
 
-    it.each([[{ id: 1, dropBoxId: null }], [null]])('should return null for %p', async workspace => {
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue(workspace);
+    it.each<[string, Workspace[]]>([
+      ['the workspace has none', [createMock<Workspace>({ id: 1, groupId: 7, dropBoxId: null })]],
+      ['the workspace does not exist', []],
+      ['the drop box does not exist', [createMock<Workspace>({ id: 1, groupId: 7, dropBoxId: 100 })]],
+      ['the drop box is the workspace itself', [createMock<Workspace>({ id: 1, groupId: 7, dropBoxId: 1 })]],
+      // #2027: a move before the fix left drop boxes in the old group
+      ['the drop box is in another group', [
+        createMock<Workspace>({ id: 1, groupId: 7, dropBoxId: 100 }),
+        createMock<Workspace>({ id: 100, groupId: 8 })
+      ]]
+    ])('should return null when %s', async (_, workspaces) => {
+      lookup(workspaces);
 
       expect(await service.dropBoxIdOf(1)).toBeNull();
     });
@@ -474,7 +680,7 @@ describe('WorkspaceService', () => {
         expect(ws.settings.defaultEditor).toBe('new-editor');
         expect(ws.settings.unitMDProfile).toBe(unitProfile);
         expect(ws.settings.itemMDProfile).toBe(itemProfile);
-        expect(unitService.patchMetadataCurrentProfile).not.toHaveBeenCalled();
+        expect(unitMetadataService.patchMetadataCurrentProfile).not.toHaveBeenCalled();
       });
 
       it('treats an explicitly emptied profile key as removal and reclassifies', async () => {
@@ -487,7 +693,7 @@ describe('WorkspaceService', () => {
         } as WorkspaceSettingsDto);
 
         expect(ws.settings.unitMDProfile).toBe('');
-        expect(unitService.patchMetadataCurrentProfile).toHaveBeenCalledWith(7, '', '');
+        expect(unitMetadataService.patchMetadataCurrentProfile).toHaveBeenCalledWith(7, '', '');
       });
 
       it('does not reclassify when the same profile arrives in the retired spelling', async () => {
@@ -500,7 +706,7 @@ describe('WorkspaceService', () => {
           itemMDProfile: itemProfile
         } as WorkspaceSettingsDto);
 
-        expect(unitService.patchMetadataCurrentProfile).not.toHaveBeenCalled();
+        expect(unitMetadataService.patchMetadataCurrentProfile).not.toHaveBeenCalled();
         // ...but the stored spelling is still canonicalized
         expect(ws.settings.unitMDProfile).toBe(unitProfile);
       });
@@ -510,7 +716,7 @@ describe('WorkspaceService', () => {
         const ws = { id: 1, settings: storedSettings() };
         (workspaceRepository.findOne as jest.Mock).mockResolvedValue(ws);
         (unitService.getUnitIdsByWorkspaceId as jest.Mock).mockResolvedValue([7, 8]);
-        (unitService.patchMetadataCurrentProfile as jest.Mock).mockImplementation(async () => {
+        (unitMetadataService.patchMetadataCurrentProfile as jest.Mock).mockImplementation(async () => {
           calls.push('reclassify');
         });
         (workspaceRepository.save as jest.Mock).mockImplementation(async () => {
@@ -520,11 +726,11 @@ describe('WorkspaceService', () => {
 
         await service.patchSettings(1, { unitMDProfile: newUnitProfile } as WorkspaceSettingsDto);
 
-        expect(unitService.patchMetadataCurrentProfile).toHaveBeenCalledTimes(2);
+        expect(unitMetadataService.patchMetadataCurrentProfile).toHaveBeenCalledTimes(2);
         // The item profile was not part of the request: the kept value is passed
         // on, so the unchanged side is not reclassified against ''.
-        expect(unitService.patchMetadataCurrentProfile).toHaveBeenCalledWith(7, newUnitProfile, itemProfile);
-        expect(unitService.patchMetadataCurrentProfile).toHaveBeenCalledWith(8, newUnitProfile, itemProfile);
+        expect(unitMetadataService.patchMetadataCurrentProfile).toHaveBeenCalledWith(7, newUnitProfile, itemProfile);
+        expect(unitMetadataService.patchMetadataCurrentProfile).toHaveBeenCalledWith(8, newUnitProfile, itemProfile);
         expect(calls).toEqual(['reclassify', 'reclassify', 'save']);
       });
 
@@ -532,7 +738,7 @@ describe('WorkspaceService', () => {
         const ws = { id: 1, settings: storedSettings() };
         (workspaceRepository.findOne as jest.Mock).mockResolvedValue(ws);
         (unitService.getUnitIdsByWorkspaceId as jest.Mock).mockResolvedValue([7, 8]);
-        (unitService.patchMetadataCurrentProfile as jest.Mock)
+        (unitMetadataService.patchMetadataCurrentProfile as jest.Mock)
           .mockResolvedValueOnce(undefined)
           .mockRejectedValueOnce(new Error('db gone'));
 
@@ -545,971 +751,20 @@ describe('WorkspaceService', () => {
     });
   });
 
-  describe('remove', () => {
-    it('should remove workspace', async () => {
-      await service.remove(1);
-      expect(workspaceRepository.delete).toHaveBeenCalledWith(1);
-    });
-  });
-
   describe('getCodingReport', () => {
-    it('should return report', async () => {
-      (unitService.findAllWithProperties as jest.Mock).mockResolvedValue([]);
-      const result = await service.getCodingReport(1);
-      expect(result).toEqual([]);
-    });
+    afterEach(() => jest.restoreAllMocks());
 
-    it('keeps activated no-value variables and alias chains free of breaking errors', async () => {
-      (unitService.findAllWithProperties as jest.Mock).mockResolvedValue([{
-        id: 10,
-        key: 'DLB007',
-        name: '',
-        schemer: 'schemer@2.8.1',
-        variables: [
-          { id: 'marking-panel_1', type: 'no-value' },
-          { id: 'id04', type: 'string' },
-          { id: '02', type: 'string' }
-        ],
-        metadata: { items: [] },
-        scheme: JSON.stringify({
-          version: '2.5',
-          variableCodings: [{
-            id: 'marking-panel_1',
-            alias: '_08_reached',
-            sourceType: 'BASE',
-            sourceParameters: {
-              processing: ['TAKE_DISPLAYED_AS_VALUE_CHANGED']
-            },
-            codes: [{
-              id: 0,
-              type: 'INTENDED_INCOMPLETE',
-              score: 0,
-              label: '',
-              manualInstruction: '',
-              ruleSetOperatorAnd: false,
-              ruleSets: []
-            }]
-          }, {
-            id: 'id04', alias: '02', sourceType: 'BASE', codes: []
-          }, {
-            id: '02', alias: '05', sourceType: 'BASE', codes: []
-          }]
-        })
-      }]);
+    it('builds the report with CodingReportClass from the units of the workspace', async () => {
+      const units = [{ id: 10, key: 'DLB007' }] as UnitPropertiesDto[];
+      const rows = [{ unit: 'DLB007' }] as CodingReportDto[];
+      (unitService.findAllWithProperties as jest.Mock).mockResolvedValue(units);
+      const build = jest.spyOn(CodingReportClass, 'build').mockReturnValue(rows);
 
       const result = await service.getCodingReport(1);
 
-      expect(result.find(row => row.variable === '_08_reached')?.validation)
-        .toBe('OK');
-      expect(result.every(row => row.validation !== 'Fehler')).toBe(true);
-    });
-
-    // A list stored in the VariableInfo 2.x spelling is read as such (#1708).
-    it('reads variable types in the 2.x spelling', async () => {
-      (unitService.findAllWithProperties as jest.Mock).mockResolvedValue([{
-        id: 11,
-        key: 'VI2',
-        name: '',
-        schemer: 'schemer@2.8.1',
-        variables: [
-          { id: 'panel', type: 'NO_VALUE' },
-          { id: 'count', type: 'NUMBER' }
-        ],
-        metadata: { items: [] },
-        scheme: JSON.stringify({
-          version: '2.5',
-          variableCodings: [{
-            id: 'panel', alias: 'panel', sourceType: 'BASE_NO_VALUE', codes: []
-          }, {
-            id: 'count',
-            alias: 'count',
-            sourceType: 'BASE',
-            codes: [{
-              id: 1,
-              type: 'FULL_CREDIT',
-              score: 1,
-              label: '',
-              manualInstruction: '',
-              ruleSetOperatorAnd: false,
-              ruleSets: [{ ruleOperatorAnd: false, rules: [{ method: 'NUMERIC_MATCH', parameters: ['1'] }] }]
-            }]
-          }]
-        })
-      }]);
-
-      const result = await service.getCodingReport(1);
-
-      expect(result.every(row => row.validation !== 'Fehler')).toBe(true);
-    });
-  });
-
-  describe('coding report validation aggregation', () => {
-    const codingVariable = {
-      id: 'technical-id', alias: 'public-id'
-    } as VariableCodingData;
-
-    it('deduplicates and sorts all problems with breaking problems first', () => {
-      const validationResults: CodingSchemeProblem[] = [{
-        type: 'VACANT',
-        breaking: false,
-        variableId: 'public-id',
-        variableLabel: ''
-      }, {
-        type: 'SOURCE_MISSING',
-        breaking: true,
-        variableId: 'public-id',
-        variableLabel: '',
-        code: '2'
-      }, {
-        type: 'SOURCE_MISSING',
-        breaking: true,
-        variableId: 'public-id',
-        variableLabel: '',
-        code: '2'
-      }];
-
-      const validationProblems = WorkspaceService.getValidationProblems(
-        validationResults,
-        codingVariable
-      );
-
-      expect(validationProblems).toEqual([{
-        type: 'SOURCE_MISSING', breaking: true, code: '2'
-      }, {
-        type: 'VACANT', breaking: false
-      }]);
-      expect(
-        WorkspaceService.getValidationStatus(validationProblems)
-      ).toBe('Fehler');
-    });
-
-    it('reports warnings when no problem is breaking', () => {
-      expect(WorkspaceService.getValidationStatus([{
-        type: 'VACANT', breaking: false
-      }])).toBe('Warnung');
-      expect(WorkspaceService.getValidationStatus([])).toBe('OK');
-    });
-  });
-
-  describe('determineCodingType', () => {
-    it('maps closed coding to automatisch', () => {
-      const codingType = WorkspaceService.determineCodingType({
-        codes: [{
-          type: 'RESIDUAL_AUTO',
-          manualInstruction: '',
-          ruleSets: [{ rules: [] }]
-        }]
-      } as unknown as VariableCodingData);
-
-      expect(codingType).toBe('automatisch');
-    });
-
-    it('maps rules-based coding to halbautomatisch', () => {
-      const codingType = WorkspaceService.determineCodingType({
-        codes: [{
-          manualInstruction: '',
-          ruleSets: [{ rules: [{ method: 'MATCH', parameters: ['a'] }] }]
-        }]
-      } as unknown as VariableCodingData);
-
-      expect(codingType).toBe('halbautomatisch');
-    });
-
-    it('maps manual coding to manuell', () => {
-      const codingType = WorkspaceService.determineCodingType({
-        codes: [{
-          manualInstruction: 'Hinweis',
-          ruleSets: [{ rules: [] }]
-        }]
-      } as unknown as VariableCodingData);
-
-      expect(codingType).toBe('manuell');
-    });
-  });
-
-  describe('determineVariableType', () => {
-    it('maps base variables to Basisvariable', () => {
-      const variableType = WorkspaceService.determineVariableType({
-        sourceType: 'BASE'
-      } as unknown as VariableCodingData);
-
-      expect(variableType).toBe('Basisvariable');
-    });
-
-    it('maps derived variables to abgeleitete Variable', () => {
-      const variableType = WorkspaceService.determineVariableType({
-        sourceType: 'SUM_SCORE'
-      } as unknown as VariableCodingData);
-
-      expect(variableType).toBe('abgeleitete Variable');
-    });
-  });
-
-  describe('determineTrainingEffort', () => {
-    it('returns erhöht when CODER_TRAINING_REQUIRED is set', () => {
-      const trainingEffort = WorkspaceService.determineTrainingEffort({
-        processing: ['CODER_TRAINING_REQUIRED']
-      } as unknown as VariableCodingData);
-
-      expect(trainingEffort).toBe('erhöht');
-    });
-
-    it('returns normal when CODER_TRAINING_REQUIRED is not set', () => {
-      const trainingEffort = WorkspaceService.determineTrainingEffort({
-        processing: []
-      } as unknown as VariableCodingData);
-
-      expect(trainingEffort).toBe('normal');
-    });
-  });
-
-  describe('mapImportedComment', () => {
-    it('maps spec field names (commentator/isHidden/parentComment) onto the internal DTO', () => {
-      const mapped = WorkspaceService.mapImportedComment({
-        id: 7,
-        body: 'a comment',
-        commentator: 'Jane Doe',
-        parentComment: 3,
-        isHidden: true,
-        createdAt: '2026-04-09T13:15:10.977Z',
-        changedAt: '2026-04-10T13:15:10.977Z',
-        itemUuids: ['item-uuid-1']
-      });
-
-      expect(mapped).toEqual({
-        id: 7,
-        body: 'a comment',
-        userName: 'Jane Doe',
-        userId: -1,
-        parentId: 3,
-        hidden: true,
-        createdAt: new Date('2026-04-09T13:15:10.977Z'),
-        changedAt: new Date('2026-04-10T13:15:10.977Z'),
-        itemUuids: ['item-uuid-1']
-      });
-    });
-
-    it('falls back to legacy field names (userName/hidden/parentId)', () => {
-      const mapped = WorkspaceService.mapImportedComment({
-        id: 1,
-        body: 'legacy',
-        userName: 'Old Name',
-        parentId: 5,
-        hidden: true
-      });
-
-      expect(mapped.userName).toBe('Old Name');
-      expect(mapped.parentId).toBe(5);
-      expect(mapped.hidden).toBe(true);
-    });
-
-    it('always sets userId to -1 regardless of any exported user id', () => {
-      const mapped = WorkspaceService.mapImportedComment({ id: 1, body: 'x' });
-
-      expect(mapped.userId).toBe(-1);
-    });
-
-    it('defaults parentId to null and hidden to false when absent', () => {
-      const mapped = WorkspaceService.mapImportedComment({ id: 1, body: 'root' });
-
-      expect(mapped.parentId).toBeNull();
-      expect(mapped.hidden).toBe(false);
-    });
-  });
-
-  describe('mapImportedMetadata', () => {
-    it('maps the unit-metadata@0.1 wrapper onto the internal profiles structure', () => {
-      const mapped = WorkspaceService.mapImportedMetadata({
-        changedAt: '2026-05-01T08:00:00.000Z',
-        metadata: [{
-          profileId: 'https://example.org/unit-profile.json',
-          entries: [{
-            id: 'iqb_author',
-            label: [{ lang: 'de', value: 'Entwickler:in' }],
-            value: [{ lang: 'de', value: 'Ana Maier' }]
-          }]
-        }]
-      });
-
-      expect(mapped).toEqual({
-        profiles: [{
-          profileId: 'https://example.org/unit-profile.json',
-          entries: [{
-            id: 'iqb_author',
-            label: [{ lang: 'de', value: 'Entwickler:in' }],
-            value: [{ lang: 'de', value: 'Ana Maier' }],
-            valueAsText: [{ lang: 'de', value: 'Ana Maier' }]
-          }]
-        }]
-      });
-    });
-
-    it('reconstructs value and valueAsText from a simple_value', () => {
-      const mapped = WorkspaceService.mapImportedMetadata({
-        metadata: [{
-          profileId: 'p1',
-          entries: [{
-            id: 'a1',
-            value: { raw: 'false', asText: [{ lang: 'de', value: 'nein' }] }
-          }]
-        }]
-      });
-
-      expect(mapped.profiles[0].entries[0]).toEqual({
-        id: 'a1',
-        label: [],
-        value: 'false',
-        valueAsText: [{ lang: 'de', value: 'nein' }]
-      });
-    });
-
-    it('reconstructs internal vocabulary values ({ id, text }) from vocabulary_entries', () => {
-      const mapped = WorkspaceService.mapImportedMetadata({
-        metadata: [{
-          profileId: 'p1',
-          entries: [{
-            id: 'w4',
-            value: [{ id: 'https://w3id.org/iqb/vocab/p2', label: [{ lang: 'de', value: 'Anwenden' }] }]
-          }]
-        }]
-      });
-
-      expect(mapped.profiles[0].entries[0]).toEqual({
-        id: 'w4',
-        label: [],
-        value: [{
-          id: 'https://w3id.org/iqb/vocab/p2', text: [{ lang: 'de', value: 'Anwenden' }], annotation: []
-        }],
-        // vocabulary valueAsText is recomputed on read, not at import time
-        valueAsText: []
-      });
-    });
-
-    it('preserves the annotation (numbering) in the value; valueAsText is filled on read', () => {
-      const mapped = WorkspaceService.mapImportedMetadata({
-        metadata: [{
-          profileId: 'p1',
-          entries: [{
-            id: 'w5',
-            value: [{
-              id: 'https://w3id.org/iqb/vocab/p2',
-              label: [{ lang: 'de', value: 'Anwenden' }],
-              annotation: [{ lang: 'de', value: '1.2' }]
-            }]
-          }]
-        }]
-      });
-
-      expect(mapped.profiles[0].entries[0]).toEqual({
-        id: 'w5',
-        label: [],
-        value: [{
-          id: 'https://w3id.org/iqb/vocab/p2',
-          text: [{ lang: 'de', value: 'Anwenden' }],
-          annotation: [{ lang: 'de', value: '1.2' }]
-        }],
-        // recomputed by UnitService.ensureValueAsText on read (see unit.service.spec)
-        valueAsText: []
-      });
-    });
-
-    it('normalizes a legacy raw { profiles, items } blob, deriving order from isCurrent', () => {
-      const legacy = {
-        profiles: [
-          { profileId: 'p1', isCurrent: true, entries: [] },
-          { profileId: 'p2', isCurrent: false, entries: [] }
-        ],
-        items: [{ id: 'ITEM1', profiles: [{ profileId: 'ip1', isCurrent: true, entries: [] }] }]
-      };
-
-      expect(WorkspaceService.mapImportedMetadata(legacy)).toEqual({
-        profiles: [
-          { profileId: 'p1', order: 0, entries: [] },
-          { profileId: 'p2', order: -1, entries: [] }
-        ],
-        items: [{ id: 'ITEM1', profiles: [{ profileId: 'ip1', order: 0, entries: [] }] }]
-      });
-    });
-
-    it('keeps an explicit order on a legacy profile instead of deriving from isCurrent', () => {
-      const legacy = {
-        profiles: [{
-          profileId: 'p1', order: 2, isCurrent: false, entries: []
-        }],
-        items: []
-      };
-
-      expect(WorkspaceService.mapImportedMetadata(legacy)).toEqual({
-        profiles: [{ profileId: 'p1', order: 2, entries: [] }],
-        items: []
-      });
-    });
-
-    // Profile ids are deliberately NOT rewritten here: UnitService.setCurrentProfiles
-    // canonicalizes them on the way to persistence, and the profile_id column
-    // transformer backstops every writer (#1570).
-    it('passes imported profile ids through unchanged', () => {
-      const github = 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json';
-      const mapped = WorkspaceService.mapImportedMetadata({
-        metadata: [{ profileId: github, entries: [] }]
-      });
-
-      expect(mapped.profiles[0].profileId).toBe(github);
-    });
-  });
-
-  describe('mapImportedItems', () => {
-    it('maps unit-items@0.2 items onto the internal structure', () => {
-      const mapped = WorkspaceService.mapImportedItems([{
-        uuid: 'item-uuid-1',
-        id: 'ITEM1',
-        description: 'Notiz',
-        order: 3,
-        sourceVariableId: 'VAR1',
-        sourceVariableUuid: 'var-uuid-1',
-        changedAt: '2026-04-01T00:00:00.000Z',
-        metadata: [{
-          profileId: 'https://example.org/item-profile.json',
-          entries: [{
-            id: 'w4',
-            label: [{ lang: 'de', value: 'Prozess' }],
-            value: [{ lang: 'de', value: 'Anwenden' }]
-          }]
-        }]
-      }]);
-
-      expect(mapped).toEqual([{
-        uuid: 'item-uuid-1',
-        id: 'ITEM1',
-        description: 'Notiz',
-        order: 3,
-        variableId: 'VAR1',
-        variableReadOnlyId: 'var-uuid-1',
-        createdAt: undefined,
-        changedAt: new Date('2026-04-01T00:00:00.000Z'),
-        profiles: [{
-          profileId: 'https://example.org/item-profile.json',
-          entries: [{
-            id: 'w4',
-            label: [{ lang: 'de', value: 'Prozess' }],
-            value: [{ lang: 'de', value: 'Anwenden' }],
-            valueAsText: [{ lang: 'de', value: 'Anwenden' }]
-          }]
-        }]
-      }]);
-    });
-
-    it('defaults missing source variables to null', () => {
-      const mapped = WorkspaceService.mapImportedItems([{ id: 'ITEM1' }]);
-
-      expect(mapped[0].variableId).toBeNull();
-      expect(mapped[0].variableReadOnlyId).toBeNull();
-    });
-
-    it('drops items without the required id', () => {
-      const mapped = WorkspaceService.mapImportedItems([
-        { uuid: 'item-uuid-1' } as never,
-        { id: 'ITEM1' }
-      ]);
-
-      expect(mapped).toHaveLength(1);
-      expect(mapped[0].id).toBe('ITEM1');
-    });
-  });
-
-  describe('uploadFiles', () => {
-    const user = { id: 1 } as User;
-    const buildFile = (name: string, mime: string, content: string): FileIo => ({
-      originalname: name,
-      mimetype: mime,
-      buffer: Buffer.from(content),
-      fieldname: 'files',
-      encoding: '7bit',
-      size: content.length
-    });
-    const xmlUnit = (key: string) => `<Unit><Metadata><Id>${key}</Id><Label>L</Label></Metadata></Unit>`;
-    const jsonIndex = (key: string, extra: object = {}) => JSON
-      .stringify({ id: key, userInterface: { player: 'test-player' }, ...extra });
-
-    it('should process upload', async () => {
-      (unitService.create as jest.Mock).mockResolvedValue(10);
-      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
-
-      const result = await service.uploadFiles(1, [
-        buildFile('test.xml', 'text/xml', xmlUnit('1'))
-      ], user);
-
-      expect(result.messages).toHaveLength(0);
-      expect(unitService.create).toHaveBeenCalled();
-    });
-
-    it('should prefer JSON over XML for the same unit key', async () => {
-      (unitService.create as jest.Mock).mockResolvedValue(10);
-      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
-
-      const result = await service.uploadFiles(1, [
-        buildFile('unit01.xml', 'text/xml', xmlUnit('UNIT01')),
-        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01'))
-      ], user);
-
-      expect(result.messages).toHaveLength(0);
-      expect(unitService.create).toHaveBeenCalledTimes(1);
-    });
-
-    // An export with test takers carries the Testcenter's booklet and test-taker files. Imported
-    // back, the booklet became an empty unit and the test-taker file raised a warning (#1710).
-    it('should pass over the booklet and test-taker files of an export', async () => {
-      (unitService.create as jest.Mock).mockResolvedValue(10);
-      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
-
-      const result = await service.uploadFiles(1, [
-        buildFile('export.zip/UNIT01.xml', 'text/xml', xmlUnit('UNIT01')),
-        buildFile(
-          'export.zip/booklet1.xml',
-          'text/xml',
-          '<Booklet><Metadata><Id>booklet1</Id><Label/></Metadata><Units><Unit id="UNIT01"/></Units></Booklet>'
-        ),
-        buildFile(
-          'export.zip/booklet1_testtaker.xml',
-          'text/xml',
-          '<Testtakers><Metadata/><Group id="booklet1_group"/></Testtakers>'
-        )
-      ], user);
-
-      expect(result.messages).toHaveLength(0);
-      expect(unitService.create).toHaveBeenCalledTimes(1);
-      expect(unitService.create).toHaveBeenCalledWith(1, { key: 'UNIT01', name: 'L' }, user, true);
-    });
-
-    // A definition without a file of its own was dropped together with its variables (#1839).
-    describe('with an inline definition', () => {
-      beforeEach(() => {
-        (unitService.create as jest.Mock).mockResolvedValue(10);
-        (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-        (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
-      });
-
-      it('should store the definition and the variables of an XML unit', async () => {
-        const result = await service.uploadFiles(1, [
-          buildFile('unit01.xml', 'text/xml', '<Unit><Metadata><Id>UNIT01</Id><Label>L</Label></Metadata>' +
-            '<Definition player="p@1.0">{"content":1}</Definition>' +
-            '<BaseVariables><Variable id="v1" type="string" format="" nullable="false" multiple="false"/>' +
-            '</BaseVariables></Unit>')
-        ], user);
-
-        expect(result.messages).toHaveLength(0);
-        expect(unitService.patchDefinition).toHaveBeenCalledWith(
-          10,
-          expect.objectContaining({
-            definition: '{"content":1}',
-            variables: [expect.objectContaining({ id: 'v1', type: 'string' })]
-          }),
-          null,
-          undefined
-        );
-      });
-
-      it('should store the definition of a JSON unit', async () => {
-        const result = await service.uploadFiles(1, [
-          buildFile('unit01.json', 'application/json', JSON.stringify({
-            id: 'UNIT01',
-            userInterface: { player: 'p@1.0', definition: '{"content":1}', isDefinitionInline: true }
-          }))
-        ], user);
-
-        expect(result.messages).toHaveLength(0);
-        expect(unitService.patchDefinition).toHaveBeenCalledWith(
-          10,
-          expect.objectContaining({ definition: '{"content":1}' }),
-          null,
-          undefined
-        );
-      });
-
-      it('should not store an empty definition without a date', async () => {
-        await service.uploadFiles(1, [
-          buildFile('unit01.xml', 'text/xml', '<Unit><Metadata><Id>UNIT01</Id><Label>L</Label></Metadata>' +
-            '<Definition player="p@1.0"/></Unit>')
-        ], user);
-
-        expect(unitService.patchDefinition).not.toHaveBeenCalled();
-      });
-    });
-
-    it('should still warn about an XML file that is neither a unit nor a Testcenter file', async () => {
-      const result = await service.uploadFiles(1, [
-        buildFile('other.xml', 'text/xml', '<Something><Metadata><Id>X</Id></Metadata></Something>')
-      ], user);
-
-      expect(unitService.create).not.toHaveBeenCalled();
-      expect(result.messages).toEqual([{
-        objectKey: 'other.xml',
-        messageKey: 'unit-upload.api-warning.xml-parse'
-      }]);
-    });
-
-    it('should report unreferenced JSON that is not a valid unit index as ignored', async () => {
-      const result = await service.uploadFiles(1, [
-        buildFile('broken.json', 'application/json', JSON.stringify({ notId: 'something' }))
-      ], user);
-
-      expect(result.messages).toHaveLength(1);
-      expect(result.messages[0].messageKey).toBe('unit-upload.api-warning.ignore-file');
-    });
-
-    it('should not warn for companion JSON files that are not unit indices', async () => {
-      const result = await service.uploadFiles(1, [
-        buildFile('unit01.vocs.json', 'application/json', JSON.stringify({ something: 'else' }))
-      ], user);
-
-      expect(result.messages.every(m => m.messageKey !== 'unit-upload.api-warning.json-parse')).toBe(true);
-    });
-
-    it('should import companion files with arbitrary names when the index references them', async () => {
-      (unitService.create as jest.Mock).mockResolvedValue(10);
-      (unitService.patchScheme as jest.Mock).mockResolvedValue(undefined);
-      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
-
-      const schemeContent = JSON.stringify({ variableCodings: [] });
-      const result = await service.uploadFiles(1, [
-        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
-          codingScheme: { id: 'scheme.json', type: 'iqb-coding-scheme' }
-        })),
-        buildFile('scheme.json', 'application/json', schemeContent)
-      ], user);
-
-      expect(result.messages).toHaveLength(0);
-      expect(unitService.patchScheme).toHaveBeenCalledWith(
-        10,
-        expect.objectContaining({ scheme: schemeContent }),
-        null,
-        undefined
-      );
-    });
-
-    it('should warn when definition file referenced in index is missing from upload', async () => {
-      (unitService.create as jest.Mock).mockResolvedValue(10);
-      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
-
-      const result = await service.uploadFiles(1, [
-        buildFile(
-          'unit01.json',
-          'application/json',
-          jsonIndex('UNIT01', { userInterface: { player: 'p', definition: 'unit01.voud' } })
-        )
-      ], user);
-
-      expect(result.messages.some(m => m.messageKey === 'unit-upload.api-warning.missing-file')).toBe(true);
-    });
-
-    it('should load baseVariables from vova.json before importing definition', async () => {
-      const baseVariables = [{
-        id: 'VAR1',
-        type: 'string',
-        format: 'text',
-        nullable: false,
-        multiple: false
-      }];
-      const vovaContent = JSON.stringify({ baseVariables, derivedVariables: [] });
-
-      (unitService.create as jest.Mock).mockResolvedValue(10);
-      (unitService.patchDefinition as jest.Mock).mockResolvedValue(undefined);
-      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
-
-      await service.uploadFiles(1, [
-        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
-          userInterface: { player: 'p', definition: 'unit01.voud' },
-          variables: { id: 'unit01.vova.json', type: 'unit-variables' }
-        })),
-        buildFile('unit01.voud', 'application/octet-stream', '<definition/>'),
-        buildFile('unit01.vova.json', 'application/json', vovaContent)
-      ], user);
-
-      expect(unitService.patchDefinition).toHaveBeenCalledWith(
-        10,
-        expect.objectContaining({ variables: baseVariables }),
-        null,
-        undefined
-      );
-    });
-
-    it('should hand the definition type of the index on with the definition (#1368)', async () => {
-      (unitService.create as jest.Mock).mockResolvedValue(10);
-      (unitService.patchDefinition as jest.Mock).mockResolvedValue(undefined);
-      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
-
-      await service.uploadFiles(1, [
-        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
-          userInterface: { player: 'p', definition: 'unit01.voud', type: 'aspect-unit-definition@4.12.0' }
-        })),
-        buildFile('unit01.voud', 'application/octet-stream', '<definition/>')
-      ], user);
-
-      expect(unitService.patchDefinition).toHaveBeenCalledWith(
-        10,
-        expect.objectContaining({
-          definition: '<definition/>',
-          definitionType: 'aspect-unit-definition@4.12.0'
-        }),
-        null,
-        undefined
-      );
-    });
-
-    it('should import vomd (unit-metadata@0.1) and voit (unit-items@0.2) files', async () => {
-      (unitService.create as jest.Mock).mockResolvedValue(10);
-      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
-
-      const vomdContent = JSON.stringify({
-        changedAt: '2026-05-01T08:00:00.000Z',
-        metadata: [{
-          profileId: 'https://example.org/unit-profile.json',
-          entries: [{
-            id: 'a1',
-            label: [{ lang: 'de', value: 'Für SPF geeignet' }],
-            value: { raw: 'false', asText: [{ lang: 'de', value: 'nein' }] }
-          }]
-        }]
-      });
-      const voitContent = JSON.stringify([{
-        uuid: 'item-uuid-1',
-        id: 'ITEM1',
-        order: 0,
-        sourceVariableId: 'VAR1',
-        sourceVariableUuid: 'var-uuid-1'
-      }]);
-
-      const result = await service.uploadFiles(1, [
-        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
-          metadata: { id: 'unit01.vomd.json', type: 'unit-metadata@0.1' },
-          items: { id: 'unit01.voit.json', type: 'unit-items@0.2' }
-        })),
-        buildFile('unit01.vomd.json', 'application/json', vomdContent),
-        buildFile('unit01.voit.json', 'application/json', voitContent)
-      ], user);
-
-      expect(result.messages).toHaveLength(0);
-      expect(unitService.copyItemsWithMetadata).toHaveBeenCalledWith(10, {
-        profiles: [{
-          profileId: 'https://example.org/unit-profile.json',
-          order: -1,
-          entries: [{
-            id: 'a1',
-            label: [{ lang: 'de', value: 'Für SPF geeignet' }],
-            value: 'false',
-            valueAsText: [{ lang: 'de', value: 'nein' }]
-          }]
-        }],
-        items: [{
-          uuid: 'item-uuid-1',
-          id: 'ITEM1',
-          description: undefined,
-          order: 0,
-          variableId: 'VAR1',
-          variableReadOnlyId: 'var-uuid-1',
-          createdAt: undefined,
-          changedAt: undefined,
-          profiles: []
-        }]
-      });
-    });
-
-    it('should still import a legacy raw vomd blob with embedded items', async () => {
-      (unitService.create as jest.Mock).mockResolvedValue(10);
-      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
-
-      const legacyVomd = JSON.stringify({
-        profiles: [{ profileId: 'p1', isCurrent: true, entries: [] }],
-        items: [{ id: 'ITEM1', variableId: 'VAR1', profiles: [] }]
-      });
-
-      const result = await service.uploadFiles(1, [
-        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
-          metadata: { id: 'unit01.vomd.json', type: 'metadata-values' }
-        })),
-        buildFile('unit01.vomd.json', 'application/json', legacyVomd)
-      ], user);
-
-      expect(result.messages).toHaveLength(0);
-      expect(unitService.copyItemsWithMetadata).toHaveBeenCalledWith(10, {
-        profiles: [{ profileId: 'p1', order: -1, entries: [] }],
-        items: [{ id: 'ITEM1', variableId: 'VAR1', profiles: [] }]
-      });
-    });
-
-    it('should adopt the unit uuid from the index when present', async () => {
-      (unitService.create as jest.Mock).mockResolvedValue(10);
-      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
-
-      await service.uploadFiles(1, [
-        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', { uuid: 'imported-unit-uuid' }))
-      ], user);
-
-      expect(unitService.adoptUuidIfFree).toHaveBeenCalledWith(10, 'imported-unit-uuid');
-    });
-
-    it('should not try to adopt a uuid when the index has none', async () => {
-      (unitService.create as jest.Mock).mockResolvedValue(10);
-      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
-
-      await service.uploadFiles(1, [
-        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01'))
-      ], user);
-
-      expect(unitService.adoptUuidIfFree).not.toHaveBeenCalled();
-    });
-
-    it('should warn and continue when a companion JSON file is broken', async () => {
-      (unitService.create as jest.Mock).mockResolvedValue(10);
-      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
-
-      const result = await service.uploadFiles(1, [
-        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
-          metadata: { id: 'unit01.vomd.json', type: 'unit-metadata@0.1' },
-          items: { id: 'unit01.voit.json', type: 'unit-items@0.2' }
-        })),
-        buildFile('unit01.vomd.json', 'application/json', '{ "metadata": broken !!!'),
-        buildFile('unit01.voit.json', 'application/json', '[{ "id": "X", broken !!!')
-      ], user);
-
-      const parseWarnings = result.messages
-        .filter(m => m.messageKey === 'unit-upload.api-warning.json-parse')
-        .map(m => m.objectKey);
-      expect(parseWarnings).toEqual(expect.arrayContaining(['unit01.vomd.json', 'unit01.voit.json']));
-      expect(unitService.create).toHaveBeenCalledTimes(1);
-      expect(unitService.copyItemsWithMetadata).not.toHaveBeenCalled();
-    });
-
-    it('should import remaining blocks when only one companion file is broken', async () => {
-      (unitService.create as jest.Mock).mockResolvedValue(10);
-      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
-
-      const voitContent = JSON.stringify([{ id: 'ITEM1', sourceVariableId: 'VAR1' }]);
-      const result = await service.uploadFiles(1, [
-        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
-          metadata: { id: 'unit01.vomd.json', type: 'unit-metadata@0.1' },
-          items: { id: 'unit01.voit.json', type: 'unit-items@0.2' }
-        })),
-        buildFile('unit01.vomd.json', 'application/json', '{ broken'),
-        buildFile('unit01.voit.json', 'application/json', voitContent)
-      ], user);
-
-      expect(result.messages.map(m => m.objectKey)).toEqual(['unit01.vomd.json']);
-      expect(unitService.copyItemsWithMetadata).toHaveBeenCalledWith(10, expect.objectContaining({
-        items: [expect.objectContaining({ id: 'ITEM1', variableId: 'VAR1' })]
-      }));
-    });
-
-    it('should clear legacy items when the items file is legitimately empty', async () => {
-      (unitService.create as jest.Mock).mockResolvedValue(10);
-      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
-
-      const legacyBlob = JSON.stringify({ profiles: [], items: [{ id: 'OLD' }] });
-      const result = await service.uploadFiles(1, [
-        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
-          metadata: { id: 'unit01.vomd.json', type: 'metadata-values' },
-          items: { id: 'unit01.voit.json', type: 'unit-items@0.2' }
-        })),
-        buildFile('unit01.vomd.json', 'application/json', legacyBlob),
-        buildFile('unit01.voit.json', 'application/json', '[]')
-      ], user);
-
-      expect(result.messages).toHaveLength(0);
-      expect(unitService.copyItemsWithMetadata).toHaveBeenCalledWith(10, expect.objectContaining({
-        items: []
-      }));
-    });
-
-    it('should silently accept an export report file without creating units or warnings', async () => {
-      const result = await service.uploadFiles(1, [
-        buildFile('_export-report.json', 'application/json', JSON.stringify({
-          messages: [{ unitKey: 'U1', messageKey: 'dropped-content.metadata-not-exported' }]
-        }))
-      ], user);
-
-      expect(result.messages).toHaveLength(0);
-      expect(unitService.create).not.toHaveBeenCalled();
-    });
-
-    it('should warn when the items file referenced in the index is missing from the upload', async () => {
-      (unitService.create as jest.Mock).mockResolvedValue(10);
-      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
-
-      const result = await service.uploadFiles(1, [
-        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
-          items: { id: 'unit01.voit.json', type: 'unit-items@0.2' }
-        }))
-      ], user);
-
-      expect(result.messages).toEqual([{
-        objectKey: 'unit01.voit.json',
-        messageKey: 'unit-upload.api-warning.missing-file'
-      }]);
-    });
-
-    it('does not warn when imported vocabulary entries carry an annotation (it is now persisted)', async () => {
-      (unitService.create as jest.Mock).mockResolvedValue(10);
-      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
-
-      const vomdContent = JSON.stringify({
-        metadata: [{
-          profileId: 'https://example.org/unit-profile.json',
-          entries: [{
-            id: 'a1',
-            value: [{
-              id: 'https://w3id.org/iqb/vocab/p2',
-              label: [{ lang: 'de', value: 'Anwenden' }],
-              annotation: [{ lang: 'de', value: '1.2' }]
-            }]
-          }]
-        }]
-      });
-      const result = await service.uploadFiles(1, [
-        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
-          metadata: { id: 'unit01.vomd.json', type: 'unit-metadata@0.1' }
-        })),
-        buildFile('unit01.vomd.json', 'application/json', vomdContent)
-      ], user);
-
-      expect(result.messages.some(
-        message => message.messageKey === 'unit-upload.api-warning.annotation-dropped'
-      )).toBe(false);
-    });
-
-    it('should warn when coding scheme file referenced in index is missing from upload', async () => {
-      (unitService.create as jest.Mock).mockResolvedValue(10);
-      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
-
-      const result = await service.uploadFiles(1, [
-        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
-          codingScheme: { id: 'unit01.vocs.json', type: 'iqb-coding-scheme' }
-        }))
-      ], user);
-
-      expect(result.messages.some(m => m.messageKey === 'unit-upload.api-warning.missing-file')).toBe(true);
+      expect(unitService.findAllWithProperties).toHaveBeenCalledWith(1);
+      expect(build).toHaveBeenCalledWith(1, units);
+      expect(result).toBe(rows);
     });
   });
 });

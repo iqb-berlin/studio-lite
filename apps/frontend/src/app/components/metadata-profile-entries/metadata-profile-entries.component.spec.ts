@@ -81,10 +81,6 @@ describe('MetadataProfileEntriesComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should render entries only for the current profile', () => {
     const profilesElements = fixture.nativeElement.querySelectorAll('.profiles');
     expect(profilesElements.length).toBe(2);
