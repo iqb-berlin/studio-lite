@@ -119,6 +119,38 @@ describe('AppComponent', () => {
     expect(appService.dataLoading).toBe(false);
   }));
 
+  // Without an answer the stored login may still be valid: the start page offers a second attempt
+  // instead of the login form. A refused refresh has logged out, and the form is right (#2112).
+  it.each<[string, unknown, boolean]>([
+    ['no answer', new HttpErrorResponse({ status: 0 }), true],
+    ['an error of the server', new HttpErrorResponse({ status: 502 }), true],
+    ['a refused refresh', new Error('Refresh failed'), false]
+  ])('should mark the check of a stored login as failed after %s: %s', fakeAsync((
+    _: string, error: unknown, failed: boolean
+  ) => {
+    localStorage.setItem('id_token', 'token');
+    backendService.getAuthData.mockReturnValue(throwError(() => error));
+
+    fixture.detectChanges();
+    tick();
+
+    expect(appService.authCheckFailed()).toBe(failed);
+    expect(appService.authInitializationStatus$.value).toBe('complete');
+  }));
+
+  // The start page asks for the auth data as well. If its answer came in first, the start failing
+  // afterwards must not put the hint beside the workspaces.
+  it('should not mark the check as failed when the auth data came in before the start failed', fakeAsync(() => {
+    localStorage.setItem('id_token', 'token');
+    appService.authData = { ...AppService.defaultAuthData, userId: 3, userName: 'anna' };
+    backendService.getAuthData.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 502 })));
+
+    fixture.detectChanges();
+    tick();
+
+    expect(appService.authCheckFailed()).toBe(false);
+  }));
+
   // The print view is opened with query parameters, so the area is read up to the first "/" or "?".
   it.each([
     ['/print?unitIds=1&workspaceId=2', false],
