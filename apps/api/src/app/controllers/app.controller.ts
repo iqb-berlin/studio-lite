@@ -163,8 +163,8 @@ export class AppController {
 
   /**
    * A changed password ends every session of the account, the one it was changed in as well: a
-   * copy of that session's refresh token would otherwise outlive the old password (#1901). Access
-   * tokens already issued stay valid until they expire.
+   * copy of that session's refresh token would otherwise outlive the old password (#1901). The
+   * access tokens already issued go with their sessions (#2115).
    */
   @Patch('password')
   @UseGuards(JwtAuthGuard)

@@ -193,13 +193,13 @@ describe('Cleanup API tests', () => {
     // The first user cannot delete their own account (#1949); the reset removes it.
     before(() => cy.resetDb());
 
-    it('403 negative test: should deny deletion of a user account that no longer exists', () => {
-      // The token still verifies, but its user is gone and so is the admin flag it would need.
+    it('401 negative test: should refuse the token of a user account that no longer exists', () => {
+      // The signature still verifies, but the session went with the account (#2115).
       cy.deleteUsersAPI(
         [Cypress.expose(`id_${Cypress.expose('username')}`)],
         Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
-        expect(resp.status).to.equal(403);
+        expect(resp.status).to.equal(401);
       });
     });
   });
