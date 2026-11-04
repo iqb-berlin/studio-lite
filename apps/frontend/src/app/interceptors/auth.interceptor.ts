@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@angular/core';
 import {
-  HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpResponse
+  HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpResponse, HttpErrorResponse
 } from '@angular/common/http';
 import {
   finalize, Observable, throwError, filter, take, switchMap, catchError, tap, fromEvent, timeout, map, of, shareReplay
@@ -10,6 +10,7 @@ import { AppService } from '../services/app.service';
 import { BackendService } from '../services/backend.service';
 import { AppHttpError } from '../classes/app-http-error.class';
 import { SERVER_TIME_OFFSET_DEADBAND_MS } from '../app.constants';
+import { isSessionEnded } from '../utils/session-ended.utils';
 import { IS_BACKGROUND_REQUEST, SKIP_TOKEN_REFRESH } from './request-classification';
 
 /**
@@ -92,7 +93,9 @@ export class AuthInterceptor implements HttpInterceptor {
    * A 401 that survives a fresh token cannot mean "not logged in" -- the session was renewed a
    * moment ago. The API used to answer a workspace the user has no access to that way; it sends a
    * 403 since #1706, but a 401 that still gets here is shown as the missing permission it must be
-   * (#1694). The caller gets the original error.
+   * (#1694). Unless the API says the session has ended: a new password or a logout elsewhere came
+   * between the refresh and the repetition, and the tab leaves as after a refused refresh (#2115).
+   * The caller gets the original error.
    */
   private repeat(
     request: HttpRequest<unknown>,
@@ -100,14 +103,20 @@ export class AuthInterceptor implements HttpInterceptor {
     token: string
   ): Observable<HttpEvent<unknown>> {
     return next.handle(this.addToken(request, token)).pipe(
-      catchError(error => {
-        const httpErrorInfo = new AppHttpError(error);
-        if (httpErrorInfo.status === 401) {
-          httpErrorInfo.status = 403;
-        }
-        this.report(request, httpErrorInfo);
-        return throwError(() => error);
-      })
+      catchError((error: HttpErrorResponse) => isSessionEnded(error).pipe(
+        switchMap(sessionEnded => {
+          if (sessionEnded) {
+            this.endSession();
+          } else {
+            const httpErrorInfo = new AppHttpError(error);
+            if (httpErrorInfo.status === 401) {
+              httpErrorInfo.status = 403;
+            }
+            this.report(request, httpErrorInfo);
+          }
+          return throwError(() => error);
+        })
+      ))
     );
   }
 
@@ -216,8 +225,7 @@ export class AuthInterceptor implements HttpInterceptor {
           if (storedAccessToken && storedRefreshToken && storedRefreshToken !== refreshToken) {
             return of(storedAccessToken);
           }
-          this.backendService.logout();
-          this.router.navigate(['/home']);
+          this.endSession();
           return throwError(() => new Error('Refresh failed'));
         }),
         finalize(() => {
@@ -237,10 +245,15 @@ export class AuthInterceptor implements HttpInterceptor {
 
     // Safety fallback: if no refresh token
     localStorage.removeItem('st_refresh_lock');
-    this.backendService.logout();
-    this.router.navigate(['/home']);
+    this.endSession();
     const error = new Error('No refresh token available') as Error & { status?: number };
     error.status = 401;
     return throwError(() => error);
+  }
+
+  /** Drops the tokens of a session the server will not continue and returns to the start page. */
+  private endSession(): void {
+    this.backendService.logout();
+    this.router.navigate(['/home']);
   }
 }

@@ -1,6 +1,7 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createMock } from '@golevelup/ts-jest';
+import { SESSION_ENDED_MESSAGE } from '@studio-lite/shared-code';
 import { AuthService } from '../services/auth.service';
 import { JwtStrategy } from './jwt.strategy';
 
@@ -34,14 +35,16 @@ describe('JwtStrategy', () => {
   });
 
   // Another browser of the account went on working for up to 30 minutes after a new password
-  // ended every session (#2115).
-  it('refuses a token whose session has ended (#2115)', async () => {
+  // ended every session (#2115). The reason goes along, the frontend logs out on it.
+  it('refuses a token whose session has ended, naming the reason (#2115)', async () => {
     const { strategy, authService } = build();
     authService.hasValidSession.mockResolvedValue(false);
 
-    await expect(strategy.validate({
+    const refusal = strategy.validate({
       sub: 12, username: 'alice', sub2: 0, sid: 'session-1'
-    })).rejects.toBeInstanceOf(UnauthorizedException);
+    });
+    await expect(refusal).rejects.toBeInstanceOf(UnauthorizedException);
+    await expect(refusal).rejects.toThrow(SESSION_ENDED_MESSAGE);
   });
 
   it('refuses a token of an account that names no session', async () => {

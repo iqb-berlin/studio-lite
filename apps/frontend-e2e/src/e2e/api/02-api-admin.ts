@@ -1,4 +1,5 @@
 import type { UserInListDto, WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
+import { SESSION_ENDED_MESSAGE } from '@studio-lite/shared-code';
 import {
   noId,
   fakeUser,
@@ -143,9 +144,10 @@ describe('Admin API tests', () => {
             expect(resp.status).to.equal(200);
           });
         // The access token went with its session: another browser of the user is logged out at
-        // once, not when the token expires (#2115).
+        // once, not when the token expires (#2115). The frontend reads the reason off the answer.
         cy.getUserIdAPI(session.body.accessToken).then(resp => {
           expect(resp.status).to.equal(401);
+          expect(resp.body.message).to.equal(SESSION_ENDED_MESSAGE);
         });
         cy.refreshTokenAPI(session.body.refreshToken).then(resp => {
           expect(resp.status).to.equal(401);

@@ -10,6 +10,7 @@ import {
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { of, Subject, throwError } from 'rxjs';
 import { Router } from '@angular/router';
+import { SESSION_ENDED_MESSAGE } from '@studio-lite/shared-code';
 import { AppService } from '../services/app.service';
 import { BackendService } from '../services/backend.service';
 import { AppHttpError } from '../classes/app-http-error.class';
@@ -385,6 +386,24 @@ describe('AuthInterceptor', () => {
         expect(shown.method).toBe('GET');
         expect(shown.urlWithParams).toBe('/data');
       });
+    });
+
+    // A new password or a logout elsewhere ended the session between the refresh and the
+    // repetition. That is no missing permission: the tab leaves as after a refused refresh (#2115).
+    it('should end the session when the repeated request finds it ended (#2115)', () => {
+      localStorage.setItem('refresh_token', 'old-refresh');
+      backendServiceSpy.refresh.mockReturnValue(of({ accessToken: 'new-access', refreshToken: 'new-refresh' }));
+      let receivedStatus: number | undefined;
+
+      httpClient.get('/data').subscribe({ error: err => { receivedStatus = err.status; } });
+      httpMock.expectOne('/data').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+      httpMock.expectOne('/data')
+        .flush({ statusCode: 401, message: SESSION_ENDED_MESSAGE }, { status: 401, statusText: 'Unauthorized' });
+
+      expect(backendServiceSpy.logout).toHaveBeenCalledTimes(1);
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/home']);
+      expect(appServiceSpy.addErrorMessage).not.toHaveBeenCalled();
+      expect(receivedStatus).toBe(401);
     });
 
     // Several requests fail at once when a page opens. Only the first refreshes; the others wait

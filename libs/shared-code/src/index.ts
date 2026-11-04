@@ -32,3 +32,4 @@ export {
   JWT_EXPIRES_IN,
   assertTimeConfig
 } from './lib/time.constants';
+export { SESSION_ENDED_MESSAGE } from './lib/session-ended';

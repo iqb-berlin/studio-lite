@@ -2,6 +2,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { SESSION_ENDED_MESSAGE } from '@studio-lite/shared-code';
 import { AuthService } from '../services/auth.service';
 
 /**
@@ -44,6 +45,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * every session, while the admin list already showed the account as inactive (#2115). Everything
    * else about the user that a route needs is fetched by that route.
    *
+   * The refusal names its reason (`SESSION_ENDED_MESSAGE`), so that the frontend can tell a token
+   * renewed a moment ago and refused for it from a missing permission.
+   *
    * A review login has no account and no session (`sub` is 0) and is taken at its word. An error
    * of the lookup is passed on as it is: answered with a 401, a database outage would log out
    * every browser.
@@ -51,7 +55,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: JwtPayload) {
     if (payload.sub) {
       const isValid = !!payload.sid && await this.authService.hasValidSession(payload.sub, payload.sid);
-      if (!isValid) throw new UnauthorizedException();
+      if (!isValid) throw new UnauthorizedException(SESSION_ENDED_MESSAGE);
     }
     return {
       id: payload.sub,
