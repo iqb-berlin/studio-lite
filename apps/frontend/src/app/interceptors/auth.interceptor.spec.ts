@@ -8,7 +8,7 @@ import {
   withInterceptorsFromDi
 } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
-import { of, Subject } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { AppService } from '../services/app.service';
 import { BackendService } from '../services/backend.service';
@@ -196,6 +196,26 @@ describe('AuthInterceptor', () => {
     expect(localStorage.getItem('refresh_token')).toBe('old-refresh');
     expect(localStorage.getItem('st_refresh_lock')).toBeNull();
     expect(failedWith).toEqual({ first: 0, second: 0 });
+  });
+
+  // A failed refresh is over once it has failed: the next request that finds the token expired
+  // refreshes again instead of getting the old failure (#2110).
+  it('should refresh again for the next request after a refresh that got no answer', () => {
+    localStorage.setItem('id_token', 'old-access');
+    localStorage.setItem('refresh_token', 'old-refresh');
+    backendServiceSpy.refresh
+      .mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 0, statusText: 'Unknown Error' })))
+      .mockReturnValueOnce(of({ accessToken: 'new-access', refreshToken: 'new-refresh' }));
+
+    httpClient.get('/first').subscribe({ error: () => {} });
+    httpMock.expectOne('/first').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+    httpClient.get('/second').subscribe({ error: () => {} });
+    httpMock.expectOne('/second').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+
+    expect(backendServiceSpy.refresh).toHaveBeenCalledTimes(2);
+    const repeated = httpMock.expectOne('/second');
+    expect(repeated.request.headers.get('Authorization')).toBe('Bearer new-access');
+    repeated.flush({});
   });
 
   // Another tab won the race for the refresh and stored its pair: the session goes on under it,
