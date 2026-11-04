@@ -5,13 +5,15 @@ import {
 import { TranslateModule } from '@ngx-translate/core';
 import { Component, Input } from '@angular/core';
 import { SafeUrl } from '@angular/platform-browser';
-import { of } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { of, throwError } from 'rxjs';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { AuthDataDto } from '@studio-lite-lib/api-dto';
 import { HomeComponent } from './home.component';
 import { AppService } from '../../services/app.service';
 import { BackendService } from '../../services/backend.service';
 import { LoginComponent } from '../login/login.component';
+import { AuthCheckFailedComponent } from '../auth-check-failed/auth-check-failed.component';
 import { UserWorkspacesAreaComponent } from '../user-workspaces-area/user-workspaces-area.component';
 import { UserReviewsAreaComponent } from '../user-reviews-area/user-reviews-area.component';
 import { AppInfoComponent } from '../app-info/app-info.component';
@@ -36,6 +38,9 @@ describe('HomeComponent', () => {
   @Component({ selector: 'studio-lite-login', standalone: true, template: '' })
   class MockLoginComponent {}
 
+  @Component({ selector: 'studio-lite-auth-check-failed', standalone: true, template: '' })
+  class MockAuthCheckFailedComponent {}
+
   @Component({ selector: 'studio-lite-user-workspaces-area', standalone: true, template: '' })
   class MockUserWorkspacesAreaComponent {}
 
@@ -59,6 +64,7 @@ describe('HomeComponent', () => {
       remove: {
         imports: [
           LoginComponent,
+          AuthCheckFailedComponent,
           UserWorkspacesAreaComponent,
           AppInfoComponent,
           UserReviewsAreaComponent
@@ -67,6 +73,7 @@ describe('HomeComponent', () => {
       add: {
         imports: [
           MockLoginComponent,
+          MockAuthCheckFailedComponent,
           MockUserWorkspacesAreaComponent,
           MockAppInfoComponent,
           MockUserReviewsAreaComponent
@@ -99,5 +106,30 @@ describe('HomeComponent', () => {
     tick();
 
     expect(backendService.getAuthData).not.toHaveBeenCalled();
+  }));
+
+  // A stored login the server could not check may still be valid (#2112).
+  it('should offer a second attempt instead of the login form when the check of the login failed', fakeAsync(() => {
+    TestBed.inject(AppService).setAuthCheckFailed(true);
+
+    fixture.detectChanges();
+    tick();
+
+    expect(fixture.nativeElement.querySelector('studio-lite-auth-check-failed')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('studio-lite-login')).toBeNull();
+  }));
+
+  // Back on the start page mid-session while the server is down, the user is logged in already: the
+  // hint would stand beside the workspaces. Only the check at start-up raises it.
+  it('should leave the hint to the start when its own request for the auth data gets no answer', fakeAsync(() => {
+    const appService = TestBed.inject(AppService);
+    appService.authData = { ...AppService.defaultAuthData, userId: 3, userName: 'anna' };
+    backendService.getAuthData.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 502 })));
+    localStorage.setItem('id_token', 'token');
+
+    fixture.detectChanges();
+    tick();
+
+    expect(appService.authCheckFailed()).toBe(false);
   }));
 });

@@ -2,6 +2,7 @@ import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import {
   HttpClient,
   HttpContext,
+  HttpErrorResponse,
   HTTP_INTERCEPTORS,
   provideHttpClient,
   withInterceptorsFromDi
@@ -160,9 +161,9 @@ describe('AuthInterceptor', () => {
     retryReqs[0].flush({});
   });
 
-  it('should logout and redirect to login if refresh fails', () => {
+  it('should logout and redirect to login if the server refuses the refresh token', () => {
     localStorage.setItem('refresh_token', 'old-refresh');
-    backendServiceSpy.refresh.mockReturnValue(throwError(() => new Error('Refresh expired')));
+    backendServiceSpy.refresh.mockReturnValue(of(null));
 
     httpClient.get('/data').subscribe({ error: () => {} });
     const reqs = httpMock.match('/data');
@@ -172,6 +173,166 @@ describe('AuthInterceptor', () => {
     expect(backendServiceSpy.logout).toHaveBeenCalled();
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/home']);
   });
+
+  // Logging out without reaching the server left the session behind, resumable by a token no
+  // browser held any more (#2110).
+  it('should keep the tokens and fail the waiting requests when the refresh gets no answer', () => {
+    localStorage.setItem('id_token', 'old-access');
+    localStorage.setItem('refresh_token', 'old-refresh');
+    const refresh$ = new Subject<{ accessToken: string, refreshToken: string } | null>();
+    backendServiceSpy.refresh.mockReturnValue(refresh$);
+    const failedWith: { first?: number, second?: number } = {};
+
+    httpClient.get('/first').subscribe({ error: err => { failedWith.first = err.status; } });
+    httpClient.get('/second').subscribe({ error: err => { failedWith.second = err.status; } });
+    httpMock.expectOne('/first').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+    httpMock.expectOne('/second').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+    refresh$.error(new HttpErrorResponse({ status: 0, statusText: 'Unknown Error' }));
+
+    expect(backendServiceSpy.refresh).toHaveBeenCalledTimes(1);
+    expect(backendServiceSpy.logout).not.toHaveBeenCalled();
+    expect(routerSpy.navigate).not.toHaveBeenCalled();
+    expect(localStorage.getItem('id_token')).toBe('old-access');
+    expect(localStorage.getItem('refresh_token')).toBe('old-refresh');
+    expect(localStorage.getItem('st_refresh_lock')).toBeNull();
+    expect(failedWith).toEqual({ first: 0, second: 0 });
+  });
+
+  // A failed refresh is over once it has failed: the next request that finds the token expired
+  // refreshes again instead of getting the old failure (#2110).
+  it('should refresh again for the next request after a refresh that got no answer', () => {
+    localStorage.setItem('id_token', 'old-access');
+    localStorage.setItem('refresh_token', 'old-refresh');
+    backendServiceSpy.refresh
+      .mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 0, statusText: 'Unknown Error' })))
+      .mockReturnValueOnce(of({ accessToken: 'new-access', refreshToken: 'new-refresh' }));
+
+    httpClient.get('/first').subscribe({ error: () => {} });
+    httpMock.expectOne('/first').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+    httpClient.get('/second').subscribe({ error: () => {} });
+    httpMock.expectOne('/second').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+
+    expect(backendServiceSpy.refresh).toHaveBeenCalledTimes(2);
+    const repeated = httpMock.expectOne('/second');
+    expect(repeated.request.headers.get('Authorization')).toBe('Bearer new-access');
+    repeated.flush({});
+  });
+
+  // Another tab won the race for the refresh and stored its pair: the session goes on under it,
+  // instead of this tab ending it for all of them (#2110).
+  it('should go on with the pair another tab stored when the refresh is refused', () => {
+    localStorage.setItem('id_token', 'old-access');
+    localStorage.setItem('refresh_token', 'old-refresh');
+    const refresh$ = new Subject<{ accessToken: string, refreshToken: string } | null>();
+    backendServiceSpy.refresh.mockReturnValue(refresh$);
+
+    httpClient.get('/data').subscribe({ error: () => {} });
+    httpMock.expectOne('/data').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+    localStorage.setItem('id_token', 'other-tab-access');
+    localStorage.setItem('refresh_token', 'other-tab-refresh');
+    refresh$.next(null);
+    refresh$.complete();
+
+    const repeated = httpMock.expectOne('/data');
+    expect(repeated.request.headers.get('Authorization')).toBe('Bearer other-tab-access');
+    repeated.flush({});
+    expect(backendServiceSpy.logout).not.toHaveBeenCalled();
+    expect(routerSpy.navigate).not.toHaveBeenCalled();
+  });
+
+  // A component that cancels its request -- a second click, leaving the view -- used to abort the
+  // refresh that request had started: the server exchanged the token, the answer was thrown away, and
+  // the tab waited for that refresh for good (#2110).
+  it('should finish a refresh whose request was cancelled meanwhile', () => {
+    localStorage.setItem('id_token', 'old-access');
+    localStorage.setItem('refresh_token', 'old-refresh');
+    const refresh$ = new Subject<{ accessToken: string, refreshToken: string } | null>();
+    backendServiceSpy.refresh.mockReturnValue(refresh$);
+
+    const cancelled = httpClient.get('/first').subscribe({ error: () => {} });
+    httpMock.expectOne('/first').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+    cancelled.unsubscribe();
+    refresh$.next({ accessToken: 'new-access', refreshToken: 'new-refresh' });
+    refresh$.complete();
+
+    expect(localStorage.getItem('id_token')).toBe('new-access');
+    expect(localStorage.getItem('refresh_token')).toBe('new-refresh');
+    expect(localStorage.getItem('st_refresh_lock')).toBeNull();
+    let answered = false;
+    httpClient.get('/second').subscribe(() => { answered = true; });
+    const later = httpMock.expectOne('/second');
+    expect(later.request.headers.get('Authorization')).toBe('Bearer new-access');
+    later.flush({});
+    expect(answered).toBe(true);
+    expect(backendServiceSpy.refresh).toHaveBeenCalledTimes(1);
+  });
+
+  // The requests that waited for a refused refresh used to hang until a later refresh of the tab
+  // resumed them, possibly under the token of another account (#2110).
+  it('should fail the waiting requests too when the server refuses the refresh token', () => {
+    localStorage.setItem('refresh_token', 'old-refresh');
+    const refresh$ = new Subject<{ accessToken: string, refreshToken: string } | null>();
+    backendServiceSpy.refresh.mockReturnValue(refresh$);
+    const failed: string[] = [];
+
+    httpClient.get('/first').subscribe({ error: () => failed.push('first') });
+    httpClient.get('/second').subscribe({ error: () => failed.push('second') });
+    httpMock.expectOne('/first').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+    httpMock.expectOne('/second').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+    refresh$.next(null);
+    refresh$.complete();
+
+    expect(backendServiceSpy.logout).toHaveBeenCalledTimes(1);
+    expect(failed).toEqual(['first', 'second']);
+  });
+
+  // A tab reloaded while refreshing leaves its lock behind, and every request of the reloaded page
+  // waits for it. A second refresh with the same token would be refused and log out (#2110).
+  it('should refresh once when several requests stop waiting for a lock left behind', fakeAsync(() => {
+    localStorage.setItem('id_token', 'old-access');
+    localStorage.setItem('refresh_token', 'old-refresh');
+    localStorage.setItem('st_refresh_lock', Date.now().toString());
+    const refresh$ = new Subject<{ accessToken: string, refreshToken: string } | null>();
+    backendServiceSpy.refresh.mockReturnValue(refresh$);
+
+    httpClient.get('/first').subscribe({ error: () => {} });
+    httpClient.get('/second').subscribe({ error: () => {} });
+    httpMock.expectOne('/first').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+    httpMock.expectOne('/second').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+    tick(5000);
+    refresh$.next({ accessToken: 'new-access', refreshToken: 'new-refresh' });
+    refresh$.complete();
+
+    expect(backendServiceSpy.refresh).toHaveBeenCalledTimes(1);
+    [httpMock.expectOne('/first'), httpMock.expectOne('/second')].forEach(repeated => {
+      expect(repeated.request.headers.get('Authorization')).toBe('Bearer new-access');
+      repeated.flush({});
+    });
+    expect(backendServiceSpy.logout).not.toHaveBeenCalled();
+  }));
+
+  // Storage events reach only the other tabs: a request still waiting when this tab's own refresh has
+  // ended takes the stored token instead of exchanging it once more (#2110).
+  it('should take the token of an own refresh that ended while the request waited', fakeAsync(() => {
+    localStorage.setItem('id_token', 'old-access');
+    localStorage.setItem('refresh_token', 'old-refresh');
+    localStorage.setItem('st_refresh_lock', Date.now().toString());
+    backendServiceSpy.refresh.mockReturnValue(of({ accessToken: 'new-access', refreshToken: 'new-refresh' }));
+
+    httpClient.get('/first').subscribe({ error: () => {} });
+    httpMock.expectOne('/first').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+    tick(1000);
+    httpClient.get('/second').subscribe({ error: () => {} });
+    httpMock.expectOne('/second').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+    tick(4000);
+    httpMock.expectOne('/first').flush({});
+    tick(1000);
+
+    expect(backendServiceSpy.refresh).toHaveBeenCalledTimes(1);
+    const repeated = httpMock.expectOne('/second');
+    expect(repeated.request.headers.get('Authorization')).toBe('Bearer new-access');
+    repeated.flush({});
+  }));
 
   // Since #1706 the API answers missing access with 403, so the refresh and the second attempt that
   // a 401 set off (#1694) no longer happen at all.

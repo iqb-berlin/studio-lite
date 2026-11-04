@@ -38,6 +38,7 @@ declare namespace Cypress {
     loginAPI(username: string, password: string): Chainable<Response>; // 2
     refreshTokenAPI(refreshToken: string): Chainable<Response>; // 2a
     logoutAPI(token: string, refreshToken: string): Chainable<Response>; // 2b
+    logoutSilentAPI(refreshToken: string): Chainable<Response>; // 2c
     getUserIdAPI(token: string): Chainable<Response>; // 3
     updatePasswordAPI(token: string, oldPass: string, newPass: string): Chainable<Response>; // 4
     loginWithKeycloakAPI(user: UserData): Chainable<Response>; // 5

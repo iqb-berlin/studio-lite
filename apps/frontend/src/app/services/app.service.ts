@@ -1,9 +1,12 @@
 import { BehaviorSubject, Subject } from 'rxjs';
-import { EventEmitter, Injectable, Output } from '@angular/core';
+import {
+  EventEmitter, Injectable, Output, signal
+} from '@angular/core';
 import { AuthDataDto, AppLogoDto, ConfigDto } from '@studio-lite-lib/api-dto';
 import { Title } from '@angular/platform-browser';
 import { AppHttpError } from '../classes/app-http-error.class';
 import { AppConfig } from '../classes/app-config.class';
+import { isNoAnswerStatus } from '../utils/no-answer.utils';
 
 export const standardLogo: AppLogoDto = {
   data: 'assets/studio-logo-144.png',
@@ -57,15 +60,38 @@ export class AppService {
   serverTimeOffset = 0; // clock skew compensation in ms (serverTime - clientTime)
   authInitializationStatus$ = new BehaviorSubject<'pending' | 'complete'>('pending');
   @Output() authDataChanged = new EventEmitter<AuthDataDto>();
+  // A stored login could not be checked because the server did not answer. The start page then
+  // offers to try again instead of the login form: the login may well still be valid (#2112).
+  private readonly authCheckFailedState = signal(false);
+  readonly authCheckFailed = this.authCheckFailedState.asReadonly();
+  // While the start page says that the server does not answer, a message saying the same in general
+  // words only covers it (#2112).
+  private readonly noAnswerHintShownState = signal(false);
 
   set authData(authData: AuthDataDto) {
     this._authData = authData;
+    this.authCheckFailedState.set(false);
     this.authDataChanged.emit(authData);
     this.authInitializationStatus$.next('complete');
   }
 
   get authData(): AuthDataDto {
     return this._authData;
+  }
+
+  // A check can only have failed while no login is known. The start page asks for the auth data a
+  // second time, and once one of the two answers has come in, the other one failing must not hide
+  // the workspaces behind the hint.
+  setAuthCheckFailed(failed: boolean): void {
+    const loginKnown = this._authData.userId > 0 || this._authData.reviews.length > 0;
+    this.authCheckFailedState.set(failed && !loginKnown);
+  }
+
+  setNoAnswerHintShown(shown: boolean): void {
+    this.noAnswerHintShownState.set(shown);
+    if (shown) {
+      this.errorMessages = this.errorMessages.filter(message => !isNoAnswerStatus(message.status));
+    }
   }
 
   constructor(
@@ -97,6 +123,7 @@ export class AppService {
   }
 
   addErrorMessage(error: AppHttpError) {
+    if (this.noAnswerHintShownState() && isNoAnswerStatus(error.status)) return;
     if (!this.errorMessagesDisabled) {
       const alikeErrors = this.errorMessages.filter(e => e.status === error.status);
       if (alikeErrors.length > 0) {

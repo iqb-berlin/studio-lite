@@ -62,6 +62,27 @@ describe('AppService', () => {
 
       service.authData = testAuthData;
     });
+
+    // A login, a successful check or a logout settles the question the failed check left open (#2112).
+    it('should end a failed check of the stored login when auth data is set', () => {
+      service.setAuthCheckFailed(true);
+
+      service.authData = AppService.defaultAuthData;
+
+      expect(service.authCheckFailed()).toBe(false);
+    });
+
+    // Once a login is known, a failing second request for it must not hide it behind the hint.
+    it.each<[string, Partial<AuthDataDto>]>([
+      ['an account', { userId: 3 }],
+      ['a review', { reviews: [{ id: 7, name: 'R', workspaceId: 1 } as AuthDataDto['reviews'][number]] }]
+    ])('should not mark the check as failed once the login of %s is known', (_: string, login) => {
+      service.authData = { ...AppService.defaultAuthData, ...login };
+
+      service.setAuthCheckFailed(true);
+
+      expect(service.authCheckFailed()).toBe(false);
+    });
   });
 
   describe('processMessagePost', () => {

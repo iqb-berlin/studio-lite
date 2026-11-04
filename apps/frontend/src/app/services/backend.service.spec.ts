@@ -184,6 +184,38 @@ describe('BackendService', () => {
     });
   });
 
+  // Only the server's verdict on the token ends the session; a missing answer says nothing about it (#2110).
+  describe('refresh', () => {
+    [401, 403].forEach(status => {
+      it(`should answer null when the server refuses the token with ${status}`, () => {
+        let result: unknown = 'not answered';
+        service.refresh('old').subscribe(answer => { result = answer; });
+
+        httpMock.expectOne(`${serverUrl}refresh`).flush('refused', { status, statusText: 'refused' });
+
+        expect(result).toBeNull();
+      });
+    });
+
+    it('should pass on a failure without connection', () => {
+      let failedWith: number | undefined;
+      service.refresh('old').subscribe({ error: error => { failedWith = error.status; } });
+
+      httpMock.expectOne(`${serverUrl}refresh`).error(new ProgressEvent('error'));
+
+      expect(failedWith).toBe(0);
+    });
+
+    it('should pass on an error of the server', () => {
+      let failedWith: number | undefined;
+      service.refresh('old').subscribe({ error: error => { failedWith = error.status; } });
+
+      httpMock.expectOne(`${serverUrl}refresh`).flush('boom', { status: 500, statusText: 'Server Error' });
+
+      expect(failedWith).toBe(500);
+    });
+  });
+
   describe('getAppLogo', () => {
     // A null would read as "no logo stored", and the admin form would offer an empty one for saving (#1969).
     it('should answer a failed request with false', done => {

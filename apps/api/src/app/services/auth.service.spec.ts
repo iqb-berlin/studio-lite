@@ -612,5 +612,20 @@ describe('AuthService', () => {
       expect(refreshTokenRepository.delete).not.toHaveBeenCalled();
       expect(userSessionRepository.delete).not.toHaveBeenCalled();
     });
+
+    // A tab reloaded while its refresh ran holds only the exchanged token and logs out with it (#2110).
+    it('should end the session of a token that has already been exchanged', async () => {
+      refreshTokenRepository.findOne.mockResolvedValue(null);
+      usedRefreshTokenRepository.findOne.mockResolvedValue({
+        userId: 4,
+        sessionId: 'sid-4',
+        usedAt: new Date(Date.now())
+      } as UsedRefreshToken);
+
+      await service.logoutCurrentSession('exchanged-token');
+
+      expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 4, sessionId: 'sid-4' });
+      expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 4, sessionId: 'sid-4' });
+    });
   });
 });

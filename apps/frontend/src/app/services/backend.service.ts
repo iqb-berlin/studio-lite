@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import {
   AuthDataDto,
@@ -19,6 +19,7 @@ import {
   authRequestContext, backgroundRequestContext, logoutContext, tokenRefreshContext
 } from '../interceptors/request-classification';
 import { succeeded } from '../utils/succeeded.utils';
+import { isNoAnswer } from '../utils/no-answer.utils';
 
 /**
  * The API calls that belong to no single area: logging in and out, the token refresh, the user's own
@@ -73,13 +74,19 @@ export class BackendService {
       );
   }
 
+  /**
+   * Answers null when the server has refused the token: the session cannot be continued. A failure
+   * without an answer -- no connection, or an error of the server -- says nothing about the session
+   * and is passed on, so that a network outage does not log out a browser whose session is fine
+   * (#2110). The start page draws the same line for the check of a stored login (#2112).
+   */
   refresh(refreshToken: string): Observable<{ accessToken: string, refreshToken: string } | null> {
     return this.http.post<{ accessToken: string, refreshToken: string }>(
       `${this.serverUrl}refresh`,
       { refreshToken },
       { context: tokenRefreshContext() }
     ).pipe(
-      catchError(() => of(null))
+      catchError(error => (isNoAnswer(error) ? throwError(() => error) : of(null)))
     );
   }
 

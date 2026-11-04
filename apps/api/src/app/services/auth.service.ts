@@ -86,6 +86,10 @@ export class AuthService {
     return this.refreshTokenRepository.findOne({ where: { tokenHash: AuthService.hashToken(token) } });
   }
 
+  private async findUsedRefreshToken(token: string): Promise<UsedRefreshToken | null> {
+    return this.usedRefreshTokenRepository.findOne({ where: { tokenHash: AuthService.hashToken(token) } });
+  }
+
   private async findActiveUserSession(refreshToken: RefreshToken): Promise<UserSession | null> {
     const userSession = await this.userSessionRepository.findOne({
       where: {
@@ -254,9 +258,7 @@ export class AuthService {
    * it is reopened.
    */
   private async endSessionOfReusedToken(token: string): Promise<void> {
-    const usedToken = await this.usedRefreshTokenRepository.findOne({
-      where: { tokenHash: AuthService.hashToken(token) }
-    });
+    const usedToken = await this.findUsedRefreshToken(token);
     if (!usedToken || Date.now() - usedToken.usedAt.getTime() <= REFRESH_TOKEN_REUSE_GRACE_MS) {
       return;
     }
@@ -355,20 +357,37 @@ export class AuthService {
     await this.userSessionRepository.delete({ userId });
   }
 
+  /**
+   * Ends the session the refresh token belongs to. A token that has already been exchanged still
+   * names its session: a browser whose refresh answer got lost -- the tab was reloaded or closed
+   * while it ran -- holds only the token before it and logs out with that one. Ending nothing would
+   * leave the session resumable for a week by a token no browser holds (#2110). No grace period
+   * here, unlike the refresh: whoever logs out wants the session gone, and with the exchanged token
+   * a refresh after the grace period would end it anyway.
+   */
   async logoutCurrentSession(
     token: string,
     fallbackUserId?: number,
     fallbackSessionId?: string
   ): Promise<void> {
     const refreshToken = await this.findRefreshTokenByToken(token);
-
-    if (!refreshToken) {
-      if (fallbackUserId && fallbackSessionId) {
-        await this.logoutSession(fallbackUserId, fallbackSessionId);
-      }
+    if (refreshToken) {
+      await this.logoutSession(refreshToken.userId, refreshToken.sessionId);
       return;
     }
 
-    await this.logoutSession(refreshToken.userId, refreshToken.sessionId);
+    if (fallbackUserId && fallbackSessionId) {
+      await this.logoutSession(fallbackUserId, fallbackSessionId);
+      return;
+    }
+
+    const usedToken = await this.findUsedRefreshToken(token);
+    if (usedToken) {
+      this.logger.log(
+        `Logout of user '${usedToken.userId}' came with an exchanged refresh token; ` +
+        `ending session '${usedToken.sessionId}'.`
+      );
+      await this.logoutSession(usedToken.userId, usedToken.sessionId);
+    }
   }
 }
