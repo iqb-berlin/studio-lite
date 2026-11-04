@@ -17,6 +17,7 @@ import { BackendService } from '../../services/backend.service';
 import { Comment } from '../../models/comment.interface';
 import { ActiveComment } from '../../models/active-comment.interface';
 import { CommentService } from '../../services/comment.service';
+import { RootCommentsWithRepliesPipe } from '../../pipes/root-comments-with-replies.pipe';
 
 @Pipe({
   name: 'filteredComments',
@@ -169,7 +170,8 @@ describe('CommentsComponent', () => {
             MockCommentFilterComponent,
             MockFilteredCommentsPipe,
             MockFilteredRootCommentsPipe,
-            MockHiddenCommentsCountPipe
+            MockHiddenCommentsCountPipe,
+            RootCommentsWithRepliesPipe
           ],
           providers: [
             { provide: BackendService, useValue: backendServiceSpy },
@@ -229,13 +231,16 @@ describe('CommentsComponent', () => {
     });
   });
 
-  it('should fetch comments on init', fakeAsync(() => {
+  it('should show the fetched comments as threads', fakeAsync(() => {
     component.ngOnInit();
     tick();
+    fixture.detectChanges();
+    const threads = fixture.debugElement.queryAll(By.directive(MockCommentComponent))
+      .map(debugElement => debugElement.componentInstance as MockCommentComponent);
+
     expect(backendServiceSpy.getComments).toHaveBeenCalled();
-    expect(component.comments.length).toBe(2);
-    expect(component.rootCommentsWithReplies.length).toBe(1);
-    expect(component.rootCommentsWithReplies[0].replies.length).toBe(1);
+    expect(threads.map(thread => ({ comment: thread.comment.id, replies: thread.replies.map(reply => reply.id) })))
+      .toEqual([{ comment: 1, replies: [2] }]);
   }));
 
   it('should update comment visibility', () => {
