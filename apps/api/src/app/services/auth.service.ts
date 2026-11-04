@@ -90,11 +90,11 @@ export class AuthService {
     return this.usedRefreshTokenRepository.findOne({ where: { tokenHash: AuthService.hashToken(token) } });
   }
 
-  private async findActiveUserSession(refreshToken: RefreshToken): Promise<UserSession | null> {
+  private async findValidUserSession(userId: number, sessionId: string): Promise<UserSession | null> {
     const userSession = await this.userSessionRepository.findOne({
       where: {
-        sessionId: refreshToken.sessionId,
-        userId: refreshToken.userId
+        sessionId,
+        userId
       }
     });
 
@@ -281,11 +281,11 @@ export class AuthService {
       return null;
     }
 
-    // The expiry check inside findActiveUserSession is the inactivity gate: expiresAt is
+    // The expiry check inside findValidUserSession is the inactivity gate: expiresAt is
     // always lastActivity plus PASSIVE_THRESHOLD_MS, so a session that outlives its
     // inactivity window is exactly a session whose row has expired. A second comparison
     // against lastActivity used to sit here and could not ever be true.
-    const userSession = await this.findActiveUserSession(refreshToken);
+    const userSession = await this.findValidUserSession(refreshToken.userId, refreshToken.sessionId);
     if (!userSession) {
       return null;
     }
@@ -336,6 +336,15 @@ export class AuthService {
     });
     this.logger.log(`First User with id '${newUserId}' is logging in.`);
     return this.login({ id: newUserId, name: username, reviewId: 0 });
+  }
+
+  /**
+   * Whether an access token of this session may still be used: exactly as long as a refresh could
+   * still renew the session. A session ended by a logout, a new password or the deletion of its
+   * account has no row any more, and an expired one could not be resumed (#2115).
+   */
+  async hasValidSession(userId: number, sessionId: string): Promise<boolean> {
+    return !!(await this.findValidUserSession(userId, sessionId));
   }
 
   async isAdminUser(userId: number): Promise<boolean> {

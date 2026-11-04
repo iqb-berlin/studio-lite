@@ -1,4 +1,5 @@
 import type { UserInListDto, WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
+import { SESSION_ENDED_MESSAGE } from '@studio-lite/shared-code';
 import {
   noId,
   fakeUser,
@@ -130,7 +131,8 @@ describe('Admin API tests', () => {
     // A password set by an administrator ends the user's sessions as a change of their own does
     // (#1901). The value stays the same so that later logins of this user still work; isAdmin stays
     // as the promotion above left it.
-    it('200 positive test: should end every session of a user whose password an administrator sets', () => {
+    it('200 positive test: should end every session of a user whose password an administrator sets, ' +
+      'its access token included (#2115)', () => {
       cy.loginAPI(userGroupAdmin.username, userGroupAdmin.password).then(session => {
         expect(session.status).to.equal(201);
         cy.updateUserAPI(Cypress.expose(`id_${userGroupAdmin.username}`),
@@ -141,9 +143,20 @@ describe('Admin API tests', () => {
           .then(resp => {
             expect(resp.status).to.equal(200);
           });
+        // The access token went with its session: another browser of the user is logged out at
+        // once, not when the token expires (#2115). The frontend reads the reason off the answer.
+        cy.getUserIdAPI(session.body.accessToken).then(resp => {
+          expect(resp.status).to.equal(401);
+          expect(resp.body.message).to.equal(SESSION_ENDED_MESSAGE);
+        });
         cy.refreshTokenAPI(session.body.refreshToken).then(resp => {
           expect(resp.status).to.equal(401);
         });
+      });
+      // The stored token of the user ended as well; the tests after this one work with it.
+      cy.loginAPI(userGroupAdmin.username, userGroupAdmin.password).then(resp => {
+        expect(resp.status).to.equal(201);
+        Cypress.expose(`token_${userGroupAdmin.username}`, resp.body.accessToken);
       });
     });
   });

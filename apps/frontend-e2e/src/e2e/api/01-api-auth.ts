@@ -75,6 +75,15 @@ describe('Auth API tests', () => {
   });
 
   describe('4. PATCH /api/password', () => {
+    // A new password ends the session of the stored token as well, and its access token with it
+    // (#2115). The tests after a change need a token of a session that still exists.
+    const renewAdminToken = (): void => {
+      cy.loginAPI(Cypress.expose('username'), Cypress.expose('password')).then(resp => {
+        expect(resp.status).to.equal(201);
+        Cypress.expose(`token_${Cypress.expose('username')}`, resp.body.accessToken);
+      });
+    };
+
     it('200 positive test: should allow the logged-in user to change their password', () => {
       cy.updatePasswordAPI(
         Cypress.expose(`token_${Cypress.expose('username')}`),
@@ -85,22 +94,16 @@ describe('Auth API tests', () => {
         expect(resp.body).to.equal(true);
       });
 
-      cy.loginAPI(Cypress.expose('username'), '4567').then(resp => {
-        Cypress.expose(
-          `token_${Cypress.expose('username')}`,
-          resp.body.accessToken
-        );
-        expect(resp.status).to.equal(201);
+      // The token of the new login is passed inside then(): an argument read from Cypress.expose
+      // is read when the command is queued, before the login has stored anything.
+      cy.loginAPI(Cypress.expose('username'), '4567').then(login => {
+        expect(login.status).to.equal(201);
+        cy.updatePasswordAPI(login.body.accessToken, '4567', Cypress.expose('password')).then(resp => {
+          expect(resp.status).to.equal(200);
+          expect(resp.body).to.equal(true);
+        });
       });
-
-      cy.updatePasswordAPI(
-        Cypress.expose(`token_${Cypress.expose('username')}`),
-        '4567',
-        Cypress.expose('password')
-      ).then(resp => {
-        expect(resp.status).to.equal(200);
-        expect(resp.body).to.equal(true);
-      });
+      renewAdminToken();
     });
 
     // A copy of a refresh token must not outlive the old password, not even one of the session the
@@ -126,6 +129,7 @@ describe('Auth API tests', () => {
           expect(reset.body).to.equal(true);
         });
       });
+      renewAdminToken();
       cy.wrap(refreshStatuses).should('deep.equal', [401, 401]);
     });
 
