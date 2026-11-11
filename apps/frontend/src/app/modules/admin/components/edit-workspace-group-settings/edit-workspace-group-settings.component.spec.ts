@@ -118,25 +118,29 @@ describe('EditWorkspaceGroupSettingsComponent', () => {
     expect(component.formData.profilesSelected).toEqual([]);
   });
 
-  // Saving before the stored profiles are in would replace them with an empty list (#1960).
-  describe('save button', () => {
+  // Saving before the stored profiles are in would replace them with an empty list (#1960), and a
+  // profile checked before they arrived was unchecked again by them (#2121).
+  describe('while the stored profiles load', () => {
     const save = (): HTMLButtonElement => fixture.nativeElement
       .querySelector('[data-cy="admin-edit-workspace-group-settings-save-button"]');
     const notLoaded = (): HTMLElement | null => fixture.nativeElement
       .querySelector('[data-cy="admin-edit-workspace-group-settings-not-loaded"]');
+    const profiles = (): HTMLElement | null => fixture.nativeElement.querySelector('studio-lite-profiles');
 
-    it('should stay disabled until the stored profiles have loaded', () => {
+    it('should hold back the profiles and the save button until they have loaded (#2121)', () => {
       const group = new Subject<WorkspaceGroupFullDto | boolean>();
       backendService.getWorkspaceGroupById.mockReturnValue(group);
       fixture.detectChanges();
 
       expect(save().disabled).toBe(true);
+      expect(profiles()).toBeNull();
       expect(notLoaded()).toBeNull();
 
       group.next(mockWorkspaceGroup);
       fixture.detectChanges();
 
       expect(save().disabled).toBe(false);
+      expect(profiles()).not.toBeNull();
     });
 
     it('should stay disabled and say so when the stored profiles could not be loaded', () => {

@@ -7,6 +7,7 @@ import {
 import { WorkspaceGroupFullDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { Subject, takeUntil } from 'rxjs';
 import { EditWorkspaceGroupComponentData } from '../../models/edit-workspace-group-component-data.type';
 import { BackendService } from '../../services/backend.service';
@@ -18,7 +19,7 @@ import { Profile } from '../../../../models/profile.type';
   templateUrl: './edit-workspace-group-settings.component.html',
   styleUrls: ['./edit-workspace-group-settings.component.scss'],
   imports: [ProfilesComponent, MatDialogActions, MatButton, MatDialogClose,
-    TranslateModule, MatDialogContent, MatDialogTitle]
+    TranslateModule, MatDialogContent, MatDialogTitle, MatProgressSpinner]
 })
 
 export class EditWorkspaceGroupSettingsComponent implements OnInit, OnDestroy {
@@ -31,6 +32,8 @@ export class EditWorkspaceGroupSettingsComponent implements OnInit, OnDestroy {
   fetchedProfiles: Profile[] = [];
   // Saving replaces the group's profiles with the ones chosen here. Before the stored ones are in,
   // or after they failed to load, that would be the empty list the dialog starts with (#1960).
+  // The profiles are not shown before either: the stored ones, arriving after a check, would
+  // replace it (#2121).
   private readonly profilesLoadState = signal<'pending' | 'loaded' | 'failed'>('pending');
   readonly profilesLoad = this.profilesLoadState.asReadonly();
   private ngUnsubscribe = new Subject<void>();
