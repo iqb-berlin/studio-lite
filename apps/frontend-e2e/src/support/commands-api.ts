@@ -1221,7 +1221,8 @@ Cypress.Commands.add('getUnitDefinitionAPI', (unitId: string, wsId: string, toke
 });
 
 // 46
-Cypress.Commands.add('updateUnitSchemeAPI', (unitId: string, wsId: string, token:string) => {
+// Without a scheme of the spec's own, the fixed scheme1 below
+Cypress.Commands.add('updateUnitSchemeAPI', (unitId: string, wsId: string, token:string, scheme?: string) => {
   const authorization = `bearer ${token}`;
 
   const scheme1 = JSON.stringify({
@@ -1363,7 +1364,7 @@ Cypress.Commands.add('updateUnitSchemeAPI', (unitId: string, wsId: string, token
       authorization
     },
     body: {
-      scheme: scheme1,
+      scheme: scheme ?? scheme1,
       schemeType: 'iqb@3.0'
     },
     failOnStatusCode: false

@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { VariableIdConflictDto } from './variable-id-conflict.dto';
 
 /**
  * Which of the optional export files a unit would fill. The export dialog offers a file only when
@@ -22,4 +23,8 @@ export class UnitExportContentsDto {
 
   @ApiProperty()
   richNotes!: boolean;
+
+  /** Ids the export would write twice; not a file, but asked with the rest before the export (#2119) */
+  @ApiProperty({ type: [VariableIdConflictDto] })
+  variableIdConflicts!: VariableIdConflictDto[];
 }

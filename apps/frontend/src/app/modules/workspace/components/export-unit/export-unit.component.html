@@ -16,7 +16,8 @@
           [selectedUnitIds]="unitExportSettings.unitIdList"
           [(addPlayers)]="unitExportSettings.addPlayers"
           (fileSelectionChange)="setFileSelection($event)"
-          (unitsWithOutPlayerChange)="unitSelectionTable.disabled = $event">
+          (unitsWithOutPlayerChange)="unitSelectionTable.disabled = $event"
+          (variableIdConflictsChange)="setVariableIdConflicts($event)">
         </studio-lite-export-unit-file-config>
         <mat-accordion multi>
           <mat-expansion-panel
@@ -102,8 +103,9 @@
   <mat-dialog-actions align="end">
     <div class="fx-row-start-stretch">
       <button mat-raised-button color="primary"
-              [mat-dialog-close]="unitExportSettings"
+              (click)="download()"
               [disabled]="!unitExportSettings.unitIdList.length
+                || !unitsWithVariableIdConflicts()
                 || ((unitExportSettings.addTestTakersReview
                      | hasTakers : unitExportSettings.addTestTakersHot : unitExportSettings.addTestTakersMonitor)
                     && bookletId.invalid)"
