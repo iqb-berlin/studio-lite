@@ -21,7 +21,7 @@ import { UnitCommentService } from '../services/unit-comment.service';
 import { UnitRichNoteService } from '../services/unit-rich-note.service';
 import { entryHasContent, hasCodingScheme, hasMetadataContent } from '../utils/unit-export-contents';
 import { RichNotesDownloadClass } from './rich-notes-download.class';
-import { parseDerivedCodings } from '../utils/derived-codings';
+import { derivedVariableId, parseDerivedCodings } from '../utils/derived-codings';
 
 // Comment shape as defined by the iqb unit-comments@0.1 specification
 // (https://iqb-specifications.github.io/unit-comments/). Fields without a
@@ -382,7 +382,7 @@ export class UnitJsonDownloadClass {
     const baseVariables: VariableInfo[] = toVariableInfoListV1(definitionData?.variables);
     const derivedVariables: { id: string; basedOn: string[] }[] = parseDerivedCodings(schemeData)
       .map(coding => ({
-        id: coding.alias || coding.id,
+        id: derivedVariableId(coding),
         basedOn: coding.deriveSources ?? []
       }));
 

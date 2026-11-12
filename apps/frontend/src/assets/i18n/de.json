@@ -73,6 +73,35 @@
       "import": "Export",
       "import-tooltip": "Unit-Dateien (*.xml, *.voud usw.) herunterladen"
     },
+    "variable-id-conflicts": {
+      "title": "Doppelte Variablen-IDs",
+      "intro-xml": "Im XML dieser Aufgaben stünde dieselbe ID für zwei Variablen. Das Testcenter nimmt solche Aufgaben ab Version 19 nicht an. Die übrigen Aufgaben sind davon nicht betroffen.",
+      "intro-json": "Im JSON dieser Aufgaben stünde dieselbe ID für zwei Variablen. Programme, die Variablen über ihre ID zuordnen, können die beiden verwechseln. Die übrigen Aufgaben sind davon nicht betroffen.",
+      "id": "Die ID",
+      "stands-for": "stünde für:",
+      "base": "das Element",
+      "base-hint": "im Editor – die ID ist seine interne ID, die im Editor nicht zu sehen ist",
+      "derived": "die abgeleitete Variable",
+      "derived-hint": "in der Kodierung",
+      "manual-fix": "Manuell beheben",
+      "manual-fix-intro": "Eine der beiden Variablen braucht einen anderen Namen. Welche, entscheiden Sie – das Studio benennt nichts von selbst um.",
+      "keep-derived": {
+        "title": "Den Namen der abgeleiteten Variable behalten (meist der richtige Weg)",
+        "step-duplicate": "Im Editor das Element duplizieren und das Original löschen. Die Kopie erhält dabei eine neue interne ID.",
+        "step-take-over": "Der Kopie Position und ID des Originals geben.",
+        "step-coding": "In der Kodierung die Kopie so einstellen wie das Original, z. B. deaktivieren, wenn das Original deaktiviert war.",
+        "step-sources": "Abgeleitete Variablen, die aus dem Element gebildet werden, auf die Kopie umstellen.",
+        "step-items": "Items, die mit dem Element verknüpft waren, unter „Eigenschaften“ neu verknüpfen.",
+        "note": "Antworten, die zu dem Element schon erhoben wurden, sind unter seiner alten internen ID gespeichert."
+      },
+      "rename-derived": {
+        "title": "Die abgeleitete Variable umbenennen",
+        "step-rename": "In der Kodierung der abgeleiteten Variable einen neuen Namen geben.",
+        "step-items": "Items, die mit ihr verknüpft waren, unter „Eigenschaften“ neu verknüpfen.",
+        "note": "Damit ändert sich der Name, den die Kodierer:innen sehen. Was unter dem alten Namen schon kodiert wurde, behält ihn."
+      },
+      "export-anyway": "Trotzdem exportieren"
+    },
     "dialog": {
       "title": "Aufgabe(n) als Datei herunterladen",
       "ok-button-label": "Herunterladen",

@@ -20,3 +20,11 @@ export function parseDerivedCodings(schemeData: UnitSchemeDto): VariableCodingDa
     vc => vc.sourceType !== 'BASE' && vc.sourceType !== 'BASE_NO_VALUE'
   ) ?? [];
 }
+
+/**
+ * The id a derived variable is exported under: its alias, or its id where it has none. The id
+ * check of the export dialog asks the same, so it names exactly the ids the export writes (#2119).
+ */
+export function derivedVariableId(coding: Pick<VariableCodingData, 'id' | 'alias'>): string {
+  return coding.alias || coding.id;
+}
