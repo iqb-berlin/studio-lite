@@ -484,8 +484,9 @@ export class UnitService {
   }
 
   /**
-   * The metadata and coding scheme of every unit of the workspace, read from the same source as the
-   * export reads them -- the metadata tables for a unit with the marker, its column otherwise.
+   * The metadata, coding scheme and variables of every unit of the workspace, read from the same
+   * source as the export reads them -- the metadata tables for a unit with the marker, its column
+   * otherwise.
    *
    * Only what decides content is read: the unit-level profiles and the items themselves, not the
    * items' own profiles and not the profile lookups that fill in `valueAsText`. Four queries for the
@@ -494,10 +495,14 @@ export class UnitService {
    */
   async findAllExportSources(
     workspaceId: number
-  ): Promise<{ id: number; metadata: UnitMetadataValues; scheme: string }[]> {
+  ): Promise<{
+    id: number; metadata: UnitMetadataValues; scheme: string; variables: { id: string; alias?: string }[]
+  }[]> {
     const units = await this.unitsRepository.find({
       where: { workspaceId: workspaceId },
-      select: { id: true, metadata: true, scheme: true }
+      select: {
+        id: true, metadata: true, scheme: true, variables: true
+      }
     });
     const markedUnitIds = await this.unitMetadataToDeleteService
       .findMarkedUnitIds(units.map(unit => unit.id));
@@ -514,7 +519,8 @@ export class UnitService {
           items: items.filter(item => item.unitId === unit.id) as unknown as UnitMetadataValues['items']
         } :
         unit.metadata as UnitMetadataValues,
-      scheme: unit.scheme
+      scheme: unit.scheme,
+      variables: unit.variables
     }));
   }
 

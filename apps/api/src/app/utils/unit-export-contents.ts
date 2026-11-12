@@ -4,6 +4,7 @@ import {
 import type { UnitService } from '../services/unit.service';
 import type { UnitCommentService } from '../services/unit-comment.service';
 import type { UnitRichNoteService } from '../services/unit-rich-note.service';
+import { findVariableIdConflicts } from './variable-id-conflicts';
 
 /*
  * What counts as content of an optional export file. The export writes a file only when its
@@ -53,7 +54,7 @@ export function hasCodingScheme(scheme?: string | null): boolean {
 /**
  * For every unit of the workspace, which optional export files it would fill. Metadata, items and
  * the coding scheme are read from the unit itself; comments and rich notes are asked for all units
- * at once.
+ * at once. With them come the ids the export would write twice, which the dialog warns about.
  */
 export async function findUnitExportContents(
   workspaceId: number,
@@ -73,6 +74,7 @@ export async function findUnitExportContents(
     items: hasItems(unit.metadata),
     codingScheme: hasCodingScheme(unit.scheme),
     comments: unitsWithComments.has(unit.id),
-    richNotes: unitsWithRichNotes.has(unit.id)
+    richNotes: unitsWithRichNotes.has(unit.id),
+    variableIdConflicts: findVariableIdConflicts(unit.variables, unit.scheme)
   }));
 }
