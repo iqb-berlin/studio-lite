@@ -22,7 +22,7 @@ import { UnitRichNoteService } from '../services/unit-rich-note.service';
 import { hasItems, hasMetadataContent } from '../utils/unit-export-contents';
 import { LegacyMetadataDownloadClass } from './legacy-metadata-download.class';
 import { RichNotesDownloadClass } from './rich-notes-download.class';
-import { parseDerivedCodings } from '../utils/derived-codings';
+import { derivedVariableId, parseDerivedCodings } from '../utils/derived-codings';
 import { toUnitXmlDependencies } from '../utils/unit-dependencies';
 
 /**
@@ -269,7 +269,7 @@ export class UnitXmlDownloadClass {
     derivedCodings.forEach(coding => {
       derivedVariablesElement.ele({
         Variable: {
-          '@id': coding.alias || coding.id,
+          '@id': derivedVariableId(coding),
           '@type': UnitXmlDownloadClass.getDerivedVariableType(coding),
           '@format': '',
           '@nullable': false,

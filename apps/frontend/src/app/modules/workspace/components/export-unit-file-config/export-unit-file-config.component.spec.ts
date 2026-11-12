@@ -30,7 +30,13 @@ class MockModuleService {
 }
 
 const unitWithComments: UnitExportContentsDto = {
-  unitId: 1, metadata: false, items: false, codingScheme: false, comments: true, richNotes: false
+  unitId: 1,
+  metadata: false,
+  items: false,
+  codingScheme: false,
+  comments: true,
+  richNotes: false,
+  variableIdConflicts: []
 };
 
 class MockWorkspaceBackendService {
@@ -162,6 +168,22 @@ describe('ExportUnitFileConfigComponent', () => {
       addMetadata: true, addCodingScheme: true, addComments: false, addRichNotes: false
     });
   }));
+
+  it('should pass on the units whose export would carry an id twice (#2119)', () => {
+    const unitWithConflict: UnitExportContentsDto = {
+      ...unitWithComments,
+      unitId: 2,
+      variableIdConflicts: [{ id: '05', variables: [] }]
+    };
+    backendService.exportContents = of([unitWithComments, unitWithConflict]);
+    fixture = TestBed.createComponent(ExportUnitFileConfigComponent);
+    const passedOn: UnitExportContentsDto[][] = [];
+    fixture.componentInstance.variableIdConflictsChange.subscribe(units => passedOn.push(units));
+
+    fixture.detectChanges();
+
+    expect(passedOn).toEqual([[unitWithConflict]]);
+  });
 
   describe('players', () => {
     const createWithPlayers = async (players: (string | undefined)[]): Promise<void> => {

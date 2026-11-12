@@ -229,18 +229,34 @@ describe('WorkspaceUnitController', () => {
   describe('findExportContents', () => {
     it('should answer for every unit of the workspace which optional export files it fills', async () => {
       jest.spyOn(unitService, 'findAllExportSources').mockResolvedValue([
-        { id: 1, metadata: { profiles: [], items: [{ id: 'item1' }] }, scheme: '{}' },
-        { id: 2, metadata: null, scheme: '' }
+        {
+          id: 1, metadata: { profiles: [], items: [{ id: 'item1' }] }, scheme: '{}', variables: []
+        },
+        {
+          id: 2, metadata: null, scheme: '', variables: []
+        }
       ]);
       jest.spyOn(unitCommentService, 'findUnitIdsWithComments').mockResolvedValue(new Set([2]));
       jest.spyOn(unitRichNoteService, 'findUnitIdsWithNotes').mockResolvedValue(new Set([1]));
 
       expect(await controller.findExportContents(7)).toEqual([
         {
-          unitId: 1, metadata: false, items: true, codingScheme: true, comments: false, richNotes: true
+          unitId: 1,
+          metadata: false,
+          items: true,
+          codingScheme: true,
+          comments: false,
+          richNotes: true,
+          variableIdConflicts: []
         },
         {
-          unitId: 2, metadata: false, items: false, codingScheme: false, comments: true, richNotes: false
+          unitId: 2,
+          metadata: false,
+          items: false,
+          codingScheme: false,
+          comments: true,
+          richNotes: false,
+          variableIdConflicts: []
         }
       ]);
       expect(unitService.findAllExportSources).toHaveBeenCalledWith(7);
