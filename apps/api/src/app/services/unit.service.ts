@@ -25,6 +25,9 @@ import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
 import { UnitNotFoundException } from '../exceptions/unit-not-found.exception';
 import { UnitKeyExistsException } from '../exceptions/unit-key-exists.exception';
 
+/** The column `unit.key` is VARCHAR(20); a longer key fails in the database. */
+const UNIT_KEY_MAX_LENGTH = 20;
+
 /**
  * The units and their properties -- plus creating and copying a unit, moving it to another
  * workspace, and submitting it to a drop box. What a unit is made of has services of its own:
@@ -533,7 +536,13 @@ export class UnitService {
     const unit = await this.unitsRepository.findOne({ where: { id: unitId } });
     const dataKeys = Object.keys(newData);
     if (dataKeys.indexOf('key') >= 0) {
-      if (typeof newData.key === 'string' && newData.key !== unit.key) await this.assertKeyIsFree(unit, newData.key);
+      if (typeof newData.key === 'string' && newData.key !== unit.key) {
+        // refused here rather than by the database, whose error reached the user as a server problem (#2120)
+        if (newData.key.length > UNIT_KEY_MAX_LENGTH) {
+          throw new BadRequestException(`Unit key ${newData.key} is longer than ${UNIT_KEY_MAX_LENGTH} characters`);
+        }
+        await this.assertKeyIsFree(unit, newData.key);
+      }
       unit.key = newData.key;
     }
     if (dataKeys.indexOf('name') >= 0) unit.name = newData.name;

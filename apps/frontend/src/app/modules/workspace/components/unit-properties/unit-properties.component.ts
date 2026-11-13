@@ -257,7 +257,7 @@ export class UnitPropertiesComponent
         this.workspaceService.isValidFormKey.next(
           keyControl.status === 'VALID'
         );
-        this.reportUnitKeyTaken();
+        this.reportUnitKeyRefused();
       }
 
       this.selectedStateColor = unitMetadata.state || '';
@@ -276,7 +276,7 @@ export class UnitPropertiesComponent
           this.unitForm.get('reference')?.value,
           this.unitForm.get('state')?.value
         );
-        this.reportUnitKeyTaken();
+        this.reportUnitKeyRefused();
       });
       this.unitForm.enable();
       // timeout because we access ViewChildren
@@ -312,13 +312,16 @@ export class UnitPropertiesComponent
   }
 
   /**
-   * A taken key blocks saving only once it is a change: a unit that already carries a key another
-   * unit has -- from before the server checked renames -- stays editable, as the server only checks a
-   * key that is changed (#1842).
+   * A key the server refuses blocks saving only once it is a change: a unit that already carries a
+   * key another unit has -- from before the server checked renames -- stays editable, as the server
+   * only checks a key that is changed (#1842). Too long is refused as well, since the database column
+   * holds no more than 20 characters and saving such a key failed (#2120); no stored key is longer.
    */
-  private reportUnitKeyTaken(): void {
+  private reportUnitKeyRefused(): void {
     const keyChanged = this.unitStores.metadataStore()?.getChangedData().key !== undefined;
-    this.workspaceService.setUnitKeyTaken(keyChanged && !!this.unitForm.get('key')?.hasError('keyNotUnique'));
+    const keyControl = this.unitForm.get('key');
+    const refused = !!keyControl?.hasError('keyNotUnique') || !!keyControl?.hasError('maxlength');
+    this.workspaceService.setUnitKeyRefused(keyChanged && refused);
   }
 
   private initVeronaModules(unitMetadata: UnitPropertiesDto): void {
