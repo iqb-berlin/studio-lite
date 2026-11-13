@@ -70,6 +70,10 @@ describe('AddReviewButtonComponent', () => {
     component.addReview();
     flushMicrotasks();
 
+    // #2133: the column holds 100 characters, and a longer name failed with a server problem
+    expect(dialog.open).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      data: expect.objectContaining({ maxLength: 100 })
+    }));
     expect(backendService.addReview).toHaveBeenCalledWith(42, {
       workspaceId: 42,
       name: 'Review 1'

@@ -8,6 +8,7 @@
     <mat-form-field>
       <input matInput
              formControlName="name"
+             maxlength="50"
              type="text"
              [placeholder]="'user.login-name' | translate"
              [value]="data.name"
@@ -16,6 +17,7 @@
     <mat-form-field>
       <input matInput
              formControlName="lastName"
+             maxlength="100"
              type="text"
              [placeholder]="'user.last-name' | translate"
              [value]="data.lastName"
@@ -24,6 +26,7 @@
     <mat-form-field>
       <input matInput
              formControlName="firstName"
+             maxlength="100"
              type="text"
              [placeholder]="'user.first-name' | translate"
              [value]="data.firstName"
@@ -32,6 +35,7 @@
     <mat-form-field>
       <input matInput
              formControlName="email"
+             maxlength="100"
              type="text"
              [placeholder]="'user.email' | translate"
              [value]="data.email"

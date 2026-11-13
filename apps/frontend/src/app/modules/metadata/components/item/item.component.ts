@@ -93,6 +93,8 @@ export class ItemComponent implements OnInit, OnChanges, OnDestroy {
             props: {
               placeholder: 'Item ID',
               label: 'Item ID',
+              // as the column of the item's id holds; a longer one failed with a server problem (#2133)
+              maxLength: 100,
               assignedIds: this.getOtherIds()
             },
             validators: {

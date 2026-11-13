@@ -3,7 +3,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { WorkspaceImportService } from './workspace-import.service';
 import Workspace from '../entities/workspace.entity';
 import { UnitService } from './unit.service';
@@ -113,6 +113,44 @@ describe('WorkspaceImportService', () => {
 
       expect(result.messages).toEqual([{ objectKey: 'u1.xml', messageKey: 'unit-upload.api-warning.name-too-long' }]);
       expect(unitService.create).toHaveBeenCalledWith(1, { key: 'U1', name: 'N'.repeat(100) }, user, true);
+    });
+
+    // #2133: a value of a unit longer than its column -- an item id, a uuid -- failed the whole upload
+    describe('when the database refuses a write of one unit', () => {
+      const refusedBy = (code: string) => new QueryFailedError(
+        'INSERT INTO "unit_item"',
+        [],
+        Object.assign(new Error(`database error ${code}`), { code })
+      );
+      const upload = () => service.uploadFiles(1, [
+        buildFile('u1.xml', 'text/xml', xmlUnit('U1')),
+        buildFile('u2.xml', 'text/xml', xmlUnit('U2'))
+      ], user);
+
+      beforeEach(() => {
+        (unitService.create as jest.Mock).mockImplementation(async (_, unit) => (unit.key === 'U1' ? 10 : 11));
+        (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+      });
+
+      it('should report the unit with a value too long for its column and import the others', async () => {
+        (unitService.patchUnitProperties as jest.Mock)
+          .mockImplementation(async id => { if (id === 10) throw refusedBy('22001'); });
+
+        const result = await upload();
+
+        expect(result.messages).toEqual([
+          { objectKey: 'u1.xml', messageKey: 'unit-upload.api-warning.value-too-long' }
+        ]);
+        expect(unitService.patchUnitProperties).toHaveBeenCalledWith(11, expect.anything(), null);
+      });
+
+      it('should still fail the upload on any other database error', async () => {
+        const error = refusedBy('23503');
+        (unitService.patchUnitProperties as jest.Mock)
+          .mockImplementation(async id => { if (id === 10) throw error; });
+
+        await expect(upload()).rejects.toBe(error);
+      });
     });
 
     // Comments and notes on an item follow it to the uuid the import gives it.

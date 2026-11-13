@@ -29,6 +29,8 @@ import { SelectDropBoxComponent } from '../select-drop-box/select-drop-box.compo
   imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class WorkspaceMenuComponent implements OnDestroy {
+  /** As the column of the workspace's name holds; a longer one failed with a server problem (#2133) */
+  private static readonly workspaceNameMaxLength = 50;
   private ngUnsubscribe = new Subject<void>();
   @Input() selectedWorkspaceId!: number;
   @Input() selectedRows!: WorkspaceInListDto[];
@@ -85,7 +87,8 @@ export class WorkspaceMenuComponent implements OnDestroy {
           okButtonLabel: this.translateService.instant('wsg-admin.create'),
           isBackUpWorkspaceGroup: this.isBackUpWorkspaceGroup,
           maxWorkspaceCount: this.maxWorkspaceCount,
-          workspacesCount: this.workspaces.length
+          workspacesCount: this.workspaces.length,
+          maxLength: WorkspaceMenuComponent.workspaceNameMaxLength
         }
       });
       dialogRef.afterClosed()
@@ -163,7 +166,8 @@ export class WorkspaceMenuComponent implements OnDestroy {
           title: this.translateService.instant('wsg-admin.rename-workspace'),
           prompt: this.translateService.instant('wsg-admin.enter-name'),
           default: selectedRows[0].name,
-          okButtonLabel: this.translateService.instant('save')
+          okButtonLabel: this.translateService.instant('save'),
+          maxLength: WorkspaceMenuComponent.workspaceNameMaxLength
         }
       });
       dialogRef.afterClosed()

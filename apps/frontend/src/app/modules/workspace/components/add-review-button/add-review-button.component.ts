@@ -44,7 +44,9 @@ export class AddReviewButtonComponent extends CheckForChangesDirective {
             title: this.translateService.instant('workspace.new-review'),
             default: '',
             okButtonLabel: this.translateService.instant('workspace.save'),
-            prompt: this.translateService.instant('workspace.new-review-name')
+            prompt: this.translateService.instant('workspace.new-review-name'),
+            // as the column of the review's name holds; a longer one failed with a server problem (#2133)
+            maxLength: 100
           }
         });
 

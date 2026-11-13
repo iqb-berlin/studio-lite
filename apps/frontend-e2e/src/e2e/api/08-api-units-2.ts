@@ -645,6 +645,16 @@ describe('Unit API tests part II', () => {
         });
       });
 
+      // #2133: a value longer than its column failed in the database, and the user saw a server problem
+      it('400 negative test: should refuse a last name longer than the 100 characters of its column', () => {
+        cy.updateMyData(
+          Cypress.expose(`token_${Cypress.expose('username')}`),
+          { ...data, lastName: 'L'.repeat(101) }
+        ).then(resp => {
+          expect(resp.status).to.equal(400);
+        });
+      });
+
       it('403 negative test: should deny a superadmin from updating data belonging to another account', () => {
         cy.updateMyData(
           Cypress.expose(`token_${Cypress.expose('username')}`),
