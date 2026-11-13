@@ -1,4 +1,14 @@
 import { BadRequestException } from '@nestjs/common';
+import { QueryFailedError } from 'typeorm';
+
+/** Postgres `string_data_right_truncation`: a value longer than the VARCHAR(n) it was written to. */
+const VALUE_TOO_LONG = '22001';
+
+/** Whether the database refused a value as longer than its column (#2133). */
+export function isValueTooLong(error: unknown): error is QueryFailedError {
+  return error instanceof QueryFailedError &&
+    (error.driverError as { code?: string } | undefined)?.code === VALUE_TOO_LONG;
+}
 
 /**
  * A VARCHAR column counts characters, where `length` counts UTF-16 units and takes a character

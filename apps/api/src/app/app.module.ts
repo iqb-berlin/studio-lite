@@ -91,6 +91,7 @@ import { WriteOrGroupAdminAccessGuard } from './guards/write-or-group-admin-acce
 import { ReadOrGroupAdminAccessGuard } from './guards/read-or-group-admin-access.guard';
 import { ManageOrGroupAdminAccessGuard } from './guards/manage-or-group-admin-access.guard';
 import { ActivityInterceptor } from './interceptors/activity.interceptor';
+import { ValueTooLongInterceptor } from './interceptors/value-too-long.interceptor';
 
 // Unit rich notes
 import UnitRichNote from './entities/unit-rich-note.entity';
@@ -232,6 +233,10 @@ const ENTITIES = [
     {
       provide: APP_INTERCEPTOR,
       useClass: ActivityInterceptor
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ValueTooLongInterceptor
     },
 
     AppVersionProvider,

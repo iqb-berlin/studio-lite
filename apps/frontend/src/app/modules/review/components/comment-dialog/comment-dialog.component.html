@@ -10,6 +10,7 @@
     <mat-label>{{'review.comment-name' | translate}}</mat-label>
     <input matInput
       #nameInput
+      maxlength="100"
       [placeholder]="'review.enter-comment-name' | translate"
       required
       [(ngModel)]="userName"

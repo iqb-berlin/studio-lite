@@ -12,6 +12,7 @@
       <input matInput
              required
              data-cy="workspace-review-config-name"
+             maxlength="100"
              [placeholder]="'workspace.review-name' | translate"
              [(ngModel)]="name"
              [disabled]="!selectedReviewId || disabled"
@@ -22,6 +23,7 @@
         <input matInput
                [placeholder]="'workspace.review-password' | translate"
                [(ngModel)]="password"
+               maxlength="100"
                [disabled]="!selectedReviewId || disabled"
                (ngModelChange)="passwordChange.emit($event); reviewChange.emit()">
       </mat-form-field>

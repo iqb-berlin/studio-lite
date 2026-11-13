@@ -75,7 +75,10 @@ describe('WorkspaceMenuComponent', () => {
 
     component.addObject();
 
-    expect(mockMatDialog.open).toHaveBeenCalled();
+    // #2133: the column holds 50 characters, and a longer name failed with a server problem
+    expect(mockMatDialog.open).toHaveBeenCalledWith(InputTextComponent, expect.objectContaining({
+      data: expect.objectContaining({ maxLength: 50 })
+    }));
     expect(component.workspaceAdded.emit).toHaveBeenCalledWith('new-workspace');
   });
 
@@ -90,7 +93,9 @@ describe('WorkspaceMenuComponent', () => {
 
     component.renameObject();
 
-    expect(mockMatDialog.open).toHaveBeenCalled();
+    expect(mockMatDialog.open).toHaveBeenCalledWith(InputTextComponent, expect.objectContaining({
+      data: expect.objectContaining({ maxLength: 50 })
+    }));
     expect(component.workspaceRenamed.emit).toHaveBeenCalledWith({
       selection: [workspace],
       name: 'renamed-workspace'

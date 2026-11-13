@@ -9,7 +9,7 @@ import AdmZip from 'adm-zip';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import Workspace from '../entities/workspace.entity';
 import { UNIT_KEY_MAX_LENGTH, UNIT_NAME_MAX_LENGTH } from '../entities/unit.entity';
-import { cutToColumn, fitsColumn } from '../utils/column-length';
+import { cutToColumn, fitsColumn, isValueTooLong } from '../utils/column-length';
 import { FileIo } from '../interfaces/file-io.interface';
 import { UnitImportData } from '../classes/unit-import-data.class';
 import { NotAUnitXmlError } from '../exceptions/not-a-unit-xml.error';
@@ -71,14 +71,24 @@ export class WorkspaceImportService {
 
     await Promise.all(
       unitData.map(async u => {
-        await this.uploadFile(
-          usedFiles,
-          u,
-          workspaceId,
-          user,
-          functionReturn,
-          notXmlFiles
-        );
+        try {
+          await this.uploadFile(
+            usedFiles,
+            u,
+            workspaceId,
+            user,
+            functionReturn,
+            notXmlFiles
+          );
+        } catch (error) {
+          // A value of the unit longer than its column -- an item id, a uuid -- failed the whole
+          // upload without its report (#2133). The unit stays as far as it got, and is reported.
+          if (!isValueTooLong(error)) throw error;
+          functionReturn.messages.push({
+            objectKey: u.fileName,
+            messageKey: 'unit-upload.api-warning.value-too-long'
+          });
+        }
       })
     );
 
