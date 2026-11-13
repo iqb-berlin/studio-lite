@@ -321,6 +321,14 @@ describe('UnitService', () => {
       expect(unitsRepository.save).not.toHaveBeenCalled();
     });
 
+    // #2128: the database refused it, and the user saw a server problem
+    it('should refuse a key longer than the 20 characters of its column', async () => {
+      await expect(service.create(1, { key: 'M1_002_ABCDEFGHIJKLMN' } as CreateUnitDto, { id: 1 } as User, false))
+        .rejects.toBeInstanceOf(BadRequestException);
+      expect(unitsRepository.findOne).not.toHaveBeenCalled();
+      expect(unitsRepository.save).not.toHaveBeenCalled();
+    });
+
     it('should assign a uuid to the new unit', async () => {
       const newUnit: Partial<Unit> = { id: 2 };
       unitsRepository.findOne.mockResolvedValue(null);

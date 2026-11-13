@@ -3,6 +3,9 @@ import {
 } from 'typeorm';
 import Workspace from './workspace.entity';
 
+/** The column `unit.key` is VARCHAR(20); a longer key fails in the database. */
+export const UNIT_KEY_MAX_LENGTH = 20;
+
 /**
  * A task ("Aufgabe") in a workspace -- the central record of the studio. It holds the properties
  * around the task, while the parts that grow large or are edited on their own live in tables of

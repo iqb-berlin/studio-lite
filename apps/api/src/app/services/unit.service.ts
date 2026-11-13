@@ -12,7 +12,7 @@ import {
   UnitPropertiesDto
 } from '@studio-lite-lib/api-dto';
 import Workspace from '../entities/workspace.entity';
-import Unit from '../entities/unit.entity';
+import Unit, { UNIT_KEY_MAX_LENGTH } from '../entities/unit.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import { UnitUserService } from './unit-user.service';
 import { UnitCommentService } from './unit-comment.service';
@@ -24,9 +24,6 @@ import { UnitItemService } from './unit-item.service';
 import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
 import { UnitNotFoundException } from '../exceptions/unit-not-found.exception';
 import { UnitKeyExistsException } from '../exceptions/unit-key-exists.exception';
-
-/** The column `unit.key` is VARCHAR(20); a longer key fails in the database. */
-const UNIT_KEY_MAX_LENGTH = 20;
 
 /**
  * The units and their properties -- plus creating and copying a unit, moving it to another
@@ -264,6 +261,7 @@ export class UnitService {
   async create(workspaceId: number, unit: CreateUnitDto, user: User, addComments: boolean): Promise<number> {
     // TypeORM throws on an undefined key in the lookup below; a request without one is the caller's error (#2095)
     if (!unit.key) throw new BadRequestException('A unit needs a key.');
+    UnitService.assertKeyFits(unit.key);
     const existingUnitId = await this.unitsRepository.findOne({
       where: { workspaceId: workspaceId, key: unit.key },
       select: { id: true }
@@ -537,10 +535,7 @@ export class UnitService {
     const dataKeys = Object.keys(newData);
     if (dataKeys.indexOf('key') >= 0) {
       if (typeof newData.key === 'string' && newData.key !== unit.key) {
-        // refused here rather than by the database, whose error reached the user as a server problem (#2120)
-        if (newData.key.length > UNIT_KEY_MAX_LENGTH) {
-          throw new BadRequestException(`Unit key ${newData.key} is longer than ${UNIT_KEY_MAX_LENGTH} characters`);
-        }
+        UnitService.assertKeyFits(newData.key);
         await this.assertKeyIsFree(unit, newData.key);
       }
       unit.key = newData.key;
@@ -572,6 +567,17 @@ export class UnitService {
       unit.lastChangedSchemeUser = userName;
     }
     await this.unitsRepository.save(unit);
+  }
+
+  /**
+   * Refused here rather than by the database, whose error reached the user as a server problem: on
+   * renaming (#2120) and on creating (#2128). The import checks the length before creating, so that
+   * it can report the unit and go on with the others (#2128).
+   */
+  private static assertKeyFits(key: string): void {
+    if (key.length > UNIT_KEY_MAX_LENGTH) {
+      throw new BadRequestException(`Unit key ${key} is longer than ${UNIT_KEY_MAX_LENGTH} characters`);
+    }
   }
 
   /**
