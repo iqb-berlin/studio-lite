@@ -23,7 +23,7 @@ import {
 import { PreviewDirective } from '../../../../directives/preview.directive';
 import { UnitState } from '../../../../models/verona.interface';
 import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
-import { matchDefinitionType } from '../../utils/definition-type-match.utils';
+import { matchDefinitionType, playerRejectsDefinitionType } from '../../utils/definition-type-match.utils';
 import { findMissingDependencies } from '../../utils/missing-dependencies.utils';
 
 /**
@@ -189,7 +189,7 @@ export class UnitPreviewComponent extends PreviewDirective {
    */
   private getDefinitionTypeWarning(definitionType: string | undefined): string {
     const player = this.moduleService.players[this.playerName];
-    if (!player || matchDefinitionType(definitionType, player.metadata?.model) !== 'incompatible') return '';
+    if (!playerRejectsDefinitionType(definitionType, player)) return '';
     const alternatives = Object.values(this.moduleService.players)
       .filter(module => matchDefinitionType(definitionType, module.metadata?.model) === 'compatible')
       .map(module => module.nameAndVersion);

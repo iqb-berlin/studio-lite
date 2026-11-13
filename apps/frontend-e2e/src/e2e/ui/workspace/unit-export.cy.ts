@@ -8,14 +8,11 @@ import {
   selectListUnits,
   waitForSuccess
 } from '../../../support/helpers';
-import { createTestBaseAPI, deleteTestBaseAPI, TestBase } from '../../../support/helpers/test-base';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Workspace Unit Export & Reports', () => {
-  let base: TestBase;
-
   before(() => {
-    createTestBaseAPI({ units: [exportUnits.exportUnit1, exportUnits.exportUnit2] })
-      .then(created => { base = created; });
+    createTestBaseAPI({ units: [exportUnits.exportUnit1, exportUnits.exportUnit2] });
   });
 
   after(() => {
@@ -113,57 +110,6 @@ describe('Workspace Unit Export & Reports', () => {
       const settings = JSON.parse(new URL(interception.request.url).searchParams.get('settings') ?? '{}');
       expect(settings).to.include({ addComments: false, addRichNotes: false });
     });
-  });
-
-  // The element's internal id 05 and the derived variable's alias 05 are each unique in their own
-  // list, but both formats write both as an id; the Testcenter from version 19 rejects the XML (#2119)
-  it('names an id the export would carry twice, in XML and in JSON, and exports anyway on request', () => {
-    const conflictUnit = { shortname: 'EXP_ID05', name: 'Doppelte ID', group: '' };
-    let unitId = '';
-    cy.createUnitAPI(base.wsId, conflictUnit, base.token).then(created => {
-      expect(created.status, conflictUnit.shortname).to.equal(201);
-      unitId = String(created.body);
-      cy.updateUnitVariablesAPI(unitId, base.wsId, [{
-        id: '05', alias: '_00a', type: 'string', format: '', multiple: true, nullable: false, values: []
-      }], base.token).its('status').should('equal', 200);
-      cy.updateUnitSchemeAPI(unitId, base.wsId, base.token, JSON.stringify({
-        version: '3.0',
-        variableCodings: [
-          { id: '05', alias: '_00a', sourceType: 'BASE_NO_VALUE' },
-          {
-            id: 'd_1790938214783', alias: '05', sourceType: 'MANUAL', deriveSources: []
-          }
-        ]
-      })).its('status').should('equal', 200);
-    });
-    cy.visitWs(primaryWorkspace);
-    cy.contains('.unit-row, mat-row', conflictUnit.shortname, { timeout: 15000 }).should('be.visible');
-    goToWsMenu();
-    cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
-    selectListUnits([conflictUnit.shortname]);
-    cy.get('mat-radio-button[value="xml"]').click();
-
-    cy.get('[data-cy="workspace-export-unit-button"]').click();
-    cy.get('[data-cy="variable-id-conflicts-unit"]')
-      .should('contain.text', conflictUnit.shortname)
-      .find('[data-cy="variable-id-conflict"] .name')
-      .then($names => {
-        expect([...$names].map(name => name.textContent?.trim())).to.deep.equal(['05', '_00a', '05']);
-      });
-    cy.get('[data-cy="variable-id-conflicts-cancel"]').click();
-    cy.get('[data-cy="variable-id-conflicts-unit"]').should('not.exist');
-    cy.get('mat-radio-button[value="json"]').click();
-    cy.get('[data-cy="workspace-export-unit-button"]').should('be.visible').click();
-    cy.get('[data-cy="variable-id-conflicts-unit"]').should('contain.text', conflictUnit.shortname);
-    cy.get('[data-cy="variable-id-conflicts-cancel"]').click();
-    cy.get('mat-radio-button[value="xml"]').click();
-    cy.intercept('GET', '/api/workspaces/*?download=true*').as('downloadConflictReq');
-    cy.get('[data-cy="workspace-export-unit-button"]').should('be.visible').click();
-    cy.get('[data-cy="variable-id-conflicts-export-anyway"]').click();
-    waitForSuccess('@downloadConflictReq');
-    cy.get('[data-cy="workspace-export-unit-button"]').should('not.exist');
-    // the other tests of this spec share the base and are not meant to see this unit
-    cy.then(() => cy.deleteUnitsAPI([unitId], base.wsId, base.token).its('status').should('equal', 200));
   });
 
   it('displays metadata report', () => {

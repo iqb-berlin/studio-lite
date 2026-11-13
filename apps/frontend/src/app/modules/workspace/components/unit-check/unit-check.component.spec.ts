@@ -15,7 +15,7 @@ describe('UnitCheckComponent', () => {
   let unitStores: UnitStoresService;
   let hiddenRoutes: string[];
   let getUnitRichNotes: jest.Mock;
-  let getComments: jest.Mock;
+  let hasComments: jest.Mock;
 
   const element = (): HTMLElement => fixture.nativeElement as HTMLElement;
   const tabs = () => Array.from(
@@ -61,7 +61,7 @@ describe('UnitCheckComponent', () => {
       set: {
         providers: [{
           provide: CommentsBackendService,
-          useValue: { getComments }
+          useValue: { hasComments }
         }]
       }
     });
@@ -72,7 +72,7 @@ describe('UnitCheckComponent', () => {
 
   beforeEach(() => {
     hiddenRoutes = [];
-    getComments = jest.fn(() => of([{ id: 1 }]));
+    hasComments = jest.fn(() => of(true));
     getUnitRichNotes = jest.fn(() => of({ tags: [], notes: [] }));
   });
 
@@ -94,7 +94,7 @@ describe('UnitCheckComponent', () => {
     create();
 
     expect(tabs()).toEqual(['unit-check-properties', 'unit-check-editor', 'unit-check-schemer']);
-    expect(getComments).not.toHaveBeenCalled();
+    expect(hasComments).not.toHaveBeenCalled();
     expect(getUnitRichNotes).not.toHaveBeenCalled();
   }));
 

@@ -62,14 +62,10 @@ export {
   withChosenResourcePackage
 } from './lib/resource-package-versions';
 export { UiLanguage, UI_LANGUAGES, DEFAULT_UI_LANGUAGE } from './lib/ui-languages';
+export { hasCodingScheme, parseDerivedCodings, derivedVariableId } from './lib/coding-scheme';
 export {
   LocalizedText, LOCALIZED_CONFIG_TEXTS, LOCALIZED_EMAIL_TEMPLATE_TEXTS, toLocalizedText, textIn
 } from './lib/localized-text';
 export {
-  VariableIdConflict,
-  VariableIdConflictVariable,
-  hasCodingScheme,
-  parseDerivedCodings,
-  derivedVariableId,
-  findVariableIdConflicts
+  VariableIdConflict, VariableIdConflictVariable, findVariableIdConflicts
 } from './lib/variable-id-conflicts';

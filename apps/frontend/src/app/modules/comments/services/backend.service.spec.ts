@@ -88,6 +88,20 @@ describe('Comments BackendService', () => {
     req.flush([]);
   });
 
+  // a comment list that fails to load must not read as no comments (#2135)
+  it('should tell whether a unit has comments, and nothing when the server does not answer', () => {
+    const answers: (boolean | undefined)[] = [];
+    service.hasComments(10, 20).subscribe(answer => answers.push(answer));
+    httpMock.expectOne(`${serverUrl}workspaces/10/units/20/comments`).flush([{ id: 1 }]);
+    service.hasComments(10, 20).subscribe(answer => answers.push(answer));
+    httpMock.expectOne(`${serverUrl}workspaces/10/units/20/comments`).flush([]);
+    service.hasComments(10, 20).subscribe(answer => answers.push(answer));
+    httpMock.expectOne(`${serverUrl}workspaces/10/units/20/comments`)
+      .flush(null, { status: 500, statusText: 'Server Error' });
+
+    expect(answers).toEqual([true, false, undefined]);
+  });
+
   it('should create a comment for reviews', done => {
     const comment = { text: 'test' } as unknown as Partial<Comment>;
     service.createComment(comment, 10, 20, 30).subscribe(result => {

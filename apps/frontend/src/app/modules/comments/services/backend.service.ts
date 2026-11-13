@@ -19,14 +19,24 @@ export class BackendService {
   ) {}
 
   getComments(workspaceId: number, unitId: number, reviewId: number): Observable<Comment[]> {
-    const url = reviewId > 0 ?
-      `${this.serverUrl}reviews/${reviewId}/units/${unitId}/comments` :
-      `${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/comments`;
     return this.httpClient
-      .get<Comment[]>(url)
+      .get<Comment[]>(this.commentsUrl(workspaceId, unitId, reviewId))
       .pipe(
         catchError(() => of([])),
         map(comments => comments)
+      );
+  }
+
+  /**
+   * Whether a unit of a workspace has comments; undefined when the server does not answer, which
+   * {@link getComments} would report as no comments at all (#2135).
+   */
+  hasComments(workspaceId: number, unitId: number): Observable<boolean | undefined> {
+    return this.httpClient
+      .get<Comment[]>(this.commentsUrl(workspaceId, unitId, 0))
+      .pipe(
+        map(comments => comments.length > 0),
+        catchError(() => of(undefined))
       );
   }
 
@@ -114,5 +124,11 @@ export class BackendService {
       .pipe(
         catchError(() => of([]))
       );
+  }
+
+  private commentsUrl(workspaceId: number, unitId: number, reviewId: number): string {
+    return reviewId > 0 ?
+      `${this.serverUrl}reviews/${reviewId}/units/${unitId}/comments` :
+      `${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/comments`;
   }
 }

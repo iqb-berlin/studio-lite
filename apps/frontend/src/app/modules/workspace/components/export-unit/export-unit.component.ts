@@ -63,8 +63,9 @@ export class ExportUnitComponent implements OnDestroy {
   // The download button locks while the booklet id is invalid, so the reason shows while typing, not only on blur.
   readonly showErrorWhileTyping = new ShowOnDirtyErrorStateMatcher();
 
-  // undefined until the file config has the export contents; the download waits for them (#2119)
-  private readonly unitsWithVariableIdConflictsState = signal<UnitExportContentsDto[] | undefined>(undefined);
+  // undefined until the file config has the export contents; the download waits for them (#2119).
+  // null when they could not be read: the export stays possible, with a note that nothing was checked.
+  private readonly unitsWithVariableIdConflictsState = signal<UnitExportContentsDto[] | null | undefined>(undefined);
   readonly unitsWithVariableIdConflicts = this.unitsWithVariableIdConflictsState.asReadonly();
   private conflictDialogOpen = false;
   private ngUnsubscribe = new Subject<void>();
@@ -93,7 +94,7 @@ export class ExportUnitComponent implements OnDestroy {
     Object.assign(this.unitExportSettings, selection);
   }
 
-  setVariableIdConflicts(units: UnitExportContentsDto[]): void {
+  setVariableIdConflicts(units: UnitExportContentsDto[] | null): void {
     this.unitsWithVariableIdConflictsState.set(units);
   }
 
