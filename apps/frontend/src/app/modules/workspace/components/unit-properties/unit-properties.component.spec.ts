@@ -212,6 +212,7 @@ describe('UnitPropertiesComponent', () => {
     const store = createMock<UnitMetadataStore>();
     store.getChangedData.mockReturnValue(changed ? { id: 1, key: 'FIRST1' } : { id: 1 });
     jest.spyOn(component.unitStores, 'metadataStore').mockReturnValue(store);
+    component.unitForm.patchValue({ key: 'FIRST1' }, { emitEvent: false });
     component.unitForm.get('key')?.setErrors(carried ? { keyNotUnique: 'taken' } : null);
 
     (component as unknown as { reportUnitKeyRefused(): void }).reportUnitKeyRefused();
@@ -306,6 +307,21 @@ describe('UnitPropertiesComponent', () => {
       expect(component.workspaceService.setUnitKeyRefused).toHaveBeenLastCalledWith(false);
 
       component.unitForm.patchValue({ key: 'K'.repeat(21) });
+      expect(component.workspaceService.setUnitKeyRefused).toHaveBeenLastCalledWith(true);
+    }));
+
+    // #2127: the dialog on leaving the unit saves what the save button saves, and an empty key was
+    // blocked there only because it blocked every key that broke a rule
+    it('blocks saving an emptied key, but not one that only breaks the format rules', fakeAsync(() => {
+      openUnit(unitData({ key: 'KEY1' }));
+
+      component.unitForm.patchValue({ key: '1K' });
+      expect(component.workspaceService.setUnitKeyRefused).toHaveBeenLastCalledWith(false);
+
+      component.unitForm.patchValue({ key: '' });
+      expect(component.workspaceService.setUnitKeyRefused).toHaveBeenLastCalledWith(true);
+
+      component.unitForm.patchValue({ key: '   ' });
       expect(component.workspaceService.setUnitKeyRefused).toHaveBeenLastCalledWith(true);
     }));
 

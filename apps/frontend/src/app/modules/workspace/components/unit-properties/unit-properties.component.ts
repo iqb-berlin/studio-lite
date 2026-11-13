@@ -316,11 +316,14 @@ export class UnitPropertiesComponent
    * key another unit has -- from before the server checked renames -- stays editable, as the server
    * only checks a key that is changed (#1842). Too long is refused as well, since the database column
    * holds no more than 20 characters and saving such a key failed (#2120); no stored key is longer.
+   * So is an empty key, blanks only included, which a unit cannot be created with either (#2095), now
+   * that the dialog on leaving the unit no longer blocks saving every key that breaks a rule (#2127).
    */
   private reportUnitKeyRefused(): void {
     const keyChanged = this.unitStores.metadataStore()?.getChangedData().key !== undefined;
     const keyControl = this.unitForm.get('key');
-    const refused = !!keyControl?.hasError('keyNotUnique') || !!keyControl?.hasError('maxlength');
+    const blank = !`${keyControl?.value ?? ''}`.trim();
+    const refused = blank || !!keyControl?.hasError('keyNotUnique') || !!keyControl?.hasError('maxlength');
     this.workspaceService.setUnitKeyRefused(keyChanged && refused);
   }
 

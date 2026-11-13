@@ -75,9 +75,10 @@ export class WorkspaceService {
   isValidFormKey = new BehaviorSubject<boolean>(true);
   private readonly unitKeyRefusedState = signal(false);
   /**
-   * Whether the key typed in the properties is one the server refuses: another unit of the workspace
-   * already carries it (#1842), or it is longer than the database column holds (#2120). Unlike a key
-   * that only breaks the format rules -- which units in use do, and must stay savable -- it blocks saving.
+   * Whether the key typed in the properties is one that must not be saved: another unit of the
+   * workspace already carries it (#1842), it is longer than the database column holds (#2120), or it
+   * is empty (#2127). Unlike a key that only breaks the format rules -- which units in use do, and must
+   * stay savable -- it blocks saving, with the save button and in the dialog on leaving the unit.
    */
   readonly unitKeyRefused = this.unitKeyRefusedState.asReadonly();
   private readonly savingState = signal(false);

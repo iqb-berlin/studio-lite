@@ -10,7 +10,10 @@ describe('SaveOrDiscardComponent', () => {
   let component: SaveOrDiscardComponent;
   let fixture: ComponentFixture<SaveOrDiscardComponent>;
 
-  const confirmData = { title: 't', content: 'c', confirmButtonLabel: 'ok' };
+  const confirmData = {
+    title: 't', content: 'c', confirmButtonLabel: 'ok', warning: true, confirmButtonDisabled: false
+  };
+  const saveButton = (): HTMLButtonElement => fixture.nativeElement.querySelector('button');
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -21,7 +24,7 @@ describe('SaveOrDiscardComponent', () => {
       providers: [
         {
           provide: MAT_DIALOG_DATA,
-          useValue: confirmData
+          useValue: { ...confirmData }
         },
         {
           provide: WorkspaceBackendService,
@@ -50,7 +53,12 @@ describe('SaveOrDiscardComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  // #2127: a warning alone does not block saving; the guard says when saving is refused
+  it('offers saving despite a warning until saving is refused', () => {
+    expect(saveButton().disabled).toBe(false);
+
+    component.confirmData.confirmButtonDisabled = true;
+    fixture.detectChanges();
+    expect(saveButton().disabled).toBe(true);
   });
 });
