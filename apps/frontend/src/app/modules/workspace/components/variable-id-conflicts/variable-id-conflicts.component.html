@@ -8,62 +8,19 @@
     }
   </p>
   @for (unit of data.units; track unit.key) {
-    <div class="unit" data-cy="variable-id-conflicts-unit">
+    <div data-cy="variable-id-conflicts-unit">
       <h3 class="unit-title">
         {{ unit.key }}
         @if (unit.name) {
           <span>– {{ unit.name }}</span>
         }
       </h3>
-      <ul class="conflicts">
-        @for (conflict of unit.conflicts; track conflict.id) {
-          <li data-cy="variable-id-conflict">
-            {{ 'unit-download.variable-id-conflicts.id' | translate }}
-            <span class="name">{{ conflict.id }}</span>
-            {{ 'unit-download.variable-id-conflicts.stands-for' | translate }}
-            <ul class="variables">
-              @for (variable of conflict.variables; track $index) {
-                <li>
-                  @if (variable.kind === 'base') {
-                    {{ 'unit-download.variable-id-conflicts.base' | translate }}
-                    <span class="name">{{ variable.alias || variable.id }}</span>
-                    {{ 'unit-download.variable-id-conflicts.base-hint' | translate }}
-                  } @else {
-                    {{ 'unit-download.variable-id-conflicts.derived' | translate }}
-                    <span class="name">{{ variable.alias || variable.id }}</span>
-                    {{ 'unit-download.variable-id-conflicts.derived-hint' | translate }}
-                  }
-                </li>
-              }
-            </ul>
-          </li>
-        }
-      </ul>
+      <studio-lite-variable-id-conflict-list [conflicts]="unit.conflicts"></studio-lite-variable-id-conflict-list>
     </div>
   }
-  <mat-expansion-panel class="manual-fix" data-cy="variable-id-conflicts-manual-fix">
-    <mat-expansion-panel-header>
-      <mat-panel-title>{{ 'unit-download.variable-id-conflicts.manual-fix' | translate }}</mat-panel-title>
-    </mat-expansion-panel-header>
-    <p>{{ 'unit-download.variable-id-conflicts.manual-fix-intro' | translate }}</p>
-    @if (involvesElement) {
-      <h4 class="way-title">{{ 'unit-download.variable-id-conflicts.keep-derived.title' | translate }}</h4>
-      <ol>
-        <li>{{ 'unit-download.variable-id-conflicts.keep-derived.step-duplicate' | translate }}</li>
-        <li>{{ 'unit-download.variable-id-conflicts.keep-derived.step-take-over' | translate }}</li>
-        <li>{{ 'unit-download.variable-id-conflicts.keep-derived.step-coding' | translate }}</li>
-        <li>{{ 'unit-download.variable-id-conflicts.keep-derived.step-sources' | translate }}</li>
-        <li>{{ 'unit-download.variable-id-conflicts.keep-derived.step-items' | translate }}</li>
-      </ol>
-      <p class="note">{{ 'unit-download.variable-id-conflicts.keep-derived.note' | translate }}</p>
-    }
-    <h4 class="way-title">{{ 'unit-download.variable-id-conflicts.rename-derived.title' | translate }}</h4>
-    <ol>
-      <li>{{ 'unit-download.variable-id-conflicts.rename-derived.step-rename' | translate }}</li>
-      <li>{{ 'unit-download.variable-id-conflicts.rename-derived.step-items' | translate }}</li>
-    </ol>
-    <p class="note">{{ 'unit-download.variable-id-conflicts.rename-derived.note' | translate }}</p>
-  </mat-expansion-panel>
+  <studio-lite-variable-id-conflict-fix class="manual-fix"
+                                        [conflicts]="conflicts">
+  </studio-lite-variable-id-conflict-fix>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-raised-button color="primary"

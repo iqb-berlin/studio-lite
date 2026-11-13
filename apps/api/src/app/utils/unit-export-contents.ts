@@ -1,10 +1,10 @@
 import {
   MetadataValuesEntry, UnitExportContentsDto, UnitMetadataValues
 } from '@studio-lite-lib/api-dto';
+import { findVariableIdConflicts, hasCodingScheme } from '@studio-lite/shared-code';
 import type { UnitService } from '../services/unit.service';
 import type { UnitCommentService } from '../services/unit-comment.service';
 import type { UnitRichNoteService } from '../services/unit-rich-note.service';
-import { findVariableIdConflicts } from './variable-id-conflicts';
 
 /*
  * What counts as content of an optional export file. The export writes a file only when its
@@ -45,10 +45,6 @@ export function hasMetadataContent(metadata?: UnitMetadataValues | null): boolea
 /** At least one item with the id both formats require. */
 export function hasItems(metadata?: UnitMetadataValues | null): boolean {
   return (metadata?.items ?? []).some(item => !!item?.id);
-}
-
-export function hasCodingScheme(scheme?: string | null): boolean {
-  return !!scheme;
 }
 
 /**

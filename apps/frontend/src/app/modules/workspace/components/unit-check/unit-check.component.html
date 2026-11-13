@@ -1,0 +1,47 @@
+<mat-card data-cy="unit-check">
+  <mat-card-header class="unit-check-header">
+    <mat-card-title>{{ 'unit-check.title' | translate }}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <p class="hint">{{ 'unit-check.hint' | translate }}</p>
+    @if (sections(); as checked) {
+      @for (section of checked; track section.tab) {
+        <div class="section" [attr.data-cy]="'unit-check-' + section.tab">
+          <div class="section-header">
+            @if (section.info) {
+              <mat-icon class="status-icon info-icon">info</mat-icon>
+            } @else if (section.ok) {
+              <mat-icon class="status-icon ok-icon">check_circle</mat-icon>
+            } @else {
+              <mat-icon class="status-icon warning-icon">warning</mat-icon>
+            }
+            <span class="section-title">{{ 'workspace.routes.' + section.tab | translate }}</span>
+            @if (section.info) {
+              <span data-cy="unit-check-info">{{ section.info.key | translate }}</span>
+            } @else if (section.ok) {
+              <span data-cy="unit-check-ok">{{ 'unit-check.ok' | translate }}</span>
+            }
+          </div>
+          @if (section.findings.length) {
+            <ul class="findings">
+              @for (finding of section.findings; track finding.key) {
+                <li data-cy="unit-check-finding">{{ finding.key | translate: finding.params }}</li>
+              }
+            </ul>
+          }
+          @if (section.variableIdConflicts.length) {
+            <div class="conflicts" data-cy="unit-check-variable-id-conflicts">
+              <p>{{ 'unit-check.variable-id-conflicts' | translate }}</p>
+              <studio-lite-variable-id-conflict-list [conflicts]="section.variableIdConflicts">
+              </studio-lite-variable-id-conflict-list>
+              <studio-lite-variable-id-conflict-fix class="manual-fix" [conflicts]="section.variableIdConflicts">
+              </studio-lite-variable-id-conflict-fix>
+            </div>
+          }
+        </div>
+      }
+    } @else {
+      <mat-spinner class="wait-animation" diameter="30"></mat-spinner>
+    }
+  </mat-card-content>
+</mat-card>
