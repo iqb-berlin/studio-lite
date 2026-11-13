@@ -177,12 +177,23 @@ describe('ExportUnitFileConfigComponent', () => {
     };
     backendService.exportContents = of([unitWithComments, unitWithConflict]);
     fixture = TestBed.createComponent(ExportUnitFileConfigComponent);
-    const passedOn: UnitExportContentsDto[][] = [];
+    const passedOn: (UnitExportContentsDto[] | null)[] = [];
     fixture.componentInstance.variableIdConflictsChange.subscribe(units => passedOn.push(units));
 
     fixture.detectChanges();
 
     expect(passedOn).toEqual([[unitWithConflict]]);
+  });
+
+  it('should pass on that the ids could not be checked when the contents cannot be read', () => {
+    backendService.exportContents = of(null);
+    fixture = TestBed.createComponent(ExportUnitFileConfigComponent);
+    const passedOn: (UnitExportContentsDto[] | null)[] = [];
+    fixture.componentInstance.variableIdConflictsChange.subscribe(units => passedOn.push(units));
+
+    fixture.detectChanges();
+
+    expect(passedOn).toEqual([null]);
   });
 
   describe('players', () => {

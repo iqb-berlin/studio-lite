@@ -100,12 +100,17 @@
       </div>
     </div>
   </mat-dialog-content>
+  @if (unitsWithVariableIdConflicts() === null) {
+    <p class="config-message" data-cy="export-variable-id-check-failed">
+      {{ 'unit-download.variable-id-conflicts.check-failed' | translate }}
+    </p>
+  }
   <mat-dialog-actions align="end">
     <div class="fx-row-start-stretch">
       <button mat-raised-button color="primary"
               (click)="download()"
               [disabled]="!unitExportSettings.unitIdList.length
-                || !unitsWithVariableIdConflicts()
+                || unitsWithVariableIdConflicts() === undefined
                 || ((unitExportSettings.addTestTakersReview
                      | hasTakers : unitExportSettings.addTestTakersHot : unitExportSettings.addTestTakersMonitor)
                     && bookletId.invalid)"

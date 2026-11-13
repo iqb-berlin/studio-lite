@@ -107,7 +107,7 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
     // what the workspace hides is not shown, and so not asked for
     const hasComments = hiddenRoutes.includes('comments') ?
       of(undefined) :
-      this.commentsBackendService.getComments(workspaceId, unitId, 0).pipe(map(comments => comments.length > 0));
+      this.commentsBackendService.hasComments(workspaceId, unitId);
     const hasRichNotes = hiddenRoutes.includes('notes') ?
       of(undefined) :
       this.backendService.getUnitRichNotes(workspaceId, unitId)

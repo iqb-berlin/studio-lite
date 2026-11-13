@@ -98,3 +98,15 @@ export function matchDefinitionType(
   if (unitType.name !== moduleType.name) return 'incompatible';
   return inRange ? 'compatible' : 'incompatible';
 }
+
+/**
+ * Whether the player says of itself that it does not read the format a unit is written in. The
+ * preview warns of it and the unit check names it (#2135); both ask here. A missing player, or a
+ * side that says nothing, is no such statement: the player still runs (#1368).
+ */
+export function playerRejectsDefinitionType<T extends { metadata?: { model?: string } }>(
+  definitionType: string | undefined | null,
+  player: T | undefined
+): player is T {
+  return !!player && matchDefinitionType(definitionType, player.metadata?.model) === 'incompatible';
+}

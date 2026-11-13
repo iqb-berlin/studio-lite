@@ -79,7 +79,8 @@
       "title": "Doppelte Variablen-IDs",
       "intro-xml": "Im XML dieser Aufgaben stünde dieselbe ID für zwei Variablen. Das Testcenter nimmt solche Aufgaben ab Version 19 nicht an. Die übrigen Aufgaben sind davon nicht betroffen.",
       "intro-json": "Im JSON dieser Aufgaben stünde dieselbe ID für zwei Variablen. Programme, die Variablen über ihre ID zuordnen, können die beiden verwechseln. Die übrigen Aufgaben sind davon nicht betroffen.",
-      "export-anyway": "Trotzdem exportieren"
+      "export-anyway": "Trotzdem exportieren",
+      "check-failed": "Ob eine Variablen-ID im Export doppelt stünde, konnte nicht geprüft werden."
     },
     "dialog": {
       "title": "Aufgabe(n) als Datei herunterladen",

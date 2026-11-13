@@ -69,7 +69,7 @@ describe('ExportUnitComponent', () => {
     @Output() addPlayersChange = new EventEmitter<boolean>();
     @Output() fileSelectionChange = new EventEmitter<ExportFileSelection>();
     @Output() unitsWithOutPlayerChange = new EventEmitter<number[]>();
-    @Output() variableIdConflictsChange = new EventEmitter<UnitExportContentsDto[]>();
+    @Output() variableIdConflictsChange = new EventEmitter<UnitExportContentsDto[] | null>();
   }
 
   const dialogRef = createMock<MatDialogRef<ExportUnitComponent>>();
@@ -336,7 +336,7 @@ describe('ExportUnitComponent', () => {
     });
     let openDialog: jest.SpyInstance;
 
-    const reportConflicts = (units: UnitExportContentsDto[]) => {
+    const reportConflicts = (units: UnitExportContentsDto[] | null) => {
       (fixture.debugElement
         .query(By.directive(MockExportUnitFileConfigComponent))
         .componentInstance as MockExportUnitFileConfigComponent).variableIdConflictsChange.emit(units);
@@ -389,6 +389,22 @@ describe('ExportUnitComponent', () => {
       reportConflicts([]);
       fixture.detectChanges();
       expect(button().disabled).toBe(false);
+    });
+
+    // a failed check must not pass for one that found nothing
+    it('says so when the ids could not be checked, and leaves the export possible', () => {
+      const failedNote = () => fixture.debugElement.query(By.css('[data-cy="export-variable-id-check-failed"]'));
+      answerConflictDialog(false);
+      fixture.detectChanges();
+      expect(failedNote()).toBeNull();
+
+      reportConflicts(null);
+      fixture.detectChanges();
+      expect(failedNote()).not.toBeNull();
+
+      component.download();
+      expect(openDialog).not.toHaveBeenCalled();
+      expect(dialogRef.close).toHaveBeenCalledWith(component.unitExportSettings);
     });
 
     it('opens no second conflict dialog while the first is open', () => {
