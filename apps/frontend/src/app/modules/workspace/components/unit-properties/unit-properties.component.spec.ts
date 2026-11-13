@@ -65,7 +65,7 @@ describe('UnitPropertiesComponent', () => {
       } as WorkspaceSettingsDto,
       loadUnitProperties: () => of(null),
       isValidFormKey: new BehaviorSubject<boolean>(true),
-      setUnitKeyTaken: jest.fn()
+      setUnitKeyRefused: jest.fn()
     } as unknown as WorkspaceService;
 
     const moduleServiceStub = {
@@ -208,15 +208,15 @@ describe('UnitPropertiesComponent', () => {
     [true, true, true],
     [false, true, false],
     [true, false, false]
-  ])('reports the key as taken: changed %s, carried by another unit %s → %s', (changed, carried, taken) => {
+  ])('reports the key as refused: changed %s, carried by another unit %s → %s', (changed, carried, refused) => {
     const store = createMock<UnitMetadataStore>();
     store.getChangedData.mockReturnValue(changed ? { id: 1, key: 'FIRST1' } : { id: 1 });
     jest.spyOn(component.unitStores, 'metadataStore').mockReturnValue(store);
     component.unitForm.get('key')?.setErrors(carried ? { keyNotUnique: 'taken' } : null);
 
-    (component as unknown as { reportUnitKeyTaken(): void }).reportUnitKeyTaken();
+    (component as unknown as { reportUnitKeyRefused(): void }).reportUnitKeyRefused();
 
-    expect(component.workspaceService.setUnitKeyTaken).toHaveBeenCalledWith(taken);
+    expect(component.workspaceService.setUnitKeyRefused).toHaveBeenCalledWith(refused);
   });
 
   // the editor may load the definition only after this view was built
@@ -296,6 +296,17 @@ describe('UnitPropertiesComponent', () => {
       fixture.detectChanges();
 
       expect(fixture.nativeElement.querySelector('mat-error')).not.toBeNull();
+    }));
+
+    // #2120: the database column holds 20 characters, and saving a longer key failed as a server problem
+    it('blocks saving a key longer than 20 characters', fakeAsync(() => {
+      openUnit(unitData({ key: 'KEY1' }));
+
+      component.unitForm.patchValue({ key: 'K'.repeat(20) });
+      expect(component.workspaceService.setUnitKeyRefused).toHaveBeenLastCalledWith(false);
+
+      component.unitForm.patchValue({ key: 'K'.repeat(21) });
+      expect(component.workspaceService.setUnitKeyRefused).toHaveBeenLastCalledWith(true);
     }));
 
     // #2004: the store of a unit the server did not answer for holds its id alone, and the form went

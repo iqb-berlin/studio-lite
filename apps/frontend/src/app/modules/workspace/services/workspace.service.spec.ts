@@ -158,12 +158,12 @@ describe('WorkspaceService', () => {
       service.lastChangedScheme = new Date();
       service.lastChangedDefinition = new Date();
       service.isValidFormKey.next(false);
-      service.setUnitKeyTaken(true);
+      service.setUnitKeyRefused(true);
 
       service.resetUnitData();
 
       expect(service.isValidFormKey.value).toBe(true);
-      expect(service.unitKeyTaken()).toBe(false);
+      expect(service.unitKeyRefused()).toBe(false);
       expect(service.lastChangedMetadata).toBeUndefined();
       expect(service.lastChangedScheme).toBeUndefined();
       expect(service.lastChangedDefinition).toBeUndefined();

@@ -71,18 +71,18 @@ describe('UnitSaveButtonComponent', () => {
     expect(saveButton(fixture).disabled).toBe(true);
   });
 
-  // #1842: a key another unit carries blocks saving; one that only breaks the format rules does not
-  it('is disabled while the key typed in the properties is taken', () => {
+  // #1842, #2120: a key the server refuses blocks saving; one that only breaks the format rules does not
+  it('is disabled while the key typed in the properties is refused', () => {
     const workspaceService = TestBed.inject(WorkspaceService);
     unitStores.loadMetadataStore(1, 1).subscribe();
     unitStores.metadataStore()?.setPlayer('player@2.0');
     const fixture = createButton();
 
-    workspaceService.setUnitKeyTaken(true);
+    workspaceService.setUnitKeyRefused(true);
     fixture.detectChanges();
     expect(saveButton(fixture).disabled).toBe(true);
 
-    workspaceService.setUnitKeyTaken(false);
+    workspaceService.setUnitKeyRefused(false);
     workspaceService.isValidFormKey.next(false);
     fixture.detectChanges();
     expect(saveButton(fixture).disabled).toBe(false);

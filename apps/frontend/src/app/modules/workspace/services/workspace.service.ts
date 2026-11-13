@@ -73,13 +73,13 @@ export class WorkspaceService {
   lastChangedDefinitionUser?: string;
   lastChangedSchemeUser?: string;
   isValidFormKey = new BehaviorSubject<boolean>(true);
-  private readonly unitKeyTakenState = signal(false);
+  private readonly unitKeyRefusedState = signal(false);
   /**
-   * Whether another unit of the workspace already carries the key typed in the properties. Unlike
-   * a key that only breaks the format rules -- which units in use do, and must stay savable -- a
-   * taken key blocks saving (#1842).
+   * Whether the key typed in the properties is one the server refuses: another unit of the workspace
+   * already carries it (#1842), or it is longer than the database column holds (#2120). Unlike a key
+   * that only breaks the format rules -- which units in use do, and must stay savable -- it blocks saving.
    */
-  readonly unitKeyTaken = this.unitKeyTakenState.asReadonly();
+  readonly unitKeyRefused = this.unitKeyRefusedState.asReadonly();
   private readonly savingState = signal(false);
   /** Whether the open unit is being saved; no second save starts meanwhile (#1845). */
   readonly saving = this.savingState.asReadonly();
@@ -155,12 +155,12 @@ export class WorkspaceService {
     this.lastChangedDefinition = undefined;
     // the key checks belong to the unit left; the next one is checked when its properties are shown
     this.isValidFormKey.next(true);
-    this.unitKeyTakenState.set(false);
+    this.unitKeyRefusedState.set(false);
     this.unitStores.reset();
   }
 
-  setUnitKeyTaken(taken: boolean): void {
-    this.unitKeyTakenState.set(taken);
+  setUnitKeyRefused(refused: boolean): void {
+    this.unitKeyRefusedState.set(refused);
   }
 
   resetUnitList(data: UnitInListDto[]) {
