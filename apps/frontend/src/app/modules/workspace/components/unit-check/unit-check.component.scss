@@ -1,0 +1,56 @@
+.unit-check-header {
+  margin-bottom: 8px;
+}
+
+.hint {
+  color: #666;
+}
+
+.section {
+  padding: 6px 0;
+  border-top: 1px solid #eee;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title {
+  font-weight: 600;
+  min-width: 130px;
+}
+
+.status-icon {
+  flex: 0 0 auto;
+}
+
+.ok-icon {
+  color: #2e7d32;
+}
+
+.warning-icon {
+  color: #e65100;
+}
+
+.info-icon {
+  color: #1565c0;
+}
+
+.findings {
+  margin: 4px 0 0 32px;
+}
+
+.conflicts {
+  margin: 4px 0 0 32px;
+}
+
+.manual-fix {
+  display: block;
+  margin-top: 8px;
+}
+
+.wait-animation {
+  margin: 8px auto;
+}

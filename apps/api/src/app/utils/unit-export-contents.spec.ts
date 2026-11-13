@@ -1,7 +1,7 @@
 import { createMock } from '@golevelup/ts-jest';
 import { MetadataValuesEntry, UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import {
-  entryHasContent, findUnitExportContents, hasCodingScheme, hasItems, hasMetadataContent
+  entryHasContent, findUnitExportContents, hasItems, hasMetadataContent
 } from './unit-export-contents';
 import { UnitService } from '../services/unit.service';
 import { UnitCommentService } from '../services/unit-comment.service';
@@ -62,15 +62,6 @@ describe('unit export contents', () => {
       expect(hasItems({ items: [] })).toBe(false);
       expect(hasItems({})).toBe(false);
       expect(hasItems(null)).toBe(false);
-    });
-  });
-
-  describe('hasCodingScheme', () => {
-    it('is true only for a non-empty scheme', () => {
-      expect(hasCodingScheme('{"variableCodings":[]}')).toBe(true);
-      expect(hasCodingScheme('')).toBe(false);
-      expect(hasCodingScheme(null)).toBe(false);
-      expect(hasCodingScheme(undefined)).toBe(false);
     });
   });
 

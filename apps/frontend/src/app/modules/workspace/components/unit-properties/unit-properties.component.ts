@@ -58,6 +58,7 @@ import { AliasId } from '../../../metadata/models/alias-id.interface';
 import { MetadataBackendService } from '../../../metadata/services/metadata-backend.service';
 import { MetadataService } from '../../../metadata/services/metadata.service';
 import { I18nService } from '../../../../services/i18n.service';
+import { UnitCheckComponent } from '../unit-check/unit-check.component';
 
 /**
  * Everything about a unit that is not its content: name and key, the modules it is opened with, its
@@ -96,7 +97,8 @@ import { I18nService } from '../../../../services/i18n.service';
     TranslateModule,
     MatIcon,
     CanReturnUnitPipe,
-    MatProgressSpinner
+    MatProgressSpinner,
+    UnitCheckComponent
   ]
 })
 export class UnitPropertiesComponent

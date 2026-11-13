@@ -1,0 +1,23 @@
+<mat-expansion-panel data-cy="variable-id-conflicts-manual-fix">
+  <mat-expansion-panel-header>
+    <mat-panel-title>{{ 'variable-id-conflicts.manual-fix' | translate }}</mat-panel-title>
+  </mat-expansion-panel-header>
+  <p>{{ 'variable-id-conflicts.manual-fix-intro' | translate }}</p>
+  @if (involvesElement()) {
+    <h4 class="way-title">{{ 'variable-id-conflicts.keep-derived.title' | translate }}</h4>
+    <ol>
+      <li>{{ 'variable-id-conflicts.keep-derived.step-duplicate' | translate }}</li>
+      <li>{{ 'variable-id-conflicts.keep-derived.step-take-over' | translate }}</li>
+      <li>{{ 'variable-id-conflicts.keep-derived.step-coding' | translate }}</li>
+      <li>{{ 'variable-id-conflicts.keep-derived.step-sources' | translate }}</li>
+      <li>{{ 'variable-id-conflicts.keep-derived.step-items' | translate }}</li>
+    </ol>
+    <p class="note">{{ 'variable-id-conflicts.keep-derived.note' | translate }}</p>
+  }
+  <h4 class="way-title">{{ 'variable-id-conflicts.rename-derived.title' | translate }}</h4>
+  <ol>
+    <li>{{ 'variable-id-conflicts.rename-derived.step-rename' | translate }}</li>
+    <li>{{ 'variable-id-conflicts.rename-derived.step-items' | translate }}</li>
+  </ol>
+  <p class="note">{{ 'variable-id-conflicts.rename-derived.note' | translate }}</p>
+</mat-expansion-panel>

@@ -3,16 +3,15 @@ import {
   MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent, MatDialogTitle
 } from '@angular/material/dialog';
 import { MatButton } from '@angular/material/button';
-import {
-  MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle
-} from '@angular/material/expansion';
 import { TranslateModule } from '@ngx-translate/core';
-import { VariableIdConflictDto } from '@studio-lite-lib/api-dto';
+import { VariableIdConflict } from '@studio-lite/shared-code';
+import { VariableIdConflictListComponent } from '../variable-id-conflict-list/variable-id-conflict-list.component';
+import { VariableIdConflictFixComponent } from '../variable-id-conflict-fix/variable-id-conflict-fix.component';
 
 export interface UnitVariableIdConflicts {
   key: string;
   name?: string;
-  conflicts: VariableIdConflictDto[];
+  conflicts: VariableIdConflict[];
 }
 
 /**
@@ -25,19 +24,18 @@ export interface UnitVariableIdConflicts {
   templateUrl: './variable-id-conflicts.component.html',
   styleUrls: ['./variable-id-conflicts.component.scss'],
   imports: [
-    MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose, MatButton,
-    MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, TranslateModule
+    MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose, MatButton, TranslateModule,
+    VariableIdConflictListComponent, VariableIdConflictFixComponent
   ]
 })
 export class VariableIdConflictsComponent {
-  // The way that keeps the derived name gives an element a new internal id; it needs an element
-  readonly involvesElement: boolean;
+  // the conflicts of all units, for the one description of how to resolve them
+  readonly conflicts: VariableIdConflict[];
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: {
     units: UnitVariableIdConflicts[];
     exportFormat: 'xml' | 'json';
   }) {
-    this.involvesElement = data.units.some(unit => unit.conflicts
-      .some(conflict => conflict.variables.some(variable => variable.kind === 'base')));
+    this.conflicts = data.units.flatMap(unit => unit.conflicts);
   }
 }

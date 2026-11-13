@@ -1,22 +1,30 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
+import { VariableIdConflict } from '@studio-lite/shared-code';
 import { UnitVariableIdConflicts, VariableIdConflictsComponent } from './variable-id-conflicts.component';
+import { VariableIdConflictListComponent } from '../variable-id-conflict-list/variable-id-conflict-list.component';
+import { VariableIdConflictFixComponent } from '../variable-id-conflict-fix/variable-id-conflict-fix.component';
 
 describe('VariableIdConflictsComponent', () => {
   let fixture: ComponentFixture<VariableIdConflictsComponent>;
 
-  const units: UnitVariableIdConflicts[] = [{
-    key: 'GL_NC08',
-    name: 'Markieren',
-    conflicts: [{
-      id: '05',
-      variables: [
-        { kind: 'base', id: '05', alias: '_00a' },
-        { kind: 'derived', id: 'd_1790938214783', alias: '05' }
-      ]
-    }]
-  }];
+  const elementConflict: VariableIdConflict = {
+    id: '05',
+    variables: [
+      { kind: 'base', id: '05', alias: '_00a' },
+      { kind: 'derived', id: 'd_1790938214783', alias: '05' }
+    ]
+  };
+  const derivedConflict: VariableIdConflict = {
+    id: 'd_2',
+    variables: [{ kind: 'derived', id: 'd_1', alias: 'd_2' }, { kind: 'derived', id: 'd_2' }]
+  };
+  const units: UnitVariableIdConflicts[] = [
+    { key: 'GL_NC08', name: 'Markieren', conflicts: [elementConflict] },
+    { key: 'U2', conflicts: [derivedConflict] }
+  ];
 
   const create = async (data: { units: UnitVariableIdConflicts[]; exportFormat: 'xml' | 'json' }) => {
     await TestBed.configureTestingModule({
@@ -27,46 +35,22 @@ describe('VariableIdConflictsComponent', () => {
     fixture = TestBed.createComponent(VariableIdConflictsComponent);
     fixture.detectChanges();
   };
-  const ways = () => Array.from(
-    (fixture.nativeElement as HTMLElement).querySelectorAll('.way-title'),
-    title => title.textContent?.trim()
-  );
 
-  // The element is named by the alias the editor shows, not by the internal id nobody can see there
-  it('names each conflict by the names the authors see (#2119)', async () => {
+  it('lists the conflicts of each unit under its key and name (#2119)', async () => {
     await create({ units, exportFormat: 'xml' });
-    const element = fixture.nativeElement as HTMLElement;
-    const unit = element.querySelector('[data-cy="variable-id-conflicts-unit"]');
-    const conflict = element.querySelector('[data-cy="variable-id-conflict"]');
+    const unitElements = fixture.debugElement.queryAll(By.css('[data-cy="variable-id-conflicts-unit"]'));
 
-    expect(unit?.textContent).toContain('GL_NC08');
-    expect(unit?.textContent).toContain('Markieren');
-    const names = Array.from(conflict?.querySelectorAll('.name') ?? [], name => name.textContent?.trim());
-    expect(names).toEqual(['05', '_00a', '05']);
+    expect(unitElements[0].nativeElement.textContent).toContain('GL_NC08');
+    expect(unitElements[0].nativeElement.textContent).toContain('Markieren');
+    expect(unitElements.map(unit => unit.query(By.directive(VariableIdConflictListComponent))
+      .componentInstance.conflicts())).toEqual([[elementConflict], [derivedConflict]]);
   });
 
-  it('offers to give an element a new id only where an element is involved', async () => {
-    await create({
-      units: [{
-        key: 'U1',
-        conflicts: [{
-          id: 'd_2',
-          variables: [{ kind: 'derived', id: 'd_1', alias: 'd_2' }, { kind: 'derived', id: 'd_2' }]
-        }]
-      }],
-      exportFormat: 'xml'
-    });
-
-    expect(ways()).toEqual(['unit-download.variable-id-conflicts.rename-derived.title']);
-  });
-
-  it('offers both ways where an element is involved', async () => {
+  it('describes the manual fix once, for the conflicts of all units', async () => {
     await create({ units, exportFormat: 'xml' });
 
-    expect(ways()).toEqual([
-      'unit-download.variable-id-conflicts.keep-derived.title',
-      'unit-download.variable-id-conflicts.rename-derived.title'
-    ]);
+    expect(fixture.debugElement.query(By.directive(VariableIdConflictFixComponent)).componentInstance.conflicts())
+      .toEqual([elementConflict, derivedConflict]);
   });
 
   // The Testcenter takes only the XML; a JSON export is read by other programs

@@ -9,7 +9,9 @@ import {
 } from '@studio-lite-lib/api-dto';
 import type AdmZip from 'adm-zip';
 import * as XmlBuilder from 'xmlbuilder2';
-import { toUnitXmlFormat, toVariableInfoListV1 } from '@studio-lite/shared-code';
+import {
+  derivedVariableId, parseDerivedCodings, toUnitXmlFormat, toVariableInfoListV1
+} from '@studio-lite/shared-code';
 // Type-only, like every deep import into a package: should the package add an `exports` map, a
 // runtime require of this path would kill the boot -- see the import in api-file.decorator.ts.
 import type { XMLBuilder } from 'xmlbuilder2/lib/interfaces';
@@ -22,7 +24,6 @@ import { UnitRichNoteService } from '../services/unit-rich-note.service';
 import { hasItems, hasMetadataContent } from '../utils/unit-export-contents';
 import { LegacyMetadataDownloadClass } from './legacy-metadata-download.class';
 import { RichNotesDownloadClass } from './rich-notes-download.class';
-import { derivedVariableId, parseDerivedCodings } from '../utils/derived-codings';
 
 /**
  * A unit in the XML format the testcenter reads: the unit file with its references, and beside it
@@ -246,7 +247,7 @@ export class UnitXmlDownloadClass {
     schemeData: UnitSchemeDto,
     unitXml: XMLBuilder
   ): void {
-    const derivedCodings = parseDerivedCodings(schemeData);
+    const derivedCodings = parseDerivedCodings(schemeData?.scheme);
     if (derivedCodings.length === 0) return;
     const derivedVariablesElement = unitXml.root().ele('DerivedVariables');
     derivedCodings.forEach(coding => {
