@@ -1,5 +1,7 @@
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
-import { checkUnit, UnitCheckInput, UnitCheckSection } from './unit-check.utils';
+import {
+  checkUnit, storesToCheck, UnitCheckInput, UnitCheckSection
+} from './unit-check.utils';
 
 const scheme = (variableCodings: unknown[]): string => JSON.stringify({ version: '3.0', variableCodings });
 
@@ -166,6 +168,38 @@ describe('checkUnit', () => {
       input.hiddenRoutes = ['comments', 'notes'];
 
       expect(checkUnit(input).map(entry => entry.tab)).toEqual(['properties', 'editor', 'schemer']);
+    });
+  });
+
+  describe('hidden editor and coding', () => {
+    // a finding in a tab the workspace hides could not be resolved there
+    it('checks neither the tabs nor their modules', () => {
+      const input = okInput();
+      input.hiddenRoutes = ['editor', 'schemer'];
+      input.modules = { player: 'iqb-player-aspect@2.9' };
+      // neither is loaded then
+      input.definition = undefined;
+      input.scheme = undefined;
+
+      const sections = checkUnit(input);
+
+      expect(sections.map(entry => entry.tab)).toEqual(['properties', 'comments', 'notes']);
+      expect(section(sections, 'properties')?.findings).toEqual([]);
+    });
+
+    // the coding's ids are checked against the variables of the definition
+    it('loads the definition for a shown coding also when the editor is hidden', () => {
+      expect(storesToCheck(['editor'])).toEqual({ definition: true, scheme: true });
+      expect(storesToCheck(['schemer'])).toEqual({ definition: true, scheme: false });
+      expect(storesToCheck(['editor', 'schemer'])).toEqual({ definition: false, scheme: false });
+    });
+
+    it('still names a missing player, which the export needs whether the preview is shown or not', () => {
+      const input = okInput();
+      input.hiddenRoutes = ['preview', 'editor', 'schemer'];
+      input.modules = {};
+
+      expect(section(checkUnit(input), 'properties')?.findings).toEqual([{ key: 'unit-check.no-player' }]);
     });
   });
 });

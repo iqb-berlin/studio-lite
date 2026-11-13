@@ -15,7 +15,9 @@ import { UnitStoresService } from '../../services/unit-stores.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { ModuleService } from '../../../../services/module.service';
 import { BackendService as CommentsBackendService } from '../../../comments/services/backend.service';
-import { checkUnit, ModuleType, UnitCheckSection } from '../../utils/unit-check.utils';
+import {
+  checkUnit, isTabShown, ModuleType, storesToCheck, UnitCheckSection
+} from '../../utils/unit-check.utils';
 import { VariableIdConflictListComponent } from '../variable-id-conflict-list/variable-id-conflict-list.component';
 import { VariableIdConflictFixComponent } from '../variable-id-conflict-fix/variable-id-conflict-fix.component';
 
@@ -104,19 +106,24 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
     const modulesLoaded = Object.keys(this.moduleService.editors).length > 0 ?
       of(undefined) :
       from(this.moduleService.loadList());
-    // what the workspace hides is not shown, and so not asked for
-    const hasComments = hiddenRoutes.includes('comments') ?
-      of(undefined) :
-      this.commentsBackendService.hasComments(workspaceId, unitId);
-    const hasRichNotes = hiddenRoutes.includes('notes') ?
-      of(undefined) :
+    // what the workspace hides is not checked, and so not asked for
+    const stores = storesToCheck(hiddenRoutes);
+    const definition = stores.definition ?
+      this.unitStores.loadDefinitionStore(workspaceId, unitId) :
+      of(undefined);
+    const scheme = stores.scheme ? this.unitStores.loadSchemeStore(workspaceId, unitId) : of(undefined);
+    const hasComments = isTabShown(hiddenRoutes, 'comments') ?
+      this.commentsBackendService.hasComments(workspaceId, unitId) :
+      of(undefined);
+    const hasRichNotes = isTabShown(hiddenRoutes, 'notes') ?
       this.backendService.getUnitRichNotes(workspaceId, unitId)
-        .pipe(map(richNotes => (richNotes ? richNotes.notes.length > 0 : undefined)));
+        .pipe(map(richNotes => (richNotes ? richNotes.notes.length > 0 : undefined))) :
+      of(undefined);
     return forkJoin([
       modulesLoaded,
       this.unitStores.loadMetadataStore(workspaceId, unitId),
-      this.unitStores.loadDefinitionStore(workspaceId, unitId),
-      this.unitStores.loadSchemeStore(workspaceId, unitId),
+      definition,
+      scheme,
       hasComments,
       hasRichNotes
     ]).pipe(

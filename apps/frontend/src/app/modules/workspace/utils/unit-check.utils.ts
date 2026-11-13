@@ -16,7 +16,7 @@ export interface UnitCheckInput {
   /** The modules the unit names, as entered, saved or not; undefined: not loaded. */
   modules: Partial<Record<ModuleType, string>> | undefined;
   installed: Record<ModuleType, Record<string, InstalledModule>>;
-  /** undefined: not loaded (yet). */
+  /** undefined: not loaded (yet), or not asked for because both tabs that need it are hidden. */
   definition: UnitDefinitionDto | undefined;
   scheme: UnitSchemeDto | undefined;
   /** undefined: not known (yet). */
@@ -45,6 +45,20 @@ export interface UnitCheckSection {
 
 const MODULE_TYPES: ModuleType[] = ['editor', 'player', 'schemer'];
 
+/** Whether the workspace shows a tab; a tab it hides is not checked (#2135). */
+export function isTabShown(hiddenRoutes: string[], tab: string): boolean {
+  return !hiddenRoutes.includes(tab);
+}
+
+/**
+ * The stores the check of the shown tabs reads: the definition for the editor, and for the coding,
+ * whose ids are checked against the definition's variables; the scheme for the coding alone.
+ */
+export function storesToCheck(hiddenRoutes: string[]): { definition: boolean; scheme: boolean } {
+  const schemer = isTabShown(hiddenRoutes, 'schemer');
+  return { definition: schemer || isTabShown(hiddenRoutes, 'editor'), scheme: schemer };
+}
+
 /** The installed module a unit's module key opens with: the key itself, or a later minor version. */
 function installedModule(
   key: string | undefined,
@@ -58,6 +72,9 @@ function checkProperties(input: UnitCheckInput): UnitCheckFinding[] {
   const modules = input.modules;
   if (!modules) return [{ key: 'unit-check.not-loaded' }];
   return MODULE_TYPES
+    // the editor and the schemer are opened in their tabs; one the workspace hides is not needed.
+    // The player stays: the export names it, whether the preview is shown or not.
+    .filter(moduleType => moduleType === 'player' || isTabShown(input.hiddenRoutes, moduleType))
     .map((moduleType): UnitCheckFinding | undefined => {
       const key = modules[moduleType];
       // unit-check.no-editor, unit-check.no-player, unit-check.no-schemer
@@ -102,8 +119,8 @@ function checkScheme(input: UnitCheckInput): Checked {
 /**
  * The state of the unit, tab by tab (#2135): whether its modules are assigned and installed, whether
  * it has content in a format its player reads, whether it has a coding scheme and one whose variables
- * the export can write without writing an id twice, and -- only where the workspace shows these
- * tabs -- whether it has comments and rich notes.
+ * the export can write without writing an id twice, and whether it has comments and rich notes.
+ * A tab the workspace hides is not checked: what it would find could not be resolved there.
  */
 export function checkUnit(input: UnitCheckInput): UnitCheckSection[] {
   const section = (tab: UnitCheckSection['tab'], checked: Checked): UnitCheckSection => ({
@@ -119,12 +136,13 @@ export function checkUnit(input: UnitCheckInput): UnitCheckSection[] {
       info: { key: present === undefined ? 'unit-check.not-loaded' : `unit-check.${tab}-${presence}` }
     };
   };
+  const shown = (tab: UnitCheckSection['tab']) => isTabShown(input.hiddenRoutes, tab);
   const sections: UnitCheckSection[] = [
-    section('properties', { findings: checkProperties(input), variableIdConflicts: [] }),
-    section('editor', { findings: checkEditor(input), variableIdConflicts: [] }),
-    section('schemer', checkScheme(input))
+    section('properties', { findings: checkProperties(input), variableIdConflicts: [] })
   ];
-  if (!input.hiddenRoutes.includes('comments')) sections.push(infoSection('comments', input.hasComments));
-  if (!input.hiddenRoutes.includes('notes')) sections.push(infoSection('notes', input.hasRichNotes));
+  if (shown('editor')) sections.push(section('editor', { findings: checkEditor(input), variableIdConflicts: [] }));
+  if (shown('schemer')) sections.push(section('schemer', checkScheme(input)));
+  if (shown('comments')) sections.push(infoSection('comments', input.hasComments));
+  if (shown('notes')) sections.push(infoSection('notes', input.hasRichNotes));
   return sections;
 }
