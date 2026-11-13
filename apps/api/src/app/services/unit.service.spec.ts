@@ -321,6 +321,14 @@ describe('UnitService', () => {
       expect(unitsRepository.save).not.toHaveBeenCalled();
     });
 
+    // #2128: the database refused it, and the user saw a server problem
+    it('should refuse a key longer than the 20 characters of its column', async () => {
+      await expect(service.create(1, { key: 'M1_002_ABCDEFGHIJKLMN' } as CreateUnitDto, { id: 1 } as User, false))
+        .rejects.toBeInstanceOf(BadRequestException);
+      expect(unitsRepository.findOne).not.toHaveBeenCalled();
+      expect(unitsRepository.save).not.toHaveBeenCalled();
+    });
+
     it('should assign a uuid to the new unit', async () => {
       const newUnit: Partial<Unit> = { id: 2 };
       unitsRepository.findOne.mockResolvedValue(null);
@@ -638,6 +646,13 @@ describe('UnitService', () => {
       // #2120: the database refused it, and the user saw a server problem
       it('refuses a key longer than the 20 characters of its column', async () => {
         await expect(service.patchUnit(1, { id: 1, key: 'M1_002_ABCDEFGHIJKLMN' } as UnitPropertiesDto, 'user'))
+          .rejects.toBeInstanceOf(BadRequestException);
+        expect(unitsRepository.save).not.toHaveBeenCalled();
+      });
+
+      // #2127: the properties refuse an emptied key, and creating refuses a unit without one (#2095)
+      it.each(['', '   '])('refuses the empty key %p', async key => {
+        await expect(service.patchUnit(1, { id: 1, key } as UnitPropertiesDto, 'user'))
           .rejects.toBeInstanceOf(BadRequestException);
         expect(unitsRepository.save).not.toHaveBeenCalled();
       });

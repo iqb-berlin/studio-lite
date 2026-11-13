@@ -86,6 +86,23 @@ describe('WorkspaceImportService', () => {
       expect(unitService.patchUnitProperties).not.toHaveBeenCalled();
     });
 
+    // #2128: the database refused the key, and the error failed the whole upload without its report
+    it('should report a unit whose key is longer than 20 characters, and import the others', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const result = await service.uploadFiles(1, [
+        buildFile('long.xml', 'text/xml', xmlUnit('M1_002_ABCDEFGHIJKLMN')),
+        buildFile('short.xml', 'text/xml', xmlUnit('M1_002_ABCDEFGHIJKLM'))
+      ], user);
+
+      expect(result.messages).toEqual([{ objectKey: 'long.xml', messageKey: 'unit-upload.api-warning.key-too-long' }]);
+      expect(unitService.create).toHaveBeenCalledTimes(1);
+      expect(unitService.create).toHaveBeenCalledWith(
+        1, expect.objectContaining({ key: 'M1_002_ABCDEFGHIJKLM' }), user, true
+      );
+    });
+
     // Comments and notes on an item follow it to the uuid the import gives it.
     it('should import the comments and notes of a unit, linked to its imported items', async () => {
       (unitService.create as jest.Mock).mockResolvedValue(10);

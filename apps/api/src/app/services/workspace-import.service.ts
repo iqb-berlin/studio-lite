@@ -8,6 +8,7 @@ import { RequestReportDto } from '@studio-lite-lib/api-dto';
 import AdmZip from 'adm-zip';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import Workspace from '../entities/workspace.entity';
+import { UNIT_KEY_MAX_LENGTH } from '../entities/unit.entity';
 import { FileIo } from '../interfaces/file-io.interface';
 import { UnitImportData } from '../classes/unit-import-data.class';
 import { NotAUnitXmlError } from '../exceptions/not-a-unit-xml.error';
@@ -170,6 +171,14 @@ export class WorkspaceImportService {
     notXmlFiles: { [fName: string]: FileIo }
   ) {
     usedFiles.push(unitImportData.fileName);
+    // the database refused it, and the error failed the whole upload without its report (#2128)
+    if (unitImportData.key.length > UNIT_KEY_MAX_LENGTH) {
+      functionReturn.messages.push({
+        objectKey: unitImportData.fileName,
+        messageKey: 'unit-upload.api-warning.key-too-long'
+      });
+      return;
+    }
     const newUnitId = await this.unitService.create(
       workspaceId,
       { key: unitImportData.key, name: unitImportData.name },
