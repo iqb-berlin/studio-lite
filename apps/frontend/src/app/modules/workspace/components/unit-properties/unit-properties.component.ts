@@ -59,6 +59,7 @@ import { MetadataBackendService } from '../../../metadata/services/metadata-back
 import { MetadataService } from '../../../metadata/services/metadata.service';
 import { I18nService } from '../../../../services/i18n.service';
 import { LanguageService } from '../../../../services/language.service';
+import { UnitCheckComponent } from '../unit-check/unit-check.component';
 
 /**
  * Everything about a unit that is not its content: name and key, the modules it is opened with, its
@@ -97,7 +98,8 @@ import { LanguageService } from '../../../../services/language.service';
     TranslateModule,
     MatIcon,
     CanReturnUnitPipe,
-    MatProgressSpinner
+    MatProgressSpinner,
+    UnitCheckComponent
   ]
 })
 export class UnitPropertiesComponent
