@@ -5,6 +5,10 @@ import Workspace from './workspace.entity';
 
 /** The column `unit.key` is VARCHAR(20); a longer key fails in the database. */
 export const UNIT_KEY_MAX_LENGTH = 20;
+/** The column `unit.name` is VARCHAR(100). */
+export const UNIT_NAME_MAX_LENGTH = 100;
+/** The column `unit.group_name` is VARCHAR(50). */
+export const UNIT_GROUP_NAME_MAX_LENGTH = 50;
 
 /**
  * A task ("Aufgabe") in a workspace -- the central record of the studio. It holds the properties

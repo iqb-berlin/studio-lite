@@ -8,7 +8,8 @@ import { RequestReportDto } from '@studio-lite-lib/api-dto';
 import AdmZip from 'adm-zip';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import Workspace from '../entities/workspace.entity';
-import { UNIT_KEY_MAX_LENGTH } from '../entities/unit.entity';
+import { UNIT_KEY_MAX_LENGTH, UNIT_NAME_MAX_LENGTH } from '../entities/unit.entity';
+import { cutToColumn, fitsColumn } from '../utils/column-length';
 import { FileIo } from '../interfaces/file-io.interface';
 import { UnitImportData } from '../classes/unit-import-data.class';
 import { NotAUnitXmlError } from '../exceptions/not-a-unit-xml.error';
@@ -172,16 +173,26 @@ export class WorkspaceImportService {
   ) {
     usedFiles.push(unitImportData.fileName);
     // the database refused it, and the error failed the whole upload without its report (#2128)
-    if (unitImportData.key.length > UNIT_KEY_MAX_LENGTH) {
+    if (!fitsColumn(unitImportData.key, UNIT_KEY_MAX_LENGTH)) {
       functionReturn.messages.push({
         objectKey: unitImportData.fileName,
         messageKey: 'unit-upload.api-warning.key-too-long'
       });
       return;
     }
+    // A longer name failed the upload in the same way (#2131). The name identifies nothing, so the
+    // unit is created with it shortened rather than left out.
+    let { name } = unitImportData;
+    if (!fitsColumn(name, UNIT_NAME_MAX_LENGTH)) {
+      name = cutToColumn(name, UNIT_NAME_MAX_LENGTH);
+      functionReturn.messages.push({
+        objectKey: unitImportData.fileName,
+        messageKey: 'unit-upload.api-warning.name-too-long'
+      });
+    }
     const newUnitId = await this.unitService.create(
       workspaceId,
-      { key: unitImportData.key, name: unitImportData.name },
+      { key: unitImportData.key, name },
       user,
       true
     );

@@ -115,6 +115,44 @@ describe('InputTextComponent', () => {
     expect(okButton.disabled).toBeTruthy();
   });
 
+  // #2131: a group name longer than the column of its units failed when saved. One stored before
+  // the limit comes in as the default and has to be shortened before it can be saved.
+  it('should hold a text longer than maxLength back, a longer default included', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [
+        MatFormFieldModule,
+        MatInputModule,
+        ReactiveFormsModule,
+        MatDialogModule,
+        TranslateModule.forRoot(),
+        InputTextComponent
+      ],
+      providers: [
+        { provide: MAT_DIALOG_DATA, useValue: { ...mockDialogData, default: 'abcdef', maxLength: 5 } },
+        { provide: MatDialogRef, useValue: mockDialogRef }
+      ]
+    }).compileComponents();
+    fixture = TestBed.createComponent(InputTextComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    const okButton = () => fixture.debugElement.query(By.css('button[type="submit"]')).nativeElement;
+    const count = () => fixture.debugElement.query(By.css('[data-cy="input-text-length"]')).nativeElement.textContent;
+
+    expect(okButton().disabled).toBe(true);
+    expect(count().trim()).toBe('6 / 5');
+
+    component.textInputForm.get('text')?.setValue('abcde');
+    fixture.detectChanges();
+    expect(okButton().disabled).toBe(false);
+  });
+
+  it('should take a text of any length when no maxLength is given', () => {
+    component.textInputForm.get('text')?.setValue('x'.repeat(500));
+
+    expect(component.textInputForm.valid).toBe(true);
+  });
+
   it('should close the dialog with the form value when OK button is clicked', () => {
     component.textInputForm.get('text')?.setValue('New Value');
     fixture.detectChanges();

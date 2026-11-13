@@ -8,6 +8,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import { InputTextComponent } from '../../../../components/input-text/input-text.component';
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
+import { WorkspaceService } from '../../services/workspace.service';
 
 @Component({
   selector: 'studio-lite-group-menu',
@@ -34,7 +35,8 @@ export class GroupMenuComponent {
         title: this.translateService.instant('workspace.new-unit-group'),
         default: '',
         okButtonLabel: this.translateService.instant('save'),
-        prompt: this.translateService.instant('workspace.group-name')
+        prompt: this.translateService.instant('workspace.group-name'),
+        maxLength: WorkspaceService.unitGroupNameMaxLength
       }
     });
 
@@ -52,7 +54,8 @@ export class GroupMenuComponent {
         title: this.translateService.instant('workspace.rename-unit-group'),
         default: this.selectedGroup,
         okButtonLabel: this.translateService.instant('save'),
-        prompt: this.translateService.instant('workspace.group-name')
+        prompt: this.translateService.instant('workspace.group-name'),
+        maxLength: WorkspaceService.unitGroupNameMaxLength
       }
     });
 

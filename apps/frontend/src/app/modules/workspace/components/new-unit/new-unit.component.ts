@@ -29,6 +29,7 @@ import { WorkspaceService } from '../../services/workspace.service';
 export class NewUnitComponent {
   newUnitForm: UntypedFormGroup;
   groupDirectMode = false;
+  readonly groupNameMaxLength = WorkspaceService.unitGroupNameMaxLength;
   @ViewChild('newGroupInput') newGroupInput: ElementRef | undefined;
 
   constructor(private fb: UntypedFormBuilder,

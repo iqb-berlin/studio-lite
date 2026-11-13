@@ -8,7 +8,7 @@ import {
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
-import { MatFormField } from '@angular/material/form-field';
+import { MatFormField, MatHint } from '@angular/material/form-field';
 
 export interface InputTextData {
   title: string,
@@ -17,7 +17,9 @@ export interface InputTextData {
   okButtonLabel: string,
   isBackUpWorkspaceGroup: boolean,
   maxWorkspaceCount: number,
-  workspacesCount: number
+  workspacesCount: number,
+  /** at most this many characters, as the column the text goes into holds (#2131) */
+  maxLength?: number
 }
 
 @Component({
@@ -25,7 +27,7 @@ export interface InputTextData {
   templateUrl: './input-text.component.html',
   styleUrls: ['./input-text.component.scss'],
 
-  imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatHint, MatInput, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class InputTextComponent {
   textInputForm: UntypedFormGroup;

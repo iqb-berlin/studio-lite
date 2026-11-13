@@ -144,6 +144,16 @@ describe('UnitImportData', () => {
     expect(() => new UnitImportData(invalidFile)).toThrow('metadata element missing');
   });
 
+  // #2131: creating refuses a blank key, which would fail the whole upload
+  it('should take a blank id for a missing one', () => {
+    const blankId = createMock<FileIo>({
+      originalname: 'test.xml',
+      buffer: Buffer.from('<Unit><Metadata><Id>   </Id></Metadata></Unit>')
+    });
+
+    expect(() => new UnitImportData(blankId)).toThrow('unit id missing');
+  });
+
   it('should read a unit behind an XML declaration', () => {
     const data = new UnitImportData(createMock<FileIo>({
       originalname: 'unit01.xml',

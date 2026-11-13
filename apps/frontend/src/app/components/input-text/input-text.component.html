@@ -9,8 +9,14 @@
         class="fx-column-start-stretch">
     <mat-form-field>
       <input matInput
+             #textInput
              formControlName="text"
+             [maxlength]="typedData.maxLength ?? null"
              [placeholder]="typedData.prompt">
+      <!-- a longer text stored before the limit holds saving back; the count says why (#2131) -->
+      @if (typedData.maxLength) {
+        <mat-hint align="end" data-cy="input-text-length">{{ textInput.value.length }} / {{ typedData.maxLength }}</mat-hint>
+      }
     </mat-form-field>
   </form>
 </mat-dialog-content>

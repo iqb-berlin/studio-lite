@@ -103,6 +103,18 @@ describe('WorkspaceImportService', () => {
       );
     });
 
+    // #2131: the database refused the name as well; the unit is kept with the name shortened
+    it('should create a unit whose name is longer than 100 characters with the name shortened', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+      const xml = `<Unit><Metadata><Id>U1</Id><Label>${'N'.repeat(101)}</Label></Metadata></Unit>`;
+
+      const result = await service.uploadFiles(1, [buildFile('u1.xml', 'text/xml', xml)], user);
+
+      expect(result.messages).toEqual([{ objectKey: 'u1.xml', messageKey: 'unit-upload.api-warning.name-too-long' }]);
+      expect(unitService.create).toHaveBeenCalledWith(1, { key: 'U1', name: 'N'.repeat(100) }, user, true);
+    });
+
     // Comments and notes on an item follow it to the uuid the import gives it.
     it('should import the comments and notes of a unit, linked to its imported items', async () => {
       (unitService.create as jest.Mock).mockResolvedValue(10);

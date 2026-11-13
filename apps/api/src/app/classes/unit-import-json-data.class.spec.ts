@@ -135,6 +135,16 @@ describe('UnitImportJsonData', () => {
     expect(() => new UnitImportJsonData(invalid)).toThrow('unit id missing');
   });
 
+  // #2131: creating refuses a blank key, which would fail the whole upload
+  it('should take a blank id for a missing one', () => {
+    const blankId = createMock<FileIo>({
+      originalname: 'UNIT01.json',
+      buffer: Buffer.from(buildIndex({ id: '   ' }))
+    });
+
+    expect(() => new UnitImportJsonData(blankId)).toThrow('unit id missing');
+  });
+
   it('should throw error if userInterface is missing', () => {
     const invalid = createMock<FileIo>({
       originalname: 'UNIT01.json',

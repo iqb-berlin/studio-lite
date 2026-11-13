@@ -111,7 +111,8 @@ export class UnitImportData {
     const unitIdElement = metadataElement.find('Id').first();
     if (unitIdElement.length === 0) throw new Error('unit id element missing');
     this.key = unitIdElement.text();
-    if (this.key.length === 0) throw new Error('unit id missing');
+    // a blank id counts as none: creating refuses it, and the whole upload would fail with it (#2131)
+    if (!this.key.trim()) throw new Error('unit id missing');
     const unitLabelElement = metadataElement.find('Label').first();
     this.name = unitLabelElement.length > 0 ? unitLabelElement.text() : '';
     const unitMetadataReferenceElement = metadataElement.find('Reference').first();

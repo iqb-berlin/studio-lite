@@ -122,6 +122,9 @@ export class WorkspaceService {
     return '[a-zA-Z][a-zA-Z0-9_-]*';
   }
 
+  /** As the column the group goes into on each of its units holds; a longer one failed there (#2131) */
+  static readonly unitGroupNameMaxLength = 50;
+
   /**
    * The list is asked for each time the key is checked rather than handed over once: `resetUnitList`
    * replaces the list object, so one taken when the form was built may be the empty list of a

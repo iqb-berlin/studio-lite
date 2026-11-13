@@ -20,6 +20,7 @@
     <mat-form-field>
       <input matInput
         formControlName="label"
+        maxlength="100"
         [placeholder]="'workspace.unit-name' | translate"
         [value]="data.label"
         data-cy="workspace-new-unit-unit-name">
@@ -55,6 +56,7 @@
           <input matInput
             #newGroupInput
             formControlName="groupDirect"
+            [maxlength]="groupNameMaxLength"
             [placeholder]="'workspace.new-group' | translate"
             data-cy="workspace-new-unit-new-group">
         </mat-form-field>

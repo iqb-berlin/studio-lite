@@ -12,7 +12,9 @@ import {
   UnitPropertiesDto
 } from '@studio-lite-lib/api-dto';
 import Workspace from '../entities/workspace.entity';
-import Unit, { UNIT_KEY_MAX_LENGTH } from '../entities/unit.entity';
+import Unit, {
+  UNIT_GROUP_NAME_MAX_LENGTH, UNIT_KEY_MAX_LENGTH, UNIT_NAME_MAX_LENGTH
+} from '../entities/unit.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import { UnitUserService } from './unit-user.service';
 import { UnitCommentService } from './unit-comment.service';
@@ -24,6 +26,7 @@ import { UnitItemService } from './unit-item.service';
 import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
 import { UnitNotFoundException } from '../exceptions/unit-not-found.exception';
 import { UnitKeyExistsException } from '../exceptions/unit-key-exists.exception';
+import { assertFitsColumn } from '../utils/column-length';
 
 /**
  * The units and their properties -- plus creating and copying a unit, moving it to another
@@ -259,9 +262,14 @@ export class UnitService {
   }
 
   async create(workspaceId: number, unit: CreateUnitDto, user: User, addComments: boolean): Promise<number> {
-    // TypeORM throws on an undefined key in the lookup below; a request without one is the caller's error (#2095)
-    if (!unit.key) throw new BadRequestException('A unit needs a key.');
-    UnitService.assertKeyFits(unit.key);
+    // TypeORM throws on an undefined key in the lookup below; a request without one is the caller's error
+    // (#2095). A blank one is refused as on renaming (#2127).
+    if (!unit.key || (typeof unit.key === 'string' && !unit.key.trim())) {
+      throw new BadRequestException('A unit needs a key.');
+    }
+    assertFitsColumn('key', unit.key, UNIT_KEY_MAX_LENGTH);
+    assertFitsColumn('name', unit.name, UNIT_NAME_MAX_LENGTH);
+    assertFitsColumn('group', unit.groupName, UNIT_GROUP_NAME_MAX_LENGTH);
     const existingUnitId = await this.unitsRepository.findOne({
       where: { workspaceId: workspaceId, key: unit.key },
       select: { id: true }
@@ -534,15 +542,20 @@ export class UnitService {
     const unit = await this.unitsRepository.findOne({ where: { id: unitId } });
     const dataKeys = Object.keys(newData);
     if (dataKeys.indexOf('key') >= 0) {
+      // the column refused it with a server problem (#2131)
+      if (newData.key === null) throw new BadRequestException('A unit needs a key.');
       if (typeof newData.key === 'string' && newData.key !== unit.key) {
-        // an emptied or blank key, as the properties refuse it (#2127); creating refuses an empty one (#2095)
+        // an emptied or blank key, as the properties refuse it (#2127); creating refuses it too (#2095)
         if (!newData.key.trim()) throw new BadRequestException('A unit needs a key.');
-        UnitService.assertKeyFits(newData.key);
+        assertFitsColumn('key', newData.key, UNIT_KEY_MAX_LENGTH);
         await this.assertKeyIsFree(unit, newData.key);
       }
       unit.key = newData.key;
     }
-    if (dataKeys.indexOf('name') >= 0) unit.name = newData.name;
+    if (dataKeys.indexOf('name') >= 0) {
+      assertFitsColumn('name', newData.name, UNIT_NAME_MAX_LENGTH);
+      unit.name = newData.name;
+    }
     if (dataKeys.indexOf('description') >= 0) unit.description = newData.description;
     if (dataKeys.indexOf('transcript') >= 0) unit.transcript = newData.transcript;
     if (dataKeys.indexOf('reference') >= 0) unit.reference = newData.reference;
@@ -552,6 +565,7 @@ export class UnitService {
     if (dataKeys.indexOf('schemeType') >= 0) unit.schemeType = newData.schemeType;
     if (dataKeys.indexOf('state') >= 0) unit.state = newData.state;
     if (newData.groupName === '' || (newData.groupName && newData.groupName.length > 0)) {
+      assertFitsColumn('group', newData.groupName, UNIT_GROUP_NAME_MAX_LENGTH);
       unit.groupName = newData.groupName;
     }
     if (dataKeys.indexOf('lastChangedMetadata') >= 0) {
@@ -569,17 +583,6 @@ export class UnitService {
       unit.lastChangedSchemeUser = userName;
     }
     await this.unitsRepository.save(unit);
-  }
-
-  /**
-   * Refused here rather than by the database, whose error reached the user as a server problem: on
-   * renaming (#2120) and on creating (#2128). The import checks the length before creating, so that
-   * it can report the unit and go on with the others (#2128).
-   */
-  private static assertKeyFits(key: string): void {
-    if (key.length > UNIT_KEY_MAX_LENGTH) {
-      throw new BadRequestException(`Unit key ${key} is longer than ${UNIT_KEY_MAX_LENGTH} characters`);
-    }
   }
 
   /**
@@ -761,6 +764,7 @@ export class UnitService {
   }
 
   async patchUnitGroup(id: number, groupName: string, units: number[]): Promise<void> {
+    assertFitsColumn('group', groupName, UNIT_GROUP_NAME_MAX_LENGTH);
     await this.unitsRepository.update({
       workspaceId: id,
       groupName: groupName,

@@ -18,7 +18,7 @@ import { profileIdsMatch, toW3idProfileId } from '@studio-lite/shared-code';
 import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroup from '../entities/workspace-group.entity';
-import Unit from '../entities/unit.entity';
+import Unit, { UNIT_GROUP_NAME_MAX_LENGTH } from '../entities/unit.entity';
 import { CodingReportClass } from '../classes/coding-report.class';
 import { UnitService } from './unit.service';
 import { UnitMetadataService } from './unit-metadata.service';
@@ -28,6 +28,7 @@ import { UsersService } from './users.service';
 import { WorkspaceUserService } from './workspace-user.service';
 import { UnitUserService } from './unit-user.service';
 import { GroupAdminUnprocessableWorkspaceException } from '../exceptions/group-admin-unprocessable-workspace.exception';
+import { assertFitsColumn } from '../utils/column-length';
 
 /**
  * The workspaces: creating and deleting them, moving them between groups, their settings, their
@@ -424,9 +425,14 @@ export class WorkspaceService {
     if (dto.operation === 'remove') {
       return this.removeGroup(workspaceId, dto.groupName);
     }
+    // Only the name to be written is checked, before anything is: a longer one would rename the
+    // settings and then fail on the units (#2131). A longer group already in the settings can still
+    // be renamed or removed.
     if (dto.operation === 'rename' && 'newGroupName' in dto) {
+      assertFitsColumn('group', dto.newGroupName, UNIT_GROUP_NAME_MAX_LENGTH);
       return this.renameGroupName(workspaceId, dto.groupName, dto.newGroupName);
     }
+    assertFitsColumn('group', dto.groupName, UNIT_GROUP_NAME_MAX_LENGTH);
     return this.createGroup(workspaceId, dto.groupName);
   }
 
