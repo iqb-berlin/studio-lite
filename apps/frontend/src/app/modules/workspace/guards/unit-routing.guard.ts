@@ -15,7 +15,9 @@ import { ConfirmDialogData } from '../models/confirm-dialog.interface';
  * so a failed save keeps the user on the unit rather than dropping the changes silently.
  *
  * Only asked of someone who may write; a reader has nothing to save. A form the studio considers
- * incomplete is offered with a warning rather than refused -- the unit may be saved half-finished.
+ * incomplete is offered with a warning rather than refused -- the unit may be saved half-finished,
+ * and a key that only breaks the format rules is one that units in use carry (#1842). Saving is
+ * refused only as the save button refuses it: for a key that is taken, too long or empty (#2127).
  */
 @Injectable({
   providedIn: 'root'
@@ -46,7 +48,8 @@ export class UnitRoutingCanDeactivateGuard {
           confirmButtonReturn: 'YES',
           confirmButton2Label: this.translateService.instant('workspace.reject-changes-label'),
           confirmButton2Return: 'NO',
-          warning: hasWarning
+          warning: hasWarning,
+          confirmButtonDisabled: this.workspaceService.unitKeyRefused()
         }
       });
       return dialogRef.afterClosed().pipe(

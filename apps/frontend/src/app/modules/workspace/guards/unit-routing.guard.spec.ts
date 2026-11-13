@@ -28,6 +28,7 @@ describe('UnitRoutingCanDeactivateGuard', () => {
   let workspaceService: {
     userAccessLevel: number;
     isValidFormKey: BehaviorSubject<boolean>;
+    unitKeyRefused: jest.Mock<boolean, []>;
     saveUnitData: jest.Mock<Promise<boolean>, []>;
   };
   let unitStores: DeepMocked<UnitStoresService>;
@@ -65,6 +66,7 @@ describe('UnitRoutingCanDeactivateGuard', () => {
     workspaceService = {
       userAccessLevel: 2,
       isValidFormKey: new BehaviorSubject<boolean>(true),
+      unitKeyRefused: jest.fn(() => false),
       saveUnitData: jest.fn(async () => true)
     };
     unitStores = createMock<UnitStoresService>();
@@ -140,8 +142,11 @@ describe('UnitRoutingCanDeactivateGuard', () => {
     await expect(getResult()).resolves.toBe(false);
   });
 
-  it('passes warning state when form key is invalid', async () => {
+  // #2127: a key that only breaks the format rules is warned about and stays savable, as with the
+  // save button (#1842); only a refused key -- taken, too long or empty -- blocks saving
+  it.each([false, true])('warns about an invalid key and blocks saving it if refused: %s', async refused => {
     workspaceService.isValidFormKey.next(false);
+    workspaceService.unitKeyRefused.mockReturnValue(refused);
     confirmDialog.open.mockReturnValue(createDialogRef('NO'));
 
     await getResult();
@@ -149,9 +154,7 @@ describe('UnitRoutingCanDeactivateGuard', () => {
     expect(confirmDialog.open).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        data: expect.objectContaining({
-          warning: true
-        })
+        data: expect.objectContaining({ warning: true, confirmButtonDisabled: refused })
       })
     );
   });
