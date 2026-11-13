@@ -34,8 +34,13 @@
               <p>{{ 'unit-check.variable-id-conflicts' | translate }}</p>
               <studio-lite-variable-id-conflict-list [conflicts]="section.variableIdConflicts">
               </studio-lite-variable-id-conflict-list>
-              <studio-lite-variable-id-conflict-fix class="manual-fix" [conflicts]="section.variableIdConflicts">
-              </studio-lite-variable-id-conflict-fix>
+              @if (section.tab === 'schemer') {
+                <studio-lite-variable-id-conflict-fix class="manual-fix" [conflicts]="section.variableIdConflicts">
+                </studio-lite-variable-id-conflict-fix>
+              } @else {
+                <!-- under the properties only where the coding is hidden: its steps need tabs not shown here -->
+                <p class="hint" data-cy="unit-check-fix-elsewhere">{{ 'unit-check.fix-elsewhere' | translate }}</p>
+              }
             </div>
           }
         </div>

@@ -1,7 +1,5 @@
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
-import {
-  checkUnit, storesToCheck, UnitCheckInput, UnitCheckSection
-} from './unit-check.utils';
+import { checkUnit, UnitCheckInput, UnitCheckSection } from './unit-check.utils';
 
 const scheme = (variableCodings: unknown[]): string => JSON.stringify({ version: '3.0', variableCodings });
 
@@ -100,7 +98,7 @@ describe('checkUnit', () => {
       const input = okInput();
       input.definition = undefined;
 
-      expect(section(checkUnit(input), 'editor')?.findings).toEqual([{ key: 'unit-check.not-loaded' }]);
+      expect(section(checkUnit(input), 'editor')?.findings).toEqual([{ key: 'unit-check.definition-not-loaded' }]);
     });
   });
 
@@ -172,26 +170,52 @@ describe('checkUnit', () => {
   });
 
   describe('hidden editor and coding', () => {
-    // a finding in a tab the workspace hides could not be resolved there
-    it('checks neither the tabs nor their modules', () => {
+    // a module opened only in a hidden tab is not needed, nor is a scheme where nobody codes
+    it('gives the hidden tabs no section and does not ask for their modules or a scheme', () => {
       const input = okInput();
       input.hiddenRoutes = ['editor', 'schemer'];
       input.modules = { player: 'iqb-player-aspect@2.9' };
-      // neither is loaded then
-      input.definition = undefined;
-      input.scheme = undefined;
+      input.scheme = { scheme: '', schemeType: '' };
 
       const sections = checkUnit(input);
 
       expect(sections.map(entry => entry.tab)).toEqual(['properties', 'comments', 'notes']);
-      expect(section(sections, 'properties')?.findings).toEqual([]);
+      expect(section(sections, 'properties')?.ok).toBe(true);
     });
 
-    // the coding's ids are checked against the variables of the definition
-    it('loads the definition for a shown coding also when the editor is hidden', () => {
-      expect(storesToCheck(['editor'])).toEqual({ definition: true, scheme: true });
-      expect(storesToCheck(['schemer'])).toEqual({ definition: true, scheme: false });
-      expect(storesToCheck(['editor', 'schemer'])).toEqual({ definition: false, scheme: false });
+    // the preview and the export play the content whether the editor is shown or not
+    it('names content the player cannot play under the properties when the editor is hidden', () => {
+      const input = okInput();
+      input.hiddenRoutes = ['editor'];
+      input.definition = { ...input.definition, definitionType: 'aspect-unit-definition@5.0.0' };
+
+      expect(section(checkUnit(input), 'properties')?.findings).toEqual([{
+        key: 'workspace.definition-type-incompatible',
+        params: { player: 'Aspect Player 2.9', definitionType: 'aspect-unit-definition@5.0.0' }
+      }]);
+    });
+
+    // a scheme may come with an import, and the export writes its ids all the same (#2119)
+    it('names an id the export would write twice under the properties when the coding is hidden', () => {
+      const input = okInput();
+      input.hiddenRoutes = ['schemer'];
+      input.definition = { ...input.definition, variables: [{ id: '05', alias: '_00a' } as VariableInfo] };
+      input.scheme = {
+        scheme: scheme([{ id: 'd_1790938214783', alias: '05', sourceType: 'MANUAL' }]),
+        schemeType: 'iqb-standard@3.0'
+      };
+
+      const properties = section(checkUnit(input), 'properties');
+      expect(properties?.ok).toBe(false);
+      expect(properties?.variableIdConflicts.map(conflict => conflict.id)).toEqual(['05']);
+    });
+
+    it('names a scheme that could not be loaded, not the variables, when the coding is hidden', () => {
+      const input = okInput();
+      input.hiddenRoutes = ['schemer'];
+      input.scheme = undefined;
+
+      expect(section(checkUnit(input), 'properties')?.findings).toEqual([{ key: 'unit-check.scheme-not-loaded' }]);
     });
 
     it('still names a missing player, which the export needs whether the preview is shown or not', () => {

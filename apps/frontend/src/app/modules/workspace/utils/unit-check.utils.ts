@@ -16,7 +16,7 @@ export interface UnitCheckInput {
   /** The modules the unit names, as entered, saved or not; undefined: not loaded. */
   modules: Partial<Record<ModuleType, string>> | undefined;
   installed: Record<ModuleType, Record<string, InstalledModule>>;
-  /** undefined: not loaded (yet), or not asked for because both tabs that need it are hidden. */
+  /** undefined: not loaded (yet). */
   definition: UnitDefinitionDto | undefined;
   scheme: UnitSchemeDto | undefined;
   /** undefined: not known (yet). */
@@ -45,18 +45,9 @@ export interface UnitCheckSection {
 
 const MODULE_TYPES: ModuleType[] = ['editor', 'player', 'schemer'];
 
-/** Whether the workspace shows a tab; a tab it hides is not checked (#2135). */
+/** Whether the workspace shows a tab (#2135). */
 export function isTabShown(hiddenRoutes: string[], tab: string): boolean {
   return !hiddenRoutes.includes(tab);
-}
-
-/**
- * The stores the check of the shown tabs reads: the definition for the editor, and for the coding,
- * whose ids are checked against the definition's variables; the scheme for the coding alone.
- */
-export function storesToCheck(hiddenRoutes: string[]): { definition: boolean; scheme: boolean } {
-  const schemer = isTabShown(hiddenRoutes, 'schemer');
-  return { definition: schemer || isTabShown(hiddenRoutes, 'editor'), scheme: schemer };
 }
 
 /** The installed module a unit's module key opens with: the key itself, or a later minor version. */
@@ -87,7 +78,7 @@ function checkProperties(input: UnitCheckInput): UnitCheckFinding[] {
 }
 
 function checkEditor(input: UnitCheckInput): UnitCheckFinding[] {
-  if (!input.definition) return [{ key: 'unit-check.not-loaded' }];
+  if (!input.definition) return [{ key: 'unit-check.definition-not-loaded' }];
   if (!input.definition.definition) return [{ key: 'unit-check.no-definition' }];
   const player = installedModule(input.modules?.player, input.installed.player);
   const definitionType = input.definition.definitionType;
@@ -102,13 +93,13 @@ function checkEditor(input: UnitCheckInput): UnitCheckFinding[] {
 
 type Checked = Pick<UnitCheckSection, 'findings' | 'variableIdConflicts'>;
 
-function checkScheme(input: UnitCheckInput): Checked {
-  if (!input.scheme) return { findings: [{ key: 'unit-check.not-loaded' }], variableIdConflicts: [] };
-  if (!hasCodingScheme(input.scheme.scheme)) {
-    return { findings: [{ key: 'unit-check.no-scheme' }], variableIdConflicts: [] };
+/** The ids the export would write twice (#2119). */
+function checkIdConflicts(input: UnitCheckInput): Checked {
+  // without the scheme or the base variables a conflict cannot be seen, and none found means nothing
+  if (!input.scheme) return { findings: [{ key: 'unit-check.scheme-not-loaded' }], variableIdConflicts: [] };
+  if (!input.definition) {
+    return { findings: [{ key: 'unit-check.variables-not-loaded' }], variableIdConflicts: [] };
   }
-  // without the base variables a conflict with an element cannot be seen, and none found means nothing
-  if (!input.definition) return { findings: [{ key: 'unit-check.variables-not-loaded' }], variableIdConflicts: [] };
   // the base variables as the export reads them: from the definition, the editor's unsaved list included
   return {
     findings: [],
@@ -116,11 +107,23 @@ function checkScheme(input: UnitCheckInput): Checked {
   };
 }
 
+function checkScheme(input: UnitCheckInput): Checked {
+  if (!input.scheme) return { findings: [{ key: 'unit-check.scheme-not-loaded' }], variableIdConflicts: [] };
+  if (!hasCodingScheme(input.scheme.scheme)) {
+    return { findings: [{ key: 'unit-check.no-scheme' }], variableIdConflicts: [] };
+  }
+  return checkIdConflicts(input);
+}
+
 /**
  * The state of the unit, tab by tab (#2135): whether its modules are assigned and installed, whether
  * it has content in a format its player reads, whether it has a coding scheme and one whose variables
  * the export can write without writing an id twice, and whether it has comments and rich notes.
- * A tab the workspace hides is not checked: what it would find could not be resolved there.
+ *
+ * A tab the workspace hides gets no section, and its module is not asked for. What the preview and
+ * the export need all the same is asked under the properties instead: whether there is content and
+ * the player can play it, where the editor is hidden, and whether an id would be written twice,
+ * where the coding is -- a scheme may come with an import. Having no scheme is no finding there.
  */
 export function checkUnit(input: UnitCheckInput): UnitCheckSection[] {
   const section = (tab: UnitCheckSection['tab'], checked: Checked): UnitCheckSection => ({
@@ -137,10 +140,19 @@ export function checkUnit(input: UnitCheckInput): UnitCheckSection[] {
     };
   };
   const shown = (tab: UnitCheckSection['tab']) => isTabShown(input.hiddenRoutes, tab);
+  const editorFindings = checkEditor(input);
+  const idConflicts = shown('schemer') ? undefined : checkIdConflicts(input);
   const sections: UnitCheckSection[] = [
-    section('properties', { findings: checkProperties(input), variableIdConflicts: [] })
+    section('properties', {
+      findings: [
+        ...checkProperties(input),
+        ...(shown('editor') ? [] : editorFindings),
+        ...(idConflicts?.findings ?? [])
+      ],
+      variableIdConflicts: idConflicts?.variableIdConflicts ?? []
+    })
   ];
-  if (shown('editor')) sections.push(section('editor', { findings: checkEditor(input), variableIdConflicts: [] }));
+  if (shown('editor')) sections.push(section('editor', { findings: editorFindings, variableIdConflicts: [] }));
   if (shown('schemer')) sections.push(section('schemer', checkScheme(input)));
   if (shown('comments')) sections.push(infoSection('comments', input.hasComments));
   if (shown('notes')) sections.push(infoSection('notes', input.hasRichNotes));

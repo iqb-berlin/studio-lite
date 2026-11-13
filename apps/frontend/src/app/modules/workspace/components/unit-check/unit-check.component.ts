@@ -16,7 +16,7 @@ import { WorkspaceBackendService } from '../../services/workspace-backend.servic
 import { ModuleService } from '../../../../services/module.service';
 import { BackendService as CommentsBackendService } from '../../../comments/services/backend.service';
 import {
-  checkUnit, isTabShown, ModuleType, storesToCheck, UnitCheckSection
+  checkUnit, isTabShown, ModuleType, UnitCheckSection
 } from '../../utils/unit-check.utils';
 import { VariableIdConflictListComponent } from '../variable-id-conflict-list/variable-id-conflict-list.component';
 import { VariableIdConflictFixComponent } from '../variable-id-conflict-fix/variable-id-conflict-fix.component';
@@ -106,12 +106,9 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
     const modulesLoaded = Object.keys(this.moduleService.editors).length > 0 ?
       of(undefined) :
       from(this.moduleService.loadList());
-    // what the workspace hides is not checked, and so not asked for
-    const stores = storesToCheck(hiddenRoutes);
-    const definition = stores.definition ?
-      this.unitStores.loadDefinitionStore(workspaceId, unitId) :
-      of(undefined);
-    const scheme = stores.scheme ? this.unitStores.loadSchemeStore(workspaceId, unitId) : of(undefined);
+    // comments and notes the workspace hides are not checked, and so not asked for. Definition and
+    // scheme are, hidden tabs or not: whether there is content the player can play, and whether the
+    // export would write an id twice, is asked under the properties where those tabs are hidden.
     const hasComments = isTabShown(hiddenRoutes, 'comments') ?
       this.commentsBackendService.hasComments(workspaceId, unitId) :
       of(undefined);
@@ -122,8 +119,8 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
     return forkJoin([
       modulesLoaded,
       this.unitStores.loadMetadataStore(workspaceId, unitId),
-      definition,
-      scheme,
+      this.unitStores.loadDefinitionStore(workspaceId, unitId),
+      this.unitStores.loadSchemeStore(workspaceId, unitId),
       hasComments,
       hasRichNotes
     ]).pipe(

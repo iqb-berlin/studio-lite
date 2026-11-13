@@ -102,14 +102,22 @@ describe('UnitCheckComponent', () => {
     expect(getUnitRichNotes).not.toHaveBeenCalled();
   }));
 
-  // the definition can be megabytes; it is fetched only for a tab that is checked
-  it('loads neither definition nor scheme when the workspace hides the editor and the coding', fakeAsync(() => {
+  // the export writes the ids of a scheme whether the coding is shown or not (#2119)
+  it('shows an id the export would write twice under the properties when the coding is hidden', fakeAsync(() => {
     hiddenRoutes = ['editor', 'schemer'];
+    getUnitScheme.mockReturnValue(of({
+      scheme: scheme([{ id: 'd_1', alias: '05', sourceType: 'MANUAL' }]),
+      schemeType: 'iqb-standard@3.0'
+    }));
     create();
 
     expect(tabs()).toEqual(['unit-check-properties', 'unit-check-comments', 'unit-check-notes']);
-    expect(getUnitDefinition).not.toHaveBeenCalled();
-    expect(getUnitScheme).not.toHaveBeenCalled();
+    expect(getUnitScheme).toHaveBeenCalled();
+    const properties = sectionOf('properties');
+    expect(properties?.querySelector('[data-cy="unit-check-variable-id-conflicts"]')).toBeTruthy();
+    // its steps lead into the tabs this workspace hides
+    expect(properties?.querySelector('[data-cy="variable-id-conflicts-manual-fix"]')).toBeNull();
+    expect(properties?.querySelector('[data-cy="unit-check-fix-elsewhere"]')).toBeTruthy();
   }));
 
   // the card reads the unit as it is being edited, so a fix shows before it is saved (#2135)
