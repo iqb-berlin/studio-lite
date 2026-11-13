@@ -46,11 +46,7 @@ export {
   sameDependencyLists
 } from './lib/unit-dependencies';
 export { UiLanguage, UI_LANGUAGES, DEFAULT_UI_LANGUAGE } from './lib/ui-languages';
+export { hasCodingScheme, parseDerivedCodings, derivedVariableId } from './lib/coding-scheme';
 export {
-  VariableIdConflict,
-  VariableIdConflictVariable,
-  hasCodingScheme,
-  parseDerivedCodings,
-  derivedVariableId,
-  findVariableIdConflicts
+  VariableIdConflict, VariableIdConflictVariable, findVariableIdConflicts
 } from './lib/variable-id-conflicts';

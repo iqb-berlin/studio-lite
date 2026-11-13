@@ -2,7 +2,7 @@ import { UnitDefinitionDto, UnitSchemeDto } from '@studio-lite-lib/api-dto';
 import {
   findVariableIdConflicts, hasCodingScheme, VariableIdConflict, VeronaModuleFactory
 } from '@studio-lite/shared-code';
-import { matchDefinitionType } from './definition-type-match.utils';
+import { playerRejectsDefinitionType } from './definition-type-match.utils';
 
 export type ModuleType = 'editor' | 'player' | 'schemer';
 
@@ -74,7 +74,7 @@ function checkEditor(input: UnitCheckInput): UnitCheckFinding[] {
   if (!input.definition.definition) return [{ key: 'unit-check.no-definition' }];
   const player = installedModule(input.modules?.player, input.installed.player);
   const definitionType = input.definition.definitionType;
-  if (player && matchDefinitionType(definitionType, player.metadata?.model) === 'incompatible') {
+  if (playerRejectsDefinitionType(definitionType, player)) {
     return [{
       key: 'workspace.definition-type-incompatible',
       params: { player: player.nameAndVersion, definitionType: definitionType || '' }
