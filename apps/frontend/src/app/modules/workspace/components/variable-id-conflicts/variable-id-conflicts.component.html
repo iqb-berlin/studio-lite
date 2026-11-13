@@ -1,0 +1,36 @@
+<h1 mat-dialog-title>{{ 'unit-download.variable-id-conflicts.title' | translate }}</h1>
+<mat-dialog-content>
+  <p data-cy="variable-id-conflicts-intro">
+    @if (data.exportFormat === 'xml') {
+      {{ 'unit-download.variable-id-conflicts.intro-xml' | translate }}
+    } @else {
+      {{ 'unit-download.variable-id-conflicts.intro-json' | translate }}
+    }
+  </p>
+  @for (unit of data.units; track unit.key) {
+    <div data-cy="variable-id-conflicts-unit">
+      <h3 class="unit-title">
+        {{ unit.key }}
+        @if (unit.name) {
+          <span>– {{ unit.name }}</span>
+        }
+      </h3>
+      <studio-lite-variable-id-conflict-list [conflicts]="unit.conflicts"></studio-lite-variable-id-conflict-list>
+    </div>
+  }
+  <studio-lite-variable-id-conflict-fix class="manual-fix"
+                                        [conflicts]="conflicts">
+  </studio-lite-variable-id-conflict-fix>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-raised-button color="primary"
+          [mat-dialog-close]="true"
+          data-cy="variable-id-conflicts-export-anyway">
+    {{ 'unit-download.variable-id-conflicts.export-anyway' | translate }}
+  </button>
+  <button mat-raised-button
+          [mat-dialog-close]="false"
+          data-cy="variable-id-conflicts-cancel">
+    {{ 'dialogs.cancel' | translate }}
+  </button>
+</mat-dialog-actions>

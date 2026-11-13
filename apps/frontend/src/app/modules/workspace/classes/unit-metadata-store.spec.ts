@@ -245,4 +245,15 @@ describe('UnitMetadataStore', () => {
     store.restore();
     expect(store.changed()).toBe(false);
   });
+
+  it('holds in data the modules as entered, saved or not (#2135)', () => {
+    const store = new UnitMetadataStore(buildBaseProperties());
+    expect(store.data().player).toBe('p1');
+
+    store.setPlayer('p2');
+    expect(store.data().player).toBe('p2');
+
+    store.restore();
+    expect(store.data().player).toBe('p1');
+  });
 });

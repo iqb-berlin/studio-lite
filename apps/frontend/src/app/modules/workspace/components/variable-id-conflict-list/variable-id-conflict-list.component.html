@@ -1,0 +1,24 @@
+<ul class="conflicts">
+  @for (conflict of conflicts(); track conflict.id) {
+    <li data-cy="variable-id-conflict">
+      {{ 'variable-id-conflicts.id' | translate }}
+      <span class="name">{{ conflict.id }}</span>
+      {{ 'variable-id-conflicts.stands-for' | translate }}
+      <ul class="variables">
+        @for (variable of conflict.variables; track $index) {
+          <li>
+            @if (variable.kind === 'base') {
+              {{ 'variable-id-conflicts.base' | translate }}
+              <span class="name">{{ variable.alias || variable.id }}</span>
+              {{ 'variable-id-conflicts.base-hint' | translate }}
+            } @else {
+              {{ 'variable-id-conflicts.derived' | translate }}
+              <span class="name">{{ variable.alias || variable.id }}</span>
+              {{ 'variable-id-conflicts.derived-hint' | translate }}
+            }
+          </li>
+        }
+      </ul>
+    </li>
+  }
+</ul>

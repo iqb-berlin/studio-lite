@@ -1,7 +1,7 @@
 import { createMock } from '@golevelup/ts-jest';
 import { MetadataValuesEntry, UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import {
-  entryHasContent, findUnitExportContents, hasCodingScheme, hasItems, hasMetadataContent
+  entryHasContent, findUnitExportContents, hasItems, hasMetadataContent
 } from './unit-export-contents';
 import { UnitService } from '../services/unit.service';
 import { UnitCommentService } from '../services/unit-comment.service';
@@ -65,22 +65,15 @@ describe('unit export contents', () => {
     });
   });
 
-  describe('hasCodingScheme', () => {
-    it('is true only for a non-empty scheme', () => {
-      expect(hasCodingScheme('{"variableCodings":[]}')).toBe(true);
-      expect(hasCodingScheme('')).toBe(false);
-      expect(hasCodingScheme(null)).toBe(false);
-      expect(hasCodingScheme(undefined)).toBe(false);
-    });
-  });
-
   describe('findUnitExportContents', () => {
     it('combines the unit sources with the comment and rich note lookups', async () => {
       const unitService = createMock<UnitService>();
       const unitCommentService = createMock<UnitCommentService>();
       const unitRichNoteService = createMock<UnitRichNoteService>();
       unitService.findAllExportSources.mockResolvedValue([
-        { id: 3, metadata: { profiles: [{ profileId: 'p', entries: [entry('x')] }] }, scheme: '' }
+        {
+          id: 3, metadata: { profiles: [{ profileId: 'p', entries: [entry('x')] }] }, scheme: '', variables: []
+        }
       ]);
       unitCommentService.findUnitIdsWithComments.mockResolvedValue(new Set([3]));
       unitRichNoteService.findUnitIdsWithNotes.mockResolvedValue(new Set());
@@ -88,9 +81,33 @@ describe('unit export contents', () => {
       const contents = await findUnitExportContents(5, unitService, unitCommentService, unitRichNoteService);
 
       expect(contents).toEqual([{
-        unitId: 3, metadata: true, items: false, codingScheme: false, comments: true, richNotes: false
+        unitId: 3,
+        metadata: true,
+        items: false,
+        codingScheme: false,
+        comments: true,
+        richNotes: false,
+        variableIdConflicts: []
       }]);
       expect(unitService.findAllExportSources).toHaveBeenCalledWith(5);
+    });
+
+    it('names the ids the export would write twice (#2119)', async () => {
+      const unitService = createMock<UnitService>();
+      const unitCommentService = createMock<UnitCommentService>();
+      const unitRichNoteService = createMock<UnitRichNoteService>();
+      unitService.findAllExportSources.mockResolvedValue([{
+        id: 3,
+        metadata: null,
+        scheme: JSON.stringify({ variableCodings: [{ id: 'd_1', alias: '05', sourceType: 'MANUAL' }] }),
+        variables: [{ id: '05', alias: '_00a' }]
+      }]);
+      unitCommentService.findUnitIdsWithComments.mockResolvedValue(new Set());
+      unitRichNoteService.findUnitIdsWithNotes.mockResolvedValue(new Set());
+
+      const [contents] = await findUnitExportContents(5, unitService, unitCommentService, unitRichNoteService);
+
+      expect(contents.variableIdConflicts.map(conflict => conflict.id)).toEqual(['05']);
     });
   });
 });

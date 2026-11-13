@@ -3,11 +3,14 @@ import {
   ComponentFixture, fakeAsync, TestBed, tick
 } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
-import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef
+} from '@angular/material/dialog';
 import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
-import { BookletConfigDto } from '@studio-lite-lib/api-dto';
+import { BookletConfigDto, UnitExportContentsDto } from '@studio-lite-lib/api-dto';
+import { NEVER, of } from 'rxjs';
 import { MatExpansionModule, MatExpansionPanel } from '@angular/material/expansion';
 import { provideHttpClient } from '@angular/common/http';
 import { createMock } from '@golevelup/ts-jest';
@@ -66,7 +69,10 @@ describe('ExportUnitComponent', () => {
     @Output() addPlayersChange = new EventEmitter<boolean>();
     @Output() fileSelectionChange = new EventEmitter<ExportFileSelection>();
     @Output() unitsWithOutPlayerChange = new EventEmitter<number[]>();
+    @Output() variableIdConflictsChange = new EventEmitter<UnitExportContentsDto[] | null>();
   }
+
+  const dialogRef = createMock<MatDialogRef<ExportUnitComponent>>();
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -88,6 +94,10 @@ describe('ExportUnitComponent', () => {
         {
           provide: MAT_DIALOG_DATA,
           useValue: {}
+        },
+        {
+          provide: MatDialogRef,
+          useValue: dialogRef
         }
       ]
     })
@@ -114,6 +124,7 @@ describe('ExportUnitComponent', () => {
     fixture = TestBed.createComponent(ExportUnitComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+    jest.clearAllMocks();
   });
 
   it('should pass the export format down and adopt changes from the file config', () => {
@@ -176,6 +187,7 @@ describe('ExportUnitComponent', () => {
     };
     component.unitExportSettings.unitIdList = [1];
     component.unitExportSettings.addTestTakersHot = 1;
+    component.setVariableIdConflicts([]);
 
     enterBookletId('Heft_1-a');
     expect(button.disabled).toBe(false);
@@ -269,7 +281,9 @@ describe('ExportUnitComponent', () => {
   it('should start the export of a review from its booklet config, in the current keys', () => {
     const exportOfReview = new ExportUnitComponent(
       { units: [1], bookletConfigSettings: { unitTitle: 'ON' } },
-      createMock<WorkspaceService>()
+      createMock<WorkspaceService>(),
+      createMock<MatDialogRef<ExportUnitComponent>>(),
+      createMock<MatDialog>()
     );
 
     expect(exportOfReview.bookletConfigSettings).toEqual({ toolbarShowUnitTitle: 'TRUE' });
@@ -306,5 +320,126 @@ describe('ExportUnitComponent', () => {
     const headerContent = settings.find(s => s.key === 'header_content');
     expect(headerContent?.value).toBe('NONE');
     expect(settings.some(s => s.key === 'header_hidden')).toBe(false);
+  });
+  describe('ids the export would carry twice (#2119)', () => {
+    const conflictIn = (unitId: number): UnitExportContentsDto => ({
+      unitId,
+      metadata: false,
+      items: false,
+      codingScheme: true,
+      comments: false,
+      richNotes: false,
+      variableIdConflicts: [{
+        id: '05',
+        variables: [{ kind: 'base', id: '05', alias: '_00a' }, { kind: 'derived', id: 'd_1', alias: '05' }]
+      }]
+    });
+    let openDialog: jest.SpyInstance;
+
+    const reportConflicts = (units: UnitExportContentsDto[] | null) => {
+      (fixture.debugElement
+        .query(By.directive(MockExportUnitFileConfigComponent))
+        .componentInstance as MockExportUnitFileConfigComponent).variableIdConflictsChange.emit(units);
+    };
+    const answerConflictDialog = (result: boolean | undefined) => {
+      openDialog = jest.spyOn(TestBed.inject(MatDialog), 'open')
+        .mockReturnValue(createMock<MatDialogRef<unknown>>({ afterClosed: () => of(result) }));
+    };
+
+    beforeEach(() => {
+      component.unitExportSettings.unitIdList = [3];
+      component.workspaceService.unitList = { '': [{ id: 3, key: 'GL_NC08', name: 'Markieren' }] };
+    });
+
+    it('names the chosen units with such an id before the export', () => {
+      answerConflictDialog(false);
+      reportConflicts([conflictIn(3)]);
+
+      component.download();
+
+      expect(openDialog).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+        data: {
+          units: [{ key: 'GL_NC08', name: 'Markieren', conflicts: conflictIn(3).variableIdConflicts }],
+          exportFormat: 'xml'
+        }
+      }));
+    });
+
+    it('exports only when the conflict dialog is confirmed', () => {
+      reportConflicts([conflictIn(3)]);
+
+      answerConflictDialog(undefined);
+      component.download();
+      answerConflictDialog(false);
+      component.download();
+      expect(dialogRef.close).not.toHaveBeenCalled();
+
+      answerConflictDialog(true);
+      component.download();
+      expect(dialogRef.close).toHaveBeenCalledWith(component.unitExportSettings);
+    });
+
+    // Before the answer, a download would skip the check for every unit
+    it('locks the download until the ids are checked', () => {
+      const button = () => fixture.debugElement.query(By.css('[data-cy="workspace-export-unit-button"]'))
+        .nativeElement as HTMLButtonElement;
+      fixture.detectChanges();
+      expect(button().disabled).toBe(true);
+
+      reportConflicts([]);
+      fixture.detectChanges();
+      expect(button().disabled).toBe(false);
+    });
+
+    // a failed check must not pass for one that found nothing
+    it('says so when the ids could not be checked, and leaves the export possible', () => {
+      const failedNote = () => fixture.debugElement.query(By.css('[data-cy="export-variable-id-check-failed"]'));
+      answerConflictDialog(false);
+      fixture.detectChanges();
+      expect(failedNote()).toBeNull();
+
+      reportConflicts(null);
+      fixture.detectChanges();
+      expect(failedNote()).not.toBeNull();
+
+      component.download();
+      expect(openDialog).not.toHaveBeenCalled();
+      expect(dialogRef.close).toHaveBeenCalledWith(component.unitExportSettings);
+    });
+
+    it('opens no second conflict dialog while the first is open', () => {
+      reportConflicts([conflictIn(3)]);
+      openDialog = jest.spyOn(TestBed.inject(MatDialog), 'open')
+        .mockReturnValue(createMock<MatDialogRef<unknown>>({ afterClosed: () => NEVER }));
+
+      component.download();
+      component.download();
+
+      expect(openDialog).toHaveBeenCalledTimes(1);
+    });
+
+    it('exports at once when no chosen unit has such an id', () => {
+      answerConflictDialog(false);
+      reportConflicts([conflictIn(4)]);
+
+      component.download();
+
+      expect(openDialog).not.toHaveBeenCalled();
+      expect(dialogRef.close).toHaveBeenCalledWith(component.unitExportSettings);
+    });
+
+    // The JSON lists base and derived variables by the same ids as the XML
+    it('names them before a JSON export as well, and exports it when confirmed', () => {
+      answerConflictDialog(true);
+      reportConflicts([conflictIn(3)]);
+      component.unitExportSettings.exportFormat = 'json';
+
+      component.download();
+
+      expect(openDialog).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+        data: expect.objectContaining({ exportFormat: 'json' })
+      }));
+      expect(dialogRef.close).toHaveBeenCalledWith(expect.objectContaining({ exportFormat: 'json', unitIdList: [3] }));
+    });
   });
 });

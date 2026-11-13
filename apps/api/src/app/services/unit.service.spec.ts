@@ -483,26 +483,39 @@ describe('UnitService', () => {
   describe('findAllExportSources', () => {
     it('reads the metadata column of an unmarked unit without resolving profiles', async () => {
       const metadata = { profiles: [{ profileId: 'p', entries: [] }], items: [] };
-      unitsRepository.find.mockResolvedValue([{ id: 1, metadata, scheme: '{}' } as unknown as Unit]);
+      const variables = [{ id: '05', alias: '_00a' }];
+      unitsRepository.find.mockResolvedValue([{
+        id: 1, metadata, scheme: '{}', variables
+      } as unknown as Unit]);
       unitMetadataToDeleteService.findMarkedUnitIds.mockResolvedValue(new Set());
       unitMetadataService.getAllByUnitIds.mockResolvedValue([]);
       unitItemService.getAllByUnitIds.mockResolvedValue([]);
 
       const result = await service.findAllExportSources(4);
 
-      expect(result).toEqual([{ id: 1, metadata, scheme: '{}' }]);
+      expect(result).toEqual([{
+        id: 1, metadata, scheme: '{}', variables
+      }]);
       expect(unitsRepository.find).toHaveBeenCalledWith({
         where: { workspaceId: 4 },
-        select: { id: true, metadata: true, scheme: true }
+        select: {
+          id: true, metadata: true, scheme: true, variables: true
+        }
       });
       expect(unitMetadataService.buildHideNumberingMap).not.toHaveBeenCalled();
     });
 
     it('reads the metadata tables of the marked units, as the export does, in one query each', async () => {
       unitsRepository.find.mockResolvedValue([
-        { id: 2, metadata: { stale: true }, scheme: '' },
-        { id: 3, metadata: { stale: true }, scheme: '' },
-        { id: 5, metadata: { profiles: [] }, scheme: '' }
+        {
+          id: 2, metadata: { stale: true }, scheme: '', variables: []
+        },
+        {
+          id: 3, metadata: { stale: true }, scheme: '', variables: []
+        },
+        {
+          id: 5, metadata: { profiles: [] }, scheme: '', variables: []
+        }
       ] as unknown as Unit[]);
       unitMetadataToDeleteService.findMarkedUnitIds.mockResolvedValue(new Set([2, 3]));
       unitMetadataService.getAllByUnitIds.mockResolvedValue([{ unitId: 2, profileId: 'p' } as UnitMetadataDto]);
@@ -511,9 +524,15 @@ describe('UnitService', () => {
       const result = await service.findAllExportSources(4);
 
       expect(result).toEqual([
-        { id: 2, metadata: { profiles: [{ unitId: 2, profileId: 'p' }], items: [] }, scheme: '' },
-        { id: 3, metadata: { profiles: [], items: [{ unitId: 3, id: 'item1' }] }, scheme: '' },
-        { id: 5, metadata: { profiles: [] }, scheme: '' }
+        {
+          id: 2, metadata: { profiles: [{ unitId: 2, profileId: 'p' }], items: [] }, scheme: '', variables: []
+        },
+        {
+          id: 3, metadata: { profiles: [], items: [{ unitId: 3, id: 'item1' }] }, scheme: '', variables: []
+        },
+        {
+          id: 5, metadata: { profiles: [] }, scheme: '', variables: []
+        }
       ]);
       expect(unitMetadataToDeleteService.findMarkedUnitIds).toHaveBeenCalledWith([2, 3, 5]);
       expect(unitMetadataService.getAllByUnitIds).toHaveBeenCalledWith([2, 3]);

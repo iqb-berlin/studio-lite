@@ -9,7 +9,9 @@ import {
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import type AdmZip from 'adm-zip';
-import { HIDDEN_PROFILE_ORDER, toVariableInfoListV1 } from '@studio-lite/shared-code';
+import {
+  derivedVariableId, hasCodingScheme, HIDDEN_PROFILE_ORDER, parseDerivedCodings, toVariableInfoListV1
+} from '@studio-lite/shared-code';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { UnitService } from '../services/unit.service';
 import { UnitDefinitionService } from '../services/unit-definition.service';
@@ -19,9 +21,8 @@ import {
 } from '../interfaces/unit-json-specs.interface';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { UnitRichNoteService } from '../services/unit-rich-note.service';
-import { entryHasContent, hasCodingScheme, hasMetadataContent } from '../utils/unit-export-contents';
+import { entryHasContent, hasMetadataContent } from '../utils/unit-export-contents';
 import { RichNotesDownloadClass } from './rich-notes-download.class';
-import { parseDerivedCodings } from '../utils/derived-codings';
 
 // Comment shape as defined by the iqb unit-comments@0.1 specification
 // (https://iqb-specifications.github.io/unit-comments/). Fields without a
@@ -380,9 +381,9 @@ export class UnitJsonDownloadClass {
   ): { baseVariables: VariableInfo[]; derivedVariables: { id: string; basedOn: string[] }[] } | null {
     // exported in the VariableInfo 1.x spelling, as the unit XML is (#1708)
     const baseVariables: VariableInfo[] = toVariableInfoListV1(definitionData?.variables);
-    const derivedVariables: { id: string; basedOn: string[] }[] = parseDerivedCodings(schemeData)
+    const derivedVariables: { id: string; basedOn: string[] }[] = parseDerivedCodings(schemeData?.scheme)
       .map(coding => ({
-        id: coding.alias || coding.id,
+        id: derivedVariableId(coding),
         basedOn: coding.deriveSources ?? []
       }));
 
