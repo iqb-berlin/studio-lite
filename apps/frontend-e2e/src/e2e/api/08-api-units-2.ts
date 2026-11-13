@@ -618,6 +618,33 @@ describe('Unit API tests part II', () => {
         });
       });
 
+      // #2134: a comment is signed "last name, first name" -- up to 202 characters, where its column
+      // held 100. Section 79 deleted the units of ws2, so the comment gets a unit of its own.
+      it('201 positive test: should take a comment from a user whose names come to more than 100 characters', () => {
+        const token = Cypress.expose(`token_${Cypress.expose('username')}`);
+        const wsId = Cypress.expose(ws2.id);
+        const author = `${'L'.repeat(60)}, ${'F'.repeat(60)}`;
+        cy.createUnitAPI(wsId, { shortname: 'NAMES2134', name: 'Lange Namen', group: '' }, token).then(unit => {
+          expect(unit.status, 'unit').to.equal(201);
+          const unitId = String(unit.body);
+          cy.updateMyData(token, { ...data, lastName: 'L'.repeat(60), firstName: 'F'.repeat(60) }).then(names => {
+            cy.postCommentAPI(wsId, unitId, { body: '<p>Lange Namen</p>', unitId: Number(unitId) }, token)
+              .then(comment => {
+                cy.getCommentsAPI(wsId, unitId, token).then(comments => {
+                  // cleaned up before anything is asserted, so that a failure leaves the account and ws2 as they were
+                  cy.deleteUnitsAPI([unitId], wsId, token);
+                  cy.updateMyData(token, data);
+                  cy.then(() => {
+                    expect(names.status, 'names').to.equal(200);
+                    expect(comment.status).to.equal(201);
+                    expect(comments.body.map((c: { userName: string }) => c.userName)).to.deep.equal([author]);
+                  });
+                });
+              });
+          });
+        });
+      });
+
       it('403 negative test: should deny a superadmin from updating data belonging to another account', () => {
         cy.updateMyData(
           Cypress.expose(`token_${Cypress.expose('username')}`),
