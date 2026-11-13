@@ -78,6 +78,17 @@ describe('NewGroupButtonComponent', () => {
     expect(emitSpy).toHaveBeenCalledWith(newGroupName);
   });
 
+  // #2131: the units' column holds 50 characters, and a longer group failed when saved
+  it('should limit the name typed for the group to 50 characters', () => {
+    mockDialog.open.mockReturnValue({ afterClosed: () => of(false) });
+
+    component.newGroup();
+
+    expect(mockDialog.open).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      data: expect.objectContaining({ maxLength: 50 })
+    }));
+  });
+
   it('should show error snackbar if checking backend returns false', () => {
     const newGroupName = 'New Group 2';
     mockDialog.open.mockReturnValue({ afterClosed: () => of(newGroupName) });

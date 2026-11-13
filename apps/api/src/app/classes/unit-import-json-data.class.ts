@@ -38,7 +38,8 @@ export class UnitImportJsonData {
     this.fileName = fileIo.originalname;
     const folder = this.getFolder();
     const index: UnitIndexJson = JSON.parse(fileIo.buffer.toString());
-    if (!index.id) throw new Error('unit id missing');
+    // a blank id counts as none: creating refuses it, and the whole upload would fail with it (#2131)
+    if (!index.id || (typeof index.id === 'string' && !index.id.trim())) throw new Error('unit id missing');
     if (!index.userInterface) throw new Error('userInterface missing');
 
     this.key = index.id;

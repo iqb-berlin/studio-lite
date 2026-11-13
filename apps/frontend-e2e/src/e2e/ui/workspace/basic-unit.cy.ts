@@ -63,4 +63,15 @@ describe('Workspace Unit Management (Core CRUD)', () => {
     selectUnit(unitCrudUnits.unsaved.shortname);
     cy.get('input[formControlName="name"]').should('have.value', unitCrudUnits.unsaved.name);
   });
+
+  // #2131: the column holds 100 characters, and saving a longer name failed with a server problem
+  it('takes no more than 100 characters for the name of a unit', () => {
+    cy.visitWs(primaryWorkspace);
+    selectUnit(unitCrudUnits.switchedTo.shortname);
+    clickIndexTabWorkspace('properties');
+
+    cy.get('input[formControlName="name"]').clear().type('N'.repeat(101), { delay: 0 });
+
+    cy.get('input[formControlName="name"]').invoke('val').should('have.length', 100);
+  });
 });

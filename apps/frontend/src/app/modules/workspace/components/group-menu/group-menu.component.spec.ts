@@ -54,6 +54,17 @@ describe('GroupMenuComponent', () => {
     expect(renamed).toHaveBeenCalledWith('Gruppe 2');
   });
 
+  // #2131: the units' column holds 50 characters, and a longer group failed when saved
+  it.each(['addGroup', 'renameGroup'] as const)('should limit the name typed for %s to 50 characters', method => {
+    closeWith(false);
+
+    component[method]();
+
+    expect(dialog.open).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      data: expect.objectContaining({ maxLength: 50 })
+    }));
+  });
+
   it('should delete the group after confirmation', () => {
     const deleted = jest.fn();
     component.groupDeleted.subscribe(deleted);

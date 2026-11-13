@@ -329,6 +329,17 @@ describe('UnitService', () => {
       expect(unitsRepository.save).not.toHaveBeenCalled();
     });
 
+    // #2131: the columns hold 100 and 50 characters; a blank key is refused as on renaming (#2127)
+    it.each([
+      ['a name of 101 characters', { key: 'K1', name: 'N'.repeat(101) }],
+      ['a group of 51 characters', { key: 'K1', groupName: 'G'.repeat(51) }],
+      ['a blank key', { key: '   ' }]
+    ])('should refuse %s', async (_, unit) => {
+      await expect(service.create(1, unit as CreateUnitDto, { id: 1 } as User, false))
+        .rejects.toBeInstanceOf(BadRequestException);
+      expect(unitsRepository.save).not.toHaveBeenCalled();
+    });
+
     it('should assign a uuid to the new unit', async () => {
       const newUnit: Partial<Unit> = { id: 2 };
       unitsRepository.findOne.mockResolvedValue(null);
@@ -670,6 +681,32 @@ describe('UnitService', () => {
         expect(unitsRepository.save).toHaveBeenCalled();
       });
     });
+
+    // #2131: the columns refused these with a server problem
+    describe('with values that do not fit the columns', () => {
+      beforeEach(() => {
+        unitsRepository.findOne.mockResolvedValue({ id: 1, key: 'OLD', workspaceId: 7 } as Unit);
+      });
+
+      it.each([
+        ['a name of 101 characters', { name: 'N'.repeat(101) }],
+        ['a group of 51 characters', { groupName: 'G'.repeat(51) }],
+        ['no key', { key: null }]
+      ])('refuses %s', async (_, data) => {
+        await expect(service.patchUnit(1, { id: 1, ...data } as unknown as UnitPropertiesDto, 'user'))
+          .rejects.toBeInstanceOf(BadRequestException);
+        expect(unitsRepository.save).not.toHaveBeenCalled();
+      });
+
+      it('takes a name of 100 and a group of 50 characters', async () => {
+        const data = { id: 1, name: 'N'.repeat(100), groupName: 'G'.repeat(50) };
+        await service.patchUnit(1, data as UnitPropertiesDto, 'user');
+
+        expect(unitsRepository.save).toHaveBeenCalledWith(expect.objectContaining({
+          name: data.name, groupName: data.groupName
+        }));
+      });
+    });
   });
 
   describe('patchDropBoxHistory', () => {
@@ -989,6 +1026,12 @@ describe('UnitService', () => {
         { workspaceId: 3, id: In([1, 2]) },
         { groupName: 'Gruppe' }
       );
+    });
+
+    // #2131: the column holds 50 characters, and the second update failed with a server problem
+    it('should refuse a group of more than 50 characters before updating', async () => {
+      await expect(service.patchUnitGroup(3, 'G'.repeat(51), [1, 2])).rejects.toBeInstanceOf(BadRequestException);
+      expect(unitsRepository.update).not.toHaveBeenCalled();
     });
   });
 });

@@ -1,4 +1,5 @@
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import {
@@ -544,6 +545,33 @@ describe('WorkspaceService', () => {
         { workspaceId: 1, groupName: 'Alpha' },
         { groupName: 'Beta' }
       );
+    });
+
+    // #2131: the units' column holds 50 characters; a rename changed the settings and then failed on
+    // the units with a server problem
+    it.each([
+      ['add', { operation: 'add', groupName: 'G'.repeat(51) }],
+      ['rename to', { operation: 'rename', groupName: 'old', newGroupName: 'G'.repeat(51) }]
+    ])('should refuse to %s a group of more than 50 characters before writing', async (_, dto) => {
+      await expect(service.patchGroupName(1, dto as unknown as RenameGroupNameDto))
+        .rejects.toBeInstanceOf(BadRequestException);
+      expect(workspaceRepository.save).not.toHaveBeenCalled();
+      expect(unitsRepository.update).not.toHaveBeenCalled();
+    });
+
+    // #2131: a longer group stored before can be renamed into one that fits
+    it('should rename a group of more than 50 characters to a shorter one', async () => {
+      const ws = { id: 1, settings: { unitGroups: ['G'.repeat(60)] } };
+      jest.spyOn(workspaceRepository, 'findOne').mockResolvedValue(ws as unknown as Workspace);
+
+      await service.patchGroupName(1, {
+        operation: 'rename',
+        groupName: 'G'.repeat(60),
+        newGroupName: 'Kurz'
+      } as unknown as RenameGroupNameDto);
+
+      expect(ws.settings.unitGroups).toEqual(['Kurz']);
+      expect(workspaceRepository.save).toHaveBeenCalled();
     });
   });
 

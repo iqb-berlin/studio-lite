@@ -36,7 +36,8 @@
       "missing-file": "Referenzierte Datei nicht im Upload gefunden",
       "ignore-file": "Datei wurde ignoriert",
       "coding-scheme": "Kein gültiges Kodierschema, Unit wurde ohne Schema angelegt",
-      "key-too-long": "Kurzname länger als 20 Zeichen, Aufgabe wurde nicht angelegt"
+      "key-too-long": "Kurzname länger als 20 Zeichen, Aufgabe wurde nicht angelegt",
+      "name-too-long": "Name länger als 100 Zeichen, auf 100 Zeichen gekürzt"
     },
     "menu-label": {
       "import": "Import",

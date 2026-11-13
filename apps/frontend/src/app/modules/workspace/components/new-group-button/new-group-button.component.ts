@@ -36,7 +36,8 @@ export class NewGroupButtonComponent {
         title: this.translateService.instant('workspace.new-group'),
         default: '',
         okButtonLabel: this.translateService.instant('workspace.save'),
-        prompt: this.translateService.instant('workspace.group-name')
+        prompt: this.translateService.instant('workspace.group-name'),
+        maxLength: WorkspaceService.unitGroupNameMaxLength
       }
     });
 
