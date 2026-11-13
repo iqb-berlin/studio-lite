@@ -15,6 +15,8 @@ describe('UnitCheckComponent', () => {
   let unitStores: UnitStoresService;
   let hiddenRoutes: string[];
   let getUnitRichNotes: jest.Mock;
+  let getUnitDefinition: jest.Mock;
+  let getUnitScheme: jest.Mock;
   let hasComments: jest.Mock;
 
   const element = (): HTMLElement => fixture.nativeElement as HTMLElement;
@@ -42,8 +44,8 @@ describe('UnitCheckComponent', () => {
             getUnitProperties: () => of({
               id: 3, editor: 'iqb-editor-aspect@2.9', player: 'iqb-player-aspect@2.9', schemer: 'iqb-schemer@2.5'
             }),
-            getUnitDefinition: () => of({ definition: '{}', variables: [{ id: '05', alias: '_00a' }] }),
-            getUnitScheme: () => of({ scheme: scheme([]), schemeType: 'iqb-standard@3.0' }),
+            getUnitDefinition,
+            getUnitScheme,
             getUnitRichNotes
           }
         },
@@ -74,6 +76,8 @@ describe('UnitCheckComponent', () => {
     hiddenRoutes = [];
     hasComments = jest.fn(() => of(true));
     getUnitRichNotes = jest.fn(() => of({ tags: [], notes: [] }));
+    getUnitDefinition = jest.fn(() => of({ definition: '{}', variables: [{ id: '05', alias: '_00a' }] }));
+    getUnitScheme = jest.fn(() => of({ scheme: scheme([]), schemeType: 'iqb-standard@3.0' }));
   });
 
   it('shows every tab of a complete unit as in order, comments and notes as information', fakeAsync(() => {
@@ -96,6 +100,16 @@ describe('UnitCheckComponent', () => {
     expect(tabs()).toEqual(['unit-check-properties', 'unit-check-editor', 'unit-check-schemer']);
     expect(hasComments).not.toHaveBeenCalled();
     expect(getUnitRichNotes).not.toHaveBeenCalled();
+  }));
+
+  // the definition can be megabytes; it is fetched only for a tab that is checked
+  it('loads neither definition nor scheme when the workspace hides the editor and the coding', fakeAsync(() => {
+    hiddenRoutes = ['editor', 'schemer'];
+    create();
+
+    expect(tabs()).toEqual(['unit-check-properties', 'unit-check-comments', 'unit-check-notes']);
+    expect(getUnitDefinition).not.toHaveBeenCalled();
+    expect(getUnitScheme).not.toHaveBeenCalled();
   }));
 
   // the card reads the unit as it is being edited, so a fix shows before it is saved (#2135)
