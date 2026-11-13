@@ -650,6 +650,13 @@ describe('UnitService', () => {
         expect(unitsRepository.save).not.toHaveBeenCalled();
       });
 
+      // #2127: the properties refuse an emptied key, and creating refuses a unit without one (#2095)
+      it.each(['', '   '])('refuses the empty key %p', async key => {
+        await expect(service.patchUnit(1, { id: 1, key } as UnitPropertiesDto, 'user'))
+          .rejects.toBeInstanceOf(BadRequestException);
+        expect(unitsRepository.save).not.toHaveBeenCalled();
+      });
+
       it('lets a unit keep or recase its own key', async () => {
         await service.patchUnit(1, { id: 1, key: 'old' } as UnitPropertiesDto, 'user');
 

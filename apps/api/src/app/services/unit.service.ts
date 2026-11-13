@@ -535,6 +535,8 @@ export class UnitService {
     const dataKeys = Object.keys(newData);
     if (dataKeys.indexOf('key') >= 0) {
       if (typeof newData.key === 'string' && newData.key !== unit.key) {
+        // an emptied or blank key, as the properties refuse it (#2127); creating refuses an empty one (#2095)
+        if (!newData.key.trim()) throw new BadRequestException('A unit needs a key.');
         UnitService.assertKeyFits(newData.key);
         await this.assertKeyIsFree(unit, newData.key);
       }
