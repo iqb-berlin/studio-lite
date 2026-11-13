@@ -14,7 +14,8 @@ import {
   makeAdminOfGroup,
   renameGroup,
   saveUserEdit,
-  selectUserRow
+  selectUserRow,
+  waitForSuccess
 } from '../../../support/helpers';
 import { addState } from '../../../support/helpers/group-admin';
 import { selectProfileForGroupFromAdmin } from '../../../support/metadata/metadata-util';
@@ -217,6 +218,63 @@ describe('Admin User Management', () => {
         expect([...$inputs].map(input => (input as HTMLInputElement).value)).to.include('Geprüft');
       });
       deleteGroup(renamed);
+    });
+
+    // A profile checked before the stored ones arrived was unchecked again by them and not saved
+    // (#2121). The stored ones are held back until the check, so that without the fix it comes
+    // first. With the fix there is nothing to check until they are in: the dialog shows its own
+    // spinner instead, and that lets them through.
+    it('keeps a profile checked while the stored ones load (#2121)', () => {
+      const group = 'Profil vor Antwort';
+      const deutsch = 'https://w3id.org/iqb/p12/unit/';
+      const mathematik = 'https://w3id.org/iqb/p11/unit/';
+      // The dialog may show its spinner before the response has reached the intercept.
+      let released = false;
+      let letThrough: () => void = () => undefined;
+      const release = () => {
+        released = true;
+        letThrough();
+      };
+      cy.window().then(win => {
+        const token = win.localStorage.getItem('id_token') || '';
+        cy.createGroupAPI({ id: '', name: group }, token, { profiles: [{ id: deutsch, label: IqbProfile.DEu }] })
+          .then(created => {
+            expect(created.status).to.equal(201);
+            const groupId = String(created.body);
+            cy.visit('/');
+            cy.findAdminSettings().click();
+            clickIndexTabAdmin('workspace-groups');
+            cy.contains('mat-row', group).click();
+            cy.intercept('GET', new RegExp(`/api/admin/workspace-groups/${groupId}$`), req => {
+              req.on('response', () => (released ? undefined : new Promise<void>(resolve => {
+                letThrough = resolve;
+              })));
+            }).as('storedProfiles');
+            cy.get('mat-icon').contains('settings').click();
+            cy.get('mat-dialog-content.profiles', { timeout: 30000 })
+              .should($content => {
+                expect($content.children('.spinner').length +
+                  $content.find('[data-cy="shared-profiles-select-profile"]').length).to.be.greaterThan(0);
+              })
+              .then($content => {
+                if ($content.children('.spinner').length) release();
+              });
+            cy.get('[data-cy="shared-profiles-select-profile"]', { timeout: 30000 })
+              .filter(`:contains(${IqbProfile.MAu})`, { timeout: 30000 })
+              .click()
+              .then(() => release());
+            // Without the intercept on the dialog's request there is no race, and the test would pass anyway.
+            cy.wait('@storedProfiles');
+            cy.intercept('PATCH', `/api/admin/workspace-groups/${groupId}`).as('saveProfiles');
+            cy.get('[data-cy="admin-edit-workspace-group-settings-save-button"]').click();
+            waitForSuccess('@saveProfiles');
+            cy.getGroupByIdAPI(groupId, token)
+              .its('body.settings.profiles')
+              .then((profiles: { id: string }[]) => {
+                expect(profiles.map(profile => profile.id)).to.include.members([deutsch, mathematik]);
+              });
+          });
+      });
     });
 
     it('assigns a user as group admin', () => {

@@ -38,7 +38,11 @@ function getTimeNumber(time: string, propName: string, profile: string) {
   }
 }
 
+let groupProfileSaves = 0;
+
 export function selectProfileForGroupFromAdmin(group: string, profile: IqbProfile) {
+  groupProfileSaves += 1;
+  const save = `saveGroupProfiles${groupProfileSaves}`;
   cy.visit('/');
   cy.get('[data-cy="goto-admin"]').click();
   clickIndexTabAdmin('workspace-groups');
@@ -50,9 +54,12 @@ export function selectProfileForGroupFromAdmin(group: string, profile: IqbProfil
     .click();
   checkProfile(profile);
   // The profiles are sent once the dialog has closed; leaving the page before would lose them.
-  cy.intercept('PATCH', '/api/admin/workspace-groups/*').as('saveGroupProfiles');
+  // An alias of its own for every call: the intercept outlives the call, and under a shared alias a
+  // later request on the same URL that no one waited for, such as a rename of the group, answered
+  // the next call's wait before its save was sent (#2121).
+  cy.intercept('PATCH', '/api/admin/workspace-groups/*').as(save);
   cy.get('[data-cy="admin-edit-workspace-group-settings-save-button"]').click();
-  waitForSuccess('@saveGroupProfiles');
+  waitForSuccess(`@${save}`);
 }
 
 export function selectProfileForGroup(group: string, profile: IqbProfile) {
