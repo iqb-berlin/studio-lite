@@ -94,6 +94,21 @@ describe('SelectUnitListComponent', () => {
     expect(component.objectsDatasource.data.length).toBe(2);
   });
 
+  // The copy dialog loads another workspace's units into the list; the term in the search field
+  // stayed but no longer filtered (#2139)
+  it('filters a list loaded anew by the term in the search field', () => {
+    component.queryParams = new HttpParams();
+    fixture.componentRef.setInput('workspace', 10);
+    fixture.detectChanges();
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('studio-lite-search-filter input');
+    input.value = 'u1';
+    input.dispatchEvent(new KeyboardEvent('keyup'));
+
+    component.updateUnitList(11);
+
+    expect(component.objectsDatasource.filteredData.map(unit => unit.id)).toEqual([1]);
+  });
+
   // What the header checkbox acts on, the units shown or all of them (#433)
   describe('scope of the header checkbox', () => {
     const element = (selector: string): HTMLElement => fixture.nativeElement.querySelector(selector);

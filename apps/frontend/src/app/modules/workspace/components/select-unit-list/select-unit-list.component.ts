@@ -46,6 +46,9 @@ export class SelectUnitListComponent implements OnChanges, OnDestroy {
   // What the header checkbox acts on (#433). It keeps its setting while the list is shown, also when
   // the group management or the review admin swaps the selection.
   readonly selectionScope = signal<SelectionScope>('all');
+  // Set again on every data source the list loads: the copy dialog loads another workspace's units
+  // while the search field keeps its term (#2139).
+  private readonly searchTerm = signal('');
   disabledUnits: number[] = [];
   selectionChangedSubscription: Subscription | null = null;
 
@@ -88,6 +91,7 @@ export class SelectUnitListComponent implements OnChanges, OnDestroy {
           .toLowerCase()
           .includes(filter)
         );
+    this.objectsDatasource.filter = this.searchTerm();
 
     this.objectsDatasource.sort = this.sort;
     this.objectsDatasource.data.forEach(row => {
@@ -157,6 +161,11 @@ export class SelectUnitListComponent implements OnChanges, OnDestroy {
   constructor(private backendService: WorkspaceBackendService) {
     this.selectionChangedSubscription = this.tableSelectionCheckboxes.changed
       .subscribe(() => this.selectionChanged.emit(this.selectedUnitIds));
+  }
+
+  filterUnits(term: string): void {
+    this.searchTerm.set(term.trim().toLowerCase());
+    this.objectsDatasource.filter = this.searchTerm();
   }
 
   masterToggle(): void {
