@@ -1,26 +1,42 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatTableDataSource } from '@angular/material/table';
 import { TranslateModule } from '@ngx-translate/core';
 import { BehaviorSubject } from 'rxjs';
-import { MatCheckboxChange, MatCheckboxModule, MatCheckbox } from '@angular/material/checkbox';
-import { MatSortModule } from '@angular/material/sort';
-import { QueryList } from '@angular/core';
 import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
 import { ResourcePackagesTableComponent } from './resource-packages-table.component';
 import { environment } from '../../../../../environments/environment';
 
+// The selection was held in the checkboxes of the rows shown: the header checkbox ticked them without
+// selecting anything, and a package filtered out and back stayed selected, unticked (#433)
 describe('ResourcePackagesTableComponent', () => {
-  let component: ResourcePackagesTableComponent;
   let fixture: ComponentFixture<ResourcePackagesTableComponent>;
+  let selected: BehaviorSubject<number[]>;
+
+  const resourcePackages = (): ResourcePackageDto[] => [
+    {
+      id: 1, name: 'One', elements: ['one.png'], createdAt: new Date('2024-01-01')
+    },
+    {
+      id: 2, name: 'Two', elements: ['two.png'], createdAt: new Date('2024-01-02')
+    }
+  ];
+  const element = (selector: string): HTMLInputElement => fixture.nativeElement.querySelector(selector);
+  const click = (selector: string): void => {
+    element(selector).click();
+    fixture.detectChanges();
+  };
+  const filter = (value: string): void => {
+    fixture.componentInstance.dataSource.filter = value;
+    fixture.detectChanges();
+  };
+  const load = (): void => {
+    fixture.componentRef.setInput('dataSource', new MatTableDataSource(resourcePackages()));
+    fixture.detectChanges();
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        TranslateModule.forRoot(),
-        MatTableModule,
-        MatCheckboxModule,
-        MatSortModule
-      ],
+      imports: [TranslateModule.forRoot()],
       providers: [{
         provide: 'SERVER_URL',
         useValue: environment.backendUrl
@@ -28,53 +44,34 @@ describe('ResourcePackagesTableComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(ResourcePackagesTableComponent);
-    component = fixture.componentInstance;
-    const resourcePackages: ResourcePackageDto[] = [
-      {
-        id: 1,
-        name: 'One',
-        elements: ['one.png'],
-        createdAt: new Date('2024-01-01')
-      },
-      {
-        id: 2,
-        name: 'Two',
-        elements: ['two.png'],
-        createdAt: new Date('2024-01-02')
-      }
-    ];
-    component.dataSource = new MatTableDataSource(resourcePackages);
-    component.selectedResourcePackages = new BehaviorSubject<number[]>([]);
-    fixture.detectChanges();
+    selected = new BehaviorSubject<number[]>([]);
+    fixture.componentRef.setInput('selectedResourcePackages', selected);
+    load();
   });
 
-  it('updates selectedResourcePackages from checked rows', () => {
-    const checkBoxes = [
-      { checked: true } as MatCheckbox,
-      { checked: true } as MatCheckbox,
-      { checked: false } as MatCheckbox
-    ];
-    const queryList = new QueryList<MatCheckbox>();
-    queryList.reset(checkBoxes);
-    component.checkBoxes = queryList;
+  it('selects the packages shown with the header checkbox', () => {
+    click('[data-cy="selection-scope-shown-only"] button');
+    filter('one');
 
-    component.updateSelectedResourcePackages();
+    click('[data-cy="selection-scope-toggle-all"] input');
 
-    expect(component.selectedResourcePackages.value).toEqual([1]);
+    expect(selected.value).toEqual([1]);
   });
 
-  it('toggles all checkboxes', () => {
-    const checkBoxes = [
-      { checked: false } as MatCheckbox,
-      { checked: false } as MatCheckbox
-    ];
-    const queryList = new QueryList<MatCheckbox>();
-    queryList.reset(checkBoxes);
-    component.checkBoxes = queryList;
+  it('keeps a package selected and ticked that was filtered out and shown again', () => {
+    click('[data-cy="admin-packages-select-One"] input');
+    filter('two');
+    filter('');
 
-    component.toggleCheckBoxes({ checked: true } as MatCheckboxChange);
+    expect(selected.value).toEqual([1]);
+    expect(element('[data-cy="admin-packages-select-One"] input').checked).toBe(true);
+  });
 
-    expect(checkBoxes[0].checked).toBe(true);
-    expect(checkBoxes[1].checked).toBe(true);
+  it('empties the selection when the packages are loaded anew', () => {
+    click('[data-cy="admin-packages-select-One"] input');
+
+    load();
+
+    expect(selected.value).toEqual([]);
   });
 });

@@ -94,15 +94,99 @@ describe('SelectUnitListComponent', () => {
     expect(component.objectsDatasource.data.length).toBe(2);
   });
 
-  it('should toggle master selection', () => {
+  // The copy dialog loads another workspace's units into the list; the term in the search field
+  // stayed but no longer filtered (#2139)
+  it('filters a list loaded anew by the term in the search field', () => {
     component.queryParams = new HttpParams();
-    component.updateUnitList(10);
+    fixture.componentRef.setInput('workspace', 10);
+    fixture.detectChanges();
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('studio-lite-search-filter input');
+    input.value = 'u1';
+    input.dispatchEvent(new KeyboardEvent('keyup'));
 
-    component.masterToggle();
-    expect(component.selectionCount).toBe(3);
+    component.updateUnitList(11);
 
-    component.masterToggle();
-    expect(component.selectionCount).toBe(0);
+    expect(component.objectsDatasource.filteredData.map(unit => unit.id)).toEqual([1]);
+  });
+
+  // What the header checkbox acts on, the units shown or all of them (#433)
+  describe('scope of the header checkbox', () => {
+    const element = (selector: string): HTMLElement => fixture.nativeElement.querySelector(selector);
+    const headerCheckbox = (): HTMLInputElement => element(
+      '[data-cy="selection-scope-toggle-all"] input'
+    ) as HTMLInputElement;
+    const rowCheckboxes = (): string => Array.from(fixture.nativeElement.querySelectorAll('mat-row mat-checkbox input'))
+      .map(input => ((input as HTMLInputElement).checked ? 'x' : '-'))
+      .join('');
+    const click = (selector: string): void => {
+      element(selector).click();
+      fixture.detectChanges();
+    };
+    const showGroup = (group: string): void => {
+      component.objectsDatasource.filter = group;
+      fixture.detectChanges();
+    };
+
+    beforeEach(() => {
+      fixture.componentRef.setInput('workspace', 10);
+      fixture.detectChanges();
+    });
+
+    it('selects the units shown only, keeping the hidden ones as they are', () => {
+      component.selectedUnitIds = [3];
+      click('[data-cy="selection-scope-shown-only"] button');
+      showGroup('g1');
+
+      click('[data-cy="selection-scope-toggle-all"] input');
+
+      expect(component.selectedUnitIds.sort()).toEqual([1, 2, 3]);
+      expect(headerCheckbox().checked).toBe(true);
+    });
+
+    it('selects all units, the hidden ones as well, in the default scope', () => {
+      showGroup('g1');
+
+      click('[data-cy="selection-scope-toggle-all"] input');
+
+      expect(component.selectedUnitIds.sort()).toEqual([1, 2, 3]);
+    });
+
+    it('names the selected units the filter hides and deselects them', () => {
+      component.selectedUnitIds = [1, 3];
+      showGroup('g1');
+      expect(element('[data-cy="selection-scope-hidden"]').classList).not.toContain('hidden-part-placeholder');
+
+      click('[data-cy="selection-scope-deselect-hidden"]');
+
+      expect(component.selectedUnitIds).toEqual([1]);
+      expect(element('[data-cy="selection-scope-hidden"]').classList).toContain('hidden-part-placeholder');
+    });
+
+    it('locks the header checkbox when the filter shows no unit to act on', () => {
+      click('[data-cy="selection-scope-shown-only"] button');
+      showGroup('nothing');
+
+      expect(headerCheckbox().disabled).toBe(true);
+    });
+
+    // A selection replaced by another of the same size left the old rows ticked
+    it('ticks the rows of a selection replaced by one of the same size', () => {
+      component.selectedUnitIds = [1];
+      fixture.detectChanges();
+
+      component.selectedUnitIds = [2];
+      fixture.detectChanges();
+
+      expect(rowCheckboxes()).toBe('-x-');
+    });
+
+    it('offers neither scope nor header checkbox for a single unit', () => {
+      fixture.componentRef.setInput('multiple', false);
+      fixture.detectChanges();
+
+      expect(element('mat-slide-toggle')).toBeNull();
+      expect(element('mat-header-cell mat-checkbox')).toBeNull();
+    });
   });
 
   describe('locked', () => {
