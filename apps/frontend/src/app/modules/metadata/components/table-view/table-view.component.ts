@@ -83,6 +83,8 @@ export class TableViewComponent implements OnInit {
   viewMode = 'units';
   workspaceId = this.workspaceService.selectedWorkspaceId;
   dataSource!: MatTableDataSource<ColumnValues>;
+  /** The key of the unit a row belongs to; the row itself holds it as a link, which is no text to sort by. */
+  private readonly unitKeys = new WeakMap<ColumnValues, string>();
   displayedColumns: string[] = [
     'key',
     'id',
@@ -142,15 +144,13 @@ export class TableViewComponent implements OnInit {
                 i === 0
               );
             });
-            values.key = `<a href=#/a/${this.workspaceId}/${unit.id}>${unit.key}</a>` || '–';
-            totalValues.push(values);
+            totalValues.push(this.withUnitKey(values, unit));
           } else {
-            totalValues.push({
-              key: `<a href=#/a/${this.workspaceId}/${unit.id}>${unit.key}</a>` || '–',
+            totalValues.push(this.withUnitKey({
               id: item.id || '–',
               variableId: item.variableId,
               description: item.description
-            });
+            }, unit));
           }
         });
       }
@@ -167,8 +167,7 @@ export class TableViewComponent implements OnInit {
   ): ColumnValues {
     this.displayedColumns.forEach(column => {
       if (column === 'key' && addKey) {
-        values.key =
-          `<a href=#/a/${this.workspaceId}/${unit.id}>${unit.key}</a>` || '–';
+        this.withUnitKey(values, unit);
       } else {
         values[column] = item[column] ? item[column]?.toString() : '';
       }
@@ -212,18 +211,22 @@ export class TableViewComponent implements OnInit {
             values = TableViewComponent.setColumnValues(values, entry);
           });
         }
-        values.key =
-          `<a href=#/a/${this.workspaceId}/${unit.id}>${unit.key}</a>` ||
-          '–';
-        totalValues.push(values);
+        totalValues.push(this.withUnitKey(values, unit));
       } else {
-        totalValues.push({
-          key:
-            `<a href=#/a/${this.workspaceId}/${unit.id}>${unit.key}</a>` || '–'
-        });
+        totalValues.push(this.withUnitKey({}, unit));
       }
     });
     this.dataSource = this.createDataSource(totalValues.flat());
+  }
+
+  /**
+   * Gives a row the key of its unit: as the link its cell shows, and as plain text beside the row,
+   * which is what the column is sorted by.
+   */
+  private withUnitKey(values: ColumnValues, unit: UnitPropertiesDto): ColumnValues {
+    values.key = `<a href=#/a/${this.workspaceId}/${unit.id}>${unit.key}</a>`;
+    this.unitKeys.set(values, unit.key || '');
+    return values;
   }
 
   /**
@@ -249,7 +252,7 @@ export class TableViewComponent implements OnInit {
     };
     dataSource.sortingDataAccessor = (row, column) => {
       const value = row[column] ?? '';
-      if (column === 'key') return value.replace(/<[^>]*>/g, '');
+      if (column === 'key') return this.unitKeys.get(row) ?? '';
       // an empty field among numbers stays empty: as a number it would be 0
       return value && holdsNumbers(column) ? Number(value) : value;
     };
