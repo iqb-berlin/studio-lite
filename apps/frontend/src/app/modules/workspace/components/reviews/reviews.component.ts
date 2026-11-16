@@ -12,7 +12,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import {
 
-  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
+  MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow,
+  MatRowDef, MatRow
 } from '@angular/material/table';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatButton } from '@angular/material/button';
@@ -28,6 +29,7 @@ import { ReviewMenuComponent } from '../review-menu/review-menu.component';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { I18nService } from '../../../../services/i18n.service';
 import { SaveLock } from '../../../../classes/save-lock.class';
+import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 
 /**
  * The reviews of a workspace: which units each contains, what a reviewer may do in it, and the
@@ -67,7 +69,7 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
   reviewDataOriginal: ReviewFullDto = { id: 0 };
   reviewDataToChange: ReviewFullDto = { id: 0 };
 
-  objectsDatasource = new MatTableDataSource<ReviewInListDto>();
+  objectsDatasource = new TextSortTableDataSource<ReviewInListDto>();
   displayedColumns = ['name', 'createdAt', 'changedAt'];
 
   constructor(
@@ -169,7 +171,7 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
   }
 
   private setObjectsDatasource(reviews: ReviewInListDto[]): void {
-    this.objectsDatasource = new MatTableDataSource(reviews);
+    this.objectsDatasource = new TextSortTableDataSource(reviews);
     this.objectsDatasource
       .filterPredicate = (reviewList: ReviewInListDto, filter) => ['name']
         .some(column => (reviewList[column as keyof ReviewInListDto] as string || '')

@@ -1,3 +1,5 @@
+import { compareText } from '@studio-lite/shared-code';
+
 /** The two things a collection needs of its entries: whether it is checked and what it is called. */
 interface CheckableEntry {
   isChecked: boolean;
@@ -17,7 +19,7 @@ export abstract class CheckCollection<T extends CheckableEntry> {
     this.entries
       .sort((a, b) => {
         if (a.isChecked === b.isChecked) {
-          return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+          return compareText(a.name, b.name);
         }
         return a.isChecked ? -1 : 1;
       });

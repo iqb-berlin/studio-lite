@@ -11,8 +11,7 @@ import {
   MatColumnDef,
   MatHeaderCell,
   MatHeaderCellDef, MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef,
-  MatTable,
-  MatTableDataSource
+  MatTable
 } from '@angular/material/table';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -25,6 +24,7 @@ import { SearchFilterComponent } from '../../../../components/search-filter/sear
 import { AppService } from '../../../../services/app.service';
 import { WorkspacesMenuComponent } from '../workspaces-menu/workspaces-menu.component';
 import { I18nService } from '../../../../services/i18n.service';
+import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 
 @Component({
   selector: 'studio-lite-workspaces',
@@ -35,7 +35,7 @@ import { I18nService } from '../../../../services/i18n.service';
 })
 
 export class WorkspacesComponent implements OnInit, AfterViewInit {
-  dataSource = new MatTableDataSource<WorkspaceFullDto>([]);
+  dataSource = new TextSortTableDataSource<WorkspaceFullDto>([]);
   displayedColumns: string[] = ['id', 'name', 'groupId', 'editor', 'preview', 'schemer', 'comments', 'notes'];
 
   @ViewChild(MatSort) sort!: MatSort;

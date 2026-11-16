@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatTableModule } from '@angular/material/table';
 import { MatTab, MatTabChangeEvent, MatTabsModule } from '@angular/material/tabs';
-import { MatSortModule } from '@angular/material/sort';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -13,6 +13,7 @@ import { TableViewComponent } from './table-view.component';
 import { MetadataService } from '../../services/metadata.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { I18nService } from '../../../../services/i18n.service';
+import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 
 jest.mock('file-saver-es', () => ({ saveAs: jest.fn() }));
 
@@ -102,7 +103,7 @@ describe('TableViewComponent', () => {
   });
 
   it('should apply filter to data source', () => {
-    component.dataSource = new MatTableDataSource<ColumnValues>([]);
+    component.dataSource = new TextSortTableDataSource<ColumnValues>([]);
     const event = { target: { value: ' test ' } } as unknown as Event;
     component.applyFilter(event);
     expect(component.dataSource.filter).toBe('test');
@@ -191,6 +192,38 @@ describe('TableViewComponent', () => {
       component.tabChanged(tab(0));
 
       expect(component.dataSource.data).toEqual([{ key: link(1, 'K1'), Themen: 'Zahlen<br>Raum', Stufe: 'II' }]);
+    });
+
+    const sortedBy = (column: string): ColumnValues[] => component.dataSource.sortData(
+      [...component.dataSource.data],
+      { active: column, direction: 'asc' } as MatSort
+    );
+
+    it('should sort the units by their key, not by the address of their link (#1872)', () => {
+      // loaded in the order of the keys; sorted by the link, unit 100 came first and 9 last
+      component.data = {
+        units: [{ id: 100, key: 'Aa' }, { id: 9, key: 'ab' }, { id: 12, key: 'Zz' }],
+        warning: ''
+      };
+      component.tabChanged(tab(0));
+      component.dataSource.data.reverse();
+
+      expect(sortedBy('key').map(row => row.key)).toEqual([link(100, 'Aa'), link(9, 'ab'), link(12, 'Zz')]);
+    });
+
+    it('should read a number in a profile field as a number, and an item id as text (#1872)', () => {
+      const field = 'Schwierigkeit';
+      const item = (id: string, value: string): ItemsMetadataValues => ({
+        id, profiles: [{ order: 0, entries: [entry(field, { lang: 'de', value })] }]
+      });
+      component.data = {
+        units: [{ id: 1, key: 'K1', metadata: { items: [item('1.10', '0.5'), item('1.9', '0.25')] } }],
+        warning: ''
+      };
+      component.tabChanged(tab(1));
+
+      expect(sortedBy(field).map(row => row[field])).toEqual(['0.25', '0.5']);
+      expect(sortedBy('id').map(row => row.id)).toEqual(['1.9', '1.10']);
     });
 
     const itemColumns = ['key', 'id', 'variableId', 'description', 'Schwierigkeit'];

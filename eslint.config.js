@@ -50,6 +50,20 @@ module.exports = [
     }
   },
   {
+    // Tabellen sortieren mit TextSortTableDataSource: Text wie die API, ohne Zahlenwandlung. Ein
+    // `new MatTableDataSource` fiele still auf die Reihenfolge nach Zeichencode zurück (#1872).
+    files: ['apps/frontend/src/**/*.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        ...rules['no-restricted-syntax'],
+        {
+          selector: "NewExpression[callee.name='MatTableDataSource']",
+          message: 'Use TextSortTableDataSource instead: it sorts text as the API does (#1872).'
+        }
+      ]
+    }
+  },
+  {
     // Build- und Jest-Konfigurationen liegen als CommonJS vor. Der TypeScript-Teil des
     // Regelsatzes braucht Typinformationen und damit die tsconfig, in der diese Dateien
     // nicht stehen -- sie bekommen deshalb den Teil, der ohne Typen auskommt.

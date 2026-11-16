@@ -166,6 +166,30 @@ describe('UnitService', () => {
     });
   });
 
+  // Sorted in the service and not by the query, with the comparison the frontend sorts by (#1872).
+  describe('the units in dictionary order', () => {
+    const keysOf = (units: { key?: string }[]) => units.map(unit => unit.key);
+
+    beforeEach(() => {
+      unitsRepository.find.mockResolvedValue(['b1', 'A10', 'a2', 'B'].map(key => ({ key, workspaceId: 1 } as Unit)));
+      workspaceRepository.find.mockResolvedValue([{ id: 1, name: 'ws' } as Workspace]);
+    });
+
+    it('should sort the units of a group', async () => {
+      expect(keysOf(await service.findAllForGroup(1))).toEqual(['a2', 'A10', 'B', 'b1']);
+    });
+
+    it('should sort the units of a workspace', async () => {
+      expect(keysOf(await service.findAllForWorkspace(1))).toEqual(['a2', 'A10', 'B', 'b1']);
+    });
+
+    it('should sort the units with their properties', async () => {
+      unitMetadataService.getModifiedMetadataForUnit.mockImplementation(async unit => unit);
+
+      expect(keysOf(await service.findAllWithProperties(1))).toEqual(['a2', 'A10', 'B', 'b1']);
+    });
+  });
+
   describe('findAllForWorkspace', () => {
     it('should return units for workspace', async () => {
       unitsRepository.find.mockResolvedValue([{ id: 1 } as Unit]);

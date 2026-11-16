@@ -15,6 +15,7 @@ import { StatePipe } from '../../pipes/state.pipe';
 import { HasNewCommentsPipe } from '../../pipes/has-new-comments.pipe';
 import { UnitDropBoxTooltipPipe } from '../../pipes/unit-dropbox-tooltip.pipe';
 import { ScrollIntoViewDirective } from '../../directives/scroll-into-view.directive';
+import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 
 /**
  * The unit list of a workspace as a sortable table, with what a row has to say at a glance: its
@@ -76,7 +77,7 @@ export class UnitTableComponent implements AfterViewInit, OnChanges {
   }
 
   private initDataSource(): void {
-    this.dataSource = new MatTableDataSource(this.unitList);
+    this.dataSource = new TextSortTableDataSource(this.unitList);
     this.dataSource
       .filterPredicate = (unitList, filter) => this.displayedColumns
         .some(column => (unitList[column as keyof UnitInListDto] as string)

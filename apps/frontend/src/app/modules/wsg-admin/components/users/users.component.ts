@@ -1,5 +1,5 @@
 import {
-  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell,
+  MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell,
   MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
 import {
@@ -29,6 +29,7 @@ import { ACCESS_LEVELS } from '../../models/access-levels';
 import { RolesHeaderComponent } from '../roles-header/roles-header.component';
 import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
 import { ChangeResultService } from '../../../../services/change-result.service';
+import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 
 @Component({
   selector: 'studio-lite-users',
@@ -45,7 +46,7 @@ import { ChangeResultService } from '../../../../services/change-result.service'
 export class UsersComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();
   private accessRightsRequest?: Subscription;
-  objectsDatasource = new MatTableDataSource<UserFullDto>([]);
+  objectsDatasource = new TextSortTableDataSource<UserFullDto>([]);
   displayedColumns = ['name', 'displayName', 'isAdmin', 'email', 'description'];
   tableSelectionCheckbox = new SelectionModel <UserFullDto>(true, []);
   tableSelectionRow = new SelectionModel <UserFullDto>(false, []);
@@ -137,7 +138,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   private setObjectsDatasource(users: UserFullDto[]): void {
-    this.objectsDatasource = new MatTableDataSource(users);
+    this.objectsDatasource = new TextSortTableDataSource(users);
     this.objectsDatasource
       .filterPredicate = (userList: UserFullDto, filter) => [
         'name', 'firstName', 'lastName', 'email', 'description'

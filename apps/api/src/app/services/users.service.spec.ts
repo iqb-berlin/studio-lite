@@ -143,6 +143,15 @@ describe('UsersService', () => {
       expect(result).toHaveLength(1);
     });
 
+    it('should sort the users by login name as a dictionary does (#1872)', async () => {
+      const users = [{ id: 1, name: 'Zoe' }, { id: 2, name: 'anna' }, { id: 3, name: 'Özlem' }] as User[];
+      jest.spyOn(usersRepository, 'find').mockResolvedValue(users);
+
+      const result = await service.findAllUsers();
+
+      expect(result.map(user => user.name)).toEqual(['anna', 'Özlem', 'Zoe']);
+    });
+
     it('should filter by workspaceId', async () => {
       const workspaceId = 1;
       const workspaceUsers = [{ userId: 1, accessLevel: 1 }] as WorkspaceUser[];

@@ -192,6 +192,20 @@ describe('WorkspaceService', () => {
       expect(workspaceUsersRepository.find).not.toHaveBeenCalled();
     });
 
+    it('should sort the groups and the workspaces of each as a dictionary does (#1872)', async () => {
+      (workspaceGroupRepository.find as jest.Mock)
+        .mockResolvedValue([{ id: 1, name: 'Zebra' }, { id: 2, name: 'apfel' }, { id: 3, name: 'Ärger' }]);
+      (workspaceRepository.find as jest.Mock).mockResolvedValue([
+        { id: 10, groupId: 2, name: 'Klasse 10' }, { id: 20, groupId: 2, name: 'klasse 9' }
+      ]);
+      (unitsRepository.find as jest.Mock).mockResolvedValue([]);
+
+      const groups = await service.findAllGroupwise();
+
+      expect(groups.map(group => group.name)).toEqual(['apfel', 'Ärger', 'Zebra']);
+      expect(groups[0].workspaces.map(workspace => workspace.name)).toEqual(['klasse 9', 'Klasse 10']);
+    });
+
     describe('for the groups', () => {
       beforeEach(() => {
         (workspaceGroupRepository.find as jest.Mock).mockResolvedValue([
@@ -298,6 +312,18 @@ describe('WorkspaceService', () => {
     });
   });
 
+  describe('findAllByGroup', () => {
+    it('should sort the workspaces of the group as a dictionary does (#1872)', async () => {
+      (workspaceRepository.find as jest.Mock)
+        .mockResolvedValue([{ id: 1, name: 'b' }, { id: 2, name: 'A 10' }, { id: 3, name: 'a 2' }]);
+      (unitsRepository.find as jest.Mock).mockResolvedValue([]);
+
+      const workspaces = await service.findAllByGroup(7);
+
+      expect(workspaces.map(workspace => workspace.name)).toEqual(['a 2', 'A 10', 'b']);
+    });
+  });
+
   describe('findAllWorkspaceGroups', () => {
     it('should return groups', async () => {
       const ws = { id: 1, settings: { unitGroups: ['g1'] } };
@@ -318,6 +344,16 @@ describe('WorkspaceService', () => {
       );
 
       expect(await service.findAllWorkspaceGroups(1)).toEqual(['A', 'B', 'C']);
+    });
+
+    it('should sort the groups as a dictionary does (#1872)', async () => {
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, settings: { unitGroups: ['Zusatz'] } });
+      (unitsRepository.find as jest.Mock).mockResolvedValue(
+        [{ groupName: 'lesen' }, { groupName: 'Gruppe 10' }, { groupName: 'Ökologie' }, { groupName: 'Gruppe 2' }]
+      );
+
+      expect(await service.findAllWorkspaceGroups(1))
+        .toEqual(['Gruppe 2', 'Gruppe 10', 'lesen', 'Ökologie', 'Zusatz']);
     });
 
     it('should take the groups of the units alone when the settings name none', async () => {

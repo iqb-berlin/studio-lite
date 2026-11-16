@@ -10,6 +10,7 @@ import { StatePipe } from '../../pipes/state.pipe';
 import { HasNewCommentsPipe } from '../../pipes/has-new-comments.pipe';
 import { UnitDropBoxTooltipPipe } from '../../pipes/unit-dropbox-tooltip.pipe';
 import { UnitTableComponent } from './unit-table.component';
+import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 
 describe('UnitTableComponent', () => {
   let component: UnitTableComponent;
@@ -38,7 +39,7 @@ describe('UnitTableComponent', () => {
     fixture = TestBed.createComponent(UnitTableComponent);
     component = fixture.componentInstance;
     component.unitList = testUnits;
-    component.dataSource = new MatTableDataSource<UnitInListDto>(testUnits);
+    component.dataSource = new TextSortTableDataSource<UnitInListDto>(testUnits);
     fixture.detectChanges();
   });
 

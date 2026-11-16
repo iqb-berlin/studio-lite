@@ -78,6 +78,16 @@ describe('NewGroupButtonComponent', () => {
     expect(emitSpy).toHaveBeenCalledWith(newGroupName);
   });
 
+  it('should sort the new group in among the others (#1872)', () => {
+    mockWorkspaceService.workspaceSettings.unitGroups = ['Gruppe 10', 'lesen', 'Zusatz'];
+    mockDialog.open.mockReturnValue({ afterClosed: () => of('Gruppe 2') });
+    mockBackendService.setWorkspaceSettings.mockReturnValue(of(true));
+
+    component.newGroup();
+
+    expect(mockWorkspaceService.workspaceSettings.unitGroups).toEqual(['Gruppe 2', 'Gruppe 10', 'lesen', 'Zusatz']);
+  });
+
   // #2131: the units' column holds 50 characters, and a longer group failed when saved
   it('should limit the name typed for the group to 50 characters', () => {
     mockDialog.open.mockReturnValue({ afterClosed: () => of(false) });

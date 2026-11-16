@@ -35,6 +35,10 @@ export class CodingReportDto {
   @ApiProperty({ })
   unit: string | undefined;
 
+  // `unit` is a link, whose address would decide the order; the table sorts by the key (#1872)
+  @ApiProperty()
+  unitKey!: string;
+
   @ApiProperty({ })
   variable!: string;
 

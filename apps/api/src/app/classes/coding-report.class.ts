@@ -110,6 +110,7 @@ export class CodingReportClass {
 
         unitDataRows.push({
           unit: CodingReportClass.generateUnitLink(workspaceId, unit),
+          unitKey: unit.key,
           variable: codingVariable.alias || codingVariable.id || '–',
           variableType: CodingReportClass.determineVariableType(codingVariable),
           item: foundItem?.id || '–',
@@ -229,6 +230,7 @@ export class CodingReportClass {
   ): CodingReportDto {
     return {
       unit: CodingReportClass.generateUnitLink(id, unit),
+      unitKey: unit.key,
       variable: '',
       variableType: '',
       item: '',

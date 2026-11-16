@@ -33,3 +33,4 @@ export {
   assertTimeConfig
 } from './lib/time.constants';
 export { SESSION_ENDED_MESSAGE } from './lib/session-ended';
+export { compareText, byText } from './lib/compare-text';

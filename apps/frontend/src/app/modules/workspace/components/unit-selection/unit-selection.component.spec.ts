@@ -7,6 +7,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Sort, MatSortHeader } from '@angular/material/sort';
 import { of, Subject } from 'rxjs';
+import { By } from '@angular/platform-browser';
 import { UnitSelectionComponent } from './unit-selection.component';
 import { environment } from '../../../../../environments/environment';
 import { WorkspaceService } from '../../services/workspace.service';
@@ -29,7 +30,7 @@ class MockSearchFilterComponent {
   value: string = '';
 }
 
-@Component({ selector: 'studio-lite-unit-groups', template: '', standalone: true })
+@Component({ selector: 'studio-lite-unit-groups', template: '<ng-content />', standalone: true })
 class MockUnitGroupsComponent {
   @Input() expandedGroups !: number;
   @Input() numberOfGroups !: number;
@@ -124,6 +125,18 @@ describe('UnitSelectionComponent', () => {
     expect(component.expandedGroups).toBe(2);
     expect(component.groupsInfo).toContain('2 workspace.groups');
     expect(component.groupsInfo).toContain('3 workspace.units');
+  });
+
+  it('should list the groups in dictionary order (#1872)', () => {
+    component.setU = {
+      Zusatz: [], lesen: [], 'Gruppe 10': [], Ökologie: [], 'Gruppe 2': [], '': []
+    };
+    fixture.detectChanges();
+
+    const titles = fixture.debugElement
+      .queryAll(By.directive(MockUnitGroupComponent))
+      .map(group => (group.componentInstance as MockUnitGroupComponent).title);
+    expect(titles).toEqual(['', 'Gruppe 2', 'Gruppe 10', 'lesen', 'Ökologie', 'Zusatz']);
   });
 
   it('should name a single group and a single unit in the singular', () => {

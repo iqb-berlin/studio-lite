@@ -258,6 +258,16 @@ describe('ReviewService', () => {
       expect(result).toHaveLength(1);
       expect(result[0].workspaceName).toBe('ws');
     });
+
+    it('should sort the reviews by name as a dictionary does (#1872)', async () => {
+      workspaceUsersRepository.find.mockResolvedValue([{ workspaceId: 1 }] as WorkspaceUser[]);
+      workspaceRepository.find
+        .mockResolvedValue([{ id: 1, name: 'ws', workspaceGroup: { id: 2, name: 'wg' } } as Workspace]);
+      reviewRepository.find
+        .mockResolvedValue(['Zebra', 'apfel', 'Ärger'].map(name => ({ name, workspaceId: 1 } as Review)));
+
+      expect((await service.findAllByUser(1)).map(review => review.name)).toEqual(['apfel', 'Ärger', 'Zebra']);
+    });
   });
 
   describe('patch', () => {

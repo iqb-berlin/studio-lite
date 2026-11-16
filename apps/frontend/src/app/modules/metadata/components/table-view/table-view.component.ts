@@ -24,6 +24,7 @@ import { MetadataService } from '../../services/metadata.service';
 import { IncludePipe } from '../../../../pipes/include.pipe';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { I18nService } from '../../../../services/i18n.service';
+import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 
 interface ColumnValues {
   key?: string;
@@ -155,7 +156,7 @@ export class TableViewComponent implements OnInit {
       }
       allUnits.push(totalValues);
     });
-    this.dataSource = new MatTableDataSource(allUnits.flat());
+    this.dataSource = this.createDataSource(allUnits.flat());
   }
 
   private setItemColumnValues(
@@ -222,7 +223,37 @@ export class TableViewComponent implements OnInit {
         });
       }
     });
-    this.dataSource = new MatTableDataSource(totalValues.flat());
+    this.dataSource = this.createDataSource(totalValues.flat());
+  }
+
+  /**
+   * The table's rows, sorted by what a cell shows rather than by what it holds:
+   *
+   * - The key is a link. Sorted by that, its address decided the order, and the rows moved away from
+   *   the order by key they are loaded in (#1872).
+   * - A profile field can hold numbers, which arrive as text. Where a field holds nothing else, they
+   *   are compared as numbers, so that 0.25 stays in front of 0.5. Decided for the column and not
+   *   value by value: numbers and text mixed in one comparison give no order at all.
+   */
+  private static readonly plainNumber = /^\s*-?\d+(\.\d+)?\s*$/;
+
+  private createDataSource(rows: ColumnValues[]): MatTableDataSource<ColumnValues> {
+    const dataSource = new TextSortTableDataSource(rows);
+    const numberColumns = new Map<string, boolean>();
+    const holdsNumbers = (column: string): boolean => {
+      if (!numberColumns.has(column)) {
+        numberColumns.set(column, !this.displayedColumns.includes(column) &&
+          rows.every(row => !row[column] || TableViewComponent.plainNumber.test(row[column])));
+      }
+      return !!numberColumns.get(column);
+    };
+    dataSource.sortingDataAccessor = (row, column) => {
+      const value = row[column] ?? '';
+      if (column === 'key') return value.replace(/<[^>]*>/g, '');
+      // an empty field among numbers stays empty: as a number it would be 0
+      return value && holdsNumbers(column) ? Number(value) : value;
+    };
+    return dataSource;
   }
 
   private getTableItemsColumnsDefinitions(): string[] {

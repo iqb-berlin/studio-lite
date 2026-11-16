@@ -8,6 +8,7 @@ import {
 import { UserInListDto } from '@studio-lite-lib/api-dto';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { TranslateModule } from '@ngx-translate/core';
+import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 
 @Component({
   selector: 'studio-lite-user-list',
@@ -18,11 +19,11 @@ import { TranslateModule } from '@ngx-translate/core';
 })
 export class UserListComponent implements AfterViewInit {
   @ViewChild(MatSort) sort!: MatSort;
-  objectsDatasource: MatTableDataSource<UserInListDto> = new MatTableDataSource();
+  objectsDatasource: MatTableDataSource<UserInListDto> = new TextSortTableDataSource();
   displayedColumns = ['displayName', 'email', 'description'];
   @Input('users')
   set userList(value: UserInListDto[]) {
-    this.objectsDatasource = new MatTableDataSource(value);
+    this.objectsDatasource = new TextSortTableDataSource(value);
   }
 
   ngAfterViewInit(): void {

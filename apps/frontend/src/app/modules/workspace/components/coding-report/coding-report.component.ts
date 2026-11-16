@@ -18,8 +18,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { CodingReportDto } from '@studio-lite-lib/api-dto';
 import { WorkspaceService } from '../../services/workspace.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
+import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 
-type CodingReportColumn = Exclude<keyof CodingReportDto, 'validationProblems'> |
+type CodingReportColumn = Exclude<keyof CodingReportDto, 'validationProblems' | 'unitKey'> |
 'validationDetails';
 
 type CodingReportRow = CodingReportDto & {
@@ -154,7 +155,7 @@ export class CodingReportComponent implements OnInit {
       this.unitDataRows.filter((row: CodingReportRow) => row.codingType !== 'keine Regeln') :
       this.unitDataRows;
 
-    this.dataSource = new MatTableDataSource(filteredRows); // Refresh the data source
+    this.dataSource = new TextSortTableDataSource(filteredRows); // Refresh the data source
     const defaultSortingDataAccessor = this.dataSource.sortingDataAccessor;
     const validationSeveritySortOrder: Record<
       CodingReportRow['validationSeverity'], number
@@ -163,11 +164,13 @@ export class CodingReportComponent implements OnInit {
       warning: 1,
       ok: 2
     };
-    this.dataSource.sortingDataAccessor = (row, column) => (
-      column === 'validationDetails' ?
-        validationSeveritySortOrder[row.validationSeverity] :
-        defaultSortingDataAccessor(row, column)
-    );
+    this.dataSource.sortingDataAccessor = (row, column) => {
+      if (column === 'validationDetails') return validationSeveritySortOrder[row.validationSeverity];
+      // The cell is a link. Sorted by that, its address decided the order, and the rows moved away
+      // from the order by key they are loaded in (#1872).
+      if (column === 'unit') return row.unitKey;
+      return defaultSortingDataAccessor(row, column);
+    };
     this.dataSource.filterPredicate = (row, filter) => (
       CodingReportComponent.csvColumns
         .map(column => String(row[column] ?? ''))
