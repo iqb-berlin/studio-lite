@@ -5,6 +5,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of, Subject } from 'rxjs';
 import { WorkspaceGroupFullDto, WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
 import { EditWorkspaceGroupSettingsComponent } from './edit-workspace-group-settings.component';
@@ -66,6 +67,7 @@ describe('EditWorkspaceGroupSettingsComponent', () => {
       ],
       providers: [
         provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: BackendService, useValue: backendServiceMock },
         {
           provide: 'SERVER_URL',
@@ -126,6 +128,7 @@ describe('EditWorkspaceGroupSettingsComponent', () => {
     const notLoaded = (): HTMLElement | null => fixture.nativeElement
       .querySelector('[data-cy="admin-edit-workspace-group-settings-not-loaded"]');
     const profiles = (): HTMLElement | null => fixture.nativeElement.querySelector('studio-lite-profiles');
+    const spinner = (): HTMLElement | null => fixture.nativeElement.querySelector('mat-dialog-content > .spinner');
 
     it('should hold back the profiles and the save button until they have loaded (#2121)', () => {
       const group = new Subject<WorkspaceGroupFullDto | boolean>();
@@ -135,12 +138,14 @@ describe('EditWorkspaceGroupSettingsComponent', () => {
       expect(save().disabled).toBe(true);
       expect(profiles()).toBeNull();
       expect(notLoaded()).toBeNull();
+      expect(spinner()).not.toBeNull();
 
       group.next(mockWorkspaceGroup);
       fixture.detectChanges();
 
       expect(save().disabled).toBe(false);
       expect(profiles()).not.toBeNull();
+      expect(spinner()).toBeNull();
     });
 
     it('should stay disabled and say so when the stored profiles could not be loaded', () => {
