@@ -66,8 +66,8 @@
             }
             <mat-select  class="select-profile"
                          placeholder="{{'metadata.select-profile' | translate }}"
-                         [(value)]="selectedUnitMDProfile"
-                         (click)="$event.stopPropagation()" (selectionChange)="selectUnitMDProfile($event)"
+                         [(value)]="dialogData.unitMDProfile"
+                         (click)="$event.stopPropagation()"
                          data-cy="edit-workspace-settings-select-unit-profile">
               <mat-option [value]="undefined"></mat-option>
               @for (unitMDProfile of unitMDProfiles; track unitMDProfile) {
@@ -85,9 +85,8 @@
             }
             <mat-select class="select-profile"
                         placeholder="{{'metadata.select-profile' | translate }}"
-                        [(value)]="selectedItemMDProfile"
+                        [(value)]="dialogData.itemMDProfile"
                         (click)="$event.stopPropagation()"
-                        (selectionChange)="selectItemMDProfile($event)"
                         data-cy="edit-workspace-settings-select-item-profile">
               <mat-option [value]="undefined"></mat-option>
               @for (itemMDProfile of itemMDProfiles; track itemMDProfile) {

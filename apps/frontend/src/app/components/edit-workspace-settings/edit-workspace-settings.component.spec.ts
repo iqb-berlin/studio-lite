@@ -2,6 +2,7 @@ import {
   Component, Input
 } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { TranslateModule } from '@ngx-translate/core';
 import {
   MAT_DIALOG_DATA, MatDialogModule, MatDialogRef
@@ -9,10 +10,10 @@ import {
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatSelectModule } from '@angular/material/select';
+import { MatSelect, MatSelectModule } from '@angular/material/select';
 import { of } from 'rxjs';
 import {
-  WorkspaceGroupFullDto, WorkspaceFullDto, WorkspaceSettingsDto
+  WorkspaceGroupFullDto, WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { EditWorkspaceSettingsComponent } from './edit-workspace-settings.component';
 import { BackendService } from '../../modules/admin/services/backend.service';
@@ -50,7 +51,9 @@ describe('EditWorkspaceSettingsComponent', () => {
       defaultSchemer: 'schemer1',
       defaultPlayer: 'player1',
       stableModulesOnly: false,
-      states: []
+      states: [],
+      unitMDProfile: 'profile1/unit.json',
+      itemMDProfile: 'profile2/item.json'
     } as WorkspaceSettingsDto,
     selectedRow: {
       id: 1,
@@ -66,16 +69,11 @@ describe('EditWorkspaceSettingsComponent', () => {
         settings: {
           profiles: [
             { id: 'profile1/unit.json', label: 'Unit Profile 1' },
-            { id: 'profile2/item.json', label: 'Item Profile 1' }
+            { id: 'profile2/item.json', label: 'Item Profile 1' },
+            { id: 'profile3/unit.json', label: 'Unit Profile 2' }
           ]
         }
-      } as WorkspaceGroupFullDto)),
-      getWorkspaceById: jest.fn().mockReturnValue(of({
-        settings: {
-          itemMDProfile: 'profile2/item.json',
-          unitMDProfile: 'profile1/unit.json'
-        }
-      } as WorkspaceFullDto))
+      } as WorkspaceGroupFullDto))
     };
 
     mockAppService = {};
@@ -116,15 +114,34 @@ describe('EditWorkspaceSettingsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should initialize profiles in ngOnInit', () => {
+  it('should offer the unit and the item profiles of the group apart', () => {
     expect(mockBackendService.getWorkspaceGroupById).toHaveBeenCalledWith(10);
-    expect(mockBackendService.getWorkspaceById).toHaveBeenCalledWith(1);
-    expect(component.unitMDProfiles.length).toBe(1);
-    expect(component.unitMDProfiles[0].id).toBe('profile1/unit.json');
-    expect(component.itemMDProfiles.length).toBe(1);
-    expect(component.itemMDProfiles[0].id).toBe('profile2/item.json');
-    expect(component.selectedItemMDProfile).toBe('profile2/item.json');
-    expect(component.selectedUnitMDProfile).toBe('profile1/unit.json');
+    expect(component.unitMDProfiles.map(profile => profile.id)).toEqual(['profile1/unit.json', 'profile3/unit.json']);
+    expect(component.itemMDProfiles.map(profile => profile.id)).toEqual(['profile2/item.json']);
+  });
+
+  // A request of its own put the stored profile back on screen after a choice, while the choice was
+  // saved (#2138). What is shown and what is saved are now one value: the settings the dialog was opened with.
+  describe('metadata profiles (#2138)', () => {
+    const select = (kind: 'unit' | 'item'): MatSelect => fixture.debugElement
+      .query(By.css(`[data-cy="edit-workspace-settings-select-${kind}-profile"]`))
+      .injector.get(MatSelect);
+
+    it('should show the profiles of the settings it was opened with', () => {
+      expect(select('unit').value).toBe('profile1/unit.json');
+      expect(select('item').value).toBe('profile2/item.json');
+    });
+
+    it('should save the profile it shows once one is chosen', () => {
+      select('unit').open();
+      fixture.detectChanges();
+      select('unit').options.find(option => option.value === 'profile3/unit.json')!.select();
+      fixture.detectChanges();
+
+      expect(select('unit').value).toBe('profile3/unit.json');
+      expect(component.dialogData.unitMDProfile).toBe('profile3/unit.json');
+      expect(component.dialogData.itemMDProfile).toBe('profile2/item.json');
+    });
   });
 
   it('should update modules in selectModule', () => {

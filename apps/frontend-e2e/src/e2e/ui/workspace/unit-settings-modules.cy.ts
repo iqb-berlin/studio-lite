@@ -1,4 +1,5 @@
 import {
+  AccessLevel,
   baseGroup,
   primaryWorkspace,
   secondaryWorkspace
@@ -129,5 +130,74 @@ describe('Workspace Settings & Verona Modules', () => {
     saveWorkspaceSettings();
 
     cy.get('[data-cy="workspace-routes-notes"]').should('not.exist');
+  });
+
+  // The dialog showed the profiles from a request of its own for the workspace, and its response,
+  // coming after a choice, put the stored profile back on screen while the choice was saved (#2138).
+  // That request is held back until the choice is made, so that without the fix it comes after it.
+  // With the fix the dialog makes no such request.
+  it('shows the unit profile it saves when one is chosen before its own request answered (#2138)', () => {
+    const group = 'Profil vor Arbeitsbereich';
+    const workspace = 'Profil vor Antwort';
+    const deutsch = 'https://w3id.org/iqb/p12/unit/';
+    const mathematik = 'https://w3id.org/iqb/p11/unit/';
+    let requested = false;
+    let answered = false;
+    let released = false;
+    let letThrough: () => void = () => undefined;
+    cy.window().then(win => {
+      const token = win.localStorage.getItem('id_token') || '';
+      cy.getUserIdAPI(token).then(user => {
+        expect(user.status).to.equal(200);
+        cy.createGroupAPI({ id: '', name: group }, token, {
+          profiles: [{ id: deutsch, label: IqbProfile.DEu }, { id: mathematik, label: IqbProfile.MAu }]
+        }).then(createdGroup => {
+          expect(createdGroup.status).to.equal(201);
+          cy.createWsAPI(String(createdGroup.body), { id: '', name: workspace }, token).then(createdWs => {
+            expect(createdWs.status).to.equal(201);
+            const wsId = String(createdWs.body);
+            cy.setUsersOfWsAPI(wsId, [{ id: String(user.body.userId), access: AccessLevel.Admin }], token)
+              .its('status').should('equal', 200);
+            cy.updateWsSettingsAPI(wsId, { unitMDProfile: deutsch }, token)
+              .its('status').should('equal', 200);
+            cy.visitWs(workspace);
+            cy.intercept('GET', new RegExp(`/api/workspaces/${wsId}$`), req => {
+              requested = true;
+              req.on('response', () => (released ? undefined : new Promise<void>(resolve => {
+                letThrough = resolve;
+              })));
+              req.on('after:response', () => {
+                answered = true;
+              });
+            });
+            cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
+            cy.get('[data-cy="workspace-edit-unit-settings"]').click();
+            cy.get('[data-cy="edit-workspace-settings-select-unit-profile"]').click();
+            cy.get('[data-cy="edit-workspace-settings-unit-profile"]')
+              .contains(IqbProfile.MAu)
+              .click()
+              .then(() => {
+                released = true;
+                letThrough();
+              });
+            // Without the fix the held response arrives now; with it there is none to wait for. The page
+            // applies a response before the answer to a request it sends after it, so only once that answer
+            // is in does the select show what the late response left on it.
+            cy.wrap(null).should(() => {
+              if (requested) expect(answered, 'the held workspace response').to.equal(true);
+            });
+            cy.window().then(page => page.fetch('/assets/i18n/de.json', { cache: 'no-store' }));
+            // The select's own text holds the labels of its options as well, so only the value is asked.
+            cy.get('[data-cy="edit-workspace-settings-select-unit-profile"] .mat-mdc-select-value-text')
+              .should('have.text', IqbProfile.MAu);
+            saveWorkspaceSettings();
+            cy.getWsNormalAPI(wsId, token).then(stored => {
+              expect(stored.status).to.equal(200);
+              expect(stored.body.settings.unitMDProfile).to.equal(mathematik);
+            });
+          });
+        });
+      });
+    });
   });
 });
