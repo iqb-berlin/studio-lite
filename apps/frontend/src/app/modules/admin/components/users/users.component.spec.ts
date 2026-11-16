@@ -675,6 +675,33 @@ describe('UsersComponent', () => {
     expect(component.orphanedSessionCount).toBe(1);
   });
 
+  it('should draw the passive sessions of an account as one dot with their count, after the active one (#2150)', () => {
+    const users = [
+      {
+        id: 1,
+        name: 'a',
+        activityStatus: 'active',
+        isLoggedIn: true,
+        sessions: [
+          { sessionId: 'p1', activityStatus: 'passive', lastActivity: new Date(2026, 10, 9, 9, 30) },
+          { sessionId: 'a1', activityStatus: 'active', lastActivity: new Date() },
+          { sessionId: 'p2', activityStatus: 'passive', lastActivity: new Date(2026, 10, 10, 9, 30) },
+          { sessionId: 'p3', activityStatus: 'passive', lastActivity: new Date(2026, 10, 11, 9, 30) }
+        ]
+      }
+    ] as UserFullDto[];
+
+    (mockBackendService.getUsersFullWithActivity as jest.Mock).mockReturnValue(of(users));
+    component.updateUserList();
+    fixture.detectChanges();
+
+    const cell: HTMLElement = fixture.nativeElement.querySelector('mat-cell.mat-column-active');
+    const marks = ['active-dot', 'passive-dot', 'passive-count', 'orphaned-dot'];
+    expect(Array.from(cell.children).map(child => marks.find(mark => child.classList.contains(mark))))
+      .toEqual(['active-dot', 'passive-dot', 'passive-count']);
+    expect(cell.querySelector('.passive-count')?.textContent?.trim()).toBe('3');
+  });
+
   it('should not treat logged-in users as logged-out when activityStatus is missing', () => {
     const users = [
       {

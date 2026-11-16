@@ -43,9 +43,16 @@
             @for (session of element.sessions; track session.sessionId) {
               @if (session.activityStatus === 'active') {
                 <span class="active-dot" [matTooltip]="('user.active' | translate) + (session.lastActivity ? ' (' + (session.lastActivity | date: 'dd.MM., HH:mm') + ')' : '')"></span>
-              } @else if (session.activityStatus === 'passive') {
-                <span class="passive-dot" [matTooltip]="('user.passive' | translate) + (session.lastActivity ? ' (' + (session.lastActivity | date: 'dd.MM., HH:mm') + ')' : '')"></span>
               }
+            }
+            @let passive = element.sessions | passiveSessionSummary;
+            @if (passive.count === 1) {
+              <span class="passive-dot" [matTooltip]="('user.passive' | translate) + (passive.times ? ' (' + passive.times + ')' : '')"></span>
+            } @else if (passive.count > 1) {
+              <span class="passive-dot"
+                    matTooltipClass="mat-tooltip-linebreaks"
+                    [matTooltip]="('user.passive-sessions' | translate: { count: passive.count }) + '\n' + passive.times + (passive.more ? '\n' + ('user.passive-sessions-more' | translate: { count: passive.more }) : '')"></span>
+              <span class="passive-count">{{ passive.count }}</span>
             }
           }
           @for (session of element.sessions; track session.sessionId) {
