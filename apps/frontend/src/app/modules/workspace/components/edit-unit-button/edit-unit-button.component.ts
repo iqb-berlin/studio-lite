@@ -93,10 +93,28 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
   }
 
   async settings(): Promise<void> {
+    // The dialog shows and saves the settings it is given (#2138). Those of the workspace service date
+    // from when the workspace was opened, or are a placeholder until it is, so the stored ones are loaded.
+    const workspace = await lastValueFrom(
+      this.appBackendService.getWorkspaceData(this.workspaceService.selectedWorkspaceId)
+    );
+    if (!workspace) {
+      this.snackBar.open(
+        this.translateService.instant('workspace.workspace-not-loaded'),
+        this.translateService.instant('error'),
+        { duration: 3000 }
+      );
+      return;
+    }
+    // The view puts into these settings what the stored ones do not hold in full: the group's states and
+    // rich note tags, and the unit groups in use. The dialog does not edit them, so they stay the view's.
+    const { states, richNoteTags, unitGroups } = this.workspaceService.workspaceSettings;
     const dialogRef = this.editSettingsDialog.open(EditWorkspaceSettingsComponent, {
       width: '900px',
       data: {
-        settings: this.workspaceService.workspaceSettings,
+        settings: {
+          ...(workspace.settings ?? this.workspaceService.workspaceSettings), states, richNoteTags, unitGroups
+        },
         selectedRow: { id: this.workspaceService.selectedWorkspaceId }
       }
     });

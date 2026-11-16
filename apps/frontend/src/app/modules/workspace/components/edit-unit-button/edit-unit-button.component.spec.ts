@@ -14,7 +14,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, of } from 'rxjs';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import {
-  RequestReportDto, UnitDownloadSettingsDto, UnitPropertiesDto, UsersInWorkspaceDto, WorkspaceSettingsDto
+  RequestReportDto, State, UnitDownloadSettingsDto, UnitPropertiesDto, UsersInWorkspaceDto, WorkspaceFullDto,
+  WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { MessageDialogComponent } from '@studio-lite-lib/iqb-components';
 import {
@@ -52,6 +53,8 @@ describe('EditUnitButtonComponent', () => {
   // Some dialog results reach the backend calls through native async/await, which fakeAsync cannot
   // flush (the specs compile to es2020); a macrotask runs only after every pending promise callback.
   const settle = (): Promise<void> => new Promise(resolve => { setTimeout(resolve); });
+  // A plain object: of() takes a mock, which has a schedule function, for a scheduler and emits nothing.
+  const storedWorkspace = (settings: WorkspaceSettingsDto): WorkspaceFullDto => ({ id: 1, dropBoxId: 0, settings });
 
   beforeEach(async () => {
     mockWorkspaceService = createMock<WorkspaceService>({
@@ -73,7 +76,8 @@ describe('EditUnitButtonComponent', () => {
       dataLoading: false
     });
     mockAppBackendService = createMock<AppBackendService>({
-      setWorkspaceSettings: jest.fn().mockReturnValue(of(true))
+      setWorkspaceSettings: jest.fn().mockReturnValue(of(true)),
+      getWorkspaceData: jest.fn().mockReturnValue(of(storedWorkspace({ ...mockWorkspaceService.workspaceSettings })))
     });
     mockMetadataService = createMock<MetadataService>();
     mockDialog = createMock<MatDialog>();
@@ -252,6 +256,64 @@ describe('EditUnitButtonComponent', () => {
 
       expect(mockAppBackendService.setWorkspaceSettings).not.toHaveBeenCalled();
       expect(mockWorkspaceService.workspaceSettings.itemMDProfile).toBe('profile');
+    });
+
+    // What the workspace service holds dates from when the workspace was opened (#2138).
+    it('should open the dialog with the settings as stored, not as they were when the workspace was opened',
+      async () => {
+        mockAppBackendService.getWorkspaceData.mockReturnValue(of(storedWorkspace({
+          ...mockWorkspaceService.workspaceSettings, unitMDProfile: 'stored-profile'
+        })));
+        closeSettingsWith(undefined);
+
+        await component.settings();
+
+        expect(mockAppBackendService.getWorkspaceData).toHaveBeenCalledWith(1);
+        expect(mockDialog.open).toHaveBeenCalledWith(EditWorkspaceSettingsComponent, expect.objectContaining({
+          data: expect.objectContaining({
+            settings: expect.objectContaining({ unitMDProfile: 'stored-profile' })
+          })
+        }));
+      });
+
+    // The view holds the group's states and rich note tags and the unit groups in use in the same settings;
+    // the stored copy is outdated or narrower, and the dialog, which does not edit them, hands back what it gets.
+    it('should give the dialog the states, rich note tags and unit groups of the view, not those stored', async () => {
+      const groupState: State = { id: 2, label: 'Gruppe', color: '#00ff00' };
+      mockWorkspaceService.workspaceSettings.states = [groupState];
+      mockWorkspaceService.workspaceSettings.richNoteTags = ['Gruppe'];
+      mockWorkspaceService.workspaceSettings.unitGroups = ['Gespeichert', 'Nur in Aufgaben'];
+      mockAppBackendService.getWorkspaceData.mockReturnValue(of(storedWorkspace({
+        ...mockWorkspaceService.workspaceSettings,
+        unitMDProfile: 'stored-profile',
+        states: [{ id: 1, label: 'Alt', color: '#ff0000' }],
+        richNoteTags: [],
+        unitGroups: ['Gespeichert']
+      })));
+      closeSettingsWith(undefined);
+
+      await component.settings();
+
+      expect(mockDialog.open).toHaveBeenCalledWith(EditWorkspaceSettingsComponent, expect.objectContaining({
+        data: expect.objectContaining({
+          settings: expect.objectContaining({
+            unitMDProfile: 'stored-profile',
+            states: [groupState],
+            richNoteTags: ['Gruppe'],
+            unitGroups: ['Gespeichert', 'Nur in Aufgaben']
+          })
+        })
+      }));
+    });
+
+    it('should open no dialog and say so when the workspace cannot be loaded', async () => {
+      mockAppBackendService.getWorkspaceData.mockReturnValue(of(null));
+      const snackBarOpen = jest.spyOn(component.snackBar, 'open');
+
+      await component.settings();
+
+      expect(mockDialog.open).not.toHaveBeenCalled();
+      expect(snackBarOpen).toHaveBeenCalledWith('workspace.workspace-not-loaded', 'error', { duration: 3000 });
     });
 
     it('should say when the backend refuses the settings', async () => {

@@ -68,7 +68,7 @@ export class EditWorkspaceSettingsComponent implements OnInit, OnDestroy {
 
   // The profiles are shown from dialogData, which is what is saved, and not loaded once more: a
   // response that came after a choice put the stored profile back on screen, while the choice was
-  // saved (#2138). Both openers pass the workspace's settings in.
+  // saved (#2138). Both openers load the workspace before they open the dialog and pass its settings in.
   ngOnInit(): void {
     this.selectionChanged = this.dialogData.states as State[];
     const workspaceGroupId = this.data.selectedRow?.groupId || this.workspaceService.groupId;
