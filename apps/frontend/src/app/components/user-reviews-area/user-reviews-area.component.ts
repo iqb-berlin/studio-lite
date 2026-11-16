@@ -6,6 +6,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
+import { byText } from '@studio-lite/shared-code';
 import { LogoutDirective } from '../../directives/logout.directive';
 import { AreaTitleComponent } from '../area-title/area-title.component';
 import { ReviewTableComponent } from '../review-table/review-table.component';
@@ -36,6 +37,6 @@ export class UserReviewsAreaComponent implements OnInit {
         existingGroup.reviews.push(review);
         return groups;
       }, [] as { groupName: string; groupId: number; reviews: ReviewDto[] }[])
-      .sort((a, b) => a.groupName.localeCompare(b.groupName));
+      .sort(byText(group => group.groupName));
   }
 }

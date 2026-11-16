@@ -34,4 +34,10 @@ describe('SortAscendingPipe', () => {
     expect(result[1].name).toBe('Banana');
     expect(result[2].name).toBeNull();
   });
+
+  it('should sort text as a dictionary does, as the API sorts it (#1872)', () => {
+    const items = [{ id: '10' }, { id: 'B2' }, { id: '' }, { id: '9' }, { id: 'a1' }];
+
+    expect(pipe.transform(items, 'id').map(item => item.id)).toEqual(['9', '10', 'a1', 'B2', '']);
+  });
 });

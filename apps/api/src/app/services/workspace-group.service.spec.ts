@@ -53,6 +53,15 @@ describe('WorkspaceGroupService', () => {
       expect(result).toHaveLength(1);
     });
 
+    it('should sort the groups as a dictionary does (#1872)', async () => {
+      mockRepository.find
+        .mockResolvedValue([{ id: 1, name: 'Zebra' }, { id: 2, name: 'apfel' }, { id: 3, name: 'Ärger' }]);
+
+      const result = await service.findAll();
+
+      expect(result.map(group => group.name)).toEqual(['apfel', 'Ärger', 'Zebra']);
+    });
+
     it('should filter by user access', async () => {
       const userId = 1;
       const adminEntries = [{ workspaceGroupId: 1 }] as WorkspaceGroupAdmin[];

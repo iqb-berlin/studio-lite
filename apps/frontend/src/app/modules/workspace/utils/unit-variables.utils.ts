@@ -1,7 +1,7 @@
 import { UnitDefinitionDto, UnitSchemeDto } from '@studio-lite-lib/api-dto';
 import { CodingSchemeData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
-import { toVariableInfoV1 } from '@studio-lite/shared-code';
+import { byText, toVariableInfoV1 } from '@studio-lite/shared-code';
 import { AliasId } from '../../metadata/models/alias-id.interface';
 
 /**
@@ -36,11 +36,5 @@ export function unitVariables(
       if (!merged.find(aliasId => aliasId.id === current.id)) merged.push(current);
       return merged;
     }, [])
-    .sort((a, b) => {
-      const aliasA = a.alias.toUpperCase();
-      const aliasB = b.alias.toUpperCase();
-      if (aliasA < aliasB) return -1;
-      if (aliasA > aliasB) return 1;
-      return 0;
-    });
+    .sort(byText(aliasId => aliasId.alias));
 }

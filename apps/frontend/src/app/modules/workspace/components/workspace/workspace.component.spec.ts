@@ -8,7 +8,7 @@ import {
 } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateModule } from '@ngx-translate/core';
-import { of, Subject } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { AuthDataDto, UserWorkspaceFullDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { WorkspaceComponent } from './workspace.component';
@@ -58,6 +58,15 @@ class MockAppService {
   }
 }
 
+// A class rather than createMock: a createMock keeps answering with what a property held when it
+// was first read, and the component reads the settings before it replaces them.
+class MockWorkspaceService {
+  workspaceSettings = {} as WorkspaceSettingsDto;
+  resetUnitList = jest.fn();
+  setWorkspaceGroupStates = jest.fn();
+  loadRichNoteTags = jest.fn();
+}
+
 describe('WorkspaceComponent', () => {
   let fixture: ComponentFixture<WorkspaceComponent>;
   let routerEvents: Subject<Event>;
@@ -72,13 +81,13 @@ describe('WorkspaceComponent', () => {
 
   const configure = async (
     url: string,
-    { userId = 1, workspace = loadedWorkspace }:
-    { userId?: number, workspace?: UserWorkspaceFullDto | null } = {}
+    { userId = 1, workspace = loadedWorkspace, answer = of(workspace) }:
+    { userId?: number, workspace?: UserWorkspaceFullDto | null, answer?: Observable<UserWorkspaceFullDto | null> } = {}
   ): Promise<void> => {
     routerEvents = new Subject<Event>();
     appService = new MockAppService(userId);
     appBackendService = createMock<AppBackendService>({
-      getUserWorkspaceData: jest.fn().mockReturnValue(of(workspace))
+      getUserWorkspaceData: jest.fn().mockReturnValue(answer)
     });
     snackBar = createMock<MatSnackBar>();
 
@@ -89,7 +98,7 @@ describe('WorkspaceComponent', () => {
         { provide: ActivatedRoute, useValue: createMock<ActivatedRoute>({ snapshot: { params: { ws: 5 } } }) },
         { provide: AppService, useValue: appService },
         { provide: AppBackendService, useValue: appBackendService },
-        { provide: WorkspaceService, useValue: createMock<WorkspaceService>() },
+        { provide: WorkspaceService, useValue: new MockWorkspaceService() },
         { provide: ModuleService, useValue: createMock<ModuleService>() },
         { provide: MatSnackBar, useValue: snackBar }
       ]
@@ -145,7 +154,33 @@ describe('WorkspaceComponent', () => {
 
     await configure('/a/5/7/editor', { workspace: { ...loadedWorkspace, settings } });
 
-    expect(TestBed.inject(WorkspaceService).workspaceSettings).toBe(settings);
+    expect(TestBed.inject(WorkspaceService).workspaceSettings).toEqual({ ...settings, unitGroups: [] });
+  });
+
+  // The unit list asks for the groups itself. Its answer was lost when the settings came after it,
+  // and the group select of a unit was empty (#1872).
+  it('should keep the unit groups that were loaded before the settings', async () => {
+    const answer = new Subject<UserWorkspaceFullDto>();
+    await configure('/a/5/7/editor', { answer });
+    const workspaceService = TestBed.inject(WorkspaceService);
+    workspaceService.workspaceSettings.unitGroups = ['Gruppe 2', 'Gruppe 10'];
+    const settings: WorkspaceSettingsDto = {
+      defaultEditor: 'editor', defaultPlayer: 'player', defaultSchemer: 'schemer', unitGroups: ['von Hand']
+    };
+
+    answer.next({ ...loadedWorkspace, settings });
+
+    expect(workspaceService.workspaceSettings).toEqual({ ...settings, unitGroups: ['Gruppe 2', 'Gruppe 10'] });
+  });
+
+  it('should show the stored unit groups, sorted, until the unit list has loaded them', async () => {
+    const settings: WorkspaceSettingsDto = {
+      defaultEditor: 'editor', defaultPlayer: 'player', defaultSchemer: 'schemer', unitGroups: ['b', 'A', 'ä']
+    };
+
+    await configure('/a/5/7/editor', { workspace: { ...loadedWorkspace, settings } });
+
+    expect(TestBed.inject(WorkspaceService).workspaceSettings.unitGroups).toEqual(['A', 'ä', 'b']);
   });
 
   it('should say when the workspace could not be loaded', async () => {

@@ -4,7 +4,7 @@ import {
 // adm-zip is CommonJS with no statically detectable named exports -- see the note on the adm-zip
 // import in workspace-import.service.ts.
 import AdmZip from 'adm-zip';
-import { VeronaModuleKeyCollection } from '@studio-lite/shared-code';
+import { VeronaModuleKeyCollection, byText } from '@studio-lite/shared-code';
 import { UnitService } from '../services/unit.service';
 import { UnitMetadataService } from '../services/unit-metadata.service';
 import { UnitDefinitionService } from '../services/unit-definition.service';
@@ -101,7 +101,7 @@ export class UnitDownloadClass {
       );
     }
     if (exportReport.length) {
-      exportReport.sort((a, b) => a.unitKey.localeCompare(b.unitKey));
+      exportReport.sort(byText(message => message.unitKey));
       zip.addFile(EXPORT_REPORT_FILENAME, Buffer.from(JSON.stringify({ messages: exportReport }, null, 2)));
     }
     return zip.toBuffer();

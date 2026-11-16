@@ -39,6 +39,11 @@
 - **Rule**: Act on a dialog's result only when it is what its confirming button returns: `result === true` for `ConfirmDialogComponent`, the returned data (an object, a form) for a dialog that hands data back. `result !== false` on its own is not such a test.
 - **Rationale**: A `MatDialog` closed by Esc, by a click beside it or by navigation returns `undefined`, and `undefined !== false`. Written that way, a dismissed confirmation discarded unsaved work and deleted reviews and modules, and dismissed data dialogs ran on with `undefined` (#1844). The pattern had been fixed once before (79842c1c4) and came back with new dialogs.
 
+### Sorting: One Comparison for Text
+- **Rule**: Text a person reads — names, keys, item ids — is sorted with `compareText` or `byText` from `@studio-lite/shared-code`, in the frontend and in the API alike. Not with `<`, a `.sort()` without a comparison, `localeCompare`, or an `order` on a text column of a database query.
+- **Rule**: A Material table gets a `TextSortTableDataSource`, not a `MatTableDataSource` — ESLint rejects `new MatTableDataSource` in the frontend. A column that shows something other than it holds — a link, a number that arrives as text — says what it sorts by in a `sortingDataAccessor`.
+- **Rationale**: Sorted by character code, every upper-case name stands before the lower-case ones, umlauts stand behind z and `Unit10` before `Unit2`. And several tables show the order the API sent until a column header is clicked: if the two sides compare differently, the rows move on that click (#1872).
+
 ### Unit Testing: Asynchronous Tests
 - **Rule**: Prefer `fakeAsync` and `tick()` over `async/await` with `setTimeout` or manual `wait()` helpers for testing asynchronous logic.
 - **Rationale**: 

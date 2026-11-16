@@ -14,7 +14,9 @@ import {
   GroupNameDto,
   RenameGroupNameDto
 } from '@studio-lite-lib/api-dto';
-import { profileIdsMatch, toW3idProfileId } from '@studio-lite/shared-code';
+import {
+  byText, compareText, profileIdsMatch, toW3idProfileId
+} from '@studio-lite/shared-code';
 import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroup from '../entities/workspace-group.entity';
@@ -84,9 +86,8 @@ export class WorkspaceService {
       })
       );
     }
-    const workspaces: Workspace[] = await this.workspacesRepository.find({
-      order: { name: 'ASC' }
-    });
+    const workspaces: Workspace[] = await this.workspacesRepository.find();
+    workspaces.sort(byText(workspace => workspace.name));
     return Promise.all(
       workspaces
         .filter(
@@ -187,9 +188,8 @@ export class WorkspaceService {
         );
       }
     }
-    const workspaceGroups = await this.workspaceGroupRepository.find({
-      order: { name: 'ASC' }
-    });
+    const workspaceGroups = await this.workspaceGroupRepository.find();
+    workspaceGroups.sort(byText(workspaceGroup => workspaceGroup.name));
     const workspaces = await this.findAll(userId);
     const myReturn: WorkspaceGroupDto[] = [];
     workspaceGroups.forEach(workspaceGroup => {
@@ -216,9 +216,9 @@ export class WorkspaceService {
     workspaceGroupId: number
   ): Promise<WorkspaceInListDto[]> {
     const workspaces: Workspace[] = await this.workspacesRepository.find({
-      order: { name: 'ASC' },
       where: { groupId: workspaceGroupId }
     });
+    workspaces.sort(byText(workspace => workspace.name));
     return Promise.all(
       workspaces.map(async workspace => ({
         id: workspace.id,
@@ -315,7 +315,7 @@ export class WorkspaceService {
       // Each name once: a rename onto an existing group left it twice in the settings until #1989
       return [...new Set([...unitGroups.map(u => u.groupName), ...settingsGroups])]
         .filter(g => !!g)
-        .sort();
+        .sort(compareText);
     }
     throw new AdminWorkspaceNotFoundException(id, 'GET');
   }

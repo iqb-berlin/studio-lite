@@ -6,7 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, In, Repository } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import {
-  orderFromCurrent, profileIdsMatch, reconcileProfilesByProfileId
+  byText, orderFromCurrent, profileIdsMatch, reconcileProfilesByProfileId
 } from '@studio-lite/shared-code';
 import UnitItem from '../entities/unit-item.entity';
 import { UnitItemMetadataService } from './unit-item-metadata.service';
@@ -76,13 +76,13 @@ export class UnitItemService {
     }).then(workspaces => workspaces.map(w => w.id));
   }
 
-  async getAllByUnitId(unitId: number,
-                       orderKey: string = 'id',
-                       direction: 'DESC' | 'ASC' = 'ASC',
-                       manager?: EntityManager): Promise<UnitItemDto[]> {
-    return this.repo(manager)
-      .find(
-        { where: { unitId: unitId }, order: { [orderKey]: direction } });
+  /**
+   * The items of a unit by `id`, which is the item id as its author typed it: in dictionary order,
+   * those without an id last -- the order the frontend sorts them in (#1872).
+   */
+  async getAllByUnitId(unitId: number, manager?: EntityManager): Promise<UnitItemDto[]> {
+    return (await this.repo(manager).find({ where: { unitId: unitId } }))
+      .sort(byText(item => item.id, true));
   }
 
   async getOneByUuid(uuid: string, manager?: EntityManager): Promise<UnitItemDto> {
@@ -101,7 +101,7 @@ export class UnitItemService {
   }
 
   async getAllByUnitIdWithMetadata(unitId: number, manager?: EntityManager): Promise<UnitItemWithMetadataDto[]> {
-    return Promise.all((await this.getAllByUnitId(unitId, 'id', 'ASC', manager))
+    return Promise.all((await this.getAllByUnitId(unitId, manager))
       .map(async item => ({
         ...item,
         profiles: await this.unitItemMetadataService.getAllByItemId(item.uuid, manager)

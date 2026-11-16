@@ -1,6 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
 import { MatTableDataSource } from '@angular/material/table';
+import { TextSortTableDataSource } from '../../../models/text-sort-table-data-source.class';
 
 /**
  * Wraps the resource packages in the data source a Material table needs, so the template can hand
@@ -14,8 +15,8 @@ export class TableDataSourcePipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this
   transform(resourcePackages: ResourcePackageDto[] | null): MatTableDataSource<ResourcePackageDto> {
     if (resourcePackages) {
-      return new MatTableDataSource(resourcePackages);
+      return new TextSortTableDataSource(resourcePackages);
     }
-    return new MatTableDataSource();
+    return new TextSortTableDataSource();
   }
 }

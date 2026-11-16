@@ -8,8 +8,7 @@ import {
   MatHeaderRowDef,
   MatRow,
   MatRowDef,
-  MatTable,
-  MatTableDataSource
+  MatTable
 } from '@angular/material/table';
 import {
   Component, OnDestroy, OnInit, ViewChild, computed, inject, signal
@@ -40,6 +39,7 @@ import { WorkspaceGroupsMenuComponent } from '../workspace-groups-menu/workspace
 import { Profile } from '../../../../models/profile.type';
 import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
 import { ChangeResultService } from '../../../../services/change-result.service';
+import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 
 /**
  * The workspace groups of the installation: creating, renaming and deleting them, appointing their
@@ -53,7 +53,7 @@ import { ChangeResultService } from '../../../../services/change-result.service'
   imports: [WorkspaceGroupsMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent]
 })
 export class WorkspaceGroupsComponent implements OnInit, OnDestroy {
-  objectsDatasource = new MatTableDataSource<WorkspaceGroupInListDto>();
+  objectsDatasource = new TextSortTableDataSource<WorkspaceGroupInListDto>();
   displayedColumns = ['id', 'name', 'delete'];
   tableSelectionRow = new SelectionModel<WorkspaceGroupInListDto>(false, []);
   selectedWorkspaceGroupId = 0;
@@ -246,7 +246,7 @@ export class WorkspaceGroupsComponent implements OnInit, OnDestroy {
   }
 
   private setObjectsDatasource(groups: WorkspaceGroupInListDto[]): void {
-    this.objectsDatasource = new MatTableDataSource(groups);
+    this.objectsDatasource = new TextSortTableDataSource(groups);
     this.objectsDatasource
       .filterPredicate = (groupList: WorkspaceGroupInListDto, filter) => [
         'name', 'id'

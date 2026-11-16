@@ -7,6 +7,7 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
+import { compareText } from '@studio-lite/shared-code';
 import { InputTextComponent } from '../../../../components/input-text/input-text.component';
 import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
@@ -48,6 +49,8 @@ export class NewGroupButtonComponent {
         }
         if (this.workspaceService.workspaceSettings.unitGroups.indexOf(result) < 0) {
           this.workspaceService.workspaceSettings.unitGroups.push(result);
+          // the group select lists them as the API sorts them (#1872)
+          this.workspaceService.workspaceSettings.unitGroups.sort(compareText);
           this.appBackendService.setWorkspaceSettings(
             this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
           ).subscribe(isOK => {

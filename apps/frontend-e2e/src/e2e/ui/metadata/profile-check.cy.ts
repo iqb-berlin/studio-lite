@@ -1,26 +1,24 @@
 import { checkMultipleProfiles } from '../../../support/metadata/metadata-util';
-import { standardUser, metadataMathGroup, metadataGermanGroup } from '../../../support/testData';
+import { metadataMathGroup, metadataGermanGroup } from '../../../support/testData';
 import {
-  addFirstUser,
   clickIndexTabAdmin,
   clickIndexTabWsgAdmin,
-  createGroup,
-  createNewUser,
+  login,
   waitForSuccess
 } from '../../../support/helpers';
 
 describe('Metadata Profile Management', () => {
   const groups = [metadataMathGroup, metadataGermanGroup];
   before(() => {
-    addFirstUser();
-  });
-
-  it('sets up groups and users', () => {
-    createNewUser(standardUser);
-    groups.forEach(area => {
-      createGroup(area);
+    const username = Cypress.expose('username');
+    const password = Cypress.expose('password');
+    cy.addFirstUserAPI(username, password).then(init => {
+      expect(init.status, 'first user').to.equal(201);
+      groups.forEach(name => {
+        cy.createGroupAPI({ id: '', name }, init.body.accessToken).its('status').should('equal', 201);
+      });
     });
-    // cy.wait(200);
+    login(username, password);
   });
 
   it('loads metadata profile from admin settings', () => {
@@ -28,6 +26,7 @@ describe('Metadata Profile Management', () => {
       'IQB Deutsch Primar - Aufgabe',
       'IQB Deutsch Primar - Item'
     ];
+    cy.findAdminSettings().click();
     clickIndexTabAdmin('workspace-groups');
     cy.get('mat-table')
       .contains(groups[1])

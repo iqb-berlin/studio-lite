@@ -11,6 +11,7 @@ import {
   UnitMetadataValues,
   UnitPropertiesDto
 } from '@studio-lite-lib/api-dto';
+import { byText } from '@studio-lite/shared-code';
 import Workspace from '../entities/workspace.entity';
 import Unit, {
   UNIT_GROUP_NAME_MAX_LENGTH, UNIT_KEY_MAX_LENGTH, UNIT_NAME_MAX_LENGTH
@@ -169,7 +170,6 @@ export class UnitService {
     if (workspaceIds.length === 0) return [];
     const units = await this.unitsRepository.find({
       where: { workspaceId: In(workspaceIds) },
-      order: { key: 'ASC' },
       select: {
         key: true,
         name: true,
@@ -183,6 +183,7 @@ export class UnitService {
         lastChangedSchemeUser: true
       }
     }) as UnitInViewDto[];
+    units.sort(byText(unit => unit.key));
     // add workspace name to units
     return units.map(unit => ({
       ...unit,
@@ -198,7 +199,6 @@ export class UnitService {
     this.logger.log(`Retrieving units for workspaceId ${workspaceId}`);
     let units = await this.unitsRepository.find({
       where: { workspaceId: workspaceId },
-      order: { key: 'ASC' },
       select: {
         id: true,
         key: true,
@@ -213,6 +213,7 @@ export class UnitService {
         lastChangedSchemeUser: true
       }
     }) as UnitInListDto[];
+    units.sort(byText(unit => unit.key));
     if (userId && withLastSeenCommentTimeStamp) {
       units = await Promise.all(units.map(async unit => {
         const comment = await this.unitCommentService.findOnesLastChangedComment(unit.id, userId);
@@ -453,7 +454,6 @@ export class UnitService {
     });
     const units = await this.unitsRepository.find({
       where: { workspaceId: workspaceId },
-      order: { key: 'ASC' },
       select: {
         id: true,
         key: true,
@@ -478,6 +478,7 @@ export class UnitService {
         lastChangedSchemeUser: true
       }
     });
+    units.sort(byText(unit => unit.key));
     const profileCache: ProfileFetchCache = new Map();
     return Promise.all(units.map(async unit => this.unitMetadataService
       .getModifiedMetadataForUnit(unit, workspace, profileCache)));

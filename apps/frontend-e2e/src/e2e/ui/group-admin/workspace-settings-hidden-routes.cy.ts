@@ -1,25 +1,17 @@
 import { baseGroup, primaryWorkspace, AccessLevel } from '../../../support/testData';
 
 import {
-  addFirstUser,
   clickIndexTabWsgAdmin,
-  createGroup,
   openWorkspaceSettingsDialog,
   saveWorkspaceSettings,
   setRouteVisibility
 } from '../../../support/helpers';
-import {
-  createWs,
-  grantRemovePrivilegeAtWs
-} from '../../../support/helpers/group-admin';
+import { createGroupAdminBaseAPI } from '../../../support/helpers/test-base';
 
 // ===========================================================================
 describe('Workspace Settings – hiddenRoutes', () => {
   before(() => {
-    addFirstUser();
-    createGroup(baseGroup);
-    createWs(primaryWorkspace, baseGroup);
-    grantRemovePrivilegeAtWs([Cypress.expose('username')], primaryWorkspace, [AccessLevel.Admin]);
+    createGroupAdminBaseAPI({ users: [], firstUserAccess: AccessLevel.Admin });
   });
 
   // -------------------------------------------------------------------------
@@ -64,7 +56,9 @@ describe('Workspace Settings – hiddenRoutes', () => {
       clickIndexTabWsgAdmin('workspaces');
 
       cy.contains('mat-row', primaryWorkspace)
-        .get('mat-icon:contains("directions_off")').should('have.length', 1);
+        .find('.mat-column-editor mat-icon')
+        .should('contain', 'directions')
+        .and('not.contain', 'directions_off');
     });
   });
 

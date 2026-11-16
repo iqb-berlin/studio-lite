@@ -1,7 +1,6 @@
 import { AccessLevel, standardUser } from '../../../support/testData';
 import {
   addFirstUser,
-  createNewUser,
   FIRST_WORKSPACE_REQUEST_TIMEOUT,
   loginWithUser
 } from '../../../support/helpers';
@@ -19,9 +18,9 @@ describe('A unit link into a workspace without access', () => {
 
   before(() => {
     addFirstUser();
-    createNewUser(standardUser);
     cy.window().then(win => {
       adminToken = win.localStorage.getItem('id_token') || '';
+      cy.createUserAPI(standardUser, adminToken).its('status').should('equal', 201);
       cy.getUserIdAPI(adminToken).then(authData => {
         cy.createGroupAPI(group, adminToken).then(createdGroup => {
           const groupId = String(createdGroup.body);

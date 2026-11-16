@@ -51,7 +51,7 @@
         </mat-header-cell>
         <mat-cell *matCellDef="let row"
           class="secondary-cell">
-          {{row.lastName ? row.lastName : row.name}}{{row.firstName ? (', ' + row.firstName) : ''}}
+          {{ row.name | userFullName : row.lastName : row.firstName }}
         </mat-cell>
       </ng-container>
 

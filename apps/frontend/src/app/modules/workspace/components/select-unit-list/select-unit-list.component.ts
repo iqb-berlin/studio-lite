@@ -3,7 +3,8 @@ import {
 } from '@angular/core';
 import {
 
-  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
+  MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow,
+  MatRowDef, MatRow
 } from '@angular/material/table';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -22,6 +23,7 @@ import { deselectHidden, SelectionScope, toggleAllInScope } from '../../../../ut
 import { IncludePipe } from '../../../../pipes/include.pipe';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { ScrollIntoViewDirective } from '../../directives/scroll-into-view.directive';
+import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 
 /**
  * A tickable list of units, used wherever a selection has to be made outside the workspace itself --
@@ -40,7 +42,7 @@ import { ScrollIntoViewDirective } from '../../directives/scroll-into-view.direc
 })
 export class SelectUnitListComponent implements OnChanges, OnDestroy {
   private static readonly allColumns = ['selectCheckbox', 'key', 'name', 'groupName'];
-  objectsDatasource = new MatTableDataSource<UnitInListDto>();
+  objectsDatasource = new TextSortTableDataSource<UnitInListDto>();
   displayedColumns = SelectUnitListComponent.allColumns;
   tableSelectionCheckboxes = new SelectionModel <UnitInListDto>(true, []);
   // What the header checkbox acts on (#433). It keeps its setting while the list is shown, also when
@@ -78,12 +80,12 @@ export class SelectUnitListComponent implements OnChanges, OnDestroy {
 
   private setObjectsDatasource(units: UnitInListDto[]): void {
     if (this.filter && this.filter.length) {
-      this.objectsDatasource = new MatTableDataSource(
+      this.objectsDatasource = new TextSortTableDataSource(
         units
           .filter(unit => this.filter.indexOf(unit.id) > -1)
       );
     } else {
-      this.objectsDatasource = new MatTableDataSource(units);
+      this.objectsDatasource = new TextSortTableDataSource(units);
     }
     this.objectsDatasource
       .filterPredicate = (unitList: UnitInListDto, filter) => ['key', 'name', 'groupName']

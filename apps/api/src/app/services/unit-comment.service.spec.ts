@@ -410,15 +410,21 @@ describe('UnitCommentService', () => {
       const commentId = 1;
       const mockVotes = [
         {
+          vote: 'down',
+          user: {
+            firstName: '', lastName: '', name: 'user2'
+          }
+        },
+        {
           vote: 'up',
           user: {
             firstName: 'John', lastName: 'Doe', name: 'jdoe'
           }
         },
         {
-          vote: 'down',
+          vote: 'up',
           user: {
-            firstName: '', lastName: '', name: 'user2'
+            firstName: '', lastName: '', name: 'anna'
           }
         }
       ] as unknown as UnitCommentVote[];
@@ -429,15 +435,11 @@ describe('UnitCommentService', () => {
 
       expect(voteRepository.find).toHaveBeenCalledWith({
         where: { commentId },
-        relations: { user: true },
-        order: {
-          user: {
-            lastName: 'ASC',
-            firstName: 'ASC'
-          }
-        }
+        relations: { user: true }
       });
+      // by the name shown: sorted by last name, the two without one stood in front, unordered (#1872)
       expect(result).toEqual([
+        { userName: 'anna', vote: 'up' },
         { userName: 'Doe, John', vote: 'up' },
         { userName: 'user2', vote: 'down' }
       ]);

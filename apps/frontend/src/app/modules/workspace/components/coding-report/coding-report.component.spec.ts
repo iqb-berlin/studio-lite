@@ -3,11 +3,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { of, Observable, throwError } from 'rxjs';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { CodingReportComponent } from './coding-report.component';
+import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 
 describe('CodingReportComponent', () => {
   let component: CodingReportComponent;
@@ -21,6 +21,7 @@ describe('CodingReportComponent', () => {
   const rows: CodingReportDto[] = [
     {
       unit: 'U1',
+      unitKey: 'U1',
       variable: 'V1',
       variableType: 'Basisvariable',
       item: 'I1',
@@ -31,6 +32,7 @@ describe('CodingReportComponent', () => {
     } as CodingReportDto,
     {
       unit: 'U1',
+      unitKey: 'U1',
       variable: 'V2',
       variableType: 'abgeleitete Variable',
       item: 'I2',
@@ -48,6 +50,7 @@ describe('CodingReportComponent', () => {
     } as CodingReportDto,
     {
       unit: 'U1',
+      unitKey: 'U1',
       variable: 'V3',
       variableType: 'abgeleitete Variable',
       item: 'I3',
@@ -60,6 +63,7 @@ describe('CodingReportComponent', () => {
     } as CodingReportDto,
     {
       unit: 'U2',
+      unitKey: 'U2',
       variable: '',
       variableType: '',
       item: '',
@@ -331,7 +335,7 @@ describe('CodingReportComponent', () => {
   });
 
   it('applyFilter updates the table filter', () => {
-    component.dataSource = new MatTableDataSource(component.unitDataRows);
+    component.dataSource = new TextSortTableDataSource(component.unitDataRows);
 
     const input = document.createElement('input');
     input.value = 'v2';
@@ -373,6 +377,26 @@ describe('CodingReportComponent', () => {
     );
 
     expect(sortedRows.map(row => row.variable)).toEqual(['V3', 'V2', 'V1', '']);
+  });
+
+  it('sorts the units by their key, not by the address of their link (#1872)', () => {
+    // loaded in the order of the keys; sorted by the link, unit 100 came first and 9 last
+    backendService.getCodingReport.mockReturnValue(of([
+      { ...rows[1], unit: '<a href=#/a/10/100>Aa: eins</a>', unitKey: 'Aa' },
+      { ...rows[1], unit: '<a href=#/a/10/9>ab: zwei</a>', unitKey: 'ab' },
+      { ...rows[1], unit: '<a href=#/a/10/12>Zz: drei</a>', unitKey: 'Zz' }
+    ]));
+    component.loadCodingReport();
+
+    const sortedRows = component.dataSource.sortData(
+      [...component.dataSource.data],
+      {
+        active: 'unit',
+        direction: 'desc'
+      } as MatSort
+    );
+
+    expect(sortedRows.map(row => row.unitKey)).toEqual(['Zz', 'ab', 'Aa']);
   });
 
   it('downloadCodingReport creates and revokes object URL', () => {
