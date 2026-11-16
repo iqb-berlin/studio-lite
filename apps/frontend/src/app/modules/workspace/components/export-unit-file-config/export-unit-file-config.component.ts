@@ -43,6 +43,9 @@ export class ExportUnitFileConfigComponent implements OnInit, OnChanges, OnDestr
   @Output() addPlayersChange: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() fileSelectionChange = new EventEmitter<ExportFileSelection>();
   @Output() unitsWithOutPlayerChange = new EventEmitter<number[]>();
+  // Units of the workspace whose export would carry an id twice, asked with the export contents (#2119);
+  // null when the contents could not be read, so that a failed check is not taken for a passed one
+  @Output() variableIdConflictsChange = new EventEmitter<UnitExportContentsDto[] | null>();
 
   // undefined until the answer arrives; null when the request failed
   private exportContents: UnitExportContentsDto[] | null | undefined;
@@ -72,6 +75,8 @@ export class ExportUnitFileConfigComponent implements OnInit, OnChanges, OnDestr
       this.workspaceService.selectedWorkspaceId
     ).pipe(takeUntil(this.ngUnsubscribe)).subscribe(exportContents => {
       this.exportContents = exportContents;
+      this.variableIdConflictsChange.emit(exportContents
+        ?.filter(contents => !!contents.variableIdConflicts?.length) ?? null);
       this.updateFileStates();
     });
   }

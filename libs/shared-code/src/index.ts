@@ -33,3 +33,7 @@ export {
   assertTimeConfig
 } from './lib/time.constants';
 export { SESSION_ENDED_MESSAGE } from './lib/session-ended';
+export { hasCodingScheme, parseDerivedCodings, derivedVariableId } from './lib/coding-scheme';
+export {
+  VariableIdConflict, VariableIdConflictVariable, findVariableIdConflicts
+} from './lib/variable-id-conflicts';

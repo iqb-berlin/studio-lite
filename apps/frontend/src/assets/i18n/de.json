@@ -76,6 +76,13 @@
       "import": "Export",
       "import-tooltip": "Unit-Dateien (*.xml, *.voud usw.) herunterladen"
     },
+    "variable-id-conflicts": {
+      "title": "Doppelte Variablen-IDs",
+      "intro-xml": "Im XML dieser Aufgaben stünde dieselbe ID für zwei Variablen. Das Testcenter nimmt solche Aufgaben ab Version 19 nicht an. Die übrigen Aufgaben sind davon nicht betroffen.",
+      "intro-json": "Im JSON dieser Aufgaben stünde dieselbe ID für zwei Variablen. Programme, die Variablen über ihre ID zuordnen, können die beiden verwechseln. Die übrigen Aufgaben sind davon nicht betroffen.",
+      "export-anyway": "Trotzdem exportieren",
+      "check-failed": "Ob eine Variablen-ID im Export doppelt stünde, konnte nicht geprüft werden."
+    },
     "dialog": {
       "title": "Aufgabe(n) als Datei herunterladen",
       "ok-button-label": "Herunterladen",
@@ -589,6 +596,54 @@
     "NOT_REACHED": "Noch keine Interaktion möglich",
     "DISPLAYED": "Wurde angezeigt",
     "VALUE_CHANGED": "Wert geändert"
+  },
+  "variable-id-conflicts": {
+    "id": "Die ID",
+    "stands-for": "stünde für:",
+    "base": "das Element",
+    "base-hint": "im Editor – die ID ist seine interne ID, die im Editor nicht zu sehen ist",
+    "derived": "die abgeleitete Variable",
+    "derived-hint": "in der Kodierung",
+    "manual-fix": "Manuell beheben",
+    "manual-fix-intro": "Eine der beiden Variablen braucht einen anderen Namen. Welche, entscheiden Sie – das Studio benennt nichts von selbst um.",
+    "keep-derived": {
+      "title": "Den Namen der abgeleiteten Variable behalten (meist der richtige Weg)",
+      "step-duplicate": "Im Editor das Element duplizieren und das Original löschen. Die Kopie erhält dabei eine neue interne ID.",
+      "step-take-over": "Der Kopie Position und ID des Originals geben.",
+      "step-coding": "In der Kodierung die Kopie so einstellen wie das Original, z. B. deaktivieren, wenn das Original deaktiviert war.",
+      "step-sources": "Abgeleitete Variablen, die aus dem Element gebildet werden, auf die Kopie umstellen.",
+      "step-items": "Items, die mit dem Element verknüpft waren, unter „Eigenschaften“ neu verknüpfen.",
+      "note": "Antworten, die zu dem Element schon erhoben wurden, sind unter seiner alten internen ID gespeichert."
+    },
+    "rename-derived": {
+      "title": "Die abgeleitete Variable umbenennen",
+      "step-rename": "In der Kodierung der abgeleiteten Variable einen neuen Namen geben.",
+      "step-items": "Items, die mit ihr verknüpft waren, unter „Eigenschaften“ neu verknüpfen.",
+      "note": "Damit ändert sich der Name, den die Kodierer:innen sehen. Was unter dem alten Namen schon kodiert wurde, behält ihn."
+    }
+  },
+  "unit-check": {
+    "title": "Aufgabenprüfung",
+    "hint": "Geprüft wird die Aufgabe, wie sie gerade bearbeitet wird, auch was noch nicht gespeichert ist.",
+    "ok": "in Ordnung",
+    "not-loaded": "Konnte nicht geladen werden.",
+    "no-editor": "Kein Editor zugewiesen.",
+    "no-player": "Kein Player zugewiesen.",
+    "no-schemer": "Kein Editor für das Antwortschema zugewiesen.",
+    "not-installed-editor": "Der zugewiesene Editor „{{module}}“ ist nicht installiert.",
+    "not-installed-player": "Der zugewiesene Player „{{module}}“ ist nicht installiert.",
+    "not-installed-schemer": "Der zugewiesene Editor für das Antwortschema „{{module}}“ ist nicht installiert.",
+    "no-definition": "Die Aufgabe hat noch keinen Inhalt.",
+    "definition-not-loaded": "Der Inhalt der Aufgabe konnte nicht geladen werden.",
+    "no-scheme": "Die Aufgabe hat noch kein Kodierschema.",
+    "variables-not-loaded": "Die Variablen konnten nicht geladen werden; doppelte IDs sind nicht geprüft.",
+    "scheme-not-loaded": "Das Kodierschema konnte nicht geladen werden; doppelte IDs sind nicht geprüft.",
+    "fix-elsewhere": "Beheben lässt sich das nur mit den Reitern „Editor“ und „Kodierung“, die dieser Arbeitsbereich ausblendet.",
+    "variable-id-conflicts": "Im Export stünde dieselbe ID für zwei Variablen. Das Testcenter nimmt eine solche Aufgabe ab Version 19 nicht an.",
+    "comments-present": "Kommentare vorhanden",
+    "comments-absent": "Keine Kommentare",
+    "notes-present": "Begleitmaterial vorhanden",
+    "notes-absent": "Kein Begleitmaterial"
   },
   "workspace": {
     "no-responses": "Es liegen keine Kodierungen vor",

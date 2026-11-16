@@ -18,7 +18,7 @@ import {
 import { PreviewDirective } from '../../../../directives/preview.directive';
 import { UnitState } from '../../../../models/verona.interface';
 import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
-import { matchDefinitionType } from '../../utils/definition-type-match.utils';
+import { matchDefinitionType, playerRejectsDefinitionType } from '../../utils/definition-type-match.utils';
 
 /**
  * The preview in the workspace: the unit as a test taker would see it, running in the player the
@@ -172,7 +172,7 @@ export class UnitPreviewComponent extends PreviewDirective {
    */
   private getDefinitionTypeWarning(definitionType: string | undefined): string {
     const player = this.moduleService.players[this.playerName];
-    if (!player || matchDefinitionType(definitionType, player.metadata?.model) !== 'incompatible') return '';
+    if (!playerRejectsDefinitionType(definitionType, player)) return '';
     const alternatives = Object.values(this.moduleService.players)
       .filter(module => matchDefinitionType(definitionType, module.metadata?.model) === 'compatible')
       .map(module => module.nameAndVersion);

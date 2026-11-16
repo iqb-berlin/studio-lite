@@ -1261,7 +1261,8 @@ Cypress.Commands.add('getUnitDefinitionAPI', (unitId: string, wsId: string, toke
 });
 
 // 46
-Cypress.Commands.add('updateUnitSchemeAPI', (unitId: string, wsId: string, token:string) => {
+// Without a scheme of the spec's own, the fixed scheme1 below
+Cypress.Commands.add('updateUnitSchemeAPI', (unitId: string, wsId: string, token:string, scheme?: string) => {
   const authorization = `bearer ${token}`;
 
   // const scheme1:string = '{"variableCodings":[{"id":"text-area_1","alias":"text-area_1","label":"","sourceType":"BASE","sourceParameters":{"solverExpression":"","processing":[]},"deriveSources":[],"processing":[],"fragmenting":"","manualInstruction":"","codeModel":"NONE","codes":[{"id":1,"type":"FULL_CREDIT","label":"","score":1,"ruleSetOperatorAnd":false,"ruleSets":[{"ruleOperatorAnd":true,"rules":[{"method":"MATCH","parameters":["Jupiter hat 92 Monde."]}]}],"manualInstruction":""},{"id":0,"type":"RESIDUAL","label":"","score":0,"ruleSetOperatorAnd":false,"ruleSets":[],"manualInstruction":"<p>\\n Alle anderen Antworten \\n </p>"}]}],"version":"3.0"}';
@@ -1275,7 +1276,7 @@ Cypress.Commands.add('updateUnitSchemeAPI', (unitId: string, wsId: string, token
       authorization
     },
     body: {
-      scheme: scheme1,
+      scheme: scheme ?? scheme1,
       schemeType: 'iqb@3.0'
     },
     failOnStatusCode: false

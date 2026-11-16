@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
+import { By } from '@angular/platform-browser';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { createMock } from '@golevelup/ts-jest';
@@ -29,6 +30,7 @@ import { UnitPropertiesComponent } from './unit-properties.component';
 import { environment } from '../../../../../environments/environment';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
 import { SelectModuleComponent } from '../../../../components/select-module/select-module.component';
+import { UnitCheckComponent } from '../unit-check/unit-check.component';
 
 describe('UnitPropertiesComponent', () => {
   let component: UnitPropertiesComponent;
@@ -48,6 +50,9 @@ describe('UnitPropertiesComponent', () => {
     value = '';
     @Output() selectionChanged = new EventEmitter<string>();
   }
+
+  @Component({ selector: 'studio-lite-unit-check', template: '', standalone: true })
+  class MockUnitCheckComponent {}
 
   beforeEach(async () => {
     const workspaceServiceStub = {
@@ -109,14 +114,18 @@ describe('UnitPropertiesComponent', () => {
       ]
     })
       .overrideComponent(UnitPropertiesComponent, {
-        remove: { imports: [NewGroupButtonComponent, SelectModuleComponent] },
-        add: { imports: [MockNewGroupButtonComponent, MockSelectModuleComponent] }
+        remove: { imports: [NewGroupButtonComponent, SelectModuleComponent, UnitCheckComponent] },
+        add: { imports: [MockNewGroupButtonComponent, MockSelectModuleComponent, MockUnitCheckComponent] }
       })
       .compileComponents();
 
     fixture = TestBed.createComponent(UnitPropertiesComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  it('shows the unit check (#2135)', () => {
+    expect(fixture.debugElement.query(By.directive(MockUnitCheckComponent))).toBeTruthy();
   });
 
   it('clears deprecated properties when requested', () => {
