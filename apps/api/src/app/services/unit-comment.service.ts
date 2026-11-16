@@ -7,6 +7,7 @@ import {
   UnitCommentDto, CreateUnitCommentDto, UpdateUnitCommentDto, UpdateUnitCommentVisibilityDto,
   UnitCommentVoterDto
 } from '@studio-lite-lib/api-dto';
+import { byText } from '@studio-lite/shared-code';
 import UnitComment from '../entities/unit-comment.entity';
 import UnitCommentVote from '../entities/unit-comment-vote.entity';
 import { UnitCommentNotFoundException } from '../exceptions/unit-comment-not-found.exception';
@@ -245,16 +246,10 @@ export class UnitCommentService {
   async getCommentVoters(commentId: number): Promise<UnitCommentVoterDto[]> {
     const votesWithUsers = await this.unitCommentVoteRepository.find({
       where: { commentId },
-      relations: { user: true },
-      order: {
-        user: {
-          lastName: 'ASC',
-          firstName: 'ASC'
-        }
-      }
+      relations: { user: true }
     });
 
-    return votesWithUsers.map(v => {
+    const voters = votesWithUsers.map(v => {
       const lastName = v.user.lastName ? v.user.lastName.trim() : '';
       const firstName = v.user.firstName ? v.user.firstName.trim() : '';
       const name = v.user.name ? v.user.name.trim() : '';
@@ -262,5 +257,7 @@ export class UnitCommentService {
       const userName = firstName ? `${displayName}, ${firstName}` : displayName;
       return { userName, vote: v.vote };
     });
+    // by the name shown: a voter without a last name is listed under the login name (#1872)
+    return voters.sort(byText(voter => voter.userName));
   }
 }

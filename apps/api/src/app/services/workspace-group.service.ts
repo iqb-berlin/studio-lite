@@ -8,7 +8,7 @@ import {
   WorkspaceGroupSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { ArgumentOutOfRangeError } from 'rxjs';
-import { toW3idProfileId } from '@studio-lite/shared-code';
+import { byText, toW3idProfileId } from '@studio-lite/shared-code';
 import WorkspaceGroup from '../entities/workspace-group.entity';
 import { AdminWorkspaceGroupNotFoundException } from '../exceptions/admin-workspace-group-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
@@ -72,9 +72,8 @@ export class WorkspaceGroupService {
         return [];
       }
     }
-    const workspaceGroups: WorkspaceGroup[] = await this.workspaceGroupsRepository.find(
-      { order: { name: 'ASC' } }
-    );
+    const workspaceGroups: WorkspaceGroup[] = await this.workspaceGroupsRepository.find();
+    workspaceGroups.sort(byText(workspaceGroup => workspaceGroup.name));
     const returnWorkspaces: WorkspaceGroupInListDto[] = [];
     workspaceGroups.forEach(workspaceGroup => {
       if (usersWorkspaceGroupIds.length === 0 || usersWorkspaceGroupIds.indexOf(workspaceGroup.id) >= 0) {

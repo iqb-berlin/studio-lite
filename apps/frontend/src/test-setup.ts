@@ -6,6 +6,8 @@ setupZoneTestEnv();
 Object.defineProperty(window, 'Intl', {
   writable: true,
   value: {
+    // the real one: sorting is compared against the order a browser gives (#1872)
+    Collator: Intl.Collator,
     /* eslint-disable  @typescript-eslint/no-explicit-any */
     DateTimeFormat: jest.fn().mockImplementation((locale?: string, options?: any) => ({
       resolvedOptions: jest.fn(() => ({

@@ -1,7 +1,7 @@
 import {
   AfterViewInit, Component, Input, ViewChild
 } from '@angular/core';
-import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatTableModule } from '@angular/material/table';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
@@ -13,6 +13,7 @@ import { MatButton } from '@angular/material/button';
 import { I18nService } from '../../services/i18n.service';
 import { IsNewReviewPipe } from '../../pipes/is-new-review.pipe';
 import { WrappedIconComponent } from '../wrapped-icon/wrapped-icon.component';
+import { TextSortTableDataSource } from '../../models/text-sort-table-data-source.class';
 
 @Component({
   selector: 'studio-lite-review-table',
@@ -39,7 +40,7 @@ export class ReviewTableComponent implements AfterViewInit {
 
   reviewsView: 'list' | 'details' = 'list';
 
-  dataSource = new MatTableDataSource<ReviewDto>([]);
+  dataSource = new TextSortTableDataSource<ReviewDto>([]);
   displayedColumns: string[] = [
     'name'
   ];

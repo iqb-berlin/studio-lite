@@ -81,6 +81,20 @@ describe('VeronaModulesService', () => {
       expect(result).toHaveLength(1);
     });
 
+    it('should order the modules by name and then by version (#1872)', async () => {
+      // "Player" begins "Player Plus": joined with the key into one string, it came second
+      mockRepository.find.mockResolvedValue([
+        { key: 'plus@1.0', metadata: { type: 'player', name: 'Player Plus' } },
+        { key: 'player@1.10', metadata: { type: 'player', name: 'Player' } },
+        { key: 'aspect@2.0', metadata: { type: 'player', name: 'aspect' } },
+        { key: 'player@1.9', metadata: { type: 'player', name: 'Player' } }
+      ]);
+
+      const result = await service.findAll();
+
+      expect(result.map(module => module.key)).toEqual(['aspect@2.0', 'player@1.9', 'player@1.10', 'plus@1.0']);
+    });
+
     it('should filter by type', async () => {
       const modules = [
         { key: 'e', metadata: { type: 'editor', name: 'e' } },

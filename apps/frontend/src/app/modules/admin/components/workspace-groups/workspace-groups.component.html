@@ -105,7 +105,7 @@
               [(ngModel)]="entry.isChecked"
               [disabled]="!selectedWorkspaceGroupId || loadingAdmins()"
               (change)="workspaceUsers.updateHasChanged()">
-              {{entry.displayName}} ({{entry.name}})
+              {{entry.label}}
             </mat-checkbox>
             <div class="secondary-text fx-flex-fill">{{entry.description}}</div>
           </div>

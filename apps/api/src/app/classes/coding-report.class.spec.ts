@@ -155,6 +155,7 @@ describe('CodingReportClass', () => {
 
       expect(CodingReportClass.build(3, units)).toEqual([{
         unit: '<a href=#/a/3/12>OLD: Alt</a>',
+        unitKey: 'OLD',
         variable: '',
         variableType: '',
         item: '',
@@ -194,6 +195,7 @@ describe('CodingReportClass', () => {
     describe('with a unit whose scheme cannot be evaluated', () => {
       const unreadableRow = (id: number, key: string) => ({
         unit: `<a href=#/a/1/${id}>${key}</a>`,
+        unitKey: key,
         variable: '',
         variableType: '',
         item: '',

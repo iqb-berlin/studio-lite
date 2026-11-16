@@ -8,6 +8,7 @@ import {
   filter, Subject, takeUntil, takeWhile
 } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
+import { compareText } from '@studio-lite/shared-code';
 import { ModuleService } from '../../../../services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
@@ -136,7 +137,16 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.workspaceService.dropBoxId = workspace.dropBoxId;
     this.appService.appConfig.setPageTitle(this.workspaceService.selectedWorkspaceName);
     if (workspace.settings) {
-      this.workspaceService.workspaceSettings = workspace.settings;
+      // The unit list asks for the groups itself, and its answer may be here already. Replaced by
+      // the stored settings, the group select was empty, or listed only the groups added by hand,
+      // in the order they were added (#1872). The stored ones stand in until that answer comes.
+      const loadedGroups = this.workspaceService.workspaceSettings.unitGroups;
+      this.workspaceService.workspaceSettings = {
+        ...workspace.settings,
+        unitGroups: loadedGroups?.length ?
+          loadedGroups :
+          [...workspace.settings.unitGroups || []].sort(compareText)
+      };
     }
     this.workspaceService.setWorkspaceGroupStates();
     this.workspaceService.loadRichNoteTags();

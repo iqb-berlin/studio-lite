@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatTableDataSource } from '@angular/material/table';
 import { TranslateModule } from '@ngx-translate/core';
 import { BehaviorSubject } from 'rxjs';
 import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
 import { ResourcePackagesTableComponent } from './resource-packages-table.component';
 import { environment } from '../../../../../environments/environment';
+import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 
 // The selection was held in the checkboxes of the rows shown: the header checkbox ticked them without
 // selecting anything, and a package filtered out and back stayed selected, unticked (#433)
@@ -30,7 +30,7 @@ describe('ResourcePackagesTableComponent', () => {
     fixture.detectChanges();
   };
   const load = (): void => {
-    fixture.componentRef.setInput('dataSource', new MatTableDataSource(resourcePackages()));
+    fixture.componentRef.setInput('dataSource', new TextSortTableDataSource(resourcePackages()));
     fixture.detectChanges();
   };
 

@@ -1,5 +1,5 @@
 import {
-  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef,
+  MatTable, MatColumnDef, MatHeaderCellDef,
   MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
 import { DatePipe } from '@angular/common';
@@ -40,6 +40,9 @@ import { HeartbeatService } from '../../../../services/heartbeat.service';
 import { DeleteDialogComponent } from '../../../../components/delete-dialog/delete-dialog.component';
 import { CountSessionsWithStatusPipe } from '../../../../pipes/count-sessions-with-status.pipe';
 import { ChangeResultService } from '../../../../services/change-result.service';
+import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
+import { UserFullNamePipe } from '../../../../pipes/user-full-name.pipe';
+import { sortNameColumnAsShown } from '../../../../utils/user-name-sort.utils';
 
 /**
  * The user administration: every account with its sessions and what it may administer, and the acts
@@ -53,10 +56,11 @@ import { ChangeResultService } from '../../../../services/change-result.service'
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss'],
 
-  imports: [UsersMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent, DatePipe, CountSessionsWithStatusPipe]
+  imports: [UsersMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent, DatePipe, CountSessionsWithStatusPipe,
+    UserFullNamePipe]
 })
 export class UsersComponent implements OnInit, OnDestroy {
-  objectsDatasource = new MatTableDataSource<UserFullDto>();
+  objectsDatasource = new TextSortTableDataSource<UserFullDto>();
   displayedColumns = ['active', 'name', 'displayName', 'isAdmin', 'email', 'id', 'description', 'delete'];
   tableSelectionRow = new SelectionModel <UserFullDto>(false, []);
   selectedUser = 0;
@@ -429,7 +433,7 @@ export class UsersComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.objectsDatasource = new MatTableDataSource(users);
+    this.objectsDatasource = new TextSortTableDataSource(users);
     this.objectsDatasource
       .filterPredicate = (userList: UserFullDto, filter) => [
         'name', 'firstName', 'lastName', 'email', 'id', 'description'
@@ -438,6 +442,7 @@ export class UsersComponent implements OnInit, OnDestroy {
         .toLowerCase()
         .includes(filter));
 
+    sortNameColumnAsShown(this.objectsDatasource);
     const defaultSortData = this.objectsDatasource.sortData;
     this.objectsDatasource.sortData = (data: UserFullDto[], sort: MatSort) => {
       const { active, direction } = sort;

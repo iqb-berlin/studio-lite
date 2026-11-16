@@ -4,6 +4,7 @@ import {
   Component, Input, Output, EventEmitter
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSort } from '@angular/material/sort';
 import { TranslateModule } from '@ngx-translate/core';
 import { of, BehaviorSubject, Subject } from 'rxjs';
 import { UserFullDto, UsersWorkspaceInListDto } from '@studio-lite-lib/api-dto';
@@ -109,6 +110,26 @@ describe('UsersComponent', () => {
     expect(mockBackendService.getWorkspaces).toHaveBeenCalledWith(1);
     expect(mockBackendService.getUsersFull).toHaveBeenCalled();
     expect(component.objectsDatasource.data).toEqual(users);
+  });
+
+  it('should sort the name column by the name shown (#2145)', () => {
+    const users = [
+      { id: 1, name: 'bert' },
+      {
+        id: 2, name: 'zoe', lastName: 'Abel', firstName: 'Zoe'
+      },
+      { id: 3, name: 'anna', lastName: 'Zimmer' }
+    ] as UserFullDto[];
+    mockBackendService.getUsersFull.mockReturnValue(of(users));
+    fixture.detectChanges();
+
+    const sorted = component.objectsDatasource
+      .sortData(users.slice(), { active: 'lastName', direction: 'asc' } as MatSort);
+
+    expect(sorted.map(user => user.name)).toEqual(['zoe', 'bert', 'anna']);
+    const shownNames = [...fixture.nativeElement.querySelectorAll('.mat-column-displayName.mat-mdc-cell')]
+      .map((cell: HTMLElement) => cell.textContent?.trim());
+    expect(shownNames).toEqual(['bert', 'Abel, Zoe', 'Zimmer']);
   });
 
   it('should render one radio button per access level in each row', () => {

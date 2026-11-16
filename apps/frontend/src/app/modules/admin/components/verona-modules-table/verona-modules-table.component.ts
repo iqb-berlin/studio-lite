@@ -3,7 +3,8 @@ import {
 } from '@angular/core';
 import {
 
-  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
+  MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow,
+  MatRowDef, MatRow
 } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
@@ -22,6 +23,7 @@ import { HasSelectionValuePipe } from '../../../../pipes/has-selection-value.pip
 import { IsSelectedPipe } from '../../../../pipes/is-selected.pipe';
 import { I18nService } from '../../../../services/i18n.service';
 import { ModuleSelectionChange } from '../../models/module-selection-change.interface';
+import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 
 /**
  * The installed modules as a table: name, version, size and date, with a download link per module
@@ -38,7 +40,7 @@ export class VeronaModulesTableComponent implements OnInit, OnDestroy {
   @Input() type!: string;
   @Input()
   set modules(value: { [key: string]: VeronaModuleClass }) {
-    this.objectsDatasource = new MatTableDataSource(
+    this.objectsDatasource = new TextSortTableDataSource(
       VeronaModulesTableComponent.getFlattenedVeronaModuleClasses(Object.keys(value).map(m => value[m]))
     );
     setTimeout(() => {
@@ -50,7 +52,7 @@ export class VeronaModulesTableComponent implements OnInit, OnDestroy {
   @Output() selectionChanged = new EventEmitter<ModuleSelectionChange>();
   @ViewChild(MatSort) sort = new MatSort();
 
-  objectsDatasource = new MatTableDataSource<FlattenedVeronaModuleClass>();
+  objectsDatasource = new TextSortTableDataSource<FlattenedVeronaModuleClass>();
   tableSelectionCheckboxes = new SelectionModel<FlattenedVeronaModuleClass>(true, []);
   displayedColumns = ['selectCheckbox', 'name', 'id', 'model', 'version',
     'veronaVersion', 'fileDateTime', 'filesize'];

@@ -10,7 +10,8 @@ import { Subject, takeUntil } from 'rxjs';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { Sort } from '@angular/material/sort';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import { KeyValuePipe } from '@angular/common';
+import { KeyValue, KeyValuePipe } from '@angular/common';
+import { compareText } from '@studio-lite/shared-code';
 import { WorkspaceService } from '../../services/workspace.service';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
@@ -18,6 +19,12 @@ import { UnitTableComponent } from '../unit-table/unit-table.component';
 import { UnitGroupComponent } from '../unit-group/unit-group.component';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { UnitGroupsComponent } from '../unit-groups/unit-groups.component';
+
+/** Puts the groups in dictionary order; left to itself, `keyvalue` orders them by character code. */
+const compareGroups = (
+  a: KeyValue<string, UnitInListDto[]>,
+  b: KeyValue<string, UnitInListDto[]>
+): number => compareText(a.key, b.key);
 
 /**
  * The unit list beside the workspace: the units by group, the filter over them, and the selection
@@ -37,6 +44,8 @@ export class UnitSelectionComponent extends SelectUnitDirective implements OnIni
   groupsInfo: string = '';
   unitList!: { [p: string]: UnitInListDto[] };
   ngUnsubscribe = new Subject<void>();
+  readonly compareGroups = compareGroups;
+
   @ViewChildren(UnitTableComponent) unitTables!: UnitTableComponent[];
   @Input() selectedUnitId!: number;
   @Input('unitList') set setU(unitList: { [p: string]: UnitInListDto[] }) {

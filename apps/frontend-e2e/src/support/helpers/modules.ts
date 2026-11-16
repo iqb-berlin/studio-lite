@@ -140,17 +140,16 @@ export function setModuleWithoutVerification(
   cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
   cy.get('[data-cy="workspace-edit-unit-settings"]').click();
 
-  // Set editor
-  cy.get('[data-cy="edit-workspace-settings-editor"]').click();
-  cy.get('mat-option>span').contains(editor).click();
-
-  // Set player
-  cy.get('[data-cy="edit-workspace-settings-player"]').click();
-  cy.get('mat-option>span').contains(player).click();
-
-  // Set schemer
-  cy.get('[data-cy="edit-workspace-settings-schemer"]').click();
-  cy.get('mat-option>span').contains(schemer).click();
+  // The select itself, not the element around it: it is rendered only once the module list has
+  // arrived. A click on the still empty element opened nothing, and the options were then waited
+  // for in vain (module-switch.cy.ts failed that way in the pipeline of #1872).
+  const selectModule = (moduleType: 'editor' | 'player' | 'schemer', module: string): void => {
+    cy.get(`[data-cy="edit-workspace-settings-${moduleType}"] mat-select`).click();
+    cy.get('mat-option>span').contains(module).click();
+  };
+  selectModule('editor', editor);
+  selectModule('player', player);
+  selectModule('schemer', schemer);
 
   // Save and wait for the answer: a reload right after the click would cancel the request (#1743)
   saveWorkspaceSettings();

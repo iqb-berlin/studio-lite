@@ -1,5 +1,5 @@
 import {
-  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef,
+  MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef,
   MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
 import {
@@ -40,6 +40,7 @@ import { WorkspaceNamePipe } from '../../pipes/workspace-name.pipe';
 import { I18nService } from '../../../../services/i18n.service';
 import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
 import { ChangeResultService } from '../../../../services/change-result.service';
+import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 
 /**
  * The workspaces of a group as their admin sees them: creating, renaming, moving and deleting them,
@@ -56,7 +57,7 @@ import { ChangeResultService } from '../../../../services/change-result.service'
     RouterLink]
 })
 export class WorkspacesComponent implements OnInit, OnDestroy {
-  objectsDatasource = new MatTableDataSource<WorkspaceInListDto>([]);
+  objectsDatasource = new TextSortTableDataSource<WorkspaceInListDto>([]);
   workspaces: WorkspaceInListDto[] = [];
   displayedColumns = [
     'id', 'name', 'unitsCount', 'editor', 'preview', 'schemer', 'comments', 'notes', 'dropBoxId', 'delete'
@@ -215,7 +216,7 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
   }
 
   private setObjectsDatasource(workspaces: WorkspaceInListDto[]): void {
-    this.objectsDatasource = new MatTableDataSource(workspaces);
+    this.objectsDatasource = new TextSortTableDataSource(workspaces);
     this.objectsDatasource
       .filterPredicate = (workspaceList: WorkspaceInListDto, filter) => ['name', 'id', 'unitsCount']
         .some(column => (workspaceList[column as keyof WorkspaceInListDto] || '')

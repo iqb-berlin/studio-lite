@@ -173,6 +173,20 @@ describe('AddUnitButtonComponent', () => {
     expect(snackBar.open).toHaveBeenCalledWith('workspace.group-saved', '', { duration: 1000 });
   }));
 
+  it('sorts the new group of a unit in among the others (#1872)', fakeAsync(() => {
+    workspaceService.workspaceSettings.unitGroups = ['Gruppe 10', 'lesen'];
+    jest.spyOn(
+      component as unknown as { addUnitDialog: (data: unknown) => Promise<CreateUnitDto | boolean> },
+      'addUnitDialog'
+    ).mockResolvedValue({ key: 'U3', name: 'Unit 3', groupName: 'Gruppe 2' });
+    jest.spyOn(component, 'updateUnitList').mockImplementation(() => {});
+
+    component.addUnit();
+    flushMicrotasks();
+
+    expect(workspaceService.workspaceSettings.unitGroups).toEqual(['Gruppe 2', 'Gruppe 10', 'lesen']);
+  }));
+
   it('adds a unit from an existing source', fakeAsync(() => {
     const existing: UnitInListDto = {
       id: 11,

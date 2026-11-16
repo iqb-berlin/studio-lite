@@ -7,7 +7,8 @@ import { combineLatest } from 'rxjs';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import {
 
-  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
+  MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow,
+  MatRowDef, MatRow
 } from '@angular/material/table';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
@@ -24,6 +25,7 @@ import { Group } from '../../models/group.interface';
 import { SaveChangesComponent } from '../save-changes/save-changes.component';
 import { GroupMenuComponent } from '../group-menu/group-menu.component';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
+import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 
 /**
  * The dialog for the unit groups of a workspace: creating and renaming them, and moving units in and
@@ -47,7 +49,7 @@ export class GroupManageComponent implements OnInit {
   groupUnitsOriginal: number[] = [];
   groupUnitsToChange: number[] = [];
 
-  objectsDatasource = new MatTableDataSource<Group>();
+  objectsDatasource = new TextSortTableDataSource<Group>();
   displayedColumns = ['name'];
 
   constructor(
@@ -113,7 +115,7 @@ export class GroupManageComponent implements OnInit {
   }
 
   private setObjectsDatasource(groups: Group[]): void {
-    this.objectsDatasource = new MatTableDataSource(groups);
+    this.objectsDatasource = new TextSortTableDataSource(groups);
     this.objectsDatasource
       .filterPredicate = (group: Group, filter) => ['name']
         .some(column => (group[column as keyof Group] as string || '')

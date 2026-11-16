@@ -161,7 +161,9 @@ Cypress.Commands.add('createUserAPI', (userData:UserData, token:string) => {
     body: {
       name: `${userData.username}`,
       password: `${userData.password}`,
-      isAdmin: isAdmin
+      isAdmin: isAdmin,
+      ...(userData.lastName && { lastName: userData.lastName }),
+      ...(userData.firstName && { firstName: userData.firstName })
     },
     failOnStatusCode: false
   });

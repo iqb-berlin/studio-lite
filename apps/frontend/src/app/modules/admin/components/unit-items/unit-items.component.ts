@@ -9,8 +9,7 @@ import {
   MatColumnDef,
   MatHeaderCell,
   MatHeaderCellDef, MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef,
-  MatTable,
-  MatTableDataSource
+  MatTable
 } from '@angular/material/table';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
@@ -21,6 +20,7 @@ import { BackendService } from '../../services/backend.service';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { I18nService } from '../../../../services/i18n.service';
 import { AppService } from '../../../../services/app.service';
+import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 
 @Component({
   selector: 'studio-lite-unit-items',
@@ -36,7 +36,7 @@ import { AppService } from '../../../../services/app.service';
 })
 
 export class UnitItemsComponent implements OnInit, AfterViewInit {
-  dataSource = new MatTableDataSource<UnitItemInViewDto>([]);
+  dataSource = new TextSortTableDataSource<UnitItemInViewDto>([]);
   displayedColumns: string[] = [
     'id',
     'uuid',

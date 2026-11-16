@@ -154,6 +154,20 @@ describe('UnitItemService', () => {
     });
   });
 
+  describe('getAllByUnitId', () => {
+    const idsOf = (items: { id?: string }[]) => items.map(item => item.id);
+
+    beforeEach(() => {
+      mockRepository.find.mockResolvedValue(['10', '', 'b', '9', 'A'].map(id => ({ id } as UnitItem)));
+    });
+
+    // the order the frontend sorts items in, so that both list them alike (#1872)
+    it('should sort the items by id as a dictionary does, those without an id last', async () => {
+      expect(idsOf(await service.getAllByUnitId(1))).toEqual(['9', '10', 'A', 'b', '']);
+      expect(mockRepository.find).toHaveBeenCalledWith({ where: { unitId: 1 } });
+    });
+  });
+
   describe('getAllByUnitIdWithMetadata', () => {
     it('should return items with metadata', async () => {
       const unitId = 1;

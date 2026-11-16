@@ -3,6 +3,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import {
   deselectHidden, SelectionScope, selectionScopeState, toggleAllInScope
 } from './selection-scope.utils';
+import { TextSortTableDataSource } from '../models/text-sort-table-data-source.class';
 
 // Whether the header checkbox of a filtered list acts on the shown entries or on all of them (#433)
 describe('selection scope', () => {
@@ -19,7 +20,7 @@ describe('selection scope', () => {
   const selectedKeys = (): string[] => selection.selected.map(row => row.key).sort();
 
   beforeEach(() => {
-    dataSource = new MatTableDataSource([a1, a2, b1, b2]);
+    dataSource = new TextSortTableDataSource([a1, a2, b1, b2]);
     dataSource.filterPredicate = (row, filter) => row.group === filter;
     selection = new SelectionModel<Row>(true);
   });

@@ -9,6 +9,7 @@ import {
   ReviewDto, UnitPropertiesDto
 } from '@studio-lite-lib/api-dto';
 import { v4 as uuIdv4 } from 'uuid';
+import { byText } from '@studio-lite/shared-code';
 import Review from '../entities/review.entity';
 import ReviewUnit from '../entities/review-unit.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
@@ -58,9 +59,8 @@ export class ReviewService {
 
   async findAll(workspaceId: number): Promise<ReviewInListDto[]> {
     this.logger.log(`Retrieving reviews for workspaceId ${workspaceId}`);
-    return this.reviewRepository.find({
+    const reviews = await this.reviewRepository.find({
       where: { workspaceId: workspaceId },
-      order: { name: 'ASC' },
       select: {
         id: true,
         name: true,
@@ -69,6 +69,7 @@ export class ReviewService {
         createdAt: true
       }
     });
+    return reviews.sort(byText(review => review.name));
   }
 
   /** Creates the review in the workspace of the path; a `workspaceId` in the body is ignored. */
@@ -194,7 +195,6 @@ export class ReviewService {
         workspaceId: In(workspacesIdList),
         units: MoreThan(0)
       },
-      order: { name: 'ASC' },
       select: {
         id: true,
         name: true,
@@ -203,7 +203,7 @@ export class ReviewService {
         createdAt: true
       }
     });
-    return reviews.map(r => <ReviewDto>{
+    return reviews.sort(byText(review => review.name)).map(r => <ReviewDto>{
       ...r,
       workspaceName: workspaceInfo[r.workspaceId].name,
       workspaceGroupId: workspaceInfo[r.workspaceId].groupId,

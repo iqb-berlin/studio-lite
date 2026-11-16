@@ -7,7 +7,7 @@ import {
   VeronaModuleFileDto, VeronaModuleInListDto, VeronaModuleMetadataDto, VeronaModuleType
 } from '@studio-lite-lib/api-dto';
 import * as cheerio from 'cheerio';
-import { VeronaModuleKeyCollection, veronaModuleTypesMatch } from '@studio-lite/shared-code';
+import { VeronaModuleKeyCollection, compareText, veronaModuleTypesMatch } from '@studio-lite/shared-code';
 import type { Response } from 'express';
 import VeronaModule from '../entities/verona-module.entity';
 import { AdminVeronaModulesNotFoundException } from '../exceptions/admin-verona-modules-not-found.exception';
@@ -79,10 +79,12 @@ export class VeronaModulesService {
         fileSize: vm.fileSize,
         fileDateTime: vm.fileDateTime as unknown
       })
+      // By name, then by version. Compared as one joined string, a name that begins another one
+      // could land behind it, and the module table would move on the first click on "Name" (#1872).
       .sort((
         a: VeronaModuleInListDto,
         b: VeronaModuleInListDto
-      ) => (a.metadata.name + a.sortKey).localeCompare(b.metadata.name + b.sortKey));
+      ) => compareText(a.metadata.name, b.metadata.name) || compareText(a.sortKey, b.sortKey));
   }
 
   async upload(fileData: Buffer, allowedTypes?: VeronaModuleType[]) {

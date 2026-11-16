@@ -9,8 +9,7 @@ import {
   MatColumnDef,
   MatHeaderCell,
   MatHeaderCellDef, MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef,
-  MatTable,
-  MatTableDataSource
+  MatTable
 } from '@angular/material/table';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -30,6 +29,7 @@ import { WsgAdminService } from '../../services/wsg-admin.service';
 import { AppService } from '../../../../services/app.service';
 import { IncludePipe } from '../../../../pipes/include.pipe';
 import { DeleteDialogComponent } from '../../../../components/delete-dialog/delete-dialog.component';
+import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 
 @Component({
   selector: 'studio-lite-unit-items',
@@ -41,7 +41,7 @@ import { DeleteDialogComponent } from '../../../../components/delete-dialog/dele
 
 export class UnitItemsComponent implements OnInit, AfterViewInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();
-  dataSource = new MatTableDataSource<UnitItemInViewDto>([]);
+  dataSource = new TextSortTableDataSource<UnitItemInViewDto>([]);
   displayedColumns: string[] = [
     'id',
     'uuid',

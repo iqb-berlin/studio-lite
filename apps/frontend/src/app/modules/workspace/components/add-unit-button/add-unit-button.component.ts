@@ -1,3 +1,4 @@
+import { compareText } from '@studio-lite/shared-code';
 import {
   Component, OnDestroy, Input, inject
 } from '@angular/core';
@@ -150,6 +151,8 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
       this.workspaceService.workspaceSettings.unitGroups.indexOf(newGroup) < 0
     ) {
       this.workspaceService.workspaceSettings.unitGroups.push(newGroup);
+      // the group select lists them as the API sorts them (#1872)
+      this.workspaceService.workspaceSettings.unitGroups.sort(compareText);
       this.appBackendService
         .setWorkspaceSettings(
           this.workspaceService.selectedWorkspaceId,

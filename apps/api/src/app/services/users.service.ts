@@ -16,6 +16,7 @@ import {
   UserWorkspaceAccessDto,
   WorkspaceUserInListDto
 } from '@studio-lite-lib/api-dto';
+import { byText } from '@studio-lite/shared-code';
 import User from '../entities/user.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import { AdminUserNotFoundException } from '../exceptions/admin-user-not-found.exception';
@@ -58,7 +59,7 @@ export class UsersService {
   }
 
   private async findUsersOrderedByName(): Promise<User[]> {
-    return this.usersRepository.find({ order: { name: 'ASC' } });
+    return (await this.usersRepository.find()).sort(byText(user => user.name));
   }
 
   private async findWorkspaceGroupAdminIds(workspaceGroupId: number): Promise<number[]> {
