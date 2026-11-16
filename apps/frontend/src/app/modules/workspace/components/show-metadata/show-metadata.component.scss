@@ -1,3 +1,9 @@
 .full-width {
   width: 100%;
 }
+
+// The unit list shrinks while filtering. At a fixed height the dialog keeps its place instead of being
+// centred anew, which moved the search field while typing (#2143). 65vh is the cap Material sets anyway.
+.dialog-content {
+  height: 65vh;
+}
