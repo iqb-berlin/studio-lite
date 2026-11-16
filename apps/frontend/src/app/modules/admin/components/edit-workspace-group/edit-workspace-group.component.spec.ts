@@ -71,4 +71,11 @@ describe('EditWorkspaceGroupComponent', () => {
     expect(nameControl?.hasError('minlength')).toBe(false);
     expect(nameControl?.valid).toBe(true);
   });
+
+  it('should say at the field why a short name cannot be saved (#2147)', () => {
+    component.editWorkspaceGroupForm.get('name')?.setValue('ab');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('mat-error')?.textContent).toContain('admin.invalid-group-name');
+  });
 });

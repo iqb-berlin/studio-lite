@@ -146,6 +146,27 @@ describe('Admin BackendService', () => {
     });
   });
 
+  // Blanks copied along with an address made the account unsaveable in the dialog (#2147).
+  describe('user data', () => {
+    it('should send a new user with the e-mail address trimmed (#2147)', () => {
+      service.addUser({
+        name: 'hugo', password: 'secret', isAdmin: false, description: '', email: ' hugo@example.org '
+      }).subscribe();
+
+      const req = httpMock.expectOne(`${baseUrl}admin/users`);
+      expect(req.request.body.email).toBe('hugo@example.org');
+      req.flush(5);
+    });
+
+    it('should send changed user data with the e-mail address trimmed (#2147)', () => {
+      service.changeUserData(4, { id: 4, email: ' hugo@example.org ' }).subscribe();
+
+      const req = httpMock.expectOne(`${baseUrl}admin/users/4`);
+      expect(req.request.body).toEqual({ id: 4, email: 'hugo@example.org' });
+      req.flush(null);
+    });
+  });
+
   describe('deleteUsers', () => {
     it('returns true on success', done => {
       service.deleteUsers([1, 2]).subscribe(result => {

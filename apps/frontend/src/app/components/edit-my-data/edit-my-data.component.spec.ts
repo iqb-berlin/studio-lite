@@ -50,5 +50,14 @@ describe('EditMyDataComponent', () => {
       expect(component.editUserForm.get('emailPublishApproval')?.value).toBe(true);
       expect(component.editUserForm.get('description')?.value).toBe('Test user description');
     });
+
+    // An address saved here unchecked kept the administrator from saving the account (#2147).
+    it('should refuse what is no e-mail address and say so at the field (#2147)', () => {
+      component.editUserForm.get('email')?.setValue('kein-at');
+      fixture.detectChanges();
+
+      expect(component.editUserForm.valid).toBe(false);
+      expect(fixture.nativeElement.querySelector('mat-error')?.textContent).toContain('user.invalid-email');
+    });
   });
 });

@@ -13,6 +13,9 @@
              [placeholder]="'user.login-name' | translate"
              [value]="data.name"
              data-cy="admin-edit-user-username" />
+      @if (editUserForm.controls['name'].invalid) {
+        <mat-error>{{ 'user.invalid-login-name' | translate }}</mat-error>
+      }
     </mat-form-field>
     <mat-form-field>
       <input matInput
@@ -39,8 +42,10 @@
              type="text"
              [placeholder]="'user.email' | translate"
              [value]="data.email"
-             [email]="true"
              data-cy="admin-edit-user-email" />
+      @if (editUserForm.controls['email'].invalid) {
+        <mat-error>{{ 'user.invalid-email' | translate }}</mat-error>
+      }
     </mat-form-field>
     @if (data.emailApproved) {
       <div class="consent fx-row-start-center">
@@ -85,6 +90,9 @@
                   (click)="setPasswordInputType(passwordInput)">
           {{ passwordInput.type === 'text' ? 'visibility_off' : 'visibility' }}
         </mat-icon>
+        @if (editUserForm.controls['password'].invalid) {
+          <mat-error>{{ 'user.invalid-password' | translate }}</mat-error>
+        }
       </mat-form-field>
       <button mat-mini-fab
               class="generate-password-button"

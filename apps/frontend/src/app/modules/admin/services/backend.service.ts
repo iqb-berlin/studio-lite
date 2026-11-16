@@ -20,6 +20,7 @@ import {
   UnitRichNoteTagDto
 } from '@studio-lite-lib/api-dto';
 import { succeeded } from '../../../utils/succeeded.utils';
+import { withTrimmedEmail } from '../../../utils/email.utils';
 import { Profile } from '../../../models/profile.type';
 
 /**
@@ -119,13 +120,13 @@ export class BackendService {
 
   addUser(newUser: CreateUserDto): Observable<boolean> {
     return this.http
-      .post(`${this.serverUrl}admin/users`, newUser)
+      .post(`${this.serverUrl}admin/users`, withTrimmedEmail(newUser))
       .pipe(succeeded());
   }
 
   changeUserData(id: number, newData: UserFullDto): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/users/${id}`, newData)
+      .patch(`${this.serverUrl}admin/users/${id}`, withTrimmedEmail(newData))
       .pipe(succeeded());
   }
 
