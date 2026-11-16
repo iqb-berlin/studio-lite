@@ -114,6 +114,16 @@ export interface GroupBaseUser {
   groupAdmin?: boolean;
 }
 
+/** What a spec needs to reach the group-admin base through the API */
+export interface GroupAdminBase {
+  /** of the first user, for the API: a session of its own, not the one the browser logs in with */
+  token: string;
+  /** of the primary workspace */
+  wsId: string;
+  /** of the secondary workspace */
+  secondaryWsId: string;
+}
+
 /**
  * Builds the base of the group-admin specs and logs the browser in as the first user, who is an
  * admin of the group with the two workspaces. Needs an empty database, as the reset before every
@@ -123,14 +133,18 @@ export interface GroupBaseUser {
  * @param zip - a zip of units in the fixtures, imported into the primary workspace
  * @example
  * createGroupAdminBaseAPI({ users: [{ user: standardUser }, { user: secondaryUser }] });
+ * createGroupAdminBaseAPI({ users: [], firstUserAccess: AccessLevel.Admin })
+ *   .then(base => cy.createUnitAPI(base.wsId, unit, base.token));
  */
 export function createGroupAdminBaseAPI(
   { users, firstUserAccess, zip }: { users: GroupBaseUser[]; firstUserAccess?: AccessLevel; zip?: string }
-): void {
+): Cypress.Chainable<GroupAdminBase> {
   const { username, password } = admin();
+  const base: GroupAdminBase = { token: '', wsId: '', secondaryWsId: '' };
   cy.addFirstUserAPI(username, password).then(init => {
     expect(init.status, 'first user').to.equal(201);
     const token: string = init.body.accessToken;
+    base.token = token;
     cy.getUserIdAPI(token).then(authData => {
       expect(authData.status, 'id of the first user').to.equal(200);
       const firstUserId = String(authData.body.userId);
@@ -155,6 +169,8 @@ export function createGroupAdminBaseAPI(
           cy.createWsAPI(groupId, { id: '', name }, token).then(ws => {
             expect(ws.status, name).to.equal(201);
             const wsId = String(ws.body);
+            if (name === primaryWorkspace) base.wsId = wsId;
+            else base.secondaryWsId = wsId;
             if (access.length) cy.setUsersOfWsAPI(wsId, access, token).its('status').should('equal', 200);
             if (zip && name === primaryWorkspace) importZipAPI(wsId, zip, token);
           });
@@ -163,6 +179,7 @@ export function createGroupAdminBaseAPI(
     });
   });
   login(username, password);
+  return cy.then(() => base);
 }
 
 /**

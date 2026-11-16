@@ -1,48 +1,60 @@
 /// <reference types="cypress" />
+import type { RequestReportDto, WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
+import { IqbProfile, RegistryProfile } from '../../../support/metadata/iqbProfile';
+import { baseGroup, primaryWorkspace } from '../../../support/testData';
 import {
-  selectProfileForArea,
-  selectProfileForGroup
-} from '../../../support/metadata/metadata-util';
-import { IqbProfile } from '../../../support/metadata/iqbProfile';
-import {
-  AccessLevel, modules, metadataBistaIIIGroup, metadataMathPrimarWorkspace
-} from '../../../support/testData';
-import {
-  addFirstUser,
-  addModules,
   assignVariableToItem,
   clickIndexTabWorkspace,
-  createGroup,
   createItem,
-  deleteAllModules,
   goToItem,
   goToWsMenu,
   importExercise,
-  selectUnit, setModuleWithoutVerification
+  selectUnit,
+  waitForSuccess
 } from '../../../support/helpers';
-import {
-  createWs,
-  grantRemovePrivilegeAtWs
-} from '../../../support/helpers/group-admin';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Variable and Item Metadata Coherence', () => {
-  const mathArea = metadataMathPrimarWorkspace;
-  const group = metadataBistaIIIGroup;
+  const mathArea = primaryWorkspace;
 
+  // The profiles and the modules of the workspace are set through the API: choosing them in the
+  // interface is checked in insert-record.cy.ts and unit-settings-modules.cy.ts (#1967).
   before(() => {
-    addFirstUser();
+    createTestBaseAPI().then(({ token, wsId }) => {
+      cy.getWsGroupsAPI(token).then(groups => {
+        const group = (groups.body as WorkspaceGroupInListDto[]).find(({ name }) => name === baseGroup);
+        expect(group?.id, `id of ${baseGroup}`).to.be.a('number');
+        cy.updateGroupSettingsAPI(String(group?.id), {
+          profiles: [
+            { id: RegistryProfile.get('uMA'), label: IqbProfile.MAu },
+            { id: RegistryProfile.get('iMA'), label: IqbProfile.MAi }
+          ]
+        }, token).its('status').should('equal', 200);
+      });
+      cy.updateWsSettingsAPI(wsId, {
+        defaultEditor: 'iqb-editor-aspect@3.1',
+        defaultPlayer: 'iqb-player-aspect@3.1',
+        defaultSchemer: 'iqb-schemer@2.9',
+        unitMDProfile: RegistryProfile.get('uMA'),
+        itemMDProfile: RegistryProfile.get('iMA')
+      }, token).its('status').should('equal', 200);
+    });
   });
 
-  it('sets up workspace with modules and profile', () => {
-    addModules(modules);
-    createGroup(group);
-    createWs(mathArea, group);
-    grantRemovePrivilegeAtWs([Cypress.expose('username')], mathArea, [AccessLevel.Admin]);
-    selectProfileForGroup(group, IqbProfile.MAu);
-    selectProfileForGroup(group, IqbProfile.MAi);
-    setModuleWithoutVerification(mathArea, 'Aspect', 'Aspect', 'Schemer');
-    selectProfileForArea([IqbProfile.MAu, IqbProfile.MAi]);
+  after(() => {
+    deleteTestBaseAPI();
+  });
+
+  // The only spec that imports a zip through the interface
+  it('imports the unit of a zip', () => {
+    cy.visitWs(mathArea);
+    cy.intercept('POST', '/api/workspaces/*').as('importUnits');
     importExercise('variable_metadata.zip');
+    // Rejected files are reported in the answer, which is 201 all the same.
+    cy.wait('@importUnits').then(({ response }) => {
+      expect(response?.statusCode, 'import').to.equal(201);
+      expect((response?.body as RequestReportDto).messages, 'problems importing the zip').to.deep.equal([]);
+    });
   });
 
   it('creates item 01 and assigns variable text-field_1', () => {
@@ -144,11 +156,9 @@ describe('Variable and Item Metadata Coherence', () => {
     cy.get('.fx-row-space-between-end').find('svg').eq(0).click();
     cy.get('.mat-pseudo-checkbox').next().contains('01').click();
     cy.get('.mat-pseudo-checkbox').next().contains('02').click();
+    // waited for, so that the teardown does not come in the middle of the request
+    cy.intercept('POST', '/api/workspaces/*/units/*/comments').as('sendComment');
     cy.contains('button', 'send').click({ force: true });
-  });
-
-  // The reset before the next spec does not take the modules.
-  it('removes its modules', () => {
-    deleteAllModules();
+    waitForSuccess('@sendComment');
   });
 });

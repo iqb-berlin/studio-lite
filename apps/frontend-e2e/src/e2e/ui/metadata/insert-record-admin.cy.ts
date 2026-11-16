@@ -1,32 +1,17 @@
 import { selectProfileForGroupFromAdmin } from '../../../support/metadata/metadata-util';
 import { IqbProfile } from '../../../support/metadata/iqbProfile';
-import { AccessLevel, metadataMathIIWorkspace } from '../../../support/testData';
-import {
-  addFirstUser,
-  createGroup
-} from '../../../support/helpers';
-import {
-  createWs,
-  grantRemovePrivilegeAtWs
-} from '../../../support/helpers/group-admin';
+import { baseGroup } from '../../../support/testData';
+import { createGroupAdminBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Metadata Profile Management from Admin', () => {
-  const area = 'Deutsch II';
-  const mathArea = metadataMathIIWorkspace;
-  const group = 'Bista II';
-
-  it('sets up workspaces in group', () => {
-    addFirstUser();
-    createGroup(group);
-    createWs(area, group);
-    grantRemovePrivilegeAtWs([Cypress.expose('username')], area, [AccessLevel.Admin]);
-    createWs(mathArea, group);
-    grantRemovePrivilegeAtWs([Cypress.expose('username')], mathArea, [AccessLevel.Admin]);
+  before(() => {
+    createGroupAdminBaseAPI({ users: [] });
   });
+
   it('assigns metadata profiles to group from admin settings', () => {
-    selectProfileForGroupFromAdmin(group, IqbProfile.DEu);
-    selectProfileForGroupFromAdmin(group, IqbProfile.DEi);
-    selectProfileForGroupFromAdmin(group, IqbProfile.MAu);
-    selectProfileForGroupFromAdmin(group, IqbProfile.MAi);
+    selectProfileForGroupFromAdmin(baseGroup, IqbProfile.DEu);
+    selectProfileForGroupFromAdmin(baseGroup, IqbProfile.DEi);
+    selectProfileForGroupFromAdmin(baseGroup, IqbProfile.MAu);
+    selectProfileForGroupFromAdmin(baseGroup, IqbProfile.MAi);
   });
 });
