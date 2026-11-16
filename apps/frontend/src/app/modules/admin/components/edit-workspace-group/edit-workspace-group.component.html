@@ -8,6 +8,9 @@
                maxlength="50"
                [placeholder]="'admin.group-name' | translate"
                [value]="name">
+        @if (editWorkspaceGroupForm.controls['name'].invalid) {
+          <mat-error>{{ 'admin.invalid-group-name' | translate }}</mat-error>
+        }
       </mat-form-field>
   </form>
 </mat-dialog-content>

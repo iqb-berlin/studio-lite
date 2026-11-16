@@ -8,7 +8,9 @@ import {
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
-import { MatFormField } from '@angular/material/form-field';
+import { MatError, MatFormField } from '@angular/material/form-field';
+import { ErrorStateMatcher } from '@angular/material/core';
+import { FilledErrorStateMatcher } from '../../../../classes/filled-error-state-matcher.class';
 import { EditWorkspaceGroupComponentData } from '../../models/edit-workspace-group-component-data.type';
 
 @Component({
@@ -16,7 +18,9 @@ import { EditWorkspaceGroupComponentData } from '../../models/edit-workspace-gro
   templateUrl: './edit-workspace-group.component.html',
   styleUrls: ['./edit-workspace-group.component.scss'],
 
-  imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput,
+    MatDialogActions, MatButton, MatDialogClose, TranslateModule, MatError],
+  providers: [{ provide: ErrorStateMatcher, useClass: FilledErrorStateMatcher }]
 })
 export class EditWorkspaceGroupComponent {
   editWorkspaceGroupForm: UntypedFormGroup;

@@ -11,12 +11,17 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIcon } from '@angular/material/icon';
 
 import { MatInput } from '@angular/material/input';
-import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import {
+  MatError, MatFormField, MatLabel, MatSuffix
+} from '@angular/material/form-field';
 import { MatTooltip } from '@angular/material/tooltip';
+import { ErrorStateMatcher } from '@angular/material/core';
 import { EmailTemplateDto } from '@studio-lite-lib/api-dto';
 import { EditUserComponentData } from '../../models/edit-user-component-data.type';
 import { AppService } from '../../../../services/app.service';
 import { BackendService } from '../../../../services/backend.service';
+import { FilledErrorStateMatcher } from '../../../../classes/filled-error-state-matcher.class';
+import { emailValidator, trimEmail } from '../../../../utils/email.utils';
 
 @Component({
   selector: 'studio-lite-edit-user',
@@ -24,7 +29,8 @@ import { BackendService } from '../../../../services/backend.service';
   styleUrls: ['./edit-user.component.scss'],
   imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule,
     MatFormField, MatInput, MatIcon, MatLabel, MatCheckbox, MatDialogActions, MatSuffix,
-    MatButton, MatDialogClose, TranslateModule, MatTooltip, MatMiniFabButton]
+    MatButton, MatDialogClose, TranslateModule, MatTooltip, MatMiniFabButton, MatError],
+  providers: [{ provide: ErrorStateMatcher, useClass: FilledErrorStateMatcher }]
 })
 
 export class EditUserComponent implements OnInit {
@@ -40,7 +46,7 @@ export class EditUserComponent implements OnInit {
         [Validators.required, Validators.pattern(/^[a-zäöüß]{3,}$/)]),
       lastName: this.fb.control(this.data.lastName),
       firstName: this.fb.control(this.data.firstName),
-      email: this.fb.control(this.data.email),
+      email: this.fb.control(this.data.email, [emailValidator]),
       description: this.fb.control(this.data.description),
       // disabled, the control keeps its value, so that UsersComponent does not send it (#1950)
       isAdmin: this.fb.control({ value: this.data.isAdmin, disabled: !!this.data.isOwnAccount }),
@@ -84,7 +90,7 @@ export class EditUserComponent implements OnInit {
   }
 
   mailTo(): void {
-    const email: string = this.editUserForm.get('email')?.value || '';
+    const email: string = trimEmail(this.editUserForm.get('email')?.value) || '';
     const subject: string = this.emailTemplate.emailSubject;
     window.location.href = `mailto:${email}?subject=${subject}&body=${this.getEmailBody()}`;
   }

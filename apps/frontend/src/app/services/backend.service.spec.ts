@@ -240,6 +240,17 @@ describe('BackendService', () => {
     });
   });
 
+  describe('setMyData', () => {
+    // Blanks copied along with an address made the account unsaveable for the administrator (#2147).
+    it('should send the e-mail address trimmed (#2147)', () => {
+      service.setMyData({ id: 1, email: ' someone@example.org ' }).subscribe();
+
+      const req = httpMock.expectOne(`${serverUrl}my-data`);
+      expect(req.request.body).toEqual({ id: 1, email: 'someone@example.org' });
+      req.flush(true);
+    });
+  });
+
   describe('setUserPassword', () => {
     it('should update password successfully', done => {
       service.setUserPassword('oldPass', 'newPass').subscribe(result => {

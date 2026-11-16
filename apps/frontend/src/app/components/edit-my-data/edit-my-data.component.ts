@@ -9,15 +9,20 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatInput } from '@angular/material/input';
-import { MatFormField } from '@angular/material/form-field';
+import { MatError, MatFormField } from '@angular/material/form-field';
+import { ErrorStateMatcher } from '@angular/material/core';
 import { MyData } from '../../models/my-data.interface';
+import { FilledErrorStateMatcher } from '../../classes/filled-error-state-matcher.class';
+import { emailValidator } from '../../utils/email.utils';
 
 @Component({
   selector: 'studio-lite-edit-my-data',
   templateUrl: './edit-my-data.component.html',
   styleUrls: ['./edit-my-data.component.scss'],
 
-  imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatCheckbox, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput,
+    MatCheckbox, MatDialogActions, MatButton, MatDialogClose, TranslateModule, MatError],
+  providers: [{ provide: ErrorStateMatcher, useClass: FilledErrorStateMatcher }]
 })
 
 export class EditMyDataComponent {
@@ -28,7 +33,7 @@ export class EditMyDataComponent {
       .group({
         lastName: this.fb.control(this.data.lastName),
         firstName: this.fb.control(this.data.firstName),
-        email: this.fb.control(this.data.email),
+        email: this.fb.control(this.data.email, [emailValidator]),
         emailPublishApproval: this.fb.control(this.data.emailPublishApproved),
         description: this.fb.control(this.data.description)
       });

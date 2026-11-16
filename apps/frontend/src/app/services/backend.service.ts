@@ -20,6 +20,7 @@ import {
 } from '../interceptors/request-classification';
 import { succeeded } from '../utils/succeeded.utils';
 import { isNoAnswer } from '../utils/no-answer.utils';
+import { withTrimmedEmail } from '../utils/email.utils';
 
 /**
  * The API calls that belong to no single area: logging in and out, the token refresh, the user's own
@@ -103,7 +104,7 @@ export class BackendService {
 
   setMyData(newMyData: MyDataDto): Observable<boolean> {
     return this.http
-      .patch<boolean>(`${this.serverUrl}my-data`, newMyData)
+      .patch<boolean>(`${this.serverUrl}my-data`, withTrimmedEmail(newMyData))
       .pipe(
         catchError(() => of(false))
       );

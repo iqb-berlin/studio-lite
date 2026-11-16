@@ -76,4 +76,30 @@ describe('ChangePasswordComponent', () => {
     expect(form.get('pw_new2')?.valid).toBe(true);
     expect(form.valid).toBe(true);
   });
+
+  // The button stayed grey without a word about the repetition (#2147).
+  it('should say at the repetition that it differs from the new password (#2147)', () => {
+    const form = component.changePasswordForm;
+    form.get('pw_old')?.setValue('oldpassword');
+    form.get('pw_new1')?.setValue('newpassword');
+    form.get('pw_new2')?.setValue('newpasswort');
+    fixture.detectChanges();
+
+    expect(form.valid).toBe(false);
+    const errors = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('mat-error'))
+      .map(error => error.textContent?.trim());
+    expect(errors).toEqual(['user.password-mismatch']);
+  });
+
+  it('should judge the repetition again when the new password changes', () => {
+    const form = component.changePasswordForm;
+    form.get('pw_old')?.setValue('oldpassword');
+    form.get('pw_new1')?.setValue('newpassword');
+    form.get('pw_new2')?.setValue('newpassword');
+    expect(form.valid).toBe(true);
+
+    form.get('pw_new1')?.setValue('otherpassword');
+    expect(form.get('pw_new2')?.hasError('mismatch')).toBe(true);
+    expect(form.valid).toBe(false);
+  });
 });

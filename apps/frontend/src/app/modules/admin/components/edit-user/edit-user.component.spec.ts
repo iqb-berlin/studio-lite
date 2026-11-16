@@ -100,6 +100,24 @@ describe('EditUserComponent', () => {
     expect(ownFixture.nativeElement.textContent).toContain('admin.own-admin-hint');
   });
 
+  // The fields turned red only once they had been left, which someone who only sets a password never
+  // does: the button stayed grey and nothing said why (#2147).
+  it('should show at once which stored values hold saving back (#2147)', async () => {
+    TestBed.resetTestingModule();
+    await createTestModule({ ...mockDialogData, name: 'test01', email: 'kein-at' }).compileComponents();
+    const storedFixture = TestBed.createComponent(EditUserComponent);
+    storedFixture.detectChanges();
+
+    const errors = Array.from<HTMLElement>(storedFixture.nativeElement.querySelectorAll('mat-error'))
+      .map(error => error.textContent?.trim());
+    expect(errors).toEqual(['user.invalid-login-name', 'user.invalid-email']);
+  });
+
+  it('should not hold saving back for blanks around the e-mail address (#2147)', () => {
+    component.editUserForm.get('email')?.setValue(' john.doe@example.com ');
+    expect(component.editUserForm.valid).toBe(true);
+  });
+
   it('should not require password for existing users', () => {
     const passwordControl = component.editUserForm.get('password');
     passwordControl?.setValue('');

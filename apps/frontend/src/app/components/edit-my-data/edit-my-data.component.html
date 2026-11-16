@@ -28,6 +28,9 @@
              data-cy="edit-my-data-email"
              [placeholder]="'home.email' | translate"
              [value]="data.email"/>
+      @if (editUserForm.controls['email'].invalid) {
+        <mat-error>{{ 'user.invalid-email' | translate }}</mat-error>
+      }
     </mat-form-field>
     <div class="fx-row-start-stretch fx-gap-10">
       <mat-checkbox formControlName="emailPublishApproval"

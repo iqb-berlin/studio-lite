@@ -146,6 +146,27 @@ describe('Admin User Management', () => {
       editInput('admin-edit-user-email', 'restored@example.com');
       saveUserEdit('restoreEmail');
     });
+
+    // The field turned red only once it had been left, with no word on why saving was held back, and
+    // blanks around an address held it back as well (#2147).
+    it('names the e-mail field that holds saving back and saves an address without its blanks (#2147)', () => {
+      clearFormControl('email');
+      editInput('admin-edit-user-email', 'no-address');
+      cy.focused().should('have.attr', 'data-cy', 'admin-edit-user-email');
+      cy.translate(Cypress.expose('locale')).then(json => {
+        cy.contains('mat-error', json.user['invalid-email']).should('be.visible');
+      });
+      cy.get('[data-cy="admin-edit-user-button"]').should('be.disabled');
+
+      clearFormControl('email');
+      cy.get('[data-cy="admin-edit-user-email"]').type(' trimmed@example.com ', { force: true });
+      cy.intercept('PATCH', '/api/admin/users/*').as('saveTrimmed');
+      cy.get('[data-cy="admin-edit-user-button"]').click();
+      cy.wait('@saveTrimmed').then(({ request, response }) => {
+        expect(response?.statusCode).to.equal(200);
+        expect(request.body.email).to.equal('trimmed@example.com');
+      });
+    });
   });
 
   // ─── Own account ──────────────────────────────────────────────────────────────
