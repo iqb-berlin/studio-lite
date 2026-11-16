@@ -41,6 +41,8 @@ import { DeleteDialogComponent } from '../../../../components/delete-dialog/dele
 import { CountSessionsWithStatusPipe } from '../../../../pipes/count-sessions-with-status.pipe';
 import { ChangeResultService } from '../../../../services/change-result.service';
 import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
+import { UserFullNamePipe } from '../../../../pipes/user-full-name.pipe';
+import { sortNameColumnAsShown } from '../../../../utils/user-name-sort.utils';
 
 /**
  * The user administration: every account with its sessions and what it may administer, and the acts
@@ -54,7 +56,8 @@ import { TextSortTableDataSource } from '../../../../models/text-sort-table-data
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss'],
 
-  imports: [UsersMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent, DatePipe, CountSessionsWithStatusPipe]
+  imports: [UsersMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent, DatePipe, CountSessionsWithStatusPipe,
+    UserFullNamePipe]
 })
 export class UsersComponent implements OnInit, OnDestroy {
   objectsDatasource = new TextSortTableDataSource<UserFullDto>();
@@ -439,6 +442,7 @@ export class UsersComponent implements OnInit, OnDestroy {
         .toLowerCase()
         .includes(filter));
 
+    sortNameColumnAsShown(this.objectsDatasource);
     const defaultSortData = this.objectsDatasource.sortData;
     this.objectsDatasource.sortData = (data: UserFullDto[], sort: MatSort) => {
       const { active, direction } = sort;

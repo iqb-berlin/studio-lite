@@ -1,5 +1,5 @@
 import {
-  baseGroup, primaryWorkspace, secondaryWorkspace, UnitData
+  baseGroup, primaryWorkspace, secondaryWorkspace, standardUser, UnitData, UserData
 } from '../../../support/testData';
 import { clickIndexTabWsgAdmin } from '../../../support/helpers';
 import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
@@ -20,6 +20,16 @@ describe('The order of lists', () => {
   const keysInOrder = ['Aa01', 'aa02', 'Ab01', 'ab02', 'MA_1', 'MA-1', 'MA1', 'Unit2', 'Unit10'];
   const furtherWorkspaces = ['Zebra', 'klasse 10', 'ärger', 'Klasse 9'];
   const workspacesInOrder = ['ärger', secondaryWorkspace, primaryWorkspace, 'Klasse 9', 'klasse 10', 'Zebra'];
+  // Listed under their names, which begin differently than their login names (#2145). The two users
+  // of the base have no names and are listed under their login names.
+  const namedUsers: UserData[] = [
+    {
+      username: 'anna', password: '4455', lastName: 'Zimmer', firstName: 'Anna'
+    },
+    {
+      username: 'zoe', password: '4455', lastName: 'Abel', firstName: 'Zoe'
+    }
+  ];
 
   const expectTexts = (selector: string, texts: string[]) => {
     cy.get(selector).should(elements => {
@@ -43,6 +53,9 @@ describe('The order of lists', () => {
         furtherWorkspaces.forEach(name => {
           cy.createWsAPI(String(group?.id), { id: '', name }, token).its('status').should('equal', 201);
         });
+      });
+      namedUsers.forEach(user => {
+        cy.createUserAPI(user, token).its('status').should('equal', 201);
       });
     });
   });
@@ -76,5 +89,31 @@ describe('The order of lists', () => {
 
     cy.get('th.mat-column-key').should('have.attr', 'aria-sort', 'ascending');
     expectTexts('td.mat-column-key', keysInOrder);
+  });
+
+  it('sorts the users of a group by the name their row shows', () => {
+    openGroupAdminTab('users');
+
+    cy.get('mat-header-cell.mat-column-displayName').click();
+
+    cy.get('mat-header-cell.mat-column-displayName').should('have.attr', 'aria-sort', 'ascending');
+    expectTexts(
+      'mat-cell.mat-column-displayName',
+      ['Abel, Zoe', Cypress.expose('username'), standardUser.username, 'Zimmer, Anna']
+    );
+  });
+
+  it('lists the users without access to a workspace by the name their row shows', () => {
+    openGroupAdminTab('workspaces');
+
+    cy.contains('mat-row', primaryWorkspace).click();
+
+    // in front the two users of the base, who work in the workspace
+    expectTexts('[data-cy="access-rights"]', [
+      `${Cypress.expose('username')} (${Cypress.expose('username')})`,
+      `${standardUser.username} (${standardUser.username})`,
+      'Abel, Zoe (zoe)',
+      'Zimmer, Anna (anna)'
+    ]);
   });
 });

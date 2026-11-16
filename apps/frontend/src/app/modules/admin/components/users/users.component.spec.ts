@@ -740,6 +740,23 @@ describe('UsersComponent', () => {
         'Inactive A'
       ]);
     });
+
+    it('should sort the name column by the name shown (#2145)', () => {
+      const users = [
+        { id: 1, name: 'bert' },
+        {
+          id: 2, name: 'zoe', lastName: 'Abel', firstName: 'Zoe'
+        },
+        { id: 3, name: 'anna', lastName: 'Zimmer' }
+      ] as UserFullDto[];
+      (mockBackendService.getUsersFullWithActivity as jest.Mock).mockReturnValue(of(users));
+      component.updateUserList(true);
+
+      const sorted = component.objectsDatasource
+        .sortData(users.slice(), { active: 'lastName', direction: 'asc' } as MatSort);
+
+      expect(sorted.map(user => user.name)).toEqual(['zoe', 'bert', 'anna']);
+    });
   });
 
   // Esc, a click beside the dialog and navigation close it with undefined (#1844)

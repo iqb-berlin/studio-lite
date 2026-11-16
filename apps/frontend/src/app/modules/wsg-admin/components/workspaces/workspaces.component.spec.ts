@@ -417,7 +417,12 @@ describe('WorkspacesComponent', () => {
 
     beforeEach(() => {
       userEntry = {
-        id: 1, name: 'user1', displayName: 'User 1', description: undefined, isChecked: false, accessLevel: 0
+        id: 1,
+        name: 'user1',
+        label: 'User 1 (user1)',
+        description: undefined,
+        isChecked: false,
+        accessLevel: 0
       };
       component.selectedWorkspaceId = 1;
       jest.spyOn(component.workspaceUsers, 'updateHasChanged');

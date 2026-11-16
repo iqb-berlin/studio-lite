@@ -30,6 +30,8 @@ import { RolesHeaderComponent } from '../roles-header/roles-header.component';
 import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
 import { ChangeResultService } from '../../../../services/change-result.service';
 import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
+import { UserFullNamePipe } from '../../../../pipes/user-full-name.pipe';
+import { sortNameColumnAsShown } from '../../../../utils/user-name-sort.utils';
 
 @Component({
   selector: 'studio-lite-users',
@@ -40,7 +42,7 @@ import { TextSortTableDataSource } from '../../../../models/text-sort-table-data
     SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader,
     MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, EntriesDividerComponent,
     MatRadioButton, FormsModule, IsSelectedIdPipe, TranslateModule,
-    RolesHeaderComponent, MatFabButton, MatIcon
+    RolesHeaderComponent, MatFabButton, MatIcon, UserFullNamePipe
   ]
 })
 export class UsersComponent implements OnInit, OnDestroy {
@@ -145,6 +147,7 @@ export class UsersComponent implements OnInit, OnDestroy {
       ].some(column => (userList[column as keyof UserFullDto] as string || '')
         .toLowerCase()
         .includes(filter));
+    sortNameColumnAsShown(this.objectsDatasource);
     this.objectsDatasource.sort = this.sort;
   }
 
