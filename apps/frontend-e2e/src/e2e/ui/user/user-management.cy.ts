@@ -1,9 +1,7 @@
 import { standardUser, UserData } from '../../../support/testData';
 import {
-  addFirstUser,
   changePassword,
   clearUserFilter,
-  createNewUser,
   filterUsers,
   goToAdminUsers,
   login,
@@ -14,9 +12,10 @@ import {
 
 describe('UI User Management', () => {
   before(() => {
-    addFirstUser();
-    createNewUser(standardUser);
-    logout();
+    cy.addFirstUserAPI(Cypress.expose('username'), Cypress.expose('password')).then(init => {
+      expect(init.status, 'first user').to.equal(201);
+      cy.createUserAPI(standardUser, init.body.accessToken).its('status').should('equal', 201);
+    });
   });
 
   // ─── Self-service (logged in as normal user) ─────────────────────────────────

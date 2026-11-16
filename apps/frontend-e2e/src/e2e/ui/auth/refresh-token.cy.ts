@@ -1,23 +1,21 @@
 import { standardUser } from '../../../support/testData';
 import {
-  addFirstUser,
-  createNewUser,
   login,
-  loginWithUser,
   clickIndexTabAdmin
 } from '../../../support/helpers';
 
 describe('Token Refresh UI Logic', () => {
   before(() => {
-    addFirstUser();
-    cy.findAdminSettings().click();
-    createNewUser(standardUser);
+    cy.addFirstUserAPI(Cypress.expose('username'), Cypress.expose('password')).then(init => {
+      expect(init.status, 'first user').to.equal(201);
+      cy.createUserAPI(standardUser, init.body.accessToken).its('status').should('equal', 201);
+    });
   });
 
   it('successfully refreshes the token and retries the failed request', () => {
     const newAccessToken = 'new-access-token-123';
     const newRefreshToken = 'new-refresh-token-456';
-    loginWithUser(standardUser.username, standardUser.password);
+    login(standardUser.username, standardUser.password);
     // 1. Intercept the initial data fetch to return 401
     // Using a counter to only return 401 once, so the retry can succeed
     let authDataCallCount = 0;
