@@ -236,10 +236,6 @@ export const widgets: string[] = [
 export const baseGroup = 'Grundgruppe';
 /** Admin management test group */
 export const adminGroup = 'Mathematik Primär Bereichsgruppe';
-/** Metadata test group – Bista I */
-export const metadataBistaIGroup = 'Bista I';
-/** Metadata test group – Bista III */
-export const metadataBistaIIIGroup = 'Bista III';
 /** Metadata test group – Mathematik Primär und Sek I */
 export const metadataMathGroup = 'Mathematik Primär und Sek I';
 /** Metadata test group – Deutsch Primär und Sek I */
@@ -257,14 +253,6 @@ export const secondaryWorkspace = 'Endgültiger Arbeitsbereich';
 export const adminMathWorkspace = 'Mathematik I';
 /** Admin test workspace – Deutsch I */
 export const adminGermanWorkspace = 'Deutsch I';
-/** Metadata workspace – Deutsch I */
-export const metadataGermanWorkspace = 'Deutsch I';
-/** Metadata workspace – Mathematik I */
-export const metadataMathWorkspace = 'Mathematik I';
-/** Metadata workspace – Mathematik Primar I */
-export const metadataMathPrimarWorkspace = 'Mathematik Primar I';
-/** Metadata workspace – Mathematik II */
-export const metadataMathIIWorkspace = 'Mathematik II';
 
 // =============================================================================
 // Users
