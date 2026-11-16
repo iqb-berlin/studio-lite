@@ -1,3 +1,6 @@
+@let selectionState = selection | selectionScopeState : dataSource : selectionScope() :
+  dataSource.filteredData : selection.selected;
+
 @if (!dataSource.filteredData.length) {
   <p>
     {{'resource-packages.no-packages' | translate}}
@@ -16,6 +19,42 @@
     [title]="'search-filter.filter-packages' | translate"
     (valueChange)="dataSource.filter = $event.trim().toLowerCase()">
   </studio-lite-search-filter>
+
+  <mat-slide-toggle class="selection-scope"
+                    data-cy="selection-scope-shown-only"
+                    [checked]="selectionScope() === 'shown'"
+                    (change)="selectionScope.set($event.checked ? 'shown' : 'all')">
+    {{'selection-scope.shown-only' | translate}}
+  </mat-slide-toggle>
+
+  <!-- Shown with nothing selected as well, and its hidden part always laid out but invisible while nothing
+       is hidden, so that neither the first tick nor filtering moves what is below. A flex row, so that the
+       comma follows the count without a space. -->
+  <p class="selection-count">
+    <span>
+      @if (!selection.selected.length) {
+        {{'resource-packages.no-package-selected' | translate}}
+      } @else if (selection.selected.length === 1) {
+        {{'resource-packages.package-selected' | translate}}
+      } @else {
+        {{'resource-packages.packages-selected' | translate : { count: selection.selected.length } }}
+      }
+    </span>
+    <span class="hidden-selection"
+          [class.hidden-part-placeholder]="!selectionState.hidden"
+          data-cy="selection-scope-hidden">{{
+      'selection-scope.hidden' | translate : { count: selectionState.hidden }
+    }}</span>
+    <span class="separator" [class.hidden-part-placeholder]="!selectionState.hidden">&middot;</span>
+    <button type="button"
+            class="deselect-hidden-button"
+            [class.hidden-part-placeholder]="!selectionState.hidden"
+            [disabled]="!selectionState.hidden"
+            data-cy="selection-scope-deselect-hidden"
+            (click)="deselectHidden()">
+      {{'selection-scope.deselect-hidden' | translate}}
+    </button>
+  </p>
 }
 
 <mat-table matSort
@@ -29,17 +68,22 @@
   <ng-container matColumnDef="selectCheckbox">
     <mat-header-cell *matHeaderCellDef class="fx-flex-row-fix-60">
       <mat-checkbox
-        [checked]="selectedResourcePackages.value.length === dataSource.filteredData.length &&
-                   selectedResourcePackages.value.length > 0"
-        [indeterminate]="selectedResourcePackages.value.length > 0 &&
-                         selectedResourcePackages.value.length < dataSource.filteredData.length"
-        (change)="toggleCheckBoxes($event)">
+        [disabled]="selectionState.empty"
+        data-cy="selection-scope-toggle-all"
+        [matTooltip]="(selectionScope() === 'shown'
+                       ? 'selection-scope.toggle-shown'
+                       : 'selection-scope.toggle-all') | translate"
+        matTooltipPosition="above"
+        [checked]="selectionState.checked"
+        [indeterminate]="selectionState.indeterminate"
+        (change)="masterToggle()">
       </mat-checkbox>
     </mat-header-cell>
     <mat-cell *matCellDef="let row" class="fx-flex-row-fix-60">
       <mat-checkbox
         [attr.data-cy]="'admin-packages-select-' + row.name"
-        (change)="updateSelectedResourcePackages()">
+        [checked]="selection | isSelected : row : selection.selected"
+        (change)="selection.toggle(row)">
       </mat-checkbox>
     </mat-cell>
   </ng-container>

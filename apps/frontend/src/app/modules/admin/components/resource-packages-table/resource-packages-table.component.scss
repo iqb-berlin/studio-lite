@@ -16,3 +16,37 @@
   color: #006064;
   background: #00606410;
 }
+
+.selection-scope {
+  margin: 4px 0;
+}
+
+.selection-count {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.hidden-selection {
+  color: #b71c1c;
+}
+
+.separator {
+  margin: 0 6px;
+}
+
+.deselect-hidden-button {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: #006064;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+// The hidden part is always laid out and only shown while selected entries are hidden: the count line
+// sits above the search field, and its wrapping must not move the field while typing.
+.hidden-part-placeholder {
+  visibility: hidden;
+}

@@ -1,15 +1,35 @@
 <div class="fx-column-start-stretch unit-list-wrapper">
+  @let selectionState = tableSelectionCheckboxes | selectionScopeState : objectsDatasource : selectionScope() :
+    objectsDatasource.filteredData : tableSelectionCheckboxes.selected;
   @if (multipleSelection) {
     <div class="selected-units-hint">
-      @if (selectionCount === 0) {
-        <p>{{'workspace.select-unit' | translate}}</p>
-      }
-      @if (selectionCount === 1) {
-        <p>{{'workspace.unit-selected' | translate}}</p>
-      }
-      @if (selectionCount > 1) {
-        <p>{{selectionCount}} {{'workspace.units-selected' | translate}}</p>
-      }
+      <!-- A flex row, so that the comma follows the count without a space. The hidden part is always
+           there and invisible while nothing is hidden, so the line does not change its height. -->
+      <p class="selection-count">
+        <span>
+          @if (selectionCount === 0) {
+            {{'workspace.select-unit' | translate}}
+          } @else if (selectionCount === 1) {
+            {{'workspace.unit-selected' | translate}}
+          } @else {
+            {{selectionCount}} {{'workspace.units-selected' | translate}}
+          }
+        </span>
+        <span class="hidden-selection"
+              [class.hidden-part-placeholder]="!selectionState.hidden"
+              data-cy="selection-scope-hidden">{{
+          'selection-scope.hidden' | translate : { count: selectionState.hidden }
+        }}</span>
+        <span class="separator" [class.hidden-part-placeholder]="!selectionState.hidden">&middot;</span>
+        <button type="button"
+                class="deselect-hidden-button"
+                [class.hidden-part-placeholder]="!selectionState.hidden"
+                [disabled]="locked || !selectionState.hidden"
+                data-cy="selection-scope-deselect-hidden"
+                (click)="deselectHidden()">
+          {{'selection-scope.deselect-hidden' | translate}}
+        </button>
+      </p>
     </div>
   }
 
@@ -20,6 +40,15 @@
                               data-cy="workspace-select-unit-list-filter-units">
   </studio-lite-search-filter>
 
+  @if (multipleSelection) {
+    <mat-slide-toggle class="selection-scope"
+                      data-cy="selection-scope-shown-only"
+                      [checked]="selectionScope() === 'shown'"
+                      (change)="selectionScope.set($event.checked ? 'shown' : 'all')">
+      {{'selection-scope.shown-only' | translate}}
+    </mat-slide-toggle>
+  }
+
   <mat-table class="unit-list"
              matSortDisableClear
              matSortActive="key"
@@ -28,15 +57,22 @@
              [dataSource]="objectsDatasource">
     <ng-container matColumnDef="selectCheckbox">
       <mat-header-cell *matHeaderCellDef  class="fx-flex-row-fix-70">
-        <mat-checkbox [disabled]="locked"
-                      (change)="$event ? masterToggle() : null"
-                      [checked]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) &&  (tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
-                      [indeterminate]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) && !(tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)">
-        </mat-checkbox>
+        @if (multipleSelection) {
+          <mat-checkbox [disabled]="locked || selectionState.empty"
+                        data-cy="selection-scope-toggle-all"
+                        [matTooltip]="(selectionScope() === 'shown'
+                                       ? 'selection-scope.toggle-shown'
+                                       : 'selection-scope.toggle-all') | translate"
+                        matTooltipPosition="above"
+                        (change)="masterToggle()"
+                        [checked]="selectionState.checked"
+                        [indeterminate]="selectionState.indeterminate">
+          </mat-checkbox>
+        }
       </mat-header-cell>
       <mat-cell *matCellDef="let row" class="fx-flex-row-fix-70">
         <mat-checkbox [disabled]="locked || (disabledUnits | include : row.id)"
-                      [checked]="tableSelectionCheckboxes | isSelected: row : tableSelectionCheckboxes.selected.length"
+                      [checked]="tableSelectionCheckboxes | isSelected: row : tableSelectionCheckboxes.selected"
                       [attr.data-cy]="'workspace-select-unit-list-checkbox-' + row.key"
                       (change)="$event ? tableSelectionCheckboxes.toggle(row) : null"
                       (click)="$event.stopPropagation()">

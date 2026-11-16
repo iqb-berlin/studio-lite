@@ -2,16 +2,23 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { SelectionModel } from '@angular/cdk/collections';
 
 /**
- * Whether a row is selected. Like {@link HasSelectionValuePipe} it takes the selection count as
- * well, which is what makes the pure pipe re-run when the model is mutated in place.
+ * Whether a row is selected. Beside the model it takes `selection.selected`, which the model
+ * builds anew after every change -- that is what makes the pure pipe run again, since the model is
+ * mutated in place. The count of selected rows did not do: a selection replaced by another of the
+ * same size left the old rows ticked (#433).
  */
 @Pipe({
   name: 'isSelected',
   standalone: true
 })
 export class IsSelectedPipe implements PipeTransform {
-  // eslint-disable-next-line class-methods-use-this,@typescript-eslint/no-explicit-any
-  transform(selectionModel: SelectionModel<any>, element: any, selectionCount: number): boolean {
-    return !!selectionCount && selectionModel.isSelected(element);
+  // eslint-disable-next-line class-methods-use-this
+  transform<T>(
+    selectionModel: SelectionModel<T>,
+    element: T,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    selected: readonly T[]
+  ): boolean {
+    return selectionModel.isSelected(element);
   }
 }

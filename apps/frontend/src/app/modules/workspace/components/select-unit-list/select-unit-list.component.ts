@@ -1,5 +1,5 @@
 import {
-  Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild
+  Component, EventEmitter, Input, OnChanges, OnDestroy, Output, signal, SimpleChanges, ViewChild
 } from '@angular/core';
 import {
 
@@ -11,12 +11,14 @@ import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { Subscription } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatTooltip } from '@angular/material/tooltip';
 
 import { HttpParams } from '@angular/common/http';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
-import { HasSelectionValuePipe } from '../../../../pipes/has-selection-value.pipe';
-import { IsAllSelectedPipe } from '../../../../pipes/is-all-selected.pipe';
 import { IsSelectedPipe } from '../../../../pipes/is-selected.pipe';
+import { SelectionScopeStatePipe } from '../../../../pipes/selection-scope-state.pipe';
+import { deselectHidden, SelectionScope, toggleAllInScope } from '../../../../utils/selection-scope.utils';
 import { IncludePipe } from '../../../../pipes/include.pipe';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { ScrollIntoViewDirective } from '../../directives/scroll-into-view.directive';
@@ -30,13 +32,20 @@ import { ScrollIntoViewDirective } from '../../directives/scroll-into-view.direc
   templateUrl: './select-unit-list.component.html',
   styleUrls: ['select-unit-list.component.scss'],
 
-  imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, IncludePipe, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, TranslateModule, ScrollIntoViewDirective]
+  imports: [
+    SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef,
+    MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatSlideToggle, MatTooltip,
+    IncludePipe, IsSelectedPipe, SelectionScopeStatePipe, TranslateModule, ScrollIntoViewDirective
+  ]
 })
 export class SelectUnitListComponent implements OnChanges, OnDestroy {
   private static readonly allColumns = ['selectCheckbox', 'key', 'name', 'groupName'];
   objectsDatasource = new MatTableDataSource<UnitInListDto>();
   displayedColumns = SelectUnitListComponent.allColumns;
   tableSelectionCheckboxes = new SelectionModel <UnitInListDto>(true, []);
+  // What the header checkbox acts on (#433). It keeps its setting while the list is shown, also when
+  // the group management or the review admin swaps the selection.
+  readonly selectionScope = signal<SelectionScope>('all');
   disabledUnits: number[] = [];
   selectionChangedSubscription: Subscription | null = null;
 
@@ -150,16 +159,12 @@ export class SelectUnitListComponent implements OnChanges, OnDestroy {
       .subscribe(() => this.selectionChanged.emit(this.selectedUnitIds));
   }
 
-  private isAllSelected(): boolean {
-    const numSelected = this.tableSelectionCheckboxes.selected.length;
-    const numRows = this.objectsDatasource ? this.objectsDatasource.data.length : 0;
-    return numSelected === numRows;
+  masterToggle(): void {
+    toggleAllInScope(this.tableSelectionCheckboxes, this.objectsDatasource, this.selectionScope());
   }
 
-  masterToggle(): void {
-    this.isAllSelected() || !this.objectsDatasource ?
-      this.tableSelectionCheckboxes.clear() :
-      this.objectsDatasource.data.forEach(row => this.tableSelectionCheckboxes.select(row));
+  deselectHidden(): void {
+    deselectHidden(this.tableSelectionCheckboxes, this.objectsDatasource);
   }
 
   ngOnDestroy(): void {

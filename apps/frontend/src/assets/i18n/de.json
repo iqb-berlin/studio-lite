@@ -926,6 +926,13 @@
     "delete-filter": "Suchbegriff zurücksetzen",
     "enter-filter": "Suchbegriff"
   },
+  "selection-scope": {
+    "shown-only": "Häkchen in der Kopfzeile wirkt nur auf angezeigte Einträge",
+    "toggle-shown": "Alle angezeigten Einträge aus- oder abwählen",
+    "toggle-all": "Alle Einträge aus- oder abwählen, auch ausgeblendete",
+    "hidden": ", davon {{count}} ausgeblendet",
+    "deselect-hidden": "ausgeblendete abwählen"
+  },
   "comment-editor": {
     "write": "Verfassen",
     "edit": "Bearbeiten",
@@ -1177,7 +1184,10 @@
   "resource-packages": {
     "name": "Name",
     "createdAt": "Hochgeladen am",
-    "no-packages": "Keine Pakete gespeichert."
+    "no-packages": "Keine Pakete gespeichert.",
+    "no-package-selected": "Kein Paket ausgewählt",
+    "package-selected": "Ein Paket ausgewählt",
+    "packages-selected": "{{count}} Pakete ausgewählt"
   },
   "app-http-error": {
     "0": "Allgemeiner Fehler (Server erreichbar?)",
