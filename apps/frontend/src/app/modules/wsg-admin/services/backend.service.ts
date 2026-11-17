@@ -38,14 +38,14 @@ export class BackendService {
   }
 
   getAllUnitsForGroup(groupId: number): Observable<UnitInViewDto[] | boolean> {
-    return this.http.get<UnitInViewDto[]>(`${this.serverUrl}admin/workspace-groups/${groupId}/units`)
+    return this.http.get<UnitInViewDto[]>(`${this.serverUrl}workspace-groups/${groupId}/units`)
       .pipe(
         catchError(() => of(false))
       );
   }
 
   getAllUnitItemsForGroup(groupId: number): Observable<UnitItemInViewDto[] | boolean> {
-    return this.http.get<UnitItemInViewDto[]>(`${this.serverUrl}admin/workspace-groups/${groupId}/unit-items`)
+    return this.http.get<UnitItemInViewDto[]>(`${this.serverUrl}workspace-groups/${groupId}/unit-items`)
       .pipe(
         catchError(() => of(false))
       );
@@ -96,7 +96,7 @@ export class BackendService {
 
   getWorkspaces(workspaceGroupId: number): Observable<UsersWorkspaceInListDto[]> {
     return this.http
-      .get<UsersWorkspaceInListDto[]>(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}/workspaces`)
+      .get<UsersWorkspaceInListDto[]>(`${this.serverUrl}workspace-groups/${workspaceGroupId}/workspaces`)
       .pipe(
         catchError(() => of([]))
       );

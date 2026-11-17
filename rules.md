@@ -184,7 +184,7 @@
 - **Examples**:
   - `UnitDownloadClass` and `DownloadWorkspacesClass` build what is downloaded; the controllers hand them the data and return the result.
   - `UnitImportData` and `UnitImportJsonData` read the import formats for `WorkspaceImportService`.
-  - `findOrphanedSessionIds` in `utils/` is asked by both `admin-user-controller.ts` (which displays them) and `SessionCleanupService` (which deletes them), so the two cannot drift into asking it in different words.
+  - `findOrphanedSessionIds` in `utils/` is asked by both `AuthService` (which deletes them for one user when an administrator asks) and `SessionCleanupService` (which deletes them all every hour), so the two cannot drift into asking it in different words.
 - **Rationale**: The services here run to a thousand lines and more, and what can be named on its own is what leaves without a fight. Once out, it is testable without the service's dependencies — and a second caller can have it.
 
 ## Workflow: Pull Requests and Tickets

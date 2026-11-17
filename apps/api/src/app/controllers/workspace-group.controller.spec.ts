@@ -11,6 +11,9 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 import { WorkspaceGroupAccessGuard } from '../guards/workspace-group-access.guard';
 import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
+import { UnitItemService } from '../services/unit-item.service';
+import { UsersService } from '../services/users.service';
+import { IsAdminGuard } from '../guards/is-admin.guard';
 
 describe('WorkspaceGroupController', () => {
   let controller: WorkspaceGroupController;
@@ -24,13 +27,17 @@ describe('WorkspaceGroupController', () => {
       providers: [
         { provide: WorkspaceGroupService, useValue: createMock<WorkspaceGroupService>() },
         { provide: WorkspaceService, useValue: createMock<WorkspaceService>() },
-        { provide: UnitService, useValue: createMock<UnitService>() }
+        { provide: UnitService, useValue: createMock<UnitService>() },
+        { provide: UnitItemService, useValue: createMock<UnitItemService>() },
+        { provide: UsersService, useValue: createMock<UsersService>() }
       ]
     })
       .overrideGuard(JwtAuthGuard).useValue({ canActivate: () => true })
       .overrideGuard(IsWorkspaceGroupAdminGuard)
       .useValue({ canActivate: () => true })
       .overrideGuard(WorkspaceGroupAccessGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(IsAdminGuard)
       .useValue({ canActivate: () => true })
       .compile();
 
@@ -41,9 +48,18 @@ describe('WorkspaceGroupController', () => {
   });
 
   // The guards are the authorisation of each method; no other unit test sees them (#1953).
-  it.each(['patch', 'createWorkspace'] as const)('should let only admins of the group reach %s', method => {
+  it.each(['patch', 'createWorkspace', 'findWorkspaces', 'findUnits', 'findUnitItems'] as const)(
+    'should let only admins of the group reach %s',
+    method => {
+      expect(Reflect.getMetadata('__guards__', WorkspaceGroupController.prototype[method]))
+        .toEqual([JwtAuthGuard, IsWorkspaceGroupAdminGuard]);
+    }
+  );
+
+  // Who administers a group is an administrator's to say, not the group admin's.
+  it.each(['findAdmins', 'patchAdmins'] as const)('should let only administrators reach %s', method => {
     expect(Reflect.getMetadata('__guards__', WorkspaceGroupController.prototype[method]))
-      .toEqual([JwtAuthGuard, IsWorkspaceGroupAdminGuard]);
+      .toEqual([JwtAuthGuard, IsAdminGuard]);
   });
 
   // The group is the one in the path, which the guard has checked; it used to be read from the body,

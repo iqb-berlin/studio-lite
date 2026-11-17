@@ -11,7 +11,7 @@ import {
 } from '../../support/util-api';
 
 describe('Admin API tests', () => {
-  describe('6. POST api/admin/users: should create a new user', () => {
+  describe('6. POST api/users: should create a new user', () => {
     it('201 positive test: should allow an administrator to create a new user', () => {
       cy.createUserAPI(userGroupAdmin, Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(res => {
@@ -78,7 +78,7 @@ describe('Admin API tests', () => {
     });
   });
 
-  describe('9. PATCH /api/admin/users/{id}', () => {
+  describe('9. PATCH /api/users/{id}', () => {
     it('403 negative test: should prevent a non-administrator user from granting ' +
       'themselves administrator rights', () => {
       cy.updateUserAPI(Cypress.expose(`id_${userGroupAdmin.username}`),
@@ -162,7 +162,7 @@ describe('Admin API tests', () => {
     });
   });
 
-  describe('10. POST /api/admin/workspace-groups', () => {
+  describe('10. POST /api/workspace-groups', () => {
     it('201 positive test: should allow an administrator to create a new workspace group', () => {
       cy.createGroupAPI(groupVera, Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
@@ -212,7 +212,7 @@ describe('Admin API tests', () => {
     });
   });
 
-  describe('12. GET /api/admin/workspace-groups', () => {
+  describe('12. GET /api/workspace-groups', () => {
     it('200 positive test: should allow an administrator to list all workspace groups', () => {
       cy.createGroupAPI(group2, Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
@@ -263,7 +263,7 @@ describe('Admin API tests', () => {
     });
   });
 
-  describe('14. PATCH /api/admin/workspace-groups/{workspace_group_id}/admins', () => {
+  describe('14. PATCH /api/workspace-groups/{workspace_group_id}/admins', () => {
     it('200 positive test: should allow setting the administrator list for a workspace group', () => {
       cy.setAdminsOfGroupAPI([Cypress.expose(`id_${Cypress.expose('username')}`),
         Cypress.expose(`id_${userGroupAdmin.username}`)],
@@ -294,7 +294,7 @@ describe('Admin API tests', () => {
     });
   });
 
-  describe('15. GET /api/admin/workspace-groups/{workspace_group_id}/admins', () => {
+  describe('15. GET /api/workspace-groups/{workspace_group_id}/admins', () => {
     it('200 positive test: should retrieve the list of administrators for a workspace group', () => {
       cy.getAdminOfGroupAPI(Cypress.expose(groupVera.id),
         Cypress.expose(`token_${Cypress.expose('username')}`))

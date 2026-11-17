@@ -51,7 +51,7 @@ export function createNewUser(newUser: UserData): void {
   editInput('admin-edit-user-firstname', newUser.firstName);
   editInput('admin-edit-user-email', newUser.email);
   editInput('admin-edit-user-password', newUser.password);
-  cy.clickDataCyWithResponseCheck('[data-cy="admin-edit-user-button"]', [201], '/api/admin/users', 'POST', 'addUser');
+  cy.clickDataCyWithResponseCheck('[data-cy="admin-edit-user-button"]', [201], '/api/users', 'POST', 'addUser');
 }
 
 let deleteUserCalls = 0;
@@ -74,7 +74,7 @@ export function deleteUser(user: string): void {
     // before its own DELETE was sent (#1754)
     deleteUserCalls += 1;
     const alias = `deleteUserReq${deleteUserCalls}`;
-    cy.intercept('DELETE', '/api/admin/users*').as(alias);
+    cy.intercept('DELETE', '/api/users*').as(alias);
     cy.clickButton(json.delete);
     waitForSuccess(`@${alias}`);
   });
@@ -93,7 +93,7 @@ export function createGroup(group: string): void {
   cy.get('mat-icon').contains('add').click();
   cy.translate(Cypress.expose('locale')).then(json => {
     cy.get(`input[placeholder="${json.admin['group-name']}"]`).type(group);
-    cy.clickButtonWithResponseCheck(json.create, [201], '/api/admin/workspace-groups', 'POST', 'createWsGroup');
+    cy.clickButtonWithResponseCheck(json.create, [201], '/api/workspace-groups', 'POST', 'createWsGroup');
   });
 }
 
@@ -114,7 +114,7 @@ export function deleteGroup(group: string): void {
     cy.clickDialogButtonWithResponseCheck(
       json.delete,
       [200],
-      '/api/admin/workspace-groups*',
+      '/api/workspace-groups*',
       'DELETE',
       'deleteGroup'
     );
@@ -171,7 +171,7 @@ export function makeAdminOfGroup(group: string, admins: string[]): void {
       .find('label')
       .click();
   });
-  cy.intercept('PATCH', '/api/admin/workspace-groups/*/admins').as('setGroupAdmins');
+  cy.intercept('PATCH', '/api/workspace-groups/*/admins').as('setGroupAdmins');
   cy.get('[data-cy="admin-workspace-groups-save-button"]')
     .should('not.be.disabled')
     .click();

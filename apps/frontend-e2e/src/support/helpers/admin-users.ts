@@ -57,7 +57,7 @@ export function clearUserFilter(): void {
 }
 
 /**
- * Save a user edit form and wait for the PATCH /api/admin/users/* response.
+ * Save a user edit form and wait for the PATCH /api/users/* response.
  * @param alias - cy.intercept alias (must be unique per test).
  * @example
  * saveUserEdit('updateEmail');
@@ -66,7 +66,7 @@ export function saveUserEdit(alias: string): void {
   cy.clickDataCyWithResponseCheck(
     '[data-cy="admin-edit-user-button"]',
     [200],
-    '/api/admin/users/*',
+    '/api/users/*',
     'PATCH',
     alias
   );

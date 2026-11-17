@@ -160,7 +160,7 @@ describe('Admin User Management', () => {
 
       clearFormControl('email');
       cy.get('[data-cy="admin-edit-user-email"]').type(' trimmed@example.com ', { force: true });
-      cy.intercept('PATCH', '/api/admin/users/*').as('saveTrimmed');
+      cy.intercept('PATCH', '/api/users/*').as('saveTrimmed');
       cy.get('[data-cy="admin-edit-user-button"]').click();
       cy.wait('@saveTrimmed').then(({ request, response }) => {
         expect(response?.statusCode).to.equal(200);
@@ -330,7 +330,7 @@ describe('Admin User Management', () => {
       cy.visit('/');
       cy.findAdminSettings().click();
       clickIndexTabAdmin('workspace-groups');
-      holdBack('/api/admin/workspace-groups/*/admins', 'groupAdmins');
+      holdBack('/api/workspace-groups/*/admins', 'groupAdmins');
       cy.contains('mat-row', group).click();
       cy.contains('mat-checkbox', `(${Cypress.expose('username')})`)
         .find('input[type="checkbox"]')
@@ -343,7 +343,7 @@ describe('Admin User Management', () => {
 
     it('locks the checks while the groups of the selected user load (#2056)', () => {
       goToAdminUsers();
-      holdBack('/api/admin/users/*/workspace-groups', 'userGroups');
+      holdBack('/api/users/*/administered-groups', 'userGroups');
       selectUserRow(Cypress.expose('username'));
       cy.contains('mat-checkbox', group)
         .find('input[type="checkbox"]')

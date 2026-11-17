@@ -7,7 +7,7 @@ describe('AdminUserNotFoundException', () => {
     expect(exception.getStatus()).toBe(404);
     expect(exception.getResponse()).toEqual({
       id: 1,
-      controller: 'admin/users',
+      controller: 'users',
       method: 'GET',
       description: 'Admin user with id 1 not found'
     });

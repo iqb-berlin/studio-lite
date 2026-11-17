@@ -120,13 +120,13 @@ export class BackendService {
 
   addUser(newUser: CreateUserDto): Observable<boolean> {
     return this.http
-      .post(`${this.serverUrl}admin/users`, withTrimmedEmail(newUser))
+      .post(`${this.serverUrl}users`, withTrimmedEmail(newUser))
       .pipe(succeeded());
   }
 
   changeUserData(id: number, newData: UserFullDto): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/users/${id}`, withTrimmedEmail(newData))
+      .patch(`${this.serverUrl}users/${id}`, withTrimmedEmail(newData))
       .pipe(succeeded());
   }
 
@@ -134,19 +134,19 @@ export class BackendService {
     let queryParams = new HttpParams();
     users.forEach(id => { queryParams = queryParams.append('id', id); });
     return this.http
-      .delete(`${this.serverUrl}admin/users`, { params: queryParams })
+      .delete(`${this.serverUrl}users`, { params: queryParams })
       .pipe(succeeded());
   }
 
   deleteUserSession(userId: number, sessionId: string): Observable<boolean> {
     return this.http
-      .delete(`${this.serverUrl}admin/users/${userId}/sessions/${sessionId}`)
+      .delete(`${this.serverUrl}users/${userId}/sessions/${sessionId}`)
       .pipe(succeeded());
   }
 
   deleteUserOrphanedSessions(userId: number): Observable<boolean> {
     return this.http
-      .delete(`${this.serverUrl}admin/users/${userId}/orphaned-sessions`)
+      .delete(`${this.serverUrl}users/${userId}/orphaned-sessions`)
       .pipe(succeeded());
   }
 
@@ -154,7 +154,7 @@ export class BackendService {
   // replace the stored groups (#2070).
   getWorkspaceGroupsByAdmin(userId: number): Observable<WorkspaceGroupInListDto[] | null> {
     return this.http
-      .get<WorkspaceGroupInListDto[]>(`${this.serverUrl}admin/users/${userId}/workspace-groups`)
+      .get<WorkspaceGroupInListDto[]>(`${this.serverUrl}users/${userId}/administered-groups`)
       .pipe(
         catchError(() => of(null))
       );
@@ -162,7 +162,7 @@ export class BackendService {
 
   setWorkspaceGroupsByAdmin(userId: number, accessTo: number[]): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/users/${userId}/workspace-groups`, { ids: accessTo })
+      .patch(`${this.serverUrl}users/${userId}/administered-groups`, { ids: accessTo })
       .pipe(succeeded());
   }
 
@@ -170,7 +170,7 @@ export class BackendService {
   // replace the stored admins (#2070).
   getWorkspaceGroupAdmins(workspaceGroupId: number): Observable<UserInListDto[] | null> {
     return this.http
-      .get<UserInListDto[]>(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}/admins`)
+      .get<UserInListDto[]>(`${this.serverUrl}workspace-groups/${workspaceGroupId}/admins`)
       .pipe(
         catchError(() => of(null))
       );
@@ -179,7 +179,7 @@ export class BackendService {
   setWorkspaceGroupAdmins(workspaceGroupId: number, accessTo: number[]): Observable<boolean> {
     return this.http
       .patch(
-        `${this.serverUrl}admin/workspace-groups/${workspaceGroupId}/admins`,
+        `${this.serverUrl}workspace-groups/${workspaceGroupId}/admins`,
         accessTo
       )
       .pipe(succeeded());
@@ -195,7 +195,7 @@ export class BackendService {
 
   getWorkspaceGroupList(): Observable<WorkspaceGroupInListDto[]> {
     return this.http
-      .get<WorkspaceGroupInListDto[]>(`${this.serverUrl}admin/workspace-groups`)
+      .get<WorkspaceGroupInListDto[]>(`${this.serverUrl}workspace-groups`)
       .pipe(
         catchError(() => of([]))
       );
@@ -203,7 +203,7 @@ export class BackendService {
 
   addWorkspaceGroup(workspaceGroupData: CreateWorkspaceGroupDto): Observable<boolean> {
     return this.http
-      .post<boolean>(`${this.serverUrl}admin/workspace-groups`, workspaceGroupData)
+      .post<boolean>(`${this.serverUrl}workspace-groups`, workspaceGroupData)
       .pipe(
         catchError(() => of(false))
       );
@@ -213,7 +213,7 @@ export class BackendService {
     let queryParams = new HttpParams();
     ids.forEach(id => { queryParams = queryParams.append('id', id); });
     return this.http
-      .delete(`${this.serverUrl}admin/workspace-groups`, {
+      .delete(`${this.serverUrl}workspace-groups`, {
         params: queryParams
       })
       .pipe(succeeded());
@@ -351,7 +351,7 @@ export class BackendService {
   getXlsWorkspaces(): Observable<Blob | null> {
     const queryParams = new HttpParams().set('download', 'true');
     return this.http.get(
-      `${this.serverUrl}admin/workspace-groups`,
+      `${this.serverUrl}workspace-groups`,
       {
         headers: {
           Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'

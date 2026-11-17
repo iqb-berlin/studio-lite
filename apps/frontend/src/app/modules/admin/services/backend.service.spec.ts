@@ -81,7 +81,7 @@ describe('Admin BackendService', () => {
         done();
       });
 
-      httpMock.expectOne(`${baseUrl}admin/workspace-groups/5/admins`)
+      httpMock.expectOne(`${baseUrl}workspace-groups/5/admins`)
         .flush('error', { status: 500, statusText: 'Server Error' });
     });
   });
@@ -95,7 +95,7 @@ describe('Admin BackendService', () => {
         done();
       });
 
-      httpMock.expectOne(`${baseUrl}admin/users/7/workspace-groups`)
+      httpMock.expectOne(`${baseUrl}users/7/administered-groups`)
         .flush('error', { status: 500, statusText: 'Server Error' });
     });
   });
@@ -153,7 +153,7 @@ describe('Admin BackendService', () => {
         name: 'hugo', password: 'secret', isAdmin: false, description: '', email: ' hugo@example.org '
       }).subscribe();
 
-      const req = httpMock.expectOne(`${baseUrl}admin/users`);
+      const req = httpMock.expectOne(`${baseUrl}users`);
       expect(req.request.body.email).toBe('hugo@example.org');
       req.flush(5);
     });
@@ -161,7 +161,7 @@ describe('Admin BackendService', () => {
     it('should send changed user data with the e-mail address trimmed (#2147)', () => {
       service.changeUserData(4, { id: 4, email: ' hugo@example.org ' }).subscribe();
 
-      const req = httpMock.expectOne(`${baseUrl}admin/users/4`);
+      const req = httpMock.expectOne(`${baseUrl}users/4`);
       expect(req.request.body).toEqual({ id: 4, email: 'hugo@example.org' });
       req.flush(null);
     });
@@ -174,7 +174,7 @@ describe('Admin BackendService', () => {
         done();
       });
 
-      const req = httpMock.expectOne(r => r.url === `${baseUrl}admin/users`);
+      const req = httpMock.expectOne(r => r.url === `${baseUrl}users`);
       expect(req.request.method).toBe('DELETE');
       expect(req.request.params.getAll('id')).toEqual(['1', '2']);
       req.flush(false);
@@ -202,7 +202,7 @@ describe('Admin BackendService', () => {
         done();
       });
 
-      const req = httpMock.expectOne(r => r.url === `${baseUrl}admin/workspace-groups`);
+      const req = httpMock.expectOne(r => r.url === `${baseUrl}workspace-groups`);
       expect(req.request.method).toBe('DELETE');
       expect(req.request.params.getAll('id')).toEqual(['5', '6']);
       req.flush(false);

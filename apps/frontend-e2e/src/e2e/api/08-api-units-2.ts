@@ -57,7 +57,7 @@ describe('Unit API tests part II', () => {
     });
   });
 
-  describe('76. GET /api/admin/workspace-groups download', () => {
+  describe('76. GET /api/workspace-groups download', () => {
     it('200 positive test: should allow an administrator to retrieve the workspace report', () => {
       cy.getReportAPI(
         Cypress.expose(`token_${Cypress.expose('username')}`)
@@ -1260,7 +1260,7 @@ describe('Unit API tests part II', () => {
     });
   });
 
-  describe('85. GET /api/admin/users/{id}/workspace-groups', () => {
+  describe('85. GET /api/users/{id}/administered-groups', () => {
     it(
       '200 positive test: should successfully retrieve the list of workspace groups' +
         ' associated with an administrator ID',
@@ -1310,7 +1310,7 @@ describe('Unit API tests part II', () => {
     });
   });
 
-  describe('86. PATCH /api/admin/users/{id}/workspace-groups', () => {
+  describe('86. PATCH /api/users/{id}/administered-groups', () => {
     it(
       '200 positive test: should allow an administrator to successfully update ' +
         "a user's assigned workspace groups",
