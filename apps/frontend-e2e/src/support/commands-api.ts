@@ -454,7 +454,7 @@ Cypress.Commands.add('addModuleAPI', (module:string, token: string, types = ['ed
       formData.append('file', new Blob([fileContent], { type: 'html' }), module);
       cy.request({
         method: 'POST',
-        url: `/api/admin/verona-modules?${types.map(type => `type=${type}`).join('&')}`,
+        url: `/api/verona-modules?${types.map(type => `type=${type}`).join('&')}`,
         headers: {
           'app-version': Cypress.expose('version'),
           'Content-Type': 'multipart/form-data',
@@ -2119,7 +2119,21 @@ Cypress.Commands.add('getAdminUnitsAPI', (token: string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: '/api/admin/units',
+    url: '/api/units',
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// All workspaces of the installation, as the admin view lists them
+Cypress.Commands.add('getAdminWorkspacesAPI', (token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: '/api/workspaces',
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -2133,7 +2147,7 @@ Cypress.Commands.add('getAdminUnitItemsAPI', (token: string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: '/api/admin/unit-items',
+    url: '/api/unit-items',
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -2209,7 +2223,7 @@ Cypress.Commands.add('deleteModulesAPI', (modules:string[], token:string) => {
   const qp = buildQueryParameters('key', modules);
   cy.request({
     method: 'DELETE',
-    url: `/api/admin/verona-modules${qp}`,
+    url: `/api/verona-modules${qp}`,
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -2255,7 +2269,7 @@ Cypress.Commands.add('getSettingConfigAPI', (token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: '/api/admin/settings/config',
+    url: '/api/settings/config',
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -2269,7 +2283,7 @@ Cypress.Commands.add('updateSettingConfigAPI', (token:string, hour:number) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
-    url: '/api/admin/settings/config',
+    url: '/api/settings/config',
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -2290,7 +2304,7 @@ Cypress.Commands.add('getSettingLogoAPI', (token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: '/api/admin/settings/app-logo',
+    url: '/api/settings/app-logo',
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -2304,7 +2318,7 @@ Cypress.Commands.add('updateSettingLogoAPI', (token:string, color: string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
-    url: '/api/admin/settings/app-logo',
+    url: '/api/settings/app-logo',
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -2324,7 +2338,7 @@ Cypress.Commands.add('getSettingUnitExportAPI', (token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: '/api/admin/settings/unit-export-config',
+    url: '/api/settings/unit-export-config',
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -2338,7 +2352,7 @@ Cypress.Commands.add('updateSettingUnitExportAPI', (token:string, unitExport: Un
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
-    url: '/api/admin/settings/unit-export-config',
+    url: '/api/settings/unit-export-config',
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -2357,7 +2371,7 @@ Cypress.Commands.add('getSettingMissingProfilesAPI', (token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: '/api/admin/settings/missings-profiles',
+    url: '/api/settings/missings-profiles',
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -2371,7 +2385,7 @@ Cypress.Commands.add('updateSettingMissingProfilesAPI', (token:string, profile:s
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
-    url: '/api/admin/settings/missings-profiles',
+    url: '/api/settings/missings-profiles',
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -2394,7 +2408,7 @@ Cypress.Commands.add('addPackageAPI', (resource:string, token:string) => {
       formData.append('resourcePackage', blob, resource);
       cy.request({
         method: 'POST',
-        url: '/api/admin/resource-packages',
+        url: '/api/resource-packages',
         headers: {
           'app-version': Cypress.expose('version'),
           'Content-Type': 'multipart/form-data',
@@ -2425,7 +2439,7 @@ Cypress.Commands.add('deletePackageAPI', (token:string, packageId:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'DELETE',
-    url: `/api/admin/resource-packages?id=${packageId}`,
+    url: `/api/resource-packages?id=${packageId}`,
     headers: {
       'app-version': Cypress.expose('version'),
       authorization

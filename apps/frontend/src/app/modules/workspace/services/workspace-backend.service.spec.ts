@@ -368,7 +368,7 @@ describe('WorkspaceBackendService', () => {
     'should ask for the rich note tags of workspace group %p with the parameter %p',
     (workspaceGroupId, param) => {
       service.getUnitRichNoteTags(workspaceGroupId).subscribe();
-      const request = httpMock.expectOne(req => req.url === `${serverUrl}admin/settings/unit-rich-note-tags`);
+      const request = httpMock.expectOne(req => req.url === `${serverUrl}settings/unit-rich-note-tags`);
       expect(request.request.params.get('workspaceGroupId')).toBe(param);
       request.flush([]);
     });

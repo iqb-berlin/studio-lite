@@ -7,9 +7,9 @@ describe('AdminVeronaModulesNotFoundException', () => {
     expect(exception.getStatus()).toBe(404);
     expect(exception.getResponse()).toEqual({
       id: 'module-id',
-      controller: 'admin/verona-modules',
+      controller: 'verona-modules',
       method: 'GET',
-      description: 'Admin verona modules with id module-id not found'
+      description: 'Verona module with key module-id not found'
     });
   });
 });

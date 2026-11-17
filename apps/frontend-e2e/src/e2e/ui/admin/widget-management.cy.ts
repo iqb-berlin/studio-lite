@@ -37,7 +37,7 @@ describe('Widget Management', () => {
     // Delete selected
     cy.get('[data-cy="delete-widgets-button"]').click();
     cy.translate(Cypress.expose('locale')).then(json => {
-      cy.clickButtonWithResponseCheck(json.delete, [200], '/api/admin/verona-modules*', 'DELETE', 'deleteModule');
+      cy.clickButtonWithResponseCheck(json.delete, [200], '/api/verona-modules*', 'DELETE', 'deleteModule');
     });
     // Verify it is gone: with it goes the last row, so it cannot be looked for among the rows
     cy.contains('mat-row', widgetToDelete).should('not.exist');

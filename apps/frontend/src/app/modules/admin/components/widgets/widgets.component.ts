@@ -33,7 +33,7 @@ import { UpperSnakeCaseToKebabCasePipe } from '../../pipes/upper-snake-case-to-k
 })
 export class WidgetsComponent extends ModulesDirective {
   protected readonly pageTitleKey = 'modules.widgets-title';
-  protected readonly uploadPath = 'admin/verona-modules?type=WIDGET';
+  protected readonly uploadPath = 'verona-modules?type=WIDGET';
 
   widgetGroups: { model: string; modules: { [key: string]: VeronaModuleClass } }[] = [];
 

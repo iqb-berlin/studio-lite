@@ -14,8 +14,7 @@ import { WorkspacesController } from './controllers/workspaces.controller';
 import { WorkspaceAccessController } from './controllers/workspace-access.controller';
 import { WorkspaceGroupsController } from './controllers/workspace-groups.controller';
 import { SettingController } from './controllers/setting.controller';
-import { AdminResourcePackageController } from './controllers/admin-resource-package.controller';
-import { AdminVeronaModuleController } from './controllers/admin-verona-module.controller';
+import { OutdatedFrontendController } from './controllers/outdated-frontend.controller';
 import { ReviewController } from './controllers/review.controller';
 import { MetadataController } from './controllers/metadata.controller';
 import { WorkspaceGroupController } from './controllers/workspace-group.controller';
@@ -87,7 +86,8 @@ import { ItemCommentService } from './services/item-comment.service';
 import UnitCommentUnitItem from './entities/unit-comment-unit-item.entity';
 import { ReviewUnitItemController } from './controllers/review-unit-item.controller';
 import { HttpExceptionFilter } from './exceptions/http-exception.filter';
-import { AdminController } from './controllers/admin.controller';
+import { UnitsController } from './controllers/units.controller';
+import { UnitItemsController } from './controllers/unit-items.controller';
 import { WriteOrGroupAdminAccessGuard } from './guards/write-or-group-admin-access.guard';
 import { ReadOrGroupAdminAccessGuard } from './guards/read-or-group-admin-access.guard';
 import { ManageOrGroupAdminAccessGuard } from './guards/manage-or-group-admin-access.guard';
@@ -207,11 +207,11 @@ const ENTITIES = [
     UsersController,
     WorkspaceGroupUserController,
     WorkspaceGroupsController,
-    AdminController,
+    UnitsController,
+    UnitItemsController,
     SettingController,
-    AdminResourcePackageController,
+    OutdatedFrontendController,
     ResourcePackageController,
-    AdminVeronaModuleController,
     VeronaModuleController,
     WorkspaceController,
     WorkspaceUnitController,

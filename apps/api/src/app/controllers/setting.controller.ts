@@ -15,18 +15,19 @@ import { IsAdminGuard } from '../guards/is-admin.guard';
 import { AppVersionGuard } from '../guards/app-version.guard';
 
 /**
- * `admin/settings` -- the installation-wide settings: the config, the logo, the export
- * configuration, the profile registry, the mail template, the missings profiles, the rich-note
- * tags. Each is a GET and a PATCH; the tags have a second GET, which answers the configuration
- * itself rather than the tags it resolves to.
+ * `settings` -- the installation-wide settings: the config, the logo, the export configuration, the
+ * profile registry, the mail template, the missings profiles, the rich-note tags. Each is a GET and
+ * a PATCH. The tags are read in two forms: `unit-rich-note-tags` answers the tags they resolve to
+ * for a group, `unit-rich-note-tags-config` the stored configuration itself, which is also what
+ * the PATCH writes.
  *
- * The prefix says admin and every PATCH is one, but the GETs are not all. `config` and `app-logo`
- * have to answer before anyone has logged in and therefore carry no token guard -- `config` is
- * guarded by the app version alone, which is what makes it the route that sends a stale frontend
- * to reload. The settings only an administrator ever reads, the mail template and the tag
- * configuration, are guarded on the way in as well.
+ * Every PATCH is an administrator's, the GETs are not all. `config` and `app-logo` have to answer
+ * before anyone has logged in and therefore carry no token guard -- `config` is guarded by the app
+ * version alone, which is what makes it the route that sends a stale frontend to reload. The
+ * settings only an administrator ever reads, the mail template and the tag configuration, are
+ * guarded on the way in as well.
  */
-@Controller('admin/settings')
+@Controller('settings')
 export class SettingController {
   constructor(
     private settingService: SettingService,
@@ -42,7 +43,7 @@ export class SettingController {
     allowEmptyValue: false
   })
   @ApiOkResponse({ description: 'Config settings retrieved successfully.' }) // TODO Exception
-  @ApiTags('admin settings')
+  @ApiTags('settings')
   async findConfig(): Promise<ConfigDto> {
     return this.settingService.findConfig();
   }
@@ -52,14 +53,14 @@ export class SettingController {
   @ApiOkResponse({ description: 'Config settings updated successfully.' }) // TODO Exception?
   @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiBearerAuth()
-  @ApiTags('admin settings')
+  @ApiTags('settings')
   async patchConfig(@Body() settingData: ConfigDto) {
     return this.settingService.patchConfig(settingData);
   }
 
   @Get('app-logo')
   @ApiOkResponse({ description: 'App logo retrieved successfully.' }) // TODO Exception
-  @ApiTags('admin settings')
+  @ApiTags('settings')
   async findAppLogo(): Promise<AppLogoDto> {
     return this.settingService.findAppLogo();
   }
@@ -69,7 +70,7 @@ export class SettingController {
   @ApiOkResponse({ description: 'App logo updated successfully.' }) // TODO Exception?
   @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiBearerAuth()
-  @ApiTags('admin settings')
+  @ApiTags('settings')
   async patchAppLogo(@Body() newLogo: AppLogoDto) {
     return this.settingService.patchAppLogo(newLogo);
   }
@@ -77,7 +78,7 @@ export class SettingController {
   @Get('unit-export-config')
   @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ description: 'Unit export config retrieved successfully.' }) // TODO Exception
-  @ApiTags('admin settings')
+  @ApiTags('settings')
   async findUnitExportConfig(): Promise<UnitExportConfigDto> {
     return this.settingService.findUnitExportConfig();
   }
@@ -87,7 +88,7 @@ export class SettingController {
   @ApiOkResponse({ description: 'Unit export config updated successfully.' })
   @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiBearerAuth()
-  @ApiTags('admin settings')
+  @ApiTags('settings')
   async patchUnitExportConfig(@Body() newUnitExportConfig: UnitExportConfigDto) {
     return this.settingService.patchUnitExportConfig(newUnitExportConfig);
   }
@@ -96,7 +97,7 @@ export class SettingController {
   @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ description: 'Profiles registry retrieved successfully.' })
   @ApiNotAcceptableResponse({ description: 'Profiles registry not acceptable.' })
-  @ApiTags('admin settings')
+  @ApiTags('settings')
   async findUnitProfilesRegistry(): Promise<ProfilesRegistryDto> {
     return this.settingService.findUnitProfilesRegistry();
   }
@@ -107,7 +108,7 @@ export class SettingController {
   @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiNotAcceptableResponse({ description: 'Profiles registry not acceptable.' })
   @ApiBearerAuth()
-  @ApiTags('admin settings')
+  @ApiTags('settings')
   async patchProfilesRegistry(@Body() newProfilesRegistry: ProfilesRegistryDto) {
     return this.settingService.patchProfilesRegistry(newProfilesRegistry);
   }
@@ -116,7 +117,7 @@ export class SettingController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'Email template retrieved successfully.' })
   @ApiForbiddenResponse({ description: 'No admin privileges.' })
-  @ApiTags('admin settings')
+  @ApiTags('settings')
   async findEmailTemplate(): Promise<EmailTemplateDto> {
     return this.settingService.findEmailTemplate();
   }
@@ -126,7 +127,7 @@ export class SettingController {
   @ApiOkResponse({ description: 'Email template updated successfully.' })
   @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiBearerAuth()
-  @ApiTags('admin settings')
+  @ApiTags('settings')
   async patchEmailTemplate(@Body() newEmailTemplate: EmailTemplateDto) {
     return this.settingService.patchEmailTemplate(newEmailTemplate);
   }
@@ -135,7 +136,7 @@ export class SettingController {
   @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ description: 'Missings profiles config retrieved successfully.' }) // TODO Exception
   @ApiBearerAuth()
-  @ApiTags('admin settings')
+  @ApiTags('settings')
   async findMissingsProfiles(): Promise<MissingsProfilesDto[]> {
     return this.settingService.findMissingsProfiles();
   }
@@ -145,7 +146,7 @@ export class SettingController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Missings profiles config updated successfully.' })
   @ApiForbiddenResponse({ description: 'No admin privileges.' })
-  @ApiTags('admin settings')
+  @ApiTags('settings')
   async patchMissingsProfiles(@Body() newMissingsProfiles: MissingsProfilesDto) {
     return this.settingService.patchMissingsProfiles(newMissingsProfiles);
   }
@@ -154,7 +155,7 @@ export class SettingController {
   @UseGuards(JwtAuthGuard)
   @ApiQuery({ name: 'workspaceGroupId', type: Number, required: false })
   @ApiOkResponse({ description: 'Unit rich note tags retrieved successfully.' })
-  @ApiTags('admin settings')
+  @ApiTags('settings')
   async findUnitRichNoteTags(@Query('workspaceGroupId') workspaceGroupId?: number): Promise<UnitRichNoteTagDto[]> {
     return this.settingService.findUnitRichNoteTags(workspaceGroupId ? Number(workspaceGroupId) : undefined);
   }
@@ -164,17 +165,17 @@ export class SettingController {
   @ApiOkResponse({ description: 'Unit rich note tags config retrieved successfully.' })
   @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiBearerAuth()
-  @ApiTags('admin settings')
+  @ApiTags('settings')
   async findUnitRichNoteTagsConfig(): Promise<UnitRichNoteTagDto[] | string[]> {
     return this.settingService.findUnitRichNoteTagsConfig();
   }
 
-  @Patch('unit-rich-note-tags')
+  @Patch('unit-rich-note-tags-config')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'Unit rich note tags updated successfully.' })
   @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiBearerAuth()
-  @ApiTags('admin settings')
+  @ApiTags('settings')
   async patchUnitRichNoteTags(@Body() newTags: UnitRichNoteTagDto[] | string) {
     return this.settingService.patchUnitRichNoteTags(newTags);
   }

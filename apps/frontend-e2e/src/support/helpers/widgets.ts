@@ -7,7 +7,7 @@ export function addWidgets(files: string | string[]) {
 
   const filenames = Array.isArray(files) ? files : [files];
   filenames.forEach(filename => {
-    cy.intercept('POST', '**/api/admin/verona-modules?type=WIDGET').as('uploadWidget');
+    cy.intercept('POST', '**/api/verona-modules?type=WIDGET').as('uploadWidget');
     cy.loadModule(filename);
     cy.wait('@uploadWidget');
   });

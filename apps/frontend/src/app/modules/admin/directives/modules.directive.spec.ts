@@ -12,7 +12,7 @@ import { ModulesDirective } from './modules.directive';
 class TestModulesDirective extends ModulesDirective {
   loadModuleListSpy = jest.fn();
   protected readonly pageTitleKey = 'modules.title';
-  protected readonly uploadPath = 'admin/verona-modules?type=editor&type=player&type=schemer';
+  protected readonly uploadPath = 'verona-modules?type=editor&type=player&type=schemer';
 
   constructor(
     serverUrl: string,
@@ -90,7 +90,7 @@ describe('ModulesDirective', () => {
     const { directive } = createDirective();
 
     expect(directive.uploadUrl)
-      .toBe('https://server/admin/verona-modules?type=editor&type=player&type=schemer');
+      .toBe('https://server/verona-modules?type=editor&type=player&type=schemer');
   });
 
   it('sets token and loads module list on init', () => {

@@ -40,21 +40,21 @@ export class BackendService {
   ) {}
 
   getAllWorkspaces(): Observable<WorkspaceFullDto[] | boolean> {
-    return this.http.get<WorkspaceFullDto[]>(`${this.serverUrl}admin/workspaces`)
+    return this.http.get<WorkspaceFullDto[]>(`${this.serverUrl}workspaces`)
       .pipe(
         catchError(() => of(false))
       );
   }
 
   getAllUnits(): Observable<UnitInViewDto[] | boolean> {
-    return this.http.get<UnitInViewDto[]>(`${this.serverUrl}admin/units`)
+    return this.http.get<UnitInViewDto[]>(`${this.serverUrl}units`)
       .pipe(
         catchError(() => of(false))
       );
   }
 
   getAllUnitItems(): Observable<UnitItemInViewDto[] | boolean> {
-    return this.http.get<UnitItemInViewDto[]>(`${this.serverUrl}admin/unit-items`)
+    return this.http.get<UnitItemInViewDto[]>(`${this.serverUrl}unit-items`)
       .pipe(
         catchError(() => of(false))
       );
@@ -189,7 +189,7 @@ export class BackendService {
     let queryParams = new HttpParams();
     files.forEach(file => { queryParams = queryParams.append('key', file); });
     return this.http
-      .delete(`${this.serverUrl}admin/verona-modules`, { params: queryParams })
+      .delete(`${this.serverUrl}verona-modules`, { params: queryParams })
       .pipe(succeeded());
   }
 
@@ -232,7 +232,7 @@ export class BackendService {
   // page, this answers a failure with null: the form must not offer those defaults for saving (#1968).
   getAppConfig(): Observable<ConfigDto | null> {
     return this.http
-      .get<ConfigDto>(`${this.serverUrl}admin/settings/config`)
+      .get<ConfigDto>(`${this.serverUrl}settings/config`)
       .pipe(
         catchError(() => of(null))
       );
@@ -240,13 +240,13 @@ export class BackendService {
 
   setAppConfig(appConfig: ConfigDto): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/settings/config`, appConfig)
+      .patch(`${this.serverUrl}settings/config`, appConfig)
       .pipe(succeeded());
   }
 
   setAppLogo(appLogo: AppLogoDto): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/settings/app-logo`, appLogo)
+      .patch(`${this.serverUrl}settings/app-logo`, appLogo)
       .pipe(succeeded());
   }
 
@@ -254,7 +254,7 @@ export class BackendService {
     let queryParams = new HttpParams();
     ids.forEach(id => { queryParams = queryParams.append('id', id); });
     return this.http
-      .delete(`${this.serverUrl}admin/resource-packages`, {
+      .delete(`${this.serverUrl}resource-packages`, {
         params: queryParams
       })
       .pipe(succeeded());
@@ -262,13 +262,13 @@ export class BackendService {
 
   getProfilesRegistry(): Observable<ProfilesRegistryDto> {
     return this.http
-      .get<ProfilesRegistryDto>(`${this.serverUrl}admin/settings/profiles-registry`);
+      .get<ProfilesRegistryDto>(`${this.serverUrl}settings/profiles-registry`);
   }
 
   setProfilesRegistry(profilesRegistryDto: ProfilesRegistryDto): Observable<boolean> {
     return this.http
       .patch(
-        `${this.serverUrl}admin/settings/profiles-registry`,
+        `${this.serverUrl}settings/profiles-registry`,
         profilesRegistryDto
       )
       .pipe(succeeded());
@@ -276,13 +276,13 @@ export class BackendService {
 
   getUnitExportConfig(): Observable<UnitExportConfigDto> {
     return this.http
-      .get<UnitExportConfigDto>(`${this.serverUrl}admin/settings/unit-export-config`);
+      .get<UnitExportConfigDto>(`${this.serverUrl}settings/unit-export-config`);
   }
 
   setUnitExportConfig(unitExportConfig: UnitExportConfigDto): Observable<boolean> {
     return this.http
       .patch(
-        `${this.serverUrl}admin/settings/unit-export-config`,
+        `${this.serverUrl}settings/unit-export-config`,
         unitExportConfig
       )
       .pipe(succeeded());
@@ -291,7 +291,7 @@ export class BackendService {
   setMissingsProfiles(missingsProfiles: MissingsProfilesDto[]): Observable<boolean> {
     return this.http
       .patch(
-        `${this.serverUrl}admin/settings/missings-profiles`,
+        `${this.serverUrl}settings/missings-profiles`,
         missingsProfiles
       )
       .pipe(succeeded());
@@ -299,7 +299,7 @@ export class BackendService {
 
   getMissingsProfiles():Observable<MissingsProfilesDto[]> {
     return this.http
-      .get<MissingsProfilesDto[]>(`${this.serverUrl}admin/settings/missings-profiles`)
+      .get<MissingsProfilesDto[]>(`${this.serverUrl}settings/missings-profiles`)
       .pipe(
         // An empty list, not an empty array returned from catchError: that one emits nothing, and
         // the form never learns that the load is over (#1943).
@@ -309,7 +309,7 @@ export class BackendService {
 
   getUnitRichNoteTags(): Observable<UnitRichNoteTagDto[]> {
     return this.http
-      .get<UnitRichNoteTagDto[]>(`${this.serverUrl}admin/settings/unit-rich-note-tags`)
+      .get<UnitRichNoteTagDto[]>(`${this.serverUrl}settings/unit-rich-note-tags`)
       .pipe(
         catchError(() => of([]))
       );
@@ -319,7 +319,7 @@ export class BackendService {
   // for saving over the stored URLs (#1993).
   getUnitRichNoteTagsConfig(): Observable<UnitRichNoteTagDto[] | string[] | string | null> {
     return this.http
-      .get<UnitRichNoteTagDto[] | string[] | string>(`${this.serverUrl}admin/settings/unit-rich-note-tags-config`)
+      .get<UnitRichNoteTagDto[] | string[] | string>(`${this.serverUrl}settings/unit-rich-note-tags-config`)
       .pipe(
         catchError(() => of(null))
       );
@@ -327,7 +327,7 @@ export class BackendService {
 
   setUnitRichNoteTags(tags: UnitRichNoteTagDto[] | string[] | string): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/settings/unit-rich-note-tags`, tags)
+      .patch(`${this.serverUrl}settings/unit-rich-note-tags-config`, tags)
       .pipe(succeeded());
   }
 

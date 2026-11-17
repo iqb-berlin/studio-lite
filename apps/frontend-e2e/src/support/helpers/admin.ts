@@ -185,7 +185,7 @@ export function makeAdminOfGroup(group: string, admins: string[]): void {
  * form fields are populated before tests interact with them (#1619).
  */
 export function goToSettings(): void {
-  cy.intercept('GET', '/api/admin/settings/missings-profiles').as('getMissingsProfiles');
+  cy.intercept('GET', '/api/settings/missings-profiles').as('getMissingsProfiles');
   cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('settings');

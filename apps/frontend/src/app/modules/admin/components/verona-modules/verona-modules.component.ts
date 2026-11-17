@@ -33,7 +33,7 @@ import { ModuleSelectionChange } from '../../models/module-selection-change.inte
 })
 export class VeronaModulesComponent extends ModulesDirective {
   protected readonly pageTitleKey = 'modules.title';
-  protected readonly uploadPath = 'admin/verona-modules?type=EDITOR&type=PLAYER&type=SCHEMER';
+  protected readonly uploadPath = 'verona-modules?type=EDITOR&type=PLAYER&type=SCHEMER';
 
   constructor(@Inject('SERVER_URL') serverUrl: string,
                                     appService: AppService,

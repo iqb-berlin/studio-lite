@@ -141,7 +141,7 @@ export class BackendService {
 
   getConfig(): Observable<ConfigDto | null> {
     return this.http
-      .get<ConfigDto | null>(`${this.serverUrl}admin/settings/config`, {})
+      .get<ConfigDto | null>(`${this.serverUrl}settings/config`, {})
       .pipe(
         catchError(() => of(defaultAppConfig))
       );
@@ -151,7 +151,7 @@ export class BackendService {
   // not offer an empty logo for saving over one it could not load (#1969).
   getAppLogo(): Observable<AppLogoDto | null | false> {
     return this.http
-      .get<AppLogoDto | null>(`${this.serverUrl}admin/settings/app-logo`, {})
+      .get<AppLogoDto | null>(`${this.serverUrl}settings/app-logo`, {})
       .pipe(
         catchError(() => of(false as const))
       );
@@ -204,12 +204,12 @@ export class BackendService {
 
   getEmailTemplate(): Observable<EmailTemplateDto> {
     return this.http
-      .get<EmailTemplateDto>(`${this.serverUrl}admin/settings/email-template`);
+      .get<EmailTemplateDto>(`${this.serverUrl}settings/email-template`);
   }
 
   setEmailTemplate(emailTemplateDto: EmailTemplateDto): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/settings/email-template`, emailTemplateDto)
+      .patch(`${this.serverUrl}settings/email-template`, emailTemplateDto)
       .pipe(succeeded());
   }
 

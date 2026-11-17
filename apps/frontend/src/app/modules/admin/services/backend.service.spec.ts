@@ -53,7 +53,7 @@ describe('Admin BackendService', () => {
         done();
       });
 
-      httpMock.expectOne(`${baseUrl}admin/settings/missings-profiles`)
+      httpMock.expectOne(`${baseUrl}settings/missings-profiles`)
         .flush('error', { status: 500, statusText: 'Server Error' });
     });
   });
@@ -67,7 +67,7 @@ describe('Admin BackendService', () => {
         done();
       });
 
-      httpMock.expectOne(`${baseUrl}admin/settings/config`)
+      httpMock.expectOne(`${baseUrl}settings/config`)
         .flush('error', { status: 500, statusText: 'Server Error' });
     });
   });
@@ -109,7 +109,7 @@ describe('Admin BackendService', () => {
         done();
       });
 
-      httpMock.expectOne(`${baseUrl}admin/settings/unit-rich-note-tags-config`)
+      httpMock.expectOne(`${baseUrl}settings/unit-rich-note-tags-config`)
         .flush('error', { status: 500, statusText: 'Server Error' });
     });
   });
@@ -188,7 +188,7 @@ describe('Admin BackendService', () => {
         done();
       });
 
-      const req = httpMock.expectOne(r => r.url === `${baseUrl}admin/verona-modules`);
+      const req = httpMock.expectOne(r => r.url === `${baseUrl}verona-modules`);
       expect(req.request.method).toBe('DELETE');
       expect(req.request.params.getAll('key')).toEqual(['m1', 'm2']);
       req.flush(false);
@@ -216,7 +216,7 @@ describe('Admin BackendService', () => {
         done();
       });
 
-      const req = httpMock.expectOne(r => r.url === `${baseUrl}admin/resource-packages`);
+      const req = httpMock.expectOne(r => r.url === `${baseUrl}resource-packages`);
       expect(req.request.method).toBe('DELETE');
       expect(req.request.params.getAll('id')).toEqual(['10', '11']);
       req.flush(false);
