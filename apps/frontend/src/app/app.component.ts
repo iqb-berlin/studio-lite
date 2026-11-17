@@ -5,7 +5,7 @@ import {
   catchError, tap, of, forkJoin
 } from 'rxjs';
 import {
-  Router, RouterState, RouterLink, RouterOutlet, NavigationEnd
+  Router, RouterLink, RouterOutlet, NavigationEnd
 } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -23,6 +23,7 @@ import { UserMenuComponent } from './components/user-menu/user-menu.component';
 import { WrappedIconComponent } from './components/wrapped-icon/wrapped-icon.component';
 import { HeartbeatService } from './services/heartbeat.service';
 import { isNoAnswer } from './utils/no-answer.utils';
+import { LoginAgainDirective } from './directives/login-again.directive';
 
 /**
  * The shell around everything: the bar with the session's remaining time and the user menu, the
@@ -36,7 +37,11 @@ import { isNoAnswer } from './utils/no-answer.utils';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 
-  imports: [MatProgressSpinner, MatButton, MatTooltip, MatIcon, RouterLink, RouterOutlet, TranslateModule, DataLoadingIsNumberPipe, DataLoadingAsTextPipe, IsInArrayPipe, UserMenuComponent, WrappedIconComponent, AsyncPipe]
+  imports: [
+    MatProgressSpinner, MatButton, MatTooltip, MatIcon, RouterLink, RouterOutlet, TranslateModule,
+    DataLoadingIsNumberPipe, DataLoadingAsTextPipe, IsInArrayPipe, UserMenuComponent, WrappedIconComponent,
+    AsyncPipe, LoginAgainDirective
+  ]
 })
 
 export class AppComponent implements OnInit {
@@ -121,14 +126,5 @@ export class AppComponent implements OnInit {
         this.appService.processMessagePost(event);
       }, false);
     });
-  }
-
-  logout_from_error() {
-    const state: RouterState = this.router.routerState;
-    const { snapshot } = state;
-    const snapshotUrl = (snapshot.url === '/') ? '' : snapshot.url;
-    this.backendService.logout();
-    this.appService.clearErrorMessages();
-    this.router.navigate(['/'], { queryParams: { redirectTo: snapshotUrl } });
   }
 }

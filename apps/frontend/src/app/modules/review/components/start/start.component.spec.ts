@@ -13,6 +13,7 @@ import { environment } from '../../../../../environments/environment';
 import { StartComponent } from './start.component';
 import { ReviewService } from '../../services/review.service';
 import { AppService } from '../../../../services/app.service';
+import { BackendService } from '../../../../services/backend.service';
 
 describe('StartComponent', () => {
   let component: StartComponent;
@@ -20,6 +21,7 @@ describe('StartComponent', () => {
   let mockReviewService: jest.Mocked<ReviewService>;
   let mockAppService: jest.Mocked<AppService>;
   let mockTranslateService: jest.Mocked<TranslateService>;
+  let mockBackendService: jest.Mocked<BackendService>;
 
   beforeEach(async () => {
     mockReviewService = {
@@ -32,8 +34,11 @@ describe('StartComponent', () => {
     mockAppService = {
       appConfig: {
         hideTitlesOnPage: false
-      }
+      },
+      clearErrorMessages: jest.fn()
     } as unknown as jest.Mocked<AppService>;
+
+    mockBackendService = { logout: jest.fn() } as unknown as jest.Mocked<BackendService>;
 
     mockTranslateService = {
       instant: jest.fn().mockReturnValue('Home Page'),
@@ -56,6 +61,7 @@ describe('StartComponent', () => {
         provideRouter([]),
         { provide: ReviewService, useValue: mockReviewService },
         { provide: AppService, useValue: mockAppService },
+        { provide: BackendService, useValue: mockBackendService },
         { provide: TranslateService, useValue: mockTranslateService },
         { provide: 'SERVER_URL', useValue: environment.backendUrl }
       ]
@@ -101,11 +107,15 @@ describe('StartComponent', () => {
       Object.assign(mockReviewService, { bookletConfig: {}, reviewName: '', workspaceName: '' });
     });
 
-    it('should tell the user to use the review link', () => {
+    const logoutButton = (): HTMLButtonElement | null => fixture.nativeElement
+      .querySelector('[data-cy="review-access-denied-logout"]');
+
+    it('should tell the user to use the review link, and offer the logout for it (#2156)', () => {
       mockReviewService.accessDenied = true;
       fixture.detectChanges();
 
       expect(accessDeniedText()).not.toBeNull();
+      expect(logoutButton()).not.toBeNull();
     });
 
     it('should say nothing of it for a review that loaded', () => {
@@ -113,6 +123,16 @@ describe('StartComponent', () => {
       fixture.detectChanges();
 
       expect(accessDeniedText()).toBeNull();
+      expect(logoutButton()).toBeNull();
+    });
+
+    it('should log out from its button', () => {
+      mockReviewService.accessDenied = true;
+      fixture.detectChanges();
+
+      logoutButton()?.click();
+
+      expect(mockBackendService.logout).toHaveBeenCalled();
     });
   });
 });

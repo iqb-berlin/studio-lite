@@ -1,19 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatFabAnchor, MatFabButton } from '@angular/material/button';
+import { MatButton, MatFabAnchor, MatFabButton } from '@angular/material/button';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { take } from 'rxjs';
 import { ReviewService } from '../../services/review.service';
 import { AppService } from '../../../../services/app.service';
 import { BookletConfigShowComponent } from '../booklet-config-show/booklet-config-show.component';
+import { LoginAgainDirective } from '../../../../directives/login-again.directive';
 
 @Component({
   selector: 'studio-lite-start',
   templateUrl: './start.component.html',
   styleUrls: ['./start.component.scss'],
 
-  imports: [MatFabButton, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, BookletConfigShowComponent, MatFabAnchor, MatTooltip, TranslateModule]
+  imports: [MatFabButton, MatButton, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle,
+    BookletConfigShowComponent, MatFabAnchor, MatTooltip, TranslateModule, LoginAgainDirective]
 })
 
 export class StartComponent implements OnInit {
