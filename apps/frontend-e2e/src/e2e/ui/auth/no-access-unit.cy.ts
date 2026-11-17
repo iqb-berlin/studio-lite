@@ -15,6 +15,7 @@ describe('A unit link into a workspace without access', () => {
   let adminToken = '';
   let wsId = '';
   let unitId = '';
+  let reviewId = '';
 
   before(() => {
     addFirstUser();
@@ -33,6 +34,10 @@ describe('A unit link into a workspace without access', () => {
               expect(createdUnit.status).to.equal(201);
               unitId = String(createdUnit.body);
             });
+            cy.addReviewAPI(wsId, 'NoAccessReview', adminToken).then(createdReview => {
+              expect(createdReview.status).to.equal(201);
+              reviewId = String(createdReview.body);
+            });
           });
         });
       });
@@ -50,6 +55,8 @@ describe('A unit link into a workspace without access', () => {
     cy.translate(Cypress.expose('locale')).then(json => {
       cy.get('.error-container').should('contain', json['app-http-error']['403']);
     });
+    // logging in again with the same account would bring the same answer (#2156)
+    cy.get('[data-cy="error-login"]').should('not.exist');
     cy.get('[data-cy="goto-user-menu"]').should('exist');
     cy.window().then(win => {
       expect(win.localStorage.getItem('id_token')).not.to.equal(null);
@@ -72,6 +79,29 @@ describe('A unit link into a workspace without access', () => {
 
     cy.translate(Cypress.expose('locale')).then(json => {
       cy.get('.error-container').should('contain', json['app-http-error']['403']);
+    });
+  });
+
+  // The review page tells an account without access to log out and to open the review with its own
+  // name and password (#1818). Its button logs out and leads to the login, which returns to the review (#2156).
+  it('offers to log out on a review of that workspace, keeping the way back to it (#2156)', () => {
+    loginWithUser(standardUser.username, standardUser.password);
+    cy.intercept('GET', `/api/reviews/${reviewId}`).as('reviewRequest');
+    cy.visit(`/#/review/${reviewId}`);
+    cy.wait('@reviewRequest').its('response.statusCode').should('equal', 403);
+
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('.access-denied').should('contain', json.review['access-denied']);
+    });
+    cy.get('[data-cy="error-login"]').should('not.exist');
+    cy.get('[data-cy="review-access-denied-logout"]').click();
+
+    cy.location('hash')
+      .should('include', '#/home')
+      .and('include', `redirectTo=${encodeURIComponent(`/review/${reviewId}`)}`);
+    cy.get('[data-cy="home-password"]').should('be.visible');
+    cy.window().then(win => {
+      expect(win.localStorage.getItem('id_token')).to.equal(null);
     });
   });
 });

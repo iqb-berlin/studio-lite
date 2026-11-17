@@ -2,6 +2,14 @@
   <div class="start-data fx-column-start-stretch">
     @if (reviewService.accessDenied) {
       <p class="access-denied">{{'review.access-denied' | translate}}</p>
+      <!-- logs out and comes back here, for the login with the review's name and password (#2156) -->
+      <div class="access-denied-logout fx-row-start-center">
+        <button mat-stroked-button
+                studioLiteLoginAgain
+                data-cy="review-access-denied-logout">
+          {{'home.logout' | translate}}
+        </button>
+      </div>
     }
     <div>
       <h4>{{'review.title' | translate}}</h4>

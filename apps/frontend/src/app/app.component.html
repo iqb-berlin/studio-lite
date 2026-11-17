@@ -18,10 +18,11 @@
              [matTooltip]="e.message">
           <mat-icon class="error-icon" [color]="'warn'">error_outline</mat-icon>
           <span>{{('app-http-error.' + e.status) | translate}}</span>
-          @if (e.status | isInArray: [401, 403, 410]) {
+          @if (e.status | isInArray: [401, 410]) {
             <button mat-raised-button
                     [color]="'primary'"
-                    (click)="logout_from_error()">
+                    studioLiteLoginAgain
+                    data-cy="error-login">
               {{'app-http-error.login' | translate}}
             </button>
           }

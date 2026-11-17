@@ -170,22 +170,30 @@ describe('AppComponent', () => {
     expect(!!header.querySelector('[data-cy="goto-admin"]')).toBe(shown);
   }));
 
-  it.each([
-    ['/a/5/12/editor', '/a/5/12/editor'],
-    ['/', '']
-  ])('should log out from an error on %s and return to %j after the login', fakeAsync((url: string, back: string) => {
+  // A 403 means the same account without the right, and logging in again with it brings the same
+  // answer; a lapsed login is what the button is for (#2156).
+  it.each([[401, true], [403, false], [410, true]])(
+    'should offer the login on a %i only where it can help: %s (#2156)',
+    fakeAsync((status: number, offered: boolean) => {
+      fixture.detectChanges();
+      tick();
+      appService.addErrorMessage(new AppHttpError(new HttpErrorResponse({ status })));
+      fixture.detectChanges();
+
+      expect(!!fixture.nativeElement.querySelector('.error-container [data-cy="error-login"]')).toBe(offered);
+    })
+  );
+
+  it('should log out from the login of the error box', fakeAsync(() => {
     fixture.detectChanges();
-    tick();
-    router.navigateByUrl(url);
     tick();
     appService.addErrorMessage(new AppHttpError(new HttpErrorResponse({ status: 401 })));
     fixture.detectChanges();
-    const navigate = jest.spyOn(router, 'navigate').mockResolvedValue(true);
+    jest.spyOn(router, 'navigate').mockResolvedValue(true);
 
-    fixture.nativeElement.querySelector('.error-container button[mat-raised-button]').click();
+    fixture.nativeElement.querySelector('.error-container [data-cy="error-login"]').click();
 
     expect(backendService.logout).toHaveBeenCalled();
     expect(appService.errorMessages).toEqual([]);
-    expect(navigate).toHaveBeenCalledWith(['/'], { queryParams: { redirectTo: back } });
   }));
 });
