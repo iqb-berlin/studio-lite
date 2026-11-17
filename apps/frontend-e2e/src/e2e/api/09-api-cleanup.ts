@@ -60,7 +60,7 @@ describe('Cleanup API tests', () => {
     });
   });
 
-  describe('88. DELETE /api/admin/workspace-groups', () => {
+  describe('88. DELETE /api/workspace-groups', () => {
     let qs: string[];
     before(() => {
       qs = [Cypress.expose(groupVera.id), Cypress.expose(group2.id)];
@@ -136,7 +136,7 @@ describe('Cleanup API tests', () => {
     });
   });
 
-  describe('90. DELETE /api/admin/users/id ', () => {
+  describe('90. DELETE /api/users/id ', () => {
     it('404/200 negative test: should return success or not found error when attempting ' +
       'to delete a user using an invalid ID', () => {
       cy.deleteUsersAPI(
@@ -189,7 +189,7 @@ describe('Cleanup API tests', () => {
     });
   });
 
-  describe('90. DELETE /api/admin/users/id after the database was emptied', () => {
+  describe('90. DELETE /api/users/id after the database was emptied', () => {
     // The first user cannot delete their own account (#1949); the reset removes it.
     before(() => cy.resetDb());
 

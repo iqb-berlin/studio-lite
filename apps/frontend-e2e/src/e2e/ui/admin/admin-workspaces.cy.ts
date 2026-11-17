@@ -80,7 +80,7 @@ describe('Admin Workspaces Management', () => {
   });
 
   it('should trigger report download', () => {
-    cy.intercept('GET', '/api/admin/workspace-groups?download=true').as('downloadReport');
+    cy.intercept('GET', '/api/workspace-groups?download=true').as('downloadReport');
     cy.get('[data-cy="admin-workspaces-menu-download"]').click();
     cy.wait('@downloadReport');
   });

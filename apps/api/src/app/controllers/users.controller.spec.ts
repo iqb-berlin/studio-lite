@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { UserFullDto, WorkspaceUserInListDto } from '@studio-lite-lib/api-dto';
+import { WorkspaceGroupService } from '../services/workspace-group.service';
+import { IsAdminGuard } from '../guards/is-admin.guard';
 import { UsersController } from './users.controller';
 import { UsersService } from '../services/users.service';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
@@ -12,16 +14,20 @@ import { ANY_WORKSPACE_GROUP_ADMIN_KEY } from '../decorators/any-workspace-group
 describe('UsersController', () => {
   let controller: UsersController;
   let usersService: DeepMocked<UsersService>;
+  let authService: DeepMocked<AuthService>;
 
   beforeEach(async () => {
     usersService = createMock<UsersService>();
+    authService = createMock<AuthService>();
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
       providers: [
         { provide: UsersService, useValue: usersService },
         { provide: IsWorkspaceGroupAdminGuard, useValue: { canActivate: jest.fn(() => true) } },
-        { provide: AuthService, useValue: createMock<AuthService>() },
+        { provide: IsAdminGuard, useValue: { canActivate: jest.fn(() => true) } },
+        { provide: WorkspaceGroupService, useValue: createMock<WorkspaceGroupService>() },
+        { provide: AuthService, useValue: authService },
         { provide: WorkspaceService, useValue: createMock<WorkspaceService>() }
       ]
     }).compile();
@@ -56,6 +62,69 @@ describe('UsersController', () => {
 
       expect(result).toEqual(mockUsers);
       expect(usersService.findAllFull).toHaveBeenCalled();
+    });
+  });
+
+  it.each([
+    'findAdministeredGroups',
+    'patchAdministeredGroups',
+    'remove',
+    'create',
+    'patch',
+    'removeSession',
+    'removeOrphanedSessions'
+  ] as const)(
+    'should let only administrators reach %s',
+    method => {
+      expect(Reflect.getMetadata('__guards__', UsersController.prototype[method]))
+        .toEqual([JwtAuthGuard, IsAdminGuard]);
+    }
+  );
+
+  // The administrator calling is 9; the account changed is 1.
+  describe('patch', () => {
+    it('should update a user and leave their sessions alone', async () => {
+      const dto = { id: 1, name: 'updated' } as UserFullDto;
+      usersService.patch.mockResolvedValue(undefined);
+
+      await controller.patch(9, 1, dto);
+
+      expect(usersService.patch).toHaveBeenCalledWith(1, dto, 9);
+      expect(authService.logout).not.toHaveBeenCalled();
+    });
+
+    it('should end every session of the user when a password is set', async () => {
+      const dto = { id: 1, password: 'new' } as UserFullDto;
+      usersService.patch.mockResolvedValue(undefined);
+
+      await controller.patch(9, 1, dto);
+
+      expect(usersService.patch).toHaveBeenCalledWith(1, dto, 9);
+      expect(authService.logout).toHaveBeenCalledWith(1);
+    });
+
+    it('should end no session when the user does not exist', async () => {
+      const dto = { id: 1, password: 'new' } as UserFullDto;
+      usersService.patch.mockRejectedValue(new Error('not found'));
+
+      await expect(controller.patch(9, 1, dto)).rejects.toThrow('not found');
+      expect(authService.logout).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('removeSession', () => {
+    it('should remove a specific orphaned user session', async () => {
+      authService.logoutOrphanedSession.mockResolvedValue(true);
+
+      await controller.removeSession(1, 'session-1');
+
+      expect(authService.logoutOrphanedSession).toHaveBeenCalledWith(1, 'session-1');
+    });
+
+    it('should reject non-orphaned session deletion', async () => {
+      authService.logoutOrphanedSession.mockResolvedValue(false);
+
+      await expect(controller.removeSession(1, 'session-1')).rejects.toThrow('Only orphaned sessions can be deleted.');
     });
   });
 });

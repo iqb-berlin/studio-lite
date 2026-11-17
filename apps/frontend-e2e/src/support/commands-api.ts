@@ -155,7 +155,7 @@ Cypress.Commands.add('createUserAPI', (userData:UserData, token:string) => {
   const isAdmin = userData.isAdmin;
   cy.request({
     method: 'POST',
-    url: '/api/admin/users',
+    url: '/api/users',
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -208,7 +208,7 @@ Cypress.Commands.add('updateUserAPI',
     const nu = parseInt(`${Cypress.expose(`id_${user.username}`)}`, 10);
     cy.request({
       method: 'PATCH',
-      url: `/api/admin/users/${id}`,
+      url: `/api/users/${id}`,
       headers: {
         'app-version': Cypress.expose('version'),
         authorization
@@ -228,7 +228,7 @@ Cypress.Commands.add('deleteSessionAPI', (userId: string, sessionId: string, tok
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'DELETE',
-    url: `/api/admin/users/${userId}/sessions/${sessionId}`,
+    url: `/api/users/${userId}/sessions/${sessionId}`,
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -242,7 +242,7 @@ Cypress.Commands.add('deleteOrphanedSessionsAPI', (userId: string, token: string
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'DELETE',
-    url: `/api/admin/users/${userId}/orphaned-sessions`,
+    url: `/api/users/${userId}/orphaned-sessions`,
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -256,7 +256,7 @@ Cypress.Commands.add('createGroupAPI', (group:GroupData, token:string, settings?
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'POST',
-    url: '/api/admin/workspace-groups',
+    url: '/api/workspace-groups',
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -274,7 +274,7 @@ Cypress.Commands.add('getWsGroupsAPI', (token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: '/api/admin/workspace-groups',
+    url: '/api/workspace-groups',
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -306,7 +306,7 @@ Cypress.Commands.add('setAdminsOfGroupAPI', (userIds: string[], groupId: string,
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
-    url: `/api/admin/workspace-groups/${groupId}/admins`,
+    url: `/api/workspace-groups/${groupId}/admins`,
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -321,7 +321,7 @@ Cypress.Commands.add('getAdminOfGroupAPI', (groupId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/admin/workspace-groups/${groupId}/admins`,
+    url: `/api/workspace-groups/${groupId}/admins`,
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -436,7 +436,7 @@ Cypress.Commands.add('getWsByGroupAPI',
     const authorization = `bearer ${token}`;
     cy.request({
       method: 'GET',
-      url: `/api/admin/workspace-groups/${id}/workspaces`,
+      url: `/api/workspace-groups/${id}/workspaces`,
       headers: {
         'app-version': Cypress.expose('version'),
         authorization
@@ -1929,7 +1929,7 @@ Cypress.Commands.add('getReportAPI', (token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: '/api/admin/workspace-groups?download=true',
+    url: '/api/workspace-groups?download=true',
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -2147,7 +2147,7 @@ Cypress.Commands.add('getGroupsByUserAPI', (userId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/admin/users/${userId}/workspace-groups`,
+    url: `/api/users/${userId}/administered-groups`,
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -2161,7 +2161,7 @@ Cypress.Commands.add('updateGroupsByUserAPI', (userId:string, groupIds: string[]
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
-    url: `/api/admin/users/${userId}/workspace-groups`,
+    url: `/api/users/${userId}/administered-groups`,
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -2194,7 +2194,7 @@ Cypress.Commands.add('deleteGroupsAPI', (qs: string[], token:string) => {
   const qp = buildQueryParameters('id', qs);
   cy.request({
     method: 'DELETE',
-    url: `/api/admin/workspace-groups${qp}`,
+    url: `/api/workspace-groups${qp}`,
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -2241,7 +2241,7 @@ Cypress.Commands.add('deleteUsersAPI', (ids: string[], token: string) => {
   const qp = buildQueryParameters('id', ids);
   cy.request({
     method: 'DELETE',
-    url: `/api/admin/users${qp}`,
+    url: `/api/users${qp}`,
     headers: {
       'app-version': Cypress.expose('version'),
       authorization

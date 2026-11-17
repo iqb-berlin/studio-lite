@@ -12,8 +12,7 @@ import { AppController } from './controllers/app.controller';
 import { AppVersionProvider } from './guards/app-version.guard';
 import { WorkspacesController } from './controllers/workspaces.controller';
 import { WorkspaceAccessController } from './controllers/workspace-access.controller';
-import { AdminUserController } from './controllers/admin-user-controller';
-import { AdminWorkspaceGroupController } from './controllers/admin-workspace-group.controller';
+import { WorkspaceGroupsController } from './controllers/workspace-groups.controller';
 import { SettingController } from './controllers/setting.controller';
 import { AdminResourcePackageController } from './controllers/admin-resource-package.controller';
 import { AdminVeronaModuleController } from './controllers/admin-verona-module.controller';
@@ -205,10 +204,9 @@ const ENTITIES = [
     AppController,
     WorkspacesController,
     WorkspaceAccessController,
-    AdminUserController,
     UsersController,
     WorkspaceGroupUserController,
-    AdminWorkspaceGroupController,
+    WorkspaceGroupsController,
     AdminController,
     SettingController,
     AdminResourcePackageController,

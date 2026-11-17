@@ -8,7 +8,7 @@ export class GroupAdminUnprocessableWorkspaceException extends UnprocessableEnti
   constructor(groupId: number, method: string) {
     const description = `Creating of workspace in group with id ${groupId} is forbidden`;
     const objectOrError = {
-      id: groupId, controller: 'admin/workspace-groups', method, description
+      id: groupId, controller: 'workspace-groups', method, description
     };
     super(objectOrError);
   }

@@ -353,7 +353,7 @@ describe('Workspace API tests', () => {
     });
   });
 
-  describe('21. GET /api/admin/workspace-groups/{id}/workspaces', () => {
+  describe('21. GET /api/workspace-groups/{id}/workspaces', () => {
     it('200 positive test: should retrieve all workspaces within a specified workspace group', () => {
       cy.getWsByGroupAPI(
         Cypress.expose(groupVera.id),

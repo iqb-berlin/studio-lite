@@ -7,7 +7,7 @@ describe('GroupAdminUnprocessableWorkspaceException', () => {
     expect(exception.getStatus()).toBe(422);
     expect(exception.getResponse()).toEqual({
       id: 1,
-      controller: 'admin/workspace-groups',
+      controller: 'workspace-groups',
       method: 'POST',
       description: 'Creating of workspace in group with id 1 is forbidden'
     });
