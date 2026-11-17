@@ -1,4 +1,4 @@
-import { standardUser, UserData } from '../../../support/testData';
+import { AccessLevel, standardUser, UserData } from '../../../support/testData';
 import {
   changePassword,
   clearUserFilter,
@@ -11,10 +11,23 @@ import {
 } from '../../../support/helpers';
 
 describe('UI User Management', () => {
+  // a group the standard user works in without administering it (#2155)
+  const memberGroup = { id: '', name: 'Gruppe ohne Adminrecht' };
+
   before(() => {
     cy.addFirstUserAPI(Cypress.expose('username'), Cypress.expose('password')).then(init => {
       expect(init.status, 'first user').to.equal(201);
-      cy.createUserAPI(standardUser, init.body.accessToken).its('status').should('equal', 201);
+      const token = init.body.accessToken;
+      cy.createUserAPI(standardUser, token).then(user => {
+        expect(user.status, 'standard user').to.equal(201);
+        cy.createGroupAPI(memberGroup, token).then(group => {
+          memberGroup.id = String(group.body);
+          cy.createWsAPI(memberGroup.id, { id: '', name: 'Bereich ohne Adminrecht' }, token).then(ws => {
+            cy.updateUsersOfWsAPI(String(ws.body), AccessLevel.Developer, String(user.body), token)
+              .its('status').should('equal', 200);
+          });
+        });
+      });
     });
   });
 
@@ -27,6 +40,19 @@ describe('UI User Management', () => {
 
     it('hides admin settings for normal users', () => {
       cy.findAdminSettings().should('not.exist');
+    });
+
+    // Typed into the address bar, both pages opened for anyone logged in, and only the API refused
+    // what was on them (#2155)
+    it('sends a normal user who opens the administration by its address to the start page (#2155)', () => {
+      ['#/admin', `#/wsg-admin/${memberGroup.id}`].forEach(page => {
+        // loaded afresh, as a typed address is: a change of the hash alone would not reload the page
+        cy.window().then(win => win.history.replaceState(null, '', `/${page}`));
+        cy.reload();
+        cy.location('hash').should('equal', '#/home');
+        cy.get('[data-cy="goto-user-menu"]').should('exist');
+        cy.get('.error-container').should('not.exist');
+      });
     });
 
     it('updates personal data (name, email)', () => {
