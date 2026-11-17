@@ -21,8 +21,8 @@ import { AreaTitleComponent } from '../area-title/area-title.component';
  * The login form, for both kinds of login the studio has: an account, and a review link with its
  * password. After it, the page the user was sent away from is opened again.
  *
- * Every login creates a session, so it has to be fired exactly once per attempt -- the note in the
- * class says what a second call would leave behind.
+ * A login of an account opens or continues a session, so it has to be fired exactly once per
+ * attempt -- the note in the class says what a second call would leave behind.
  */
 @Component({
   selector: 'studio-lite-login',
@@ -36,11 +36,11 @@ export class LoginComponent implements OnInit, OnDestroy {
   loginNamePreset = '';
   redirectTo = '';
   errorMessage = '';
-  // A login without a sessionId creates a session row, so every extra call creates a
-  // second session nobody can reach: the frontend keeps the tokens of the last response
-  // and the earlier row lives out the inactivity window without a client that could log
-  // it out (#1617). The template disables the submit button while this is true, and the
-  // guard in login() catches the click that lands before that rendering does.
+  // Every extra call is a login of its own. It sends the same id for a new session and so lands
+  // in the same session (#2151), but it adds a refresh token that the frontend overwrites with the
+  // next answer: a key nobody holds, which keeps the session resumable for the inactivity window
+  // (#1617). The template disables the submit button while this is true, and the guard in
+  // login() catches the click that lands before that rendering does.
   isSubmitting = false;
   private routingSubscription: Subscription | null = null;
 

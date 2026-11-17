@@ -47,7 +47,9 @@ export class AppController {
   /**
    * Issues the token pair for credentials {@link LocalAuthGuard} has already accepted. A
    * `sessionId` from the client continues that session instead of opening another, which is what
-   * keeps a reload from leaving a second session behind.
+   * keeps a reload from leaving a second session behind. A `newSessionId` is the id the client
+   * chose for the session a login opens: a login repeated after its answer was lost continues the
+   * session the first one opened (#2151).
    */
   @Post('login')
   @UseGuards(LocalAuthGuard, AppVersionGuard)
@@ -60,8 +62,12 @@ export class AppController {
   })
   @ApiCreatedResponse({ description: 'Logged in successfully.' }) // TODO: Add Exception?
   @ApiUnauthorizedResponse({ description: 'The user is not registered. ' })
-  async login(@Request() req, @Body('sessionId') sessionId?: string) {
-    return this.authService.login(req.user, sessionId);
+  async login(
+    @Request() req,
+    @Body('sessionId') sessionId?: string,
+    @Body('newSessionId') newSessionId?: string
+  ) {
+    return this.authService.login(req.user, sessionId, newSessionId);
   }
 
   // Token rotation, no interaction.
@@ -122,9 +128,9 @@ export class AppController {
   @ApiTags('auth')
   @ApiCreatedResponse({ description: 'Created first login and logged in so successfully.' }) // TODO: Add Exception?
   @ApiForbiddenResponse({ description: 'First user already created.' })
-  async initLogin(@Body() body: { username: string, password: string }
+  async initLogin(@Body() body: { username: string, password: string, newSessionId?: string }
   ) {
-    return this.authService.initLogin(body.username, body.password);
+    return this.authService.initLogin(body.username, body.password, body.newSessionId);
   }
 
   @Get('auth-data')

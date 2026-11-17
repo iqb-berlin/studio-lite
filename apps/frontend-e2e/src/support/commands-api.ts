@@ -34,7 +34,8 @@ Cypress.Commands.add('addFirstUserAPI', (username: string, password: string) => 
 
 // 2
 // ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
-Cypress.Commands.add('loginAPI', (username: string, password:string) => {
+// newSessionId: the id the session a login opens should get, as the browser chooses it (#2151).
+Cypress.Commands.add('loginAPI', (username: string, password:string, newSessionId?: string) => {
   cy.request({
     method: 'POST',
     url: '/api/login',
@@ -43,7 +44,8 @@ Cypress.Commands.add('loginAPI', (username: string, password:string) => {
     },
     body: {
       username: `${username}`,
-      password: `${password}`
+      password: `${password}`,
+      ...(newSessionId ? { newSessionId } : {})
     },
     failOnStatusCode: false
   });

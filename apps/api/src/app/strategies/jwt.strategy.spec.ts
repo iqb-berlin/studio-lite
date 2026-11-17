@@ -24,14 +24,15 @@ describe('JwtStrategy', () => {
     const { strategy, authService } = build();
 
     await expect(strategy.validate({
-      sub: 12, username: 'alice', sub2: 0, sid: 'session-1'
+      sub: 12, username: 'alice', sub2: 0, sid: 'session-1', rid: 7
     })).resolves.toEqual({
       id: 12,
       name: 'alice',
       reviewId: 0,
       sessionId: 'session-1'
     });
-    expect(authService.hasValidSession).toHaveBeenCalledWith(12, 'session-1');
+    // The row goes along: a session opened anew under the same id must not accept it (#2151).
+    expect(authService.hasValidSession).toHaveBeenCalledWith(12, 'session-1', 7);
   });
 
   // Another browser of the account went on working for up to 30 minutes after a new password

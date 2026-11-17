@@ -6,7 +6,8 @@ import {
   userGroupAdmin,
   groupVera,
   group2,
-  vera2024
+  vera2024,
+  sessionIdOf
 } from '../../support/util-api';
 
 describe('Admin API tests', () => {
@@ -329,9 +330,6 @@ describe('Admin API tests', () => {
     type SessionRow = { sessionId: string, activityStatus: string };
     type UserRow = { id: number, sessions?: SessionRow[] };
 
-    // The session a token belongs to; the login answers with the pair only, the id rides in the JWT.
-    const sessionIdOf = (accessToken: string): string => JSON.parse(atob(accessToken.split('.')[1])).sid;
-
     const findQuietSession = (users: UserRow[]): SessionRow | undefined => users
       .find(user => user.id === Number(Cypress.expose(`id_${Cypress.expose('username')}`)))
       ?.sessions
@@ -403,6 +401,31 @@ describe('Admin API tests', () => {
     it('401 negative test: should refuse to continue a session that has logged out', () => {
       cy.refreshTokenAPI(Cypress.expose('quietSessionRefresh')).then(resp => {
         expect(resp.status).to.equal(401);
+      });
+    });
+  });
+
+  // The browser chooses the id of the session a login opens, so that a login whose answer was lost
+  // is continued by the next one (#2151). The cleanup and the status of a session find its tokens
+  // by the id alone: an id one account holds is never given to another, which the database itself
+  // ensures.
+  describe('a session id belongs to one account (#2151)', () => {
+    const chosenSessionId = '6f1c2a5e-9b3d-4e7f-8a1b-2c3d4e5f6a7b';
+
+    it('201 positive test: should open the session under the id the client chose', () => {
+      cy.loginAPI(Cypress.expose('username'), Cypress.expose('password'), chosenSessionId).then(resp => {
+        expect(resp.status).to.equal(201);
+        expect(sessionIdOf(resp.body.accessToken)).to.equal(chosenSessionId);
+      });
+    });
+
+    it('201 positive test: should give another account that sends the same id a session of its own', () => {
+      // The administrator holds the id, whether or not the test before ran.
+      cy.loginAPI(Cypress.expose('username'), Cypress.expose('password'), chosenSessionId)
+        .its('status').should('equal', 201);
+      cy.loginAPI(userGroupAdmin.username, userGroupAdmin.password, chosenSessionId).then(resp => {
+        expect(resp.status).to.equal(201);
+        expect(sessionIdOf(resp.body.accessToken)).not.to.equal(chosenSessionId);
       });
     });
   });

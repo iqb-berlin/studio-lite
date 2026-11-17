@@ -21,6 +21,7 @@ import {
 import { succeeded } from '../utils/succeeded.utils';
 import { isNoAnswer } from '../utils/no-answer.utils';
 import { withTrimmedEmail } from '../utils/email.utils';
+import { randomSessionId } from '../utils/session-id.utils';
 
 /**
  * The API calls that belong to no single area: logging in and out, the token refresh, the user's own
@@ -33,6 +34,8 @@ import { withTrimmedEmail } from '../utils/email.utils';
   providedIn: 'root'
 })
 export class BackendService {
+  private static readonly newSessionIdKey = 'new_session_id';
+
   constructor(
     @Inject('SERVER_URL') private readonly serverUrl: string,
     private appService: AppService,
@@ -42,12 +45,14 @@ export class BackendService {
 
   login(name: string, password: string, initLoginMode: boolean): Observable<boolean> {
     const sessionId = BackendService.getSessionIdFromToken();
+    const newSessionId = BackendService.getNewSessionId();
     return this.http.post<{ accessToken: string, refreshToken: string }>(
       `${this.serverUrl}${initLoginMode ? 'init-login' : 'login'}`,
       {
         username: name,
         password: password,
-        sessionId
+        sessionId,
+        newSessionId
       },
       { context: authRequestContext() }
     )
@@ -61,6 +66,11 @@ export class BackendService {
             };
             localStorage.setItem('id_token', accessToken);
             localStorage.setItem('refresh_token', refreshToken);
+            // Another tab may have replaced the id while this answer was on its way.
+            if (BackendService.getSessionIdFromToken(accessToken) === newSessionId &&
+              localStorage.getItem(BackendService.newSessionIdKey) === newSessionId) {
+              localStorage.removeItem(BackendService.newSessionIdKey);
+            }
             return this.getAuthData()
               .pipe(
                 map(authData => {
@@ -207,8 +217,26 @@ export class BackendService {
     return this.http.post<void>(`${this.serverUrl}activity`, {}, { context: backgroundRequestContext() });
   }
 
-  private static getSessionIdFromToken(): string | undefined {
-    const token = localStorage.getItem('id_token');
+  /**
+   * The id for the session a login opens, kept in the storage until a token names it. The server
+   * may open the session and its answer never arrive -- the page reloaded, the tab closed. The next
+   * login sends the same id and continues that session instead of leaving it behind (#2151).
+   *
+   * A login that does not open the session under it keeps it: a refused one, a review login, one
+   * that continued the session of the stored token, and one whose id another account holds -- the
+   * session a lost login opened under it may be another person's on the same browser profile, and
+   * stays theirs to continue. Once a token names the id, the session's id is in the token, and the
+   * next login without one gets a new id.
+   */
+  private static getNewSessionId(): string {
+    const storedId = localStorage.getItem(BackendService.newSessionIdKey);
+    if (storedId) return storedId;
+    const newId = randomSessionId();
+    localStorage.setItem(BackendService.newSessionIdKey, newId);
+    return newId;
+  }
+
+  private static getSessionIdFromToken(token: string | null = localStorage.getItem('id_token')): string | undefined {
     if (!token) return undefined;
     try {
       const base64Url = token.split('.')[1];

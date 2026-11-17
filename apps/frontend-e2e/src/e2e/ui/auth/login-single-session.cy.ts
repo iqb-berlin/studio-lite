@@ -1,9 +1,10 @@
 import { addFirstUser, logout } from '../../../support/helpers';
+import { sessionIdOf } from '../../../support/util-api';
 
 /**
- * A login without a sessionId creates a session row, and the frontend keeps the tokens of
- * the last response only -- so a second call leaves behind a session nobody can reach or
- * log out, and it lives out the whole inactivity window (#1617).
+ * One attempt is one login. A second call used to leave behind a second session nobody could
+ * reach (#1617); it now lands in the same session, but still adds a refresh token nobody holds.
+ * A login whose answer never arrives must not leave a session behind either (#2151).
  *
  * This has to run in a browser: pressing Enter in a text field submits the form by way of
  * the HTML implicit submission, which jsdom does not implement. A unit test therefore sees
@@ -51,6 +52,35 @@ describe('Login form', () => {
     cy.get('[data-cy="goto-user-menu"]').should('exist');
     cy.then(() => {
       expect(logins).to.equal(1);
+    });
+  });
+
+  // The server has opened the session of a login whose answer the page never receives, because it
+  // reloads first. The login after the reload must continue that session, not open a second one
+  // that nobody can reach (#2151). Compared by the session ids rather than by counting the
+  // account's sessions: the logout before each test is not waited for.
+  it('should leave no session behind when the page reloads during the login (#2151)', () => {
+    let lostSessionId = '';
+    cy.intercept({ method: 'POST', url: '/api/login', times: 1 }, req => {
+      req.continue(res => {
+        lostSessionId = sessionIdOf(res.body.accessToken);
+        // Held back until the page has reloaded, so that the answer never arrives.
+        res.setDelay(5000);
+      });
+    });
+    enterCredentials();
+    cy.get('[data-cy="home-submit-button"]').click();
+    cy.wrap(null).should(() => {
+      expect(lostSessionId).not.to.equal('');
+    });
+    cy.reload();
+
+    enterCredentials();
+    cy.get('[data-cy="home-submit-button"]').click();
+    cy.get('[data-cy="goto-user-menu"]').should('exist');
+
+    cy.window().then(win => {
+      expect(sessionIdOf(win.localStorage.getItem('id_token') ?? '')).to.equal(lostSessionId);
     });
   });
 });

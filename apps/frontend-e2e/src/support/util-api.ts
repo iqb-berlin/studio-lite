@@ -8,6 +8,12 @@ import {
 
 export const noId: string = '9988';
 
+/** The session an access token belongs to: the login answers with the pair only, the id rides in the JWT. */
+export function sessionIdOf(accessToken: string): string {
+  const payload = accessToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+  return JSON.parse(atob(payload)).sid;
+}
+
 export const fakeUser: UserData = {
   username: 'fakeuser',
   password: 'paso',
