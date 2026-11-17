@@ -133,34 +133,6 @@ export class UnitService {
     }));
   }
 
-  async findAll(): Promise<UnitInViewDto[]> {
-    this.logger.log('Retrieving units for workspaceId');
-    const units = await this.unitsRepository.find({
-      select: {
-        key: true,
-        name: true,
-        groupName: true,
-        id: true,
-        workspaceId: true,
-        lastChangedDefinition: true,
-        lastChangedMetadata: true,
-        lastChangedScheme: true,
-        metadata: false,
-        variables: false
-      }
-    });
-    const workspaces = await this.workspaceRepository.find();
-    const newUnits = units.map(unit => unit as UnitInViewDto);
-    return Promise.all(newUnits.map(async unit => {
-      const workspace = workspaces
-        .find(w => w.id === unit.workspaceId);
-      if (workspace) {
-        unit.workspaceName = workspace.name;
-      }
-      return unit;
-    }));
-  }
-
   async findAllForGroup(workspaceGroupId: number): Promise<UnitInViewDto[]> {
     const workspaces = await this.workspaceRepository.find({
       where: { groupId: workspaceGroupId },

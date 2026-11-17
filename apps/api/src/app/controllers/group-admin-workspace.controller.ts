@@ -12,7 +12,6 @@ import {
 } from '@nestjs/swagger';
 import {
   CreateWorkspaceDto,
-  WorkspaceFullDto,
   WorkspaceUserInListDto,
   UserWorkspaceAccessDto, MoveToDto
 } from '@studio-lite-lib/api-dto';
@@ -40,17 +39,6 @@ export class GroupAdminWorkspaceController {
     private workspaceService: WorkspaceService,
     private userService: UsersService
   ) {}
-
-  @Get(':workspace_id')
-  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Workspace retrieved successfully.' })
-  @ApiForbiddenResponse({ description: 'No privileges in group-admin.' })
-  @ApiNotFoundResponse({ description: 'Admin Workspace not found.' })
-  @ApiTags('group-admin workspace')
-  async findOne(@Param('workspace_id') id: number): Promise<WorkspaceFullDto> {
-    return this.workspaceService.findOne(id);
-  }
 
   @Get(':workspace_id/users')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)

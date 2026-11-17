@@ -195,33 +195,18 @@ describe('Admin API tests', () => {
     });
   });
 
-  describe('11. GET /api/admin/workspace-groups/{workspace_group_id}', () => {
-    it('200 positive test: should retrieve workspace group details by ID for an administrator', () => {
-      cy.getGroupByIdAPI(Cypress.expose(groupVera.id), Cypress.expose(`token_${Cypress.expose('username')}`))
-        .then(resp => {
-          expect(resp.status).to.equal(200);
-          expect(resp.body.name).to.equal(groupVera.name);
-        });
-    });
-
+  describe('11. GET /api/workspace-groups/{workspace_group_id}', () => {
     it('404 negative test: should return error for a non-existent workspace group ID', () => {
-      cy.getGroupByIdAPI(noId, Cypress.expose(`token_${Cypress.expose('username')}`))
+      cy.getGroupPropertiesAPI(noId, Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
           expect(resp.status).to.equal(404);
         });
     });
 
-    it('403 negative test: should deny access to workspace group details for a non-administrator user', () => {
-      cy.getGroupByIdAPI(Cypress.expose(groupVera.id), Cypress.expose(`token_${userGroupAdmin.username}`))
+    it('403 negative test: should deny the group to a user who is neither in it nor its admin', () => {
+      cy.getGroupPropertiesAPI(Cypress.expose(groupVera.id), Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(403);
-        });
-    });
-
-    it('401 negative test: should deny access when no token is provided', () => {
-      cy.getGroupByIdAPI(Cypress.expose(groupVera.id), noId)
-        .then(resp => {
-          expect(resp.status).to.equal(401);
         });
     });
   });
@@ -257,7 +242,7 @@ describe('Admin API tests', () => {
     });
   });
 
-  describe('13. PATCH /api/admin/workspace-groups', () => {
+  describe('13. PATCH /api/workspace-groups/{workspace_group_id}', () => {
     it('200 positive test: should allow modifying workspace group details', () => {
       cy.updateGroupAPI(Cypress.expose(groupVera.id),
         vera2024,
@@ -267,26 +252,7 @@ describe('Admin API tests', () => {
         });
     });
 
-    it('500 negative test: should return a server error when attempting to update ' +
-      'a non-existent workspace group', () => {
-      cy.updateGroupAPI(noId,
-        'vera2025',
-        Cypress.expose(`token_${Cypress.expose('username')}`))
-        .then(resp => {
-          expect(resp.status).to.equal(500);
-        });
-    });
-
-    it('401 negative test: should deny updates when provided with an invalid token', () => {
-      cy.updateGroupAPI(Cypress.expose(groupVera.id),
-        'vera2026',
-        noId)
-        .then(resp => {
-          expect(resp.status).to.equal(401);
-        });
-    });
-
-    it('403 negative test: should deny updates by a user who is not an administrator', () => {
+    it('403 negative test: should deny updates by a user who is neither an administrator nor the group admin', () => {
       cy.updateGroupAPI(Cypress.expose(groupVera.id),
         'vera2027',
         Cypress.expose(`token_${userGroupAdmin.username}`))

@@ -57,7 +57,7 @@ export function selectProfileForGroupFromAdmin(group: string, profile: IqbProfil
   // An alias of its own for every call: the intercept outlives the call, and under a shared alias a
   // later request on the same URL that no one waited for, such as a rename of the group, answered
   // the next call's wait before its save was sent (#2121).
-  cy.intercept('PATCH', '/api/admin/workspace-groups/*').as(save);
+  cy.intercept('PATCH', '/api/workspace-groups/*').as(save);
   cy.get('[data-cy="admin-edit-workspace-group-settings-save-button"]').click();
   waitForSuccess(`@${save}`);
 }

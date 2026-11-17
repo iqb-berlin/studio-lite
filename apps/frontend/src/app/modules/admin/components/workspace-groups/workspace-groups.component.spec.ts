@@ -58,7 +58,6 @@ describe('WorkspaceGroupsComponent', () => {
       changeWorkspaceGroup: jest.fn().mockReturnValue(of(true)),
       setWorkspaceGroupProfiles: jest.fn().mockReturnValue(of(true)),
       deleteWorkspaceGroups: jest.fn().mockReturnValue(of(true)),
-      getUnits: jest.fn().mockReturnValue(of([])),
       getXlsWorkspaces: jest.fn().mockReturnValue(of(new Blob(['content'])))
     };
 

@@ -46,7 +46,7 @@ describe('AdminWorkspaceGroupController', () => {
   });
 
   // The guards are the authorisation of each method; no other unit test sees them (#1953).
-  it.each(['findAll', 'findAllUnits', 'remove', 'patch', 'create', 'findOnesAdmins', 'patchOnesAdmins'] as const)(
+  it.each(['findAll', 'remove', 'create', 'findOnesAdmins', 'patchOnesAdmins'] as const)(
     'should let only administrators reach %s',
     method => {
       expect(Reflect.getMetadata('__guards__', AdminWorkspaceGroupController.prototype[method]))
@@ -54,7 +54,7 @@ describe('AdminWorkspaceGroupController', () => {
     }
   );
 
-  it.each(['findOne', 'findOnesWorkspaces', 'findWorkspaceGroupUnits', 'findWorkspaceGroupUnitItems'] as const)(
+  it.each(['findOnesWorkspaces', 'findWorkspaceGroupUnits', 'findWorkspaceGroupUnitItems'] as const)(
     'should let only admins of the group reach %s',
     method => {
       expect(Reflect.getMetadata('__guards__', AdminWorkspaceGroupController.prototype[method]))

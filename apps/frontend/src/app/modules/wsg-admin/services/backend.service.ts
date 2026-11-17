@@ -153,7 +153,7 @@ export class BackendService {
   getWorkspaceGroupData(workspaceGroupId: number): Observable<WorkspaceGroupFullDto | null> {
     return this.http
       .get<WorkspaceGroupFullDto>(
-        `${this.serverUrl}admin/workspace-groups/${workspaceGroupId}`
+        `${this.serverUrl}workspace-groups/${workspaceGroupId}`
       )
       .pipe(
         catchError(() => of(null))

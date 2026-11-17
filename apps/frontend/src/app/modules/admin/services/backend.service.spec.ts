@@ -38,7 +38,7 @@ describe('Admin BackendService', () => {
         done();
       });
 
-      const req = httpMock.expectOne(`${baseUrl}admin/workspace-groups/3`);
+      const req = httpMock.expectOne(`${baseUrl}workspace-groups/3`);
       expect(req.request.method).toBe('PATCH');
       expect(req.request.body).toEqual({ id: 3, settings: { profiles } });
       req.flush(false);
