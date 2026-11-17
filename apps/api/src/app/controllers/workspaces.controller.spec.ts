@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { CreateWorkspaceDto, MoveToDto } from '@studio-lite-lib/api-dto';
-import { GroupAdminWorkspaceController } from './group-admin-workspace.controller';
+import { MoveToDto } from '@studio-lite-lib/api-dto';
+import { WorkspacesController } from './workspaces.controller';
 import { WorkspaceService } from '../services/workspace.service';
 import { UsersService } from '../services/users.service';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
@@ -9,8 +9,8 @@ import { AuthService } from '../services/auth.service';
 import { UserWorkspaceGroupNotAdminException } from '../exceptions/user-workspace-group-not-admin.exception';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
-describe('GroupAdminWorkspaceController', () => {
-  let controller: GroupAdminWorkspaceController;
+describe('WorkspacesController', () => {
+  let controller: WorkspacesController;
   let workspaceService: DeepMocked<WorkspaceService>;
   let usersService: DeepMocked<UsersService>;
 
@@ -19,7 +19,7 @@ describe('GroupAdminWorkspaceController', () => {
     usersService = createMock<UsersService>();
 
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [GroupAdminWorkspaceController],
+      controllers: [WorkspacesController],
       providers: [
         { provide: WorkspaceService, useValue: workspaceService },
         { provide: UsersService, useValue: usersService },
@@ -28,14 +28,14 @@ describe('GroupAdminWorkspaceController', () => {
       ]
     }).compile();
 
-    controller = module.get<GroupAdminWorkspaceController>(GroupAdminWorkspaceController);
+    controller = module.get<WorkspacesController>(WorkspacesController);
   });
 
   // The guards are the authorisation of each method; no other unit test sees them (#1953).
-  it.each(['findOnesUsers', 'patchOnesUsers', 'remove', 'patchGroups', 'create'] as const)(
+  it.each(['remove', 'patchGroups'] as const)(
     'should let only admins of the group reach %s',
     method => {
-      expect(Reflect.getMetadata('__guards__', GroupAdminWorkspaceController.prototype[method]))
+      expect(Reflect.getMetadata('__guards__', WorkspacesController.prototype[method]))
         .toEqual([JwtAuthGuard, IsWorkspaceGroupAdminGuard]);
     }
   );
@@ -148,52 +148,6 @@ describe('GroupAdminWorkspaceController', () => {
         .rejects.toThrow(UserWorkspaceGroupNotAdminException);
       expect(usersService.isWorkspaceGroupAdmin).not.toHaveBeenCalled();
       expect(workspaceService.patchWorkspaceGroups).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('create', () => {
-    it('should create a workspace in a group the user administers', async () => {
-      const dto = { name: 'new', groupId: 1 } as CreateWorkspaceDto;
-      usersService.getUserIsAdmin.mockResolvedValue(false);
-      usersService.isWorkspaceGroupAdmin.mockResolvedValue(true);
-      workspaceService.create.mockResolvedValue(123);
-
-      const result = await controller.create(1, dto);
-
-      expect(result).toBe(123);
-      expect(workspaceService.create).toHaveBeenCalledWith(dto);
-      expect(usersService.isWorkspaceGroupAdmin).toHaveBeenCalledWith(1, 1);
-    });
-
-    // An administrator is not entered as admin of every group, and needs not be.
-    it('should let an administrator create a workspace in any group', async () => {
-      const dto = { name: 'new', groupId: 2 } as CreateWorkspaceDto;
-      usersService.getUserIsAdmin.mockResolvedValue(true);
-      usersService.isWorkspaceGroupAdmin.mockResolvedValue(false);
-      workspaceService.create.mockResolvedValue(124);
-
-      expect(await controller.create(1, dto)).toBe(124);
-    });
-
-    it('should refuse a group the user does not administer (#1005)', async () => {
-      // The group is in the body. Whoever administered any group at all created a workspace in
-      // every other one before this check.
-      const dto = { name: 'new', groupId: 2 } as CreateWorkspaceDto;
-      usersService.getUserIsAdmin.mockResolvedValue(false);
-      usersService.isWorkspaceGroupAdmin.mockResolvedValue(false);
-
-      await expect(controller.create(1, dto)).rejects.toThrow(UserWorkspaceGroupNotAdminException);
-      expect(workspaceService.create).not.toHaveBeenCalled();
-    });
-
-    it('should refuse a body without a group instead of asking about it', async () => {
-      usersService.getUserIsAdmin.mockResolvedValue(false);
-      usersService.isWorkspaceGroupAdmin.mockResolvedValue(true);
-
-      await expect(controller.create(1, { name: 'new' } as CreateWorkspaceDto))
-        .rejects.toThrow(UserWorkspaceGroupNotAdminException);
-      expect(usersService.isWorkspaceGroupAdmin).not.toHaveBeenCalled();
-      expect(workspaceService.create).not.toHaveBeenCalled();
     });
   });
 });

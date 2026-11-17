@@ -70,7 +70,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
     it('locks the radio buttons and save while the rights of another workspace load', () => {
       openWsTab(secondaryWorkspace);
       selectRoleAtWs(standardUser.username, AccessLevel.Basic);
-      cy.intercept('GET', '**/api/group-admin/workspaces/*/users', req => {
+      cy.intercept('GET', '**/api/workspaces/*/access', req => {
         req.on('response', res => { res.setDelay(1500); });
       }).as('workspaceUsers');
       cy.contains('mat-row', primaryWorkspace).click();
@@ -87,7 +87,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
     it('locks the radio buttons and save while the rights of another user load', () => {
       openUsersTab(standardUser.username);
       selectRoleAtUser(primaryWorkspace, AccessLevel.Basic);
-      cy.intercept('GET', '**/api/group-admin/users/*/workspaces', req => {
+      cy.intercept('GET', '**/api/workspace-groups/*/users/*/workspaces', req => {
         req.on('response', res => { res.setDelay(1500); });
       }).as('userWorkspaces');
       cy.contains('mat-row', secondaryUser.username).click();
@@ -156,7 +156,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
 
   describe('Workspaces panel – save and reload', () => {
     it('persists an Admin role assignment after save and page reload', () => {
-      cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveUsers');
+      cy.intercept('PATCH', '/api/workspaces/*/access').as('saveUsers');
       openWsTab(primaryWorkspace);
       selectRoleAtWs(standardUser.username, AccessLevel.Admin);
       clickAccessRightsSaveButton();
@@ -167,7 +167,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       openWsTab(primaryWorkspace);
       assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Admin, true);
 
-      cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('cleanupSave');
+      cy.intercept('PATCH', '/api/workspaces/*/access').as('cleanupSave');
       deselectRoleAtWs(standardUser.username, AccessLevel.Admin);
       clickAccessRightsSaveButton();
       cy.wait('@cleanupSave');
@@ -175,7 +175,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
 
     it('persists removal of role (deselect then save)', () => {
       // First assign
-      cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveFirst');
+      cy.intercept('PATCH', '/api/workspaces/*/access').as('saveFirst');
       openWsTab(primaryWorkspace);
       selectRoleAtWs(standardUser.username, AccessLevel.Basic);
       clickAccessRightsSaveButton();
@@ -184,7 +184,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       // Now deselect and save
       cy.visit('/');
       cy.findAdminGroupSettings(baseGroup).click();
-      cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveUsers');
+      cy.intercept('PATCH', '/api/workspaces/*/access').as('saveUsers');
       openWsTab(primaryWorkspace);
       deselectRoleAtWs(standardUser.username, AccessLevel.Basic);
       clickAccessRightsSaveButton();
@@ -201,7 +201,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
 
     it('persists a role switch (Basic → Admin) after save', () => {
       // Assign Basic first
-      cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveFirst');
+      cy.intercept('PATCH', '/api/workspaces/*/access').as('saveFirst');
       openWsTab(primaryWorkspace);
       selectRoleAtWs(standardUser.username, AccessLevel.Basic);
       clickAccessRightsSaveButton();
@@ -210,7 +210,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       // Switch to Admin
       cy.visit('/');
       cy.findAdminGroupSettings(baseGroup).click();
-      cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveSwitch');
+      cy.intercept('PATCH', '/api/workspaces/*/access').as('saveSwitch');
       openWsTab(primaryWorkspace);
       selectRoleAtWs(standardUser.username, AccessLevel.Admin);
       clickAccessRightsSaveButton();
@@ -224,7 +224,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Basic, false);
 
       // Cleanup
-      cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('cleanupSave');
+      cy.intercept('PATCH', '/api/workspaces/*/access').as('cleanupSave');
       deselectRoleAtWs(standardUser.username, AccessLevel.Admin);
       clickAccessRightsSaveButton();
       cy.wait('@cleanupSave');
@@ -273,7 +273,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
 
   describe('Users panel – save and reload', () => {
     it('persists Basic role via Users panel after save and reload', () => {
-      cy.intercept('PATCH', '/api/group-admin/users/*/workspaces').as('saveWorkspaces');
+      cy.intercept('PATCH', '/api/workspace-groups/*/users/*/workspaces').as('saveWorkspaces');
       openUsersTab(standardUser.username);
       selectRoleAtUser(primaryWorkspace, AccessLevel.Basic);
       clickAccessRightsSaveButton();
@@ -285,7 +285,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       assertRoleRadioChecked(primaryWorkspace, AccessLevel.Basic, true);
 
       // Cleanup
-      cy.intercept('PATCH', '/api/group-admin/users/*/workspaces').as('cleanupSave');
+      cy.intercept('PATCH', '/api/workspace-groups/*/users/*/workspaces').as('cleanupSave');
       deselectRoleAtUser(primaryWorkspace, AccessLevel.Basic);
       clickAccessRightsSaveButton();
       cy.wait('@cleanupSave');
@@ -293,7 +293,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
 
     it('persists role removal via Users panel after save and reload', () => {
       // Assign first
-      cy.intercept('PATCH', '/api/group-admin/users/*/workspaces').as('saveFirst');
+      cy.intercept('PATCH', '/api/workspace-groups/*/users/*/workspaces').as('saveFirst');
       openUsersTab(standardUser.username);
       selectRoleAtUser(primaryWorkspace, AccessLevel.Developer);
       clickAccessRightsSaveButton();
@@ -302,7 +302,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       // Deselect
       cy.visit('/');
       cy.findAdminGroupSettings(baseGroup).click();
-      cy.intercept('PATCH', '/api/group-admin/users/*/workspaces').as('saveWorkspaces');
+      cy.intercept('PATCH', '/api/workspace-groups/*/users/*/workspaces').as('saveWorkspaces');
       openUsersTab(standardUser.username);
       deselectRoleAtUser(primaryWorkspace, AccessLevel.Developer);
       clickAccessRightsSaveButton();
@@ -324,7 +324,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
   describe('Cross-panel consistency', () => {
     it('role set via Workspaces tab is shown correctly in Users tab', () => {
       // Assign via Workspaces panel
-      cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveUsers');
+      cy.intercept('PATCH', '/api/workspaces/*/access').as('saveUsers');
       openWsTab(primaryWorkspace);
       selectRoleAtWs(standardUser.username, AccessLevel.Developer);
       clickAccessRightsSaveButton();
@@ -339,7 +339,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       assertRoleRadioChecked(primaryWorkspace, AccessLevel.Admin, false);
 
       // Cleanup
-      cy.intercept('PATCH', '/api/group-admin/users/*/workspaces').as('cleanupSave');
+      cy.intercept('PATCH', '/api/workspace-groups/*/users/*/workspaces').as('cleanupSave');
       deselectRoleAtUser(primaryWorkspace, AccessLevel.Developer);
       clickAccessRightsSaveButton();
       cy.wait('@cleanupSave');
@@ -347,7 +347,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
 
     it('role set via Users tab is shown correctly in Workspaces tab', () => {
       // Assign via Users panel
-      cy.intercept('PATCH', '/api/group-admin/users/*/workspaces').as('saveWs');
+      cy.intercept('PATCH', '/api/workspace-groups/*/users/*/workspaces').as('saveWs');
       openUsersTab(standardUser.username);
       selectRoleAtUser(primaryWorkspace, AccessLevel.Admin);
       clickAccessRightsSaveButton();
@@ -362,7 +362,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Developer, false);
 
       // Cleanup
-      cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('cleanupSave');
+      cy.intercept('PATCH', '/api/workspaces/*/access').as('cleanupSave');
       deselectRoleAtWs(standardUser.username, AccessLevel.Admin);
       clickAccessRightsSaveButton();
       cy.wait('@cleanupSave');

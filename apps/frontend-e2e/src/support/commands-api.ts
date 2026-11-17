@@ -177,7 +177,7 @@ Cypress.Commands.add('getUsersAPI',
     const authorization = `bearer ${token}`;
     cy.request({
       method: 'GET',
-      url: '/api/group-admin/users',
+      url: '/api/users',
       headers: {
         'app-version': Cypress.expose('version'),
         authorization
@@ -192,7 +192,7 @@ Cypress.Commands.add('getUsersFullAPI',
     const authorization = `bearer ${token}`;
     cy.request({
       method: 'GET',
-      url: `/api/group-admin/users?full=${full}`,
+      url: `/api/users?full=${full}`,
       headers: {
         'app-version': Cypress.expose('version'),
         authorization
@@ -336,14 +336,13 @@ Cypress.Commands.add('createWsAPI', (groupId: string, ws:WsData, token:string, e
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'POST',
-    url: '/api/group-admin/workspaces',
+    url: `/api/workspace-groups/${groupId}/workspaces`,
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
       ...extra,
-      groupId: `${groupId}`,
       name: `${ws.name}`
     },
     failOnStatusCode: false
@@ -355,7 +354,7 @@ Cypress.Commands.add('moveWsAPI', (ws: string | string[], newGroup: string, toke
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
-    url: '/api/group-admin/workspaces/group-id',
+    url: '/api/workspaces/group-id',
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -375,7 +374,7 @@ Cypress.Commands.add('updateUsersOfWsAPI', (wsId:string, level:AccessLevel,
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
-    url: `/api/group-admin/workspaces/${wsId}/users`,
+    url: `/api/workspaces/${wsId}/access`,
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -397,7 +396,7 @@ Cypress.Commands.add(
     const authorization = `bearer ${token}`;
     cy.request({
       method: 'PATCH',
-      url: `/api/group-admin/workspaces/${wsId}/users`,
+      url: `/api/workspaces/${wsId}/access`,
       headers: {
         'app-version': Cypress.expose('version'),
         authorization
@@ -422,7 +421,7 @@ Cypress.Commands.add('getUsersOfWsAPI', (wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/group-admin/workspaces/${wsId}/users`,
+    url: `/api/workspaces/${wsId}/access`,
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -1630,7 +1629,7 @@ Cypress.Commands.add('setUsersOfWsAPI', (wsId: string, users: AccessUser[], toke
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
-    url: `/api/group-admin/workspaces/${wsId}/users`,
+    url: `/api/workspaces/${wsId}/access`,
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -2022,11 +2021,11 @@ Cypress.Commands.add('updateMyData', (token: string, data: MyData) => {
 });
 
 // 82
-Cypress.Commands.add('getWsByUserAPI', (userId:string, token:string) => {
+Cypress.Commands.add('getWsByUserAPI', (groupId: string, userId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/group-admin/users/${userId}/workspaces`,
+    url: `/api/workspace-groups/${groupId}/users/${userId}/workspaces`,
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -2041,20 +2040,17 @@ Cypress.Commands.add('updateWsByUserAPI', (userId:string, groupId: string,
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
-    url: `/api/group-admin/users/${userId}/workspaces`,
+    url: `/api/workspace-groups/${groupId}/users/${userId}/workspaces`,
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
     },
-    body: {
-      groupId: parseInt(groupId, 10),
-      workspaces: [
-        {
-          accessLevel: levels[0],
-          id: wsIds[0]
-        }
-      ]
-    },
+    body: [
+      {
+        accessLevel: levels[0],
+        id: wsIds[0]
+      }
+    ],
     failOnStatusCode: false
   });
 });
@@ -2183,7 +2179,7 @@ Cypress.Commands.add('deleteWsAPI', (qs:string[], token:string) => {
   const qp = buildQueryParameters('id', qs);
   cy.request({
     method: 'DELETE',
-    url: `/api/group-admin/workspaces${qp}`,
+    url: `/api/workspaces${qp}`,
     headers: {
       'app-version': Cypress.expose('version'),
       authorization

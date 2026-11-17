@@ -133,7 +133,7 @@ export function createWs(ws: string, group: string): void {
     .click();
   cy.translate(Cypress.expose('locale')).then(json => {
     cy.get(`input[placeholder="${json['wsg-admin']['enter-name']}"]`).type(ws);
-    cy.clickButtonWithResponseCheck(json.create, [201], '/api/group-admin/workspaces*', 'POST', 'createWs');
+    cy.clickButtonWithResponseCheck(json.create, [201], '/api/workspace-groups/*/workspaces', 'POST', 'createWs');
   });
 }
 

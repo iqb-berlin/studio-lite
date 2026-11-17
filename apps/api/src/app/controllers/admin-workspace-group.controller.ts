@@ -36,7 +36,8 @@ import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
 
 /**
  * `admin/workspace-groups` -- the groups themselves: creating and deleting them, and saying who
- * administers each. What happens inside a group is {@link GroupAdminWorkspaceController}.
+ * administers each. What happens inside a group is {@link WorkspaceGroupController},
+ * {@link WorkspacesController} and {@link WorkspaceAccessController}.
  *
  * The two levels meet in this one controller: creating and deleting a group and appointing its
  * admins are an administrator's, while what is in a group -- its workspaces, units and items -- is

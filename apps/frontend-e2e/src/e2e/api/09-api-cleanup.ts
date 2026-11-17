@@ -21,7 +21,7 @@ describe('Cleanup API tests', () => {
     });
   };
 
-  describe('87. DELETE /api/group-admin/workspaces/{ids}', () => {
+  describe('87. DELETE /api/workspaces?id={ids}', () => {
     it('200/500 negative test: should return success or server error when attempting ' +
       'to delete without a workspace context', () => {
       cy.deleteWsAPI(

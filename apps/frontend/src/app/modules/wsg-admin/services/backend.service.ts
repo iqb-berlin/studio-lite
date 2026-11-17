@@ -3,14 +3,12 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import {
-  CreateWorkspaceDto,
   UserFullDto,
   UserInListDto,
   UsersWorkspaceInListDto,
   UserWorkspaceAccessDto,
   WorkspaceGroupFullDto,
   WorkspaceUserInListDto,
-  UserWorkspaceAccessForGroupDto,
   UnitInViewDto,
   UnitItemInViewDto
 } from '@studio-lite-lib/api-dto';
@@ -33,7 +31,7 @@ export class BackendService {
 
   getUsers(): Observable<UserInListDto[]> {
     return this.http
-      .get<UserInListDto[]>(`${this.serverUrl}group-admin/users`)
+      .get<UserInListDto[]>(`${this.serverUrl}users`)
       .pipe(
         catchError(() => of([]))
       );
@@ -69,7 +67,7 @@ export class BackendService {
     let queryParams = new HttpParams();
     queryParams = queryParams.append('full', true);
     return this.http
-      .get<UserFullDto[]>(`${this.serverUrl}group-admin/users`, { params: queryParams })
+      .get<UserFullDto[]>(`${this.serverUrl}users`, { params: queryParams })
       .pipe(
         catchError(() => of([]))
       );
@@ -77,19 +75,22 @@ export class BackendService {
 
   // A failure is answered with null, not with an empty list: saving a role onto that list would
   // remove the user from every other workspace of the group (#2074).
-  getWorkspacesByUser(userId: number): Observable<UsersWorkspaceInListDto[] | null> {
+  getWorkspacesByUser(workspaceGroupId: number, userId: number): Observable<UsersWorkspaceInListDto[] | null> {
     return this.http
-      .get<UsersWorkspaceInListDto[]>(`${this.serverUrl}group-admin/users/${userId}/workspaces`)
+      .get<UsersWorkspaceInListDto[]>(
+        `${this.serverUrl}workspace-groups/${workspaceGroupId}/users/${userId}/workspaces`
+      )
       .pipe(
         catchError(() => of(null))
       );
   }
 
   setWorkspacesByUser(
+    workspaceGroupId: number,
     userId: number,
-    accessTo: UserWorkspaceAccessForGroupDto): Observable<boolean> {
+    accessTo: UserWorkspaceAccessDto[]): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}group-admin/users/${userId}/workspaces`, accessTo)
+      .patch(`${this.serverUrl}workspace-groups/${workspaceGroupId}/users/${userId}/workspaces`, accessTo)
       .pipe(succeeded());
   }
 
@@ -101,9 +102,9 @@ export class BackendService {
       );
   }
 
-  addWorkspace(createWorkspaceDto: CreateWorkspaceDto): Observable<boolean> {
+  addWorkspace(workspaceGroupId: number, name: string): Observable<boolean> {
     return this.http
-      .post<boolean>(`${this.serverUrl}group-admin/workspaces`, createWorkspaceDto)
+      .post<boolean>(`${this.serverUrl}workspace-groups/${workspaceGroupId}/workspaces`, { name })
       .pipe(succeeded());
   }
 
@@ -123,13 +124,13 @@ export class BackendService {
     let queryParams = new HttpParams();
     workspaces.forEach(id => { queryParams = queryParams.append('id', id); });
     return this.http
-      .delete(`${this.serverUrl}group-admin/workspaces`, { params: queryParams })
+      .delete(`${this.serverUrl}workspaces`, { params: queryParams })
       .pipe(succeeded());
   }
 
   moveWorkspaces(workspaceGroupId: number, workspaces: number[]): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}group-admin/workspaces/group-id`, { targetId: workspaceGroupId, ids: workspaces })
+      .patch(`${this.serverUrl}workspaces/group-id`, { targetId: workspaceGroupId, ids: workspaces })
       .pipe(succeeded());
   }
 
@@ -138,7 +139,7 @@ export class BackendService {
   // remove everyone else from the workspace (#2074).
   getUsersByWorkspace(workspaceId: number): Observable<WorkspaceUserInListDto[] | null> {
     return this.http
-      .get<WorkspaceUserInListDto[]>(`${this.serverUrl}group-admin/workspaces/${workspaceId}/users`)
+      .get<WorkspaceUserInListDto[]>(`${this.serverUrl}workspaces/${workspaceId}/access`)
       .pipe(
         catchError(() => of(null))
       );
@@ -146,7 +147,7 @@ export class BackendService {
 
   setUsersByWorkspace(workspaceId: number, accessTo: UserWorkspaceAccessDto[]): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}group-admin/workspaces/${workspaceId}/users`, accessTo)
+      .patch(`${this.serverUrl}workspaces/${workspaceId}/access`, accessTo)
       .pipe(succeeded());
   }
 

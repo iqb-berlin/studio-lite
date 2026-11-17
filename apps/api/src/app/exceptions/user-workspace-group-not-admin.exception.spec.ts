@@ -7,7 +7,7 @@ describe('UserWorkspaceGroupNotAdminException', () => {
     expect(exception.getStatus()).toBe(403);
     expect(exception.getResponse()).toEqual({
       id: 1,
-      controller: 'group-admin/workspaces',
+      controller: 'workspaces',
       method: 'POST',
       description: 'User is not admin of 1'
     });

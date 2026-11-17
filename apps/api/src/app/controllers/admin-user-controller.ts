@@ -30,7 +30,7 @@ import { UserId } from '../decorators/user-id.decorator';
  * administers which workspace group, and clearing sessions that are stuck.
  *
  * Assigning users to single workspaces is one level down, in
- * {@link GroupAdminWorkspaceController} and {@link GroupAdminUserController}.
+ * {@link WorkspaceAccessController} and {@link WorkspaceGroupUserController}.
  */
 @Controller('admin/users')
 export class AdminUserController {

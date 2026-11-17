@@ -39,7 +39,7 @@ describe('Admin API tests', () => {
     });
   });
 
-  describe('7. GET /api/group-admin/users', () => {
+  describe('7. GET /api/users', () => {
     it('200 positive test: should allow an administrator to retrieve all users', () => {
       cy.getUsersAPI(Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
@@ -56,7 +56,7 @@ describe('Admin API tests', () => {
     });
   });
 
-  describe('8. GET /api/group-admin/users full=true', () => {
+  describe('8. GET /api/users full=true', () => {
     it('200 positive test: should allow an administrator to retrieve full user data', () => {
       cy.getUsersFullAPI(false, Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {

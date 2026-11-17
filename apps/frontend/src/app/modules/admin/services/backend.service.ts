@@ -92,7 +92,7 @@ export class BackendService {
 
   getUsers(): Observable<UserInListDto[]> {
     return this.http
-      .get<UserInListDto[]>(`${this.serverUrl}group-admin/users`)
+      .get<UserInListDto[]>(`${this.serverUrl}users`)
       .pipe(
         catchError(() => of([]))
       );
@@ -112,7 +112,7 @@ export class BackendService {
     const headers = countAsActivity ? new HttpHeaders({ 'x-activity-intent': 'user' }) : undefined;
     const requestOptions = { params: queryParams, headers };
     return this.http
-      .get<UserFullDto[]>(`${this.serverUrl}group-admin/users`, requestOptions)
+      .get<UserFullDto[]>(`${this.serverUrl}users`, requestOptions)
       .pipe(
         catchError(() => of([]))
       );

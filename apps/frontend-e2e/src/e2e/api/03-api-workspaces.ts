@@ -14,7 +14,7 @@ import {
 } from '../../support/util-api';
 
 describe('Workspace API tests', () => {
-  describe('16. POST /api/group-admin/workspaces', () => {
+  describe('16. POST /api/workspace-groups/{workspace_group_id}/workspaces', () => {
     it('201 positive test: should allow a group administrator to create a workspace', () => {
       cy.createWsAPI(
         Cypress.expose(groupVera.id),
@@ -37,9 +37,9 @@ describe('Workspace API tests', () => {
       });
     });
 
-    // The case this test was written for has arrived: it answered 201 until #1005, because the
-    // group stands in the body where the guard does not look, so administering one group was
-    // enough to create a workspace in every other one.
+    // It answered 201 until #1005: the group stood in the body where the guard does not look, so
+    // administering one group was enough to create a workspace in every other one. The group is in
+    // the path since #1216, where the guard reads it.
     it('403 negative test: should deny a group admin a workspace in a group they do not administer', () => {
       cy.createWsAPI(
         Cypress.expose(group2.id),
@@ -109,7 +109,7 @@ describe('Workspace API tests', () => {
     });
   });
 
-  describe('17. PATCH /api/group-admin/workspaces/group-id', () => {
+  describe('17. PATCH /api/workspaces/group-id', () => {
     it('200 positive test: should allow moving a workspace between groups when having permissions in both', () => {
       cy.setAdminsOfGroupAPI(
         [
@@ -259,7 +259,7 @@ describe('Workspace API tests', () => {
     });
   });
 
-  describe('19. PATCH /api/group-admin/workspaces/{id}/users', () => {
+  describe('19. PATCH /api/workspaces/{id}/access', () => {
     it('401 negative test: should deny identifying workspace users with an incorrect token', () => {
       cy.updateUsersOfWsAPI(
         Cypress.expose(ws1.id),
@@ -319,7 +319,7 @@ describe('Workspace API tests', () => {
     });
   });
 
-  describe('20. GET /api/group-admin/workspaces/{id}/users', () => {
+  describe('20. GET /api/workspaces/{id}/access', () => {
     it('200 positive test: should retrieve the list of users assigned to a workspace', () => {
       cy.getUsersOfWsAPI(
         Cypress.expose(ws1.id),
@@ -389,21 +389,16 @@ describe('Workspace API tests', () => {
     });
   });
 
-  // The routes of the group-admin area whose path names no group -- the lists, and creating a
-  // workspace, which carries its group in the body -- ask whether the user administers any group
-  // at all. user3 administers none and is refused.
+  // The user list names no group in its path and asks whether the user administers any group at
+  // all; creating a workspace and reading a user's workspaces carry their group in the path since
+  // #1216 and ask about that one. user3 administers none and is refused by all three.
   //
   // This is the closed half of IsWorkspaceGroupAdminGuard, and nothing measured it: the fixture's
   // plain user carries a user list where a token belongs (see 18.), so every request with it dies
-  // at JwtAuthGuard, several routes short of the guard. Measured against the guard before #1629
-  // (f66c147f^), these three answer the same as they do now -- the unresolved branch already asked
-  // "any group at all". What #1629 changed is that a route has to say so with
-  // @AnyWorkspaceGroupAdmin(); an unmarked one is refused instead of falling back silently.
-  //
-  // The open half is not here: whoever administers ANY group still reaches every other group
-  // through these routes, because the target group arrives in the body or the query where the
-  // guard does not look. That is #1005.
-  describe('the group-admin area without a group in the path', () => {
+  // at JwtAuthGuard, several routes short of the guard. What #1629 changed is that a route without
+  // a group has to say so with @AnyWorkspaceGroupAdmin(); an unmarked one is refused instead of
+  // falling back silently.
+  describe('the group-admin area for a user who administers no group', () => {
     before(() => {
       // `token_${user3.username}` holds the user list that 18. read a line earlier, not a token,
       // and a request with it never reaches the guard under test.
@@ -414,8 +409,6 @@ describe('Workspace API tests', () => {
     });
 
     it('403 negative test: should deny a user who administers no group the creation of a workspace', () => {
-      // The route a group admin uses to create a workspace in any group at all (#1005). It is at
-      // least closed to someone who administers none.
       cy.createWsAPI(
         Cypress.expose(groupVera.id),
         ws3,
@@ -433,6 +426,7 @@ describe('Workspace API tests', () => {
 
     it('403 negative test: should deny a user who administers no group the workspaces of another user', () => {
       cy.getWsByUserAPI(
+        Cypress.expose(groupVera.id),
         Cypress.expose(`id_${userGroupAdmin.username}`),
         Cypress.expose('tokenOfPlainUser')
       ).then(resp => {
@@ -452,8 +446,8 @@ describe('Workspace API tests', () => {
     });
   });
 
-  // The other two routes that name their group in the query or the body, and through which a group
-  // admin reached every other group until #1005. userGroupAdmin administers groupVera; group2
+  // The two routes that name their groups in the query or the body, because the workspaces may lie
+  // in several groups, and through which a group admin reached every other group until #1005. userGroupAdmin administers groupVera; group2
   // belongs to the main administrator alone since 17.
   describe('the group-admin area with a group the user does not administer (#1005)', () => {
     it('403 negative test: should deny deleting a workspace of a group the user does not administer', () => {

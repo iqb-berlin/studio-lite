@@ -161,7 +161,7 @@ describe('Token Refresh UI Logic', () => {
     // inactive is when isLoggedIn is false OR no sessions
     const inactiveDate = new Date(now - (10 * 24 * 60 * 60 * 1000)).toISOString();
 
-    cy.intercept('GET', '/api/group-admin/users*', {
+    cy.intercept('GET', '/api/users*', {
       statusCode: 200,
       body: [
         {

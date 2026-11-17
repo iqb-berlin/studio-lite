@@ -19,10 +19,7 @@ describe('WorkspaceToCheckCollection', () => {
   it('should check the workspaces of the user at their access levels', () => {
     collection.setChecks([workspace(3, 'gamma', 4), workspace(1, 'alpha', 2)]);
 
-    expect(collection.getChecks(7)).toEqual({
-      groupId: 7,
-      workspaces: [{ id: 1, accessLevel: 2 }, { id: 3, accessLevel: 4 }]
-    });
+    expect(collection.getChecks()).toEqual([{ id: 1, accessLevel: 2 }, { id: 3, accessLevel: 4 }]);
   });
 
   it.each<[string, (c: WorkspaceToCheckCollection) => void, boolean]>([

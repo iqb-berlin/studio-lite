@@ -1,10 +1,11 @@
 import {
   Body,
-  Controller, Get, Patch, Query, Res, StreamableFile, UseGuards
+  Controller, Get, Patch, Post, Query, Res, StreamableFile, UseGuards
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
@@ -12,12 +13,10 @@ import {
   ApiParam,
   ApiQuery,
   ApiTags,
-  ApiUnauthorizedResponse
+  ApiUnauthorizedResponse,
+  ApiUnprocessableEntityResponse
 } from '@nestjs/swagger';
-import {
-
-  WorkspaceGroupFullDto
-} from '@studio-lite-lib/api-dto';
+import { CreateWorkspaceDto, NameDto, WorkspaceGroupFullDto } from '@studio-lite-lib/api-dto';
 import type { Response } from 'express';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGroupService } from '../services/workspace-group.service';
@@ -30,7 +29,7 @@ import { UnitService } from '../services/unit.service';
 
 /**
  * `workspace-groups/:workspace_group_id` -- a single group: read by its members, its admin and any
- * administrator, and changed by its admin or an administrator.
+ * administrator, and changed by its admin or an administrator, who also create its workspaces here.
  *
  * The GET has a second shape: with `download` it answers with the xlsx report over all workspaces
  * of the group instead of the group itself. The group passes for its members, the report only for
@@ -90,5 +89,25 @@ export class WorkspaceGroupController {
   @ApiTags('workspace-group')
   async patch(@WorkspaceGroupId() id: number, @Body() workspaceGroupFullDto: WorkspaceGroupFullDto) {
     return this.workspaceGroupService.patch(id, workspaceGroupFullDto);
+  }
+
+  /**
+   * A new workspace in this group, for its admin. The group is the one in the path, which the guard
+   * has checked; of the body only the name is taken (#2029, #1216).
+   */
+  @Post('workspaces')
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_group_id', type: Number })
+  @ApiCreatedResponse({
+    description: 'Sends back the id of the new Workspace in database',
+    type: Number
+  })
+  @ApiUnprocessableEntityResponse({ description: 'Creating of workspace in group is forbidden' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace-group.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
+  @ApiTags('workspace-group')
+  async createWorkspace(@WorkspaceGroupId() id: number, @Body() body: NameDto): Promise<number> {
+    return this.workspaceService.create(<CreateWorkspaceDto>{ groupId: id, name: body.name });
   }
 }
