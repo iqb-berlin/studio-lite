@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { AboutComponent } from './components/about/about.component';
 import { HomeComponent } from './components/home/home.component';
 import { authGuard } from './guards/auth.guard';
+import { adminGuard, workspaceGroupAdminGuard } from './guards/role.guard';
 import { reviewAuthGuard } from './guards/review-auth.guard';
 
 export const APP_ROUTES: Routes = [
@@ -14,7 +15,7 @@ export const APP_ROUTES: Routes = [
   },
   {
     path: 'admin',
-    canActivate: [authGuard],
+    canActivate: [authGuard, adminGuard],
     loadChildren: () => import('./modules/admin/admin.routes').then(m => m.ADMIN_ROUTES)
   },
   {
@@ -24,7 +25,7 @@ export const APP_ROUTES: Routes = [
   },
   {
     path: 'wsg-admin/:wsg',
-    canActivate: [authGuard],
+    canActivate: [authGuard, workspaceGroupAdminGuard],
     loadChildren: () => import('./modules/wsg-admin/wsg-admin.routes').then(m => m.WSG_ADMIN_ROUTES)
   },
   {
