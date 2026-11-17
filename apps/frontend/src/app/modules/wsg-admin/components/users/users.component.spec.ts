@@ -160,7 +160,9 @@ describe('UsersComponent', () => {
     component.tableSelectionRow.select(user);
 
     expect(component.selectedUser).toBe(1);
-    expect(mockBackendService.getWorkspacesByUser).toHaveBeenCalledWith(1);
+    // the rights of the user in the group of the page (#1216)
+    expect(mockBackendService.getWorkspacesByUser)
+      .toHaveBeenCalledWith(mockWsgAdminService.selectedWorkspaceGroupId.value, 1);
   });
 
   it('should set selectedUser to 0 when deselected', () => {
@@ -211,7 +213,7 @@ describe('UsersComponent', () => {
       workspacesOfUser2 = new Subject<UsersWorkspaceInListDto[] | null>();
       mockBackendService.getWorkspaces.mockReturnValue(of([{ id: 1, name: 'ws1', groupId: 1 }]));
       mockBackendService.getWorkspacesByUser
-        .mockImplementation((id: number) => (id === 1 ? workspacesOfUser1 : workspacesOfUser2));
+        .mockImplementation((groupId: number, id: number) => (id === 1 ? workspacesOfUser1 : workspacesOfUser2));
       fixture.detectChanges();
     });
 
@@ -339,7 +341,8 @@ describe('UsersComponent', () => {
 
     component.saveWorkspaces();
 
-    expect(mockBackendService.setWorkspacesByUser).toHaveBeenCalled();
+    expect(mockBackendService.setWorkspacesByUser)
+      .toHaveBeenCalledWith(mockWsgAdminService.selectedWorkspaceGroupId.value, 1, []);
     expect(mockSnackBar.open).toHaveBeenCalledWith('access-rights.changed', '', { duration: 1000 });
   });
 

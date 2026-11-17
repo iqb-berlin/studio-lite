@@ -137,7 +137,7 @@ declare namespace Cypress {
     deleteUnitsAPI(ids: string[], wsId: string, token: string): Chainable<Response>; // 79
     getMyData(token:string): Chainable<Response>; // 80
     updateMyData(token:string, data:MyData): Chainable<Response>; // 81
-    getWsByUserAPI(id: string, token: string): Chainable<Response>; // 82
+    getWsByUserAPI(groupId: string, id: string, token: string): Chainable<Response>; // 82
     // eslint-disable-next-line max-len
     updateWsByUserAPI(id: string, groupId: string, levels: number[], wsIds: string[], token: string): Chainable<Response>; // 83
     uploadUnitsAPI(wsId: string, filename:string, token:string): Chainable<Response>; // 84

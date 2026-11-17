@@ -10,7 +10,8 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { JWT_EXPIRES_IN } from './app.constants';
 import { AppController } from './controllers/app.controller';
 import { AppVersionProvider } from './guards/app-version.guard';
-import { GroupAdminWorkspaceController } from './controllers/group-admin-workspace.controller';
+import { WorkspacesController } from './controllers/workspaces.controller';
+import { WorkspaceAccessController } from './controllers/workspace-access.controller';
 import { AdminUserController } from './controllers/admin-user-controller';
 import { AdminWorkspaceGroupController } from './controllers/admin-workspace-group.controller';
 import { SettingController } from './controllers/setting.controller';
@@ -70,7 +71,8 @@ import { ReviewUnitController } from './controllers/review-unit.controller';
 import { ReviewUnitCommentController } from './controllers/review-unit-comment.controller';
 import { VeronaModuleController } from './controllers/verona-module.controller';
 import { ResourcePackageController } from './controllers/resource-package.controller';
-import { GroupAdminUserController } from './controllers/group-admin-user-controller';
+import { UsersController } from './controllers/users.controller';
+import { WorkspaceGroupUserController } from './controllers/workspace-group-user.controller';
 import { WorkspaceUnitItemController } from './controllers/workspace-unit-item.controller';
 import { UnitItemService } from './services/unit-item.service';
 import UnitItem from './entities/unit-item.entity';
@@ -201,9 +203,11 @@ const ENTITIES = [
   ],
   controllers: [
     AppController,
-    GroupAdminWorkspaceController,
+    WorkspacesController,
+    WorkspaceAccessController,
     AdminUserController,
-    GroupAdminUserController,
+    UsersController,
+    WorkspaceGroupUserController,
     AdminWorkspaceGroupController,
     AdminController,
     SettingController,

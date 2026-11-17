@@ -123,7 +123,7 @@ describe('Admin BackendService', () => {
         done();
       });
 
-      const req = httpMock.expectOne(r => r.url === `${baseUrl}group-admin/users`);
+      const req = httpMock.expectOne(r => r.url === `${baseUrl}users`);
       expect(req.request.method).toBe('GET');
       expect(req.request.params.get('full')).toBe('true');
       expect(req.request.headers.has('x-activity-intent')).toBe(false);
@@ -138,7 +138,7 @@ describe('Admin BackendService', () => {
         done();
       });
 
-      const req = httpMock.expectOne(r => r.url === `${baseUrl}group-admin/users`);
+      const req = httpMock.expectOne(r => r.url === `${baseUrl}users`);
       expect(req.request.method).toBe('GET');
       expect(req.request.params.get('full')).toBe('true');
       expect(req.request.headers.get('x-activity-intent')).toBe('user');

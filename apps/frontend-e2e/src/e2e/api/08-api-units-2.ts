@@ -682,7 +682,7 @@ describe('Unit API tests part II', () => {
     });
   });
 
-  describe('82. GET /api/group-admin/users/{id}/workspaces', () => {
+  describe('82. GET /api/workspace-groups/{workspace_group_id}/users/{user_id}/workspaces', () => {
     before(() => {
       cy.updateWsByUserAPI(
         Cypress.expose(`id_${Cypress.expose('username')}`),
@@ -694,19 +694,22 @@ describe('Unit API tests part II', () => {
         expect(resp.status).to.equal(200);
       });
     });
+    // The workspaces of the group in the path, not of every group (#1216): ws3 is group2's only one.
     it('200 positive test: should successfully retrieve the workspace list for an administrator user', () => {
       cy.getWsByUserAPI(
+        Cypress.expose(group2.id),
         Cypress.expose(`id_${Cypress.expose('username')}`),
         Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
-        expect(resp.body[1].userAccessLevel).to.equal(4);
-        expect(resp.body.length).to.equal(3);
+        expect(resp.body.length).to.equal(1);
+        expect(resp.body[0].userAccessLevel).to.equal(4);
       });
     });
 
     it('200 positive test: should successfully retrieve the workspace list for a regular user profile', () => {
       cy.getWsByUserAPI(
+        Cypress.expose(groupVera.id),
         Cypress.expose(`id_${userGroupAdmin.username}`),
         Cypress.expose(`token_${userGroupAdmin.username}`)
       ).then(resp => {
@@ -721,6 +724,7 @@ describe('Unit API tests part II', () => {
         // The administrator works in ws1 and ws2 (groupVera, which userGroupAdmin administers)
         // and in ws3 (group2, which it does not). ws3 used to be handed out as well (#1650).
         cy.getWsByUserAPI(
+          Cypress.expose(groupVera.id),
           Cypress.expose(`id_${Cypress.expose('username')}`),
           Cypress.expose(`token_${userGroupAdmin.username}`)
         ).then(resp => {
@@ -732,8 +736,20 @@ describe('Unit API tests part II', () => {
       }
     );
 
+    // The group is in the path, so the guard refuses a group the requester does not administer (#1650, #1216)
+    it('403 negative test: should deny the workspaces of a user in a group the requester does not administer', () => {
+      cy.getWsByUserAPI(
+        Cypress.expose(group2.id),
+        Cypress.expose(`id_${Cypress.expose('username')}`),
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(403);
+      });
+    });
+
     it('401 negative test: should deny access to the user workspace list when no authentication is provided', () => {
       cy.getWsByUserAPI(
+        Cypress.expose(groupVera.id),
         Cypress.expose(`id_${Cypress.expose('username')}`),
         noId
       ).then(resp => {
@@ -744,6 +760,7 @@ describe('Unit API tests part II', () => {
     it('404/200 negative test: should return error when requesting workspaces for a non-existent user ID', () => {
       // This test should be negative 404, but it returns an empty array
       cy.getWsByUserAPI(
+        Cypress.expose(groupVera.id),
         noId,
         Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
@@ -753,7 +770,7 @@ describe('Unit API tests part II', () => {
     });
   });
 
-  describe('83. UPDATE /api/group-admin/users/{id}/workspaces', () => {
+  describe('83. UPDATE /api/workspace-groups/{workspace_group_id}/users/{user_id}/workspaces', () => {
     it(
       '200 positive test: should allow a group administrator to update workspace ' +
         'access levels for managed users',
@@ -787,9 +804,9 @@ describe('Unit API tests part II', () => {
       }
     );
 
-    // The case this test was written for has arrived: it answered 200 until #1005. The group
-    // stands in the body and the path names a user, so the guard had nothing to read and asked
-    // only whether the caller administers any group at all.
+    // It answered 200 until #1005: the group stood in the body and the path named a user, so the
+    // guard had nothing to read and asked only whether the caller administers any group at all. The
+    // group is in the path since #1216, where the guard reads it.
     it('403 negative test: should deny a group administrator from modifying ' +
       'access in a group they do not manage', () => {
       cy.updateWsByUserAPI(

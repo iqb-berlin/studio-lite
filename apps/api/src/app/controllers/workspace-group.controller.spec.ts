@@ -41,9 +41,19 @@ describe('WorkspaceGroupController', () => {
   });
 
   // The guards are the authorisation of each method; no other unit test sees them (#1953).
-  it('should let only admins of the group reach patch', () => {
-    expect(Reflect.getMetadata('__guards__', WorkspaceGroupController.prototype.patch))
+  it.each(['patch', 'createWorkspace'] as const)('should let only admins of the group reach %s', method => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceGroupController.prototype[method]))
       .toEqual([JwtAuthGuard, IsWorkspaceGroupAdminGuard]);
+  });
+
+  // The group is the one in the path, which the guard has checked; it used to be read from the body,
+  // where the guard does not look (#1005, #1216). Nothing else of the body goes in (#2029).
+  it('should create the workspace in the group of the path, with the name alone', async () => {
+    jest.spyOn(workspaceService, 'create').mockResolvedValue(42);
+    const body = { name: 'Neu', groupId: 9, id: 3 } as { name: string };
+
+    expect(await controller.createWorkspace(2, body)).toBe(42);
+    expect(workspaceService.create).toHaveBeenCalledWith({ groupId: 2, name: 'Neu' });
   });
 
   describe('findOne', () => {

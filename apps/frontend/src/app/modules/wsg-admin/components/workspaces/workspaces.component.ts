@@ -9,7 +9,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import {
-  CreateWorkspaceDto, WorkspaceInListDto, WorkspaceUserInListDto
+  WorkspaceInListDto, WorkspaceUserInListDto
 } from '@studio-lite-lib/api-dto';
 import { DatePipe } from '@angular/common';
 import { saveAs } from 'file-saver-es';
@@ -314,10 +314,7 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
 
   addWorkspace(result: string) {
     this.appService.dataLoading = true;
-    this.backendService.addWorkspace(<CreateWorkspaceDto>{
-      name: result,
-      groupId: this.wsgAdminService.selectedWorkspaceGroupId.value
-    })
+    this.backendService.addWorkspace(this.wsgAdminService.selectedWorkspaceGroupId.value, result)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(
         respOk => {

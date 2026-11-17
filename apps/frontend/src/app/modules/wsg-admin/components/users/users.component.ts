@@ -124,7 +124,8 @@ export class UsersComponent implements OnInit, OnDestroy {
     if (this.selectedUser) {
       this.appService.dataLoading = true;
       this.isLoadingAccessRights = true;
-      this.accessRightsRequest = this.backendService.getWorkspacesByUser(this.selectedUser)
+      this.accessRightsRequest = this.backendService
+        .getWorkspacesByUser(this.wsgAdminService.selectedWorkspaceGroupId.value, this.selectedUser)
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(
           (workspaces: UsersWorkspaceInListDto[] | null) => {
@@ -158,8 +159,9 @@ export class UsersComponent implements OnInit, OnDestroy {
       if (this.userWorkspaces.hasChanged) {
         this.appService.dataLoading = true;
         this.backendService.setWorkspacesByUser(
+          this.wsgAdminService.selectedWorkspaceGroupId.value,
           this.selectedUser,
-          this.userWorkspaces.getChecks(this.wsgAdminService.selectedWorkspaceGroupId.value)
+          this.userWorkspaces.getChecks()
         )
           .pipe(takeUntil(this.ngUnsubscribe))
           .subscribe(

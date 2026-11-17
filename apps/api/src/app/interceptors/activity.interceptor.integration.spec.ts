@@ -6,7 +6,8 @@ import { of } from 'rxjs';
 import { ActivityInterceptor } from './activity.interceptor';
 import { UsersService } from '../services/users.service';
 import { AppController } from '../controllers/app.controller';
-import { GroupAdminUserController } from '../controllers/group-admin-user-controller';
+import { UsersController } from '../controllers/users.controller';
+import { WorkspaceGroupUserController } from '../controllers/workspace-group-user.controller';
 import { BACKGROUND_REQUEST_KEY } from '../decorators/background-request.decorator';
 
 /**
@@ -59,17 +60,17 @@ describe('ActivityInterceptor (integration)', () => {
     });
 
     it('should mark the polled user list as background unless intent is declared', () => {
-      expect(modeOf(GroupAdminUserController.prototype.findAll, GroupAdminUserController))
+      expect(modeOf(UsersController.prototype.findAll, UsersController))
         .toBe('unless-user-intent');
     });
 
     // The routes that the old substring list caught by accident: saving and reading a
     // user's workspace assignments is interaction and must carry no marking (#1517).
     it.each([
-      ['patchOnesWorkspaces', GroupAdminUserController.prototype.patchOnesWorkspaces],
-      ['findOnesWorkspaces', GroupAdminUserController.prototype.findOnesWorkspaces]
-    ])('should leave %s unmarked', (_name, handler) => {
-      expect(modeOf(handler, GroupAdminUserController)).toBeUndefined();
+      ['patch', WorkspaceGroupUserController.prototype.patch],
+      ['findAll', WorkspaceGroupUserController.prototype.findAll]
+    ])('should leave the workspace assignments\' %s unmarked', (_name, handler) => {
+      expect(modeOf(handler, WorkspaceGroupUserController)).toBeUndefined();
     });
 
     it('should leave an ordinary route unmarked', () => {
@@ -103,7 +104,7 @@ describe('ActivityInterceptor (integration)', () => {
 
     it('should record activity for saving workspace assignments', () => {
       interceptor.intercept(
-        contextFor(GroupAdminUserController.prototype.patchOnesWorkspaces, GroupAdminUserController),
+        contextFor(WorkspaceGroupUserController.prototype.patch, WorkspaceGroupUserController),
         next()
       );
 
@@ -112,7 +113,7 @@ describe('ActivityInterceptor (integration)', () => {
 
     it('should not record activity for the polled user list', () => {
       interceptor.intercept(
-        contextFor(GroupAdminUserController.prototype.findAll, GroupAdminUserController),
+        contextFor(UsersController.prototype.findAll, UsersController),
         next()
       );
 
@@ -122,8 +123,8 @@ describe('ActivityInterceptor (integration)', () => {
     it('should record activity for the user-triggered list refresh', () => {
       interceptor.intercept(
         contextFor(
-          GroupAdminUserController.prototype.findAll,
-          GroupAdminUserController,
+          UsersController.prototype.findAll,
+          UsersController,
           { 'x-activity-intent': 'user' }
         ),
         next()

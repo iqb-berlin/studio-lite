@@ -148,23 +148,16 @@ export class WorkspaceService {
   }
 
   /**
-   * A user's workspaces as a group admin sees them: only those in groups the requester
-   * administers; an administrator sees all of them (#1650). The group-admin area asks this to tick
-   * the boxes of the group it shows, and handed out the person's workspaces in foreign groups too.
+   * A user's workspaces in one group, as the admin of that group sees them to tick the boxes of the
+   * group page. The group comes from the path, where the guard has checked it (#1216); before, the
+   * answer held the user's workspaces in every group the requester administered (#1650).
    *
    * {@link findAll} stays as it is: it also builds a user's own list of workspaces
-   * ({@link findAllGroupwise}), where a filter by administered groups would hide them from anyone
-   * who administers none.
+   * ({@link findAllGroupwise}), where no group is asked for.
    */
-  async findAllInAdministeredGroups(userId: number, requesterId: number): Promise<UsersWorkspaceInListDto[]> {
+  async findAllInGroup(userId: number, workspaceGroupId: number): Promise<UsersWorkspaceInListDto[]> {
     const workspaces = await this.findAll(userId);
-    if (await this.usersService.getUserIsAdmin(requesterId)) return workspaces;
-    const administeredGroups = await this.workspaceGroupAdminRepository.find({
-      where: { userId: requesterId },
-      select: { workspaceGroupId: true }
-    });
-    const groupIds = new Set(administeredGroups.map(group => group.workspaceGroupId));
-    return workspaces.filter(workspace => groupIds.has(workspace.groupId));
+    return workspaces.filter(workspace => workspace.groupId === workspaceGroupId);
   }
 
   async findAllGroupwise(userId?: number): Promise<WorkspaceGroupDto[]> {

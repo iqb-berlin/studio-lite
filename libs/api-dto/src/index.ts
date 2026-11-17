@@ -74,7 +74,6 @@ export { MetadataProfileRegistryDto }
 export { RegisteredMetadataProfileDto } from './lib/dtos/registered-metadata-profile/registered-metadata-profile.dto';
 export { UserWorkspaceFullDto } from './lib/dtos/workspace/user-workspace-full.dto';
 export { UserWorkspaceAccessDto } from './lib/dtos/workspace/user-workspace-access.dto';
-export { UserWorkspaceAccessForGroupDto } from './lib/dtos/workspace/user-workspace-access-for-group.dto';
 export { UsersWorkspaceInListDto } from './lib/dtos/workspace/users-workspace-in-list.dto';
 export { WorkspaceUserInListDto } from './lib/dtos/user/workspace-user-in-list.dto';
 export { UnitItemDto } from './lib/dtos/unit-item/unit-item.dto';

@@ -1,20 +1,14 @@
 import {
-  Body, Controller, Delete, Get, Param, ParseArrayPipe, Patch, Post, Query, UseFilters, UseGuards
+  Body, Controller, Delete, ParseArrayPipe, Patch, Query, UseFilters, UseGuards
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
-  ApiCreatedResponse, ApiForbiddenResponse, ApiInternalServerErrorResponse,
-  ApiNotFoundResponse,
+  ApiForbiddenResponse, ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiQuery,
-  ApiTags,
-  ApiUnprocessableEntityResponse
+  ApiTags
 } from '@nestjs/swagger';
-import {
-  CreateWorkspaceDto,
-  WorkspaceUserInListDto,
-  UserWorkspaceAccessDto, MoveToDto
-} from '@studio-lite-lib/api-dto';
+import { MoveToDto } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceService } from '../services/workspace.service';
 import { UsersService } from '../services/users.service';
@@ -25,42 +19,21 @@ import { AnyWorkspaceGroupAdmin } from '../decorators/any-workspace-group-admin.
 import { UserWorkspaceGroupNotAdminException } from '../exceptions/user-workspace-group-not-admin.exception';
 
 /**
- * `group-admin/workspaces` -- what a group admin does with the workspaces of their group: create
- * and delete them, move one into another group, and decide who works in each and at which access
- * level.
+ * `workspaces` -- what is done to several workspaces at once: deleting them, and moving them into
+ * another group. The workspaces may lie in different groups, so no group stands in the path for the
+ * guard to check; the handlers ask about every group the request touches (#1005, #1984).
  *
- * Working IN a workspace is {@link WorkspaceController}; this is the level above it, and it is
- * reached without being assigned to any of the workspaces it acts on.
+ * A single workspace is {@link WorkspaceController}, who may work in it and at which level
+ * {@link WorkspaceAccessController}, and creating one belongs to its group
+ * ({@link WorkspaceGroupController}).
  */
-@Controller('group-admin/workspaces')
+@Controller('workspaces')
 @UseFilters(HttpExceptionFilter)
-export class GroupAdminWorkspaceController {
+export class WorkspacesController {
   constructor(
     private workspaceService: WorkspaceService,
     private userService: UsersService
   ) {}
-
-  @Get(':workspace_id/users')
-  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Workspace users retrieved successfully.' })
-  @ApiNotFoundResponse({ description: 'Admin workspace not found.' }) // TODO: not implemented in userService.findAll
-  @ApiTags('group-admin workspace')
-  async findOnesUsers(@Param('workspace_id') id: number): Promise<WorkspaceUserInListDto[]> {
-    return this.userService.findAllUsers(id);
-  }
-
-  @Patch(':workspace_id/users')
-  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Workspace users updated successfully.' })
-  @ApiForbiddenResponse({ description: 'No privileges in group-admin.' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
-  @ApiTags('group-admin workspace')
-  async patchOnesUsers(@Param('workspace_id') id: number,
-    @Body() users: UserWorkspaceAccessDto[]) {
-    return this.userService.setUsersByWorkspace(id, users);
-  }
 
   @Delete()
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
@@ -68,7 +41,7 @@ export class GroupAdminWorkspaceController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspaces deleted successfully.' })
   @ApiForbiddenResponse({ description: 'Forbidden. No privileges in the group of one of the workspaces' })
-  @ApiTags('group-admin workspace')
+  @ApiTags('workspaces')
   @ApiQuery({
     name: 'id',
     type: Number,
@@ -94,33 +67,16 @@ export class GroupAdminWorkspaceController {
   @ApiOkResponse({ description: 'Workspace moved successfully.' })
   @ApiForbiddenResponse({ description: 'Forbidden. No privileges in the origin or the target group' })
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
-  @ApiTags('group-admin workspace')
+  @ApiTags('workspaces')
   async patchGroups(@UserId() userId: number, @Body() body: MoveToDto): Promise<void> {
     await this.assertAdministersGroup(userId, body.targetId, 'PATCH');
     await this.assertAdministersWorkspaces(userId, body.ids, 'PATCH');
     return this.workspaceService.patchWorkspaceGroups(body.ids, body.targetId);
   }
 
-  @Post()
-  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
-  @AnyWorkspaceGroupAdmin()
-  @ApiBearerAuth()
-  @ApiCreatedResponse({
-    description: 'Sends back the id of the new Workspace in database',
-    type: Number
-  })
-  @ApiUnprocessableEntityResponse({ description: 'Creating of workspace in group is forbidden' })
-  @ApiForbiddenResponse({ description: 'Forbidden. No privileges in the group the workspace goes into' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
-  @ApiTags('group-admin workspace')
-  async create(@UserId() userId: number, @Body() createWorkspaceDto: CreateWorkspaceDto) {
-    await this.assertAdministersGroup(userId, createWorkspaceDto.groupId, 'POST');
-    return this.workspaceService.create(createWorkspaceDto);
-  }
-
   /**
-   * Refuses unless the user administers this group. The guard cannot ask this for the three routes
-   * that carry their group in the body or the query -- it reads the path, and there the group is
+   * Refuses unless the user administers this group. The guard cannot ask this for the routes here,
+   * which carry their groups in the body or the query -- it reads the path, and there the group is
    * not (#1005). An administrator passes, as everywhere in this area.
    */
   private async assertAdministersGroup(userId: number, groupId: number, method: string): Promise<void> {

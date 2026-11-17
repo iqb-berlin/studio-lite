@@ -5,7 +5,7 @@ export class AdminWorkspaceNotFoundException extends NotFoundException {
   constructor(workspaceId: number, method: string) {
     const description = `Admin workspace with id ${workspaceId} not found`;
     const objectOrError = {
-      id: workspaceId, controller: 'group-admin/workspaces', method, description
+      id: workspaceId, controller: 'workspaces', method, description
     };
     super(objectOrError);
   }

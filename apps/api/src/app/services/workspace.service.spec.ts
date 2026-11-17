@@ -100,48 +100,19 @@ describe('WorkspaceService', () => {
   });
 
   // A group admin used to get a person's workspaces in every group, names and access levels
-  // included (#1650).
-  describe('findAllInAdministeredGroups', () => {
-    const personsWorkspaces = [
-      { id: 1, groupId: 10 },
-      { id: 2, groupId: 20 },
-      { id: 3, groupId: 30 }
-    ] as UsersWorkspaceInListDto[];
+  // included (#1650). The group is now the one in the path (#1216).
+  describe('findAllInGroup', () => {
+    it('should keep only the workspaces of the group', async () => {
+      jest.spyOn(service, 'findAll').mockResolvedValue([
+        { id: 1, groupId: 10 },
+        { id: 2, groupId: 20 },
+        { id: 3, groupId: 10 }
+      ] as UsersWorkspaceInListDto[]);
 
-    beforeEach(() => {
-      jest.spyOn(service, 'findAll').mockResolvedValue(personsWorkspaces);
-    });
-
-    it('should keep only the workspaces in groups the requester administers', async () => {
-      (usersService.getUserIsAdmin as jest.Mock).mockResolvedValue(false);
-      (workspaceGroupAdminRepository.find as jest.Mock).mockResolvedValue([
-        { workspaceGroupId: 10 }, { workspaceGroupId: 30 }
-      ] as WorkspaceGroupAdmin[]);
-
-      const result = await service.findAllInAdministeredGroups(5, 7);
+      const result = await service.findAllInGroup(5, 10);
 
       expect(service.findAll).toHaveBeenCalledWith(5);
-      expect(workspaceGroupAdminRepository.find).toHaveBeenCalledWith({
-        where: { userId: 7 },
-        select: { workspaceGroupId: true }
-      });
       expect(result.map(workspace => workspace.id)).toEqual([1, 3]);
-    });
-
-    it('should answer with nothing for a person who works in none of the requester\'s groups', async () => {
-      (usersService.getUserIsAdmin as jest.Mock).mockResolvedValue(false);
-      (workspaceGroupAdminRepository.find as jest.Mock).mockResolvedValue([
-        { workspaceGroupId: 99 }
-      ] as WorkspaceGroupAdmin[]);
-
-      expect(await service.findAllInAdministeredGroups(5, 7)).toEqual([]);
-    });
-
-    it('should let an administrator see all of them', async () => {
-      (usersService.getUserIsAdmin as jest.Mock).mockResolvedValue(true);
-
-      expect(await service.findAllInAdministeredGroups(5, 1)).toBe(personsWorkspaces);
-      expect(workspaceGroupAdminRepository.find).not.toHaveBeenCalled();
     });
   });
 
