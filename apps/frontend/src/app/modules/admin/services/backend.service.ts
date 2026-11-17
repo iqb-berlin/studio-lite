@@ -67,7 +67,7 @@ export class BackendService {
    */
   setWorkspaceGroupProfiles(profiles: Profile[], workspaceGroupId: number): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}`, {
+      .patch(`${this.serverUrl}workspace-groups/${workspaceGroupId}`, {
         id: workspaceGroupId,
         settings: { profiles }
       })
@@ -76,7 +76,7 @@ export class BackendService {
 
   getWorkspaceGroupById(workspaceGroupId: number):Observable<boolean | WorkspaceGroupFullDto> {
     return this.http
-      .get<WorkspaceGroupFullDto>(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}`)
+      .get<WorkspaceGroupFullDto>(`${this.serverUrl}workspace-groups/${workspaceGroupId}`)
       .pipe(
         catchError(() => of(false))
       );
@@ -222,7 +222,7 @@ export class BackendService {
   changeWorkspaceGroup(workspaceGroupData: WorkspaceGroupFullDto): Observable<boolean> {
     return this.http
       .patch<boolean>(
-        `${this.serverUrl}admin/workspace-groups/${workspaceGroupData.id}`,
+        `${this.serverUrl}workspace-groups/${workspaceGroupData.id}`,
         workspaceGroupData
       )
       .pipe(succeeded());
@@ -344,14 +344,6 @@ export class BackendService {
         responseType: 'blob'
       }
     );
-  }
-
-  getUnits(): Observable<UnitInViewDto[]> {
-    return this.http
-      .get<UnitInViewDto[]>(`${this.serverUrl}admin/workspace-groups/units`)
-      .pipe(
-        catchError(() => of([]))
-      );
   }
 
   // A failure is answered with null: passed on as an error, it never reached the handler that takes

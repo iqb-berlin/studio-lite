@@ -267,20 +267,6 @@ Cypress.Commands.add('createGroupAPI', (group:GroupData, token:string, settings?
   });
 });
 
-// 11
-Cypress.Commands.add('getGroupByIdAPI', (groupId: string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'GET',
-    url: `/api/admin/workspace-groups/${groupId}`,
-    headers: {
-      'app-version': Cypress.expose('version'),
-      authorization
-    },
-    failOnStatusCode: false
-  });
-});
-
 // 12
 Cypress.Commands.add('getWsGroupsAPI', (token:string) => {
   const authorization = `bearer ${token}`;
@@ -300,7 +286,7 @@ Cypress.Commands.add('updateGroupAPI', (groupId:string, newGroupName: string, to
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
-    url: `/api/admin/workspace-groups/${groupId}`,
+    url: `/api/workspace-groups/${groupId}`,
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -375,20 +361,6 @@ Cypress.Commands.add('moveWsAPI', (ws: string | string[], newGroup: string, toke
     body: {
       ids: (Array.isArray(ws) ? ws : [ws]).map(id => `${id}`),
       targetId: `${newGroup}`
-    },
-    failOnStatusCode: false
-  });
-});
-
-// 18
-Cypress.Commands.add('getWsAPI', (wsId: string, token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'GET',
-    url: `/api/group-admin/workspaces/${wsId}`,
-    headers: {
-      'app-version': Cypress.expose('version'),
-      authorization
     },
     failOnStatusCode: false
   });
@@ -537,20 +509,6 @@ Cypress.Commands.add('createUnitAPI', (wsId:string, unit: UnitData, token:string
       groupName: `${unit.group}`,
       ...(unit.player && { player: unit.player }),
       ...(unit.editor && { editor: unit.editor })
-    },
-    failOnStatusCode: false
-  });
-});
-
-// 26
-Cypress.Commands.add('getUnitsAPI', (token:string) => {
-  const authorization = `bearer ${token}`;
-  cy.request({
-    method: 'GET',
-    url: '/api/admin/workspace-groups/units',
-    headers: {
-      'app-version': Cypress.expose('version'),
-      authorization
     },
     failOnStatusCode: false
   });

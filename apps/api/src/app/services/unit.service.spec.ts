@@ -141,16 +141,6 @@ describe('UnitService', () => {
     });
   });
 
-  describe('findAll', () => {
-    it('should return units with workspace name', async () => {
-      unitsRepository.find.mockResolvedValue([{ workspaceId: 1 } as Unit]);
-      workspaceRepository.find.mockResolvedValue([{ id: 1, name: 'ws' } as Workspace]);
-
-      const result = await service.findAll();
-      expect(result[0].workspaceName).toBe('ws');
-    });
-  });
-
   describe('findAllForGroup', () => {
     it('should return units for group', async () => {
       workspaceRepository.find.mockResolvedValue([{ id: 1, name: 'ws' } as Workspace]);

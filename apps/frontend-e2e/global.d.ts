@@ -49,7 +49,6 @@ declare namespace Cypress {
     deleteSessionAPI(userId: string, sessionId: string, token: string): Chainable<Response>; // 9a
     deleteOrphanedSessionsAPI(userId: string, token: string): Chainable<Response>; // 9b
     createGroupAPI(group: GroupData, token: string, settings?: unknown): Chainable<Response>; // 10
-    getGroupByIdAPI(groupId: string, token: string): Chainable<Response>; // 11
     getWsGroupsAPI(token: string): Chainable<Response>; // 12
 
     updateGroupAPI(groupId:string, newGroupName: string, token: string): Chainable<Response>; // 13
@@ -57,7 +56,6 @@ declare namespace Cypress {
     getAdminOfGroupAPI(groupId: string, token: string): Chainable<Response>; // 15
     createWsAPI(groupId: string, ws: WsData, token: string, extra?: object): Chainable<Response>; // 16
     moveWsAPI(ws: string | string[], newGroup: string, token: string): Chainable<Response>; // 17
-    getWsAPI(wsId: string, token: string): Chainable<Response>; // 18
     updateUsersOfWsAPI(wsId: string, level: AccessLevel, userId: string, token: string): Chainable<Response>; // 19
     updateUserListOfWsAPI(wsId: string, list: AccessUser[], token: string): Chainable<Response>; // 19a
     getUsersOfWsAPI(wsId: string, token: string): Chainable<Response>; // 20
@@ -66,7 +64,6 @@ declare namespace Cypress {
     getModulesAPI(token: string): Chainable<Response>; // 23
     getModuleAPI(module: string, token: string): Chainable<Response>; // 24
     createUnitAPI(wsId: string, unit: UnitData, token: string): Chainable<Response>; // 25
-    getUnitsAPI(token: string): Chainable<Response>; // 26
     updateWsSettingsAPI(wsId: string, settings: WsSettings, token: string): Chainable<Response>; // 27
     getWsNormalAPI(wsId: string, token: string): Chainable<Response>; // 28
     getUsersByWsAPI(wsId: string, token: string): Chainable<Response>; // 29

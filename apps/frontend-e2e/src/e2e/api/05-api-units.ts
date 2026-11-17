@@ -82,9 +82,9 @@ describe('Unit API tests', () => {
     });
   });
 
-  describe('26. GET /api/admin/workspace-groups/units', () => {
+  describe('26. GET /api/admin/units', () => {
     it('200 positive test: should retrieve a comprehensive list of all units across all workspaces', () => {
-      cy.getUnitsAPI(
+      cy.getAdminUnitsAPI(
         Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
@@ -95,7 +95,7 @@ describe('Unit API tests', () => {
     });
 
     it('403 negative test: should deny unit listing to a non-administrator user', () => {
-      cy.getUnitsAPI(Cypress.expose(`token_${userGroupAdmin.username}`)).then(
+      cy.getAdminUnitsAPI(Cypress.expose(`token_${userGroupAdmin.username}`)).then(
         resp => {
           expect(resp.status).to.equal(403);
         }
@@ -103,7 +103,7 @@ describe('Unit API tests', () => {
     });
 
     it('401 negative test: should deny unit listing when an invalid token is provided', () => {
-      cy.getUnitsAPI(noId).then(resp => {
+      cy.getAdminUnitsAPI(noId).then(resp => {
         expect(resp.status).to.equal(401);
       });
     });
@@ -1138,7 +1138,7 @@ describe('Unit API tests', () => {
         expect(resp.status).to.equal(201);
         assign(`${resp.body}`);
       });
-    const dropBoxOf = (wsId: string) => cy.getWsAPI(wsId, token()).its('body.dropBoxId');
+    const dropBoxOf = (wsId: string) => cy.getWsNormalAPI(wsId, token()).its('body.dropBoxId');
 
     before(() => {
       createWorkspace('Verschoben-2027', id => { ids.moved = id; });
@@ -1881,6 +1881,7 @@ describe('Unit API tests', () => {
           Cypress.expose(`token_${Cypress.expose('username')}`)
         ).then(resp => {
           expect(resp.status).to.equal(200);
+          expect(resp.body.id).to.equal(Number(Cypress.expose(groupVera.id)));
         });
       });
 

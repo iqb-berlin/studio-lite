@@ -12,7 +12,6 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse, ApiInternalServerErrorResponse,
-  ApiNotFoundResponse,
   ApiOkResponse,
   ApiParam,
   ApiQuery,
@@ -21,7 +20,6 @@ import {
 } from '@nestjs/swagger';
 import {
   CreateWorkspaceGroupDto, UnitInViewDto, UserInListDto,
-  WorkspaceGroupFullDto,
   WorkspaceGroupInListDto, WorkspaceInListDto, UnitItemInViewDto
 } from '@studio-lite-lib/api-dto';
 import type { Response } from 'express';
@@ -40,9 +38,10 @@ import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
  * `admin/workspace-groups` -- the groups themselves: creating and deleting them, and saying who
  * administers each. What happens inside a group is {@link GroupAdminWorkspaceController}.
  *
- * The two levels meet in this one controller: creating, deleting, renaming a group and appointing
- * its admins are an administrator's, while reading a single group and what is in it -- its
- * workspaces, units and items -- is open to its own admin as well.
+ * The two levels meet in this one controller: creating and deleting a group and appointing its
+ * admins are an administrator's, while what is in a group -- its workspaces, units and items -- is
+ * open to its own admin as well. Reading and changing a single group is
+ * {@link WorkspaceGroupController}.
  */
 @Controller('admin/workspace-groups')
 export class AdminWorkspaceGroupController {
@@ -85,28 +84,6 @@ export class AdminWorkspaceGroupController {
       return new StreamableFile(file as unknown as Uint8Array);
     }
     return this.workspaceGroupService.findAll();
-  }
-
-  @Get('units')
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Units retrieved successfully.' })
-  @ApiForbiddenResponse({ description: 'No admin privileges.' })
-  @ApiTags('admin workspace-group')
-  async findAllUnits(): Promise<UnitInViewDto[]> {
-    return this.unitService.findAll();
-  }
-
-  @Get(':workspace_group_id')
-  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Workspace-group retrieved successfully.' })
-  @ApiForbiddenResponse({ description: 'No admin privileges.' })
-  @ApiNotFoundResponse({ description: 'Admin workspace-group not found.' })
-  @ApiParam({ name: 'workspace_group_id', type: Number })
-  @ApiTags('admin workspace-group')
-  async findOne(@WorkspaceGroupId() id: number): Promise<WorkspaceGroupFullDto> {
-    return this.workspaceGroupService.findOne(id);
   }
 
   @Get(':workspace_group_id/workspaces')
@@ -157,19 +134,6 @@ export class AdminWorkspaceGroupController {
   @ApiTags('admin workspace-group')
   async findWorkspaceGroupUnitItems(@WorkspaceGroupId() id: number): Promise<UnitItemInViewDto[]> {
     return this.unitItemService.findAllForGroup(id);
-  }
-
-  @Patch(':workspace_group_id')
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
-  @ApiBearerAuth()
-  @ApiParam({ name: 'workspace_group_id', type: Number })
-  @ApiOkResponse({ description: 'Workspace-group updated successfully.' })
-  @ApiBadRequestResponse({ description: 'The settings are no object, or a field in them has the wrong type.' })
-  @ApiForbiddenResponse({ description: 'No admin privileges.' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
-  @ApiTags('admin workspace-group')
-  async patch(@WorkspaceGroupId() id: number, @Body() workspaceGroupFullDto: WorkspaceGroupFullDto) {
-    return this.workspaceGroupService.patch(id, workspaceGroupFullDto);
   }
 
   @Post()

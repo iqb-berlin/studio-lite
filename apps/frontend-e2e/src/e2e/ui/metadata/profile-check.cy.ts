@@ -74,7 +74,7 @@ describe('Metadata Profile Management', () => {
       .click();
     checkMultipleProfiles(searchProfiles);
     // waited for, so that the reset before the next spec does not come in the middle of the save
-    cy.intercept('PATCH', '/api/admin/workspace-groups/*').as('saveGroupProfiles');
+    cy.intercept('PATCH', '/api/workspace-groups/*').as('saveGroupProfiles');
     cy.get('[data-cy="admin-edit-workspace-group-settings-save-button"]').click();
     waitForSuccess('@saveGroupProfiles');
   });

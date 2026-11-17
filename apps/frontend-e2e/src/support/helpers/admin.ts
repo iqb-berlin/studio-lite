@@ -139,7 +139,7 @@ export function renameGroup(group: string, newName: string): void {
       .should('be.visible')
       .clear()
       .type(newName);
-    cy.intercept('PATCH', '/api/admin/workspace-groups/*').as('patchGroup');
+    cy.intercept('PATCH', '/api/workspace-groups/*').as('patchGroup');
     cy.get('mat-dialog-actions button')
       .contains(json.save)
       .click({ force: true });

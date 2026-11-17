@@ -266,7 +266,7 @@ describe('Admin User Management', () => {
             cy.findAdminSettings().click();
             clickIndexTabAdmin('workspace-groups');
             cy.contains('mat-row', group).click();
-            cy.intercept('GET', new RegExp(`/api/admin/workspace-groups/${groupId}$`), req => {
+            cy.intercept('GET', new RegExp(`/api/workspace-groups/${groupId}$`), req => {
               req.on('response', () => (released ? undefined : new Promise<void>(resolve => {
                 letThrough = resolve;
               })));
@@ -286,10 +286,10 @@ describe('Admin User Management', () => {
               .then(() => release());
             // Without the intercept on the dialog's request there is no race, and the test would pass anyway.
             cy.wait('@storedProfiles');
-            cy.intercept('PATCH', `/api/admin/workspace-groups/${groupId}`).as('saveProfiles');
+            cy.intercept('PATCH', `/api/workspace-groups/${groupId}`).as('saveProfiles');
             cy.get('[data-cy="admin-edit-workspace-group-settings-save-button"]').click();
             waitForSuccess('@saveProfiles');
-            cy.getGroupByIdAPI(groupId, token)
+            cy.getGroupPropertiesAPI(groupId, token)
               .its('body.settings.profiles')
               .then((profiles: { id: string }[]) => {
                 expect(profiles.map(profile => profile.id)).to.include.members([deutsch, mathematik]);

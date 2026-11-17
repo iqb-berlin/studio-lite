@@ -978,7 +978,7 @@ describe('Unit API tests part II', () => {
         expect(units.map((u: { workspaceId: number }) => String(u.workspaceId)).sort())
           .to.deep.equal([String(Cypress.expose(ws1.id)), String(Cypress.expose(ws2.id))].sort());
         units.forEach((unit: { workspaceId: number, workspaceName: string }) => {
-          cy.getWsAPI(String(unit.workspaceId), adminToken).then(workspace => {
+          cy.getWsNormalAPI(String(unit.workspaceId), adminToken).then(workspace => {
             expect(workspace.body.name, `name of workspace ${unit.workspaceId}`).to.be.a('string').and.not.equal('');
             expect(unit.workspaceName, `workspace of unit ${unit.workspaceId}`).to.equal(workspace.body.name);
           });
@@ -1178,7 +1178,7 @@ describe('Unit API tests part II', () => {
     it('201 positive test: is the default schemer of the workspace', () => {
       const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
       const wsId = Cypress.expose(ws1.id);
-      cy.getWsAPI(wsId, adminToken).then(workspace => {
+      cy.getWsNormalAPI(wsId, adminToken).then(workspace => {
         const defaultSchemer = workspace.body.settings?.defaultSchemer;
         expect(defaultSchemer, 'default schemer of ws1').to.be.a('string').and.not.equal('');
         cy.uploadUnitFilesAPI(wsId, jsonSchemeFixtures, adminToken).then(uploaded => {

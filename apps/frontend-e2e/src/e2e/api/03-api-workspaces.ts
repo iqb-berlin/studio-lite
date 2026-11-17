@@ -84,7 +84,7 @@ describe('Workspace API tests', () => {
           createdId = `${resp.body}`;
           expect(createdId).not.to.equal(`${Cypress.expose(ws3.id)}`);
         });
-        cy.getWsAPI(Cypress.expose(ws3.id), adminToken()).then(foreign => {
+        cy.getWsNormalAPI(Cypress.expose(ws3.id), adminToken()).then(foreign => {
           expect(foreign.body.groupId).to.equal(Number(Cypress.expose(group2.id)));
           expect(foreign.body.name).to.equal(ws3.name);
         });
@@ -213,7 +213,7 @@ describe('Workspace API tests', () => {
     });
   });
 
-  describe('18. GET /api/group-admin/workspaces/{id}', () => {
+  describe('18. GET /api/workspaces/{workspace_id} as administrator', () => {
     it('200 positive test: should retrieve workspace details by ID for an authorized user', () => {
       cy.createUserAPI(
         user3,
@@ -241,7 +241,7 @@ describe('Workspace API tests', () => {
           });
         });
       });
-      cy.getWsAPI(
+      cy.getWsNormalAPI(
         Cypress.expose(ws1.id),
         Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
@@ -250,33 +250,12 @@ describe('Workspace API tests', () => {
       });
     });
 
-    it('401 negative test: should deny access to workspace details when provided with an invalid token', () => {
-      cy.getWsAPI(Cypress.expose(ws1.id), noId).then(resp => {
-        expect(resp.status).to.equal(401);
-      });
-    });
-
-    it('404 negative test: should return error when requesting a workspace with an empty ID', () => {
-      cy.getWsAPI('', Cypress.expose(`token_${Cypress.expose('username')}`)).then(
-        resp => {
-          expect(resp.status).to.equal(404);
-        }
-      );
-    });
-
     it('404 negative test: should return error when requesting a non-existent workspace', () => {
-      cy.getWsAPI(noId, Cypress.expose(`token_${Cypress.expose('username')}`)).then(
+      cy.getWsNormalAPI(noId, Cypress.expose(`token_${Cypress.expose('username')}`)).then(
         resp => {
           expect(resp.status).to.equal(404);
         }
       );
-    });
-
-    // A 404 here and a 403 for a workspace of another group told a group admin which ids exist (#2023)
-    it('403 negative test: should refuse a group admin a workspace that does not exist like a foreign one', () => {
-      cy.getWsAPI(noId, Cypress.expose(`token_${userGroupAdmin.username}`)).then(resp => {
-        expect(resp.status).to.equal(403);
-      });
     });
   });
 
@@ -363,6 +342,13 @@ describe('Workspace API tests', () => {
         Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
+      });
+    });
+
+    // A 404 here and a 403 for a workspace of another group told a group admin which ids exist (#2023)
+    it('403 negative test: should refuse a group admin a workspace that does not exist like a foreign one', () => {
+      cy.getUsersOfWsAPI(noId, Cypress.expose(`token_${userGroupAdmin.username}`)).then(resp => {
+        expect(resp.status).to.equal(403);
       });
     });
   });

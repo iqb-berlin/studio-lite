@@ -29,12 +29,12 @@ import { WorkspaceService } from '../services/workspace.service';
 import { UnitService } from '../services/unit.service';
 
 /**
- * `workspace-groups/:workspace_group_id` -- a group as its members see it, plus the group settings,
- * which only its admin may change.
+ * `workspace-groups/:workspace_group_id` -- a single group: read by its members, its admin and any
+ * administrator, and changed by its admin or an administrator.
  *
  * The GET has a second shape: with `download` it answers with the xlsx report over all workspaces
  * of the group instead of the group itself. The group passes for its members, the report only for
- * its admin -- see {@link WorkspaceGroupAccessGuard}.
+ * its admin or an administrator -- see {@link WorkspaceGroupAccessGuard}.
  */
 @Controller('workspace-groups/:workspace_group_id')
 export class WorkspaceGroupController {
