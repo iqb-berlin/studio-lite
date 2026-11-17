@@ -193,6 +193,8 @@
     "active": "Aktiv",
     "inactive": "Inaktiv oder Offline",
     "passive": "Passiv (Eingeloggt, aber inaktiv)",
+    "passive-sessions": "{{count}} passive Sessions (Eingeloggt, aber inaktiv), letzte Aktivität:",
+    "passive-sessions-more": "und {{count}} weitere",
     "activity-remaining": "Verbleibende aktive Zeit (Session wird durch Arbeit verlängert)",
     "passive-remaining": "Passiv-Phase (automatischer Logout nach Ablauf)"
   },

@@ -3,6 +3,12 @@
   overflow-y: auto;
 }
 
+// Room for two active dots, the passive dot with a two-digit count and an orphaned dot. With an equal share of
+// the table the dots were squeezed into slivers (#2150). Header and cells alike, or the rows would not line up.
+.mat-column-active {
+  flex: 0 0 120px;
+}
+
 .active-dot, .inactive-dot, .passive-dot, .orphaned-dot {
   display: inline-block;
   width: 10px;
@@ -24,6 +30,13 @@
 .passive-dot {
   background-color: #6aa2a4;
   box-shadow: 0 0 5px #6aa2a4;
+}
+
+.passive-count {
+  margin: 0 8px 0 -2px;
+  font-size: 12px;
+  color: gray;
+  vertical-align: middle;
 }
 
 .orphaned-dot {

@@ -39,6 +39,7 @@ import { AppService } from '../../../../services/app.service';
 import { HeartbeatService } from '../../../../services/heartbeat.service';
 import { DeleteDialogComponent } from '../../../../components/delete-dialog/delete-dialog.component';
 import { CountSessionsWithStatusPipe } from '../../../../pipes/count-sessions-with-status.pipe';
+import { PassiveSessionSummaryPipe } from '../../../../pipes/passive-session-summary.pipe';
 import { ChangeResultService } from '../../../../services/change-result.service';
 import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 import { UserFullNamePipe } from '../../../../pipes/user-full-name.pipe';
@@ -56,8 +57,12 @@ import { sortNameColumnAsShown } from '../../../../utils/user-name-sort.utils';
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss'],
 
-  imports: [UsersMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent, DatePipe, CountSessionsWithStatusPipe,
-    UserFullNamePipe]
+  imports: [
+    UsersMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell,
+    MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip,
+    FormsModule, TranslateModule, IsSelectedIdPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent,
+    DatePipe, CountSessionsWithStatusPipe, PassiveSessionSummaryPipe, UserFullNamePipe
+  ]
 })
 export class UsersComponent implements OnInit, OnDestroy {
   objectsDatasource = new TextSortTableDataSource<UserFullDto>();

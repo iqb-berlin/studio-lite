@@ -124,9 +124,14 @@ iframe.unitHost {
   }
 }
 
+// A tooltip that lists one entry per line. pre-line keeps the line breaks of the text and still wraps a line
+// longer than the tooltip, which pre cut off (#2150).
 .mat-tooltip-linebreaks {
-  white-space: pre;
-  font-size: 14px !important;
+  white-space: pre-line;
+
+  .mat-mdc-tooltip-surface {
+    text-align: left;
+  }
 }
 
 .fx-row-space-between-center {

@@ -156,6 +156,8 @@ describe('Token Refresh UI Logic', () => {
     const activeDate = new Date(now - (5 * 60 * 1000)).toISOString();
     // PASSIVE_THRESHOLD_MS is 7 days. We set passive to 4 hours ago.
     const passiveDate = new Date(now - (4 * 60 * 60 * 1000)).toISOString();
+    const olderPassiveDate = new Date(now - (2 * 24 * 60 * 60 * 1000)).toISOString();
+    const oldestPassiveDate = new Date(now - (3 * 24 * 60 * 60 * 1000)).toISOString();
     // inactive is when isLoggedIn is false OR no sessions
     const inactiveDate = new Date(now - (10 * 24 * 60 * 60 * 1000)).toISOString();
 
@@ -211,6 +213,21 @@ describe('Token Refresh UI Logic', () => {
           ]
         },
         {
+          id: 105,
+          name: 'manySessionsUser',
+          isLoggedIn: true,
+          lastActivity: activeDate,
+          isAdmin: false,
+          email: '',
+          description: '',
+          sessions: [
+            { sessionId: 's4', lastActivity: passiveDate, activityStatus: 'passive' },
+            { sessionId: 's5', lastActivity: activeDate, activityStatus: 'active' },
+            { sessionId: 's6', lastActivity: olderPassiveDate, activityStatus: 'passive' },
+            { sessionId: 's7', lastActivity: oldestPassiveDate, activityStatus: 'passive' }
+          ]
+        },
+        {
           id: 103,
           name: 'inactiveUser',
           isLoggedIn: false,
@@ -262,6 +279,35 @@ describe('Token Refresh UI Logic', () => {
         .invoke('text')
         .should('contain', json.user.passive)
         .and('match', /\(\d{2}\.\d{2}\., \d{2}:\d{2}\)/);
+    });
+    cy.get('mat-row').contains('mat-cell', 'passiveUser')
+      .parent()
+      .find('.passive-dot')
+      .trigger('mouseleave');
+    cy.get('.mat-mdc-tooltip').should('not.exist');
+
+    // The passive sessions of an account are one dot with their count, after the active one (#2150)
+    cy.get('mat-row').contains('mat-cell', 'manySessionsUser')
+      .parent()
+      .find('.active-dot, .passive-dot')
+      .should('have.length', 2)
+      .first()
+      .should('have.class', 'active-dot');
+    cy.get('mat-row').contains('mat-cell', 'manySessionsUser')
+      .parent()
+      .find('.passive-count')
+      .should('have.text', '3');
+    cy.get('mat-row').contains('mat-cell', 'manySessionsUser')
+      .parent()
+      .find('.passive-dot')
+      .trigger('mouseenter');
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('.mat-mdc-tooltip')
+        .invoke('text')
+        .should('contain', json.user['passive-sessions'].replace('{{count}}', '3'))
+        .then(text => {
+          expect(text.match(/\d{2}\.\d{2}\., \d{2}:\d{2}/g)).to.have.length(3);
+        });
     });
   });
 });
