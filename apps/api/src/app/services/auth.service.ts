@@ -1,5 +1,5 @@
 import {
-  ForbiddenException, Inject, Injectable, Logger, forwardRef
+  ForbiddenException, Inject, Injectable, Logger, UnauthorizedException, forwardRef
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -68,17 +68,25 @@ export class AuthService {
     return crypto.randomUUID();
   }
 
-  private static getJwtPayload(user: { id: number, name: string, reviewId: number }, sessionId: string): {
+  // `rid` names the row of the session, so that a token cannot outlive its row although a later
+  // session gets the same id (see hasValidSession). A review login has no row.
+  private static getJwtPayload(
+    user: { id: number, name: string, reviewId: number },
+    sessionId: string,
+    sessionRowId?: number
+  ): {
     username: string;
     sub: number;
     sub2: number;
     sid: string;
+    rid?: number;
   } {
     return {
       username: user.name,
       sub: user.id,
       sub2: user.reviewId,
-      sid: sessionId
+      sid: sessionId,
+      ...(sessionRowId === undefined ? {} : { rid: sessionRowId })
     };
   }
 
@@ -145,7 +153,12 @@ export class AuthService {
       }
     }
 
-    const accessToken = this.jwtService.sign(AuthService.getJwtPayload(user, sessionId));
+    const sessionRow = await this.userSessionRepository.findOne({ where: { userId: user.id, sessionId } });
+    if (!sessionRow) {
+      // Ended by a logout or the cleanup in the moment since it was opened.
+      throw new UnauthorizedException();
+    }
+    const accessToken = this.jwtService.sign(AuthService.getJwtPayload(user, sessionId, sessionRow.id));
     const refreshToken = await this.generateRefreshToken(user.id, sessionId);
     return { accessToken, refreshToken };
   }
@@ -321,7 +334,7 @@ export class AuthService {
     await this.refreshTokenRepository.delete({ tokenHash: refreshToken.tokenHash });
 
     const accessToken = this.jwtService.sign(
-      AuthService.getJwtPayload({ id: user.id, name: user.name, reviewId: 0 }, sessionId)
+      AuthService.getJwtPayload({ id: user.id, name: user.name, reviewId: 0 }, sessionId, userSession.id)
     );
     return { accessToken, refreshToken: newRefreshToken };
   }
@@ -342,9 +355,14 @@ export class AuthService {
    * Whether an access token of this session may still be used: exactly as long as a refresh could
    * still renew the session. A session ended by a logout, a new password or the deletion of its
    * account has no row any more, and an expired one could not be resumed (#2115).
+   *
+   * A session that ended and was opened again under the same id is a new row: a token naming the
+   * row of the ended one (`sessionRowId`) is refused. A token without a row was issued before tokens
+   * named it and is taken by its session id while it lasts.
    */
-  async hasValidSession(userId: number, sessionId: string): Promise<boolean> {
-    return !!(await this.findValidUserSession(userId, sessionId));
+  async hasValidSession(userId: number, sessionId: string, sessionRowId?: number): Promise<boolean> {
+    const userSession = await this.findValidUserSession(userId, sessionId);
+    return !!userSession && (sessionRowId === undefined || userSession.id === sessionRowId);
   }
 
   async isAdminUser(userId: number): Promise<boolean> {

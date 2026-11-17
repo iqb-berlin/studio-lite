@@ -1,4 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -162,6 +162,25 @@ describe('AuthService', () => {
       expect(refreshTokenRepository.save).not.toHaveBeenCalled();
     });
 
+    // A session opened anew under the id of an ended one is another row; tokens of the ended one
+    // are told apart by the row they name.
+    it('should name the row of the session in the access token (#2151)', async () => {
+      const sid = '7c9e6679-7425-40de-944b-e07fc1f90ae7';
+      userSessionRepository.findOne.mockResolvedValue({ id: 42, userId: 1, sessionId: sid } as UserSession);
+
+      await service.login({ id: 1, name: 'user', reviewId: 0 });
+
+      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({ rid: 42 }));
+    });
+
+    it('should refuse the login when its session is gone before the tokens are issued', async () => {
+      userSessionRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.login({ id: 1, name: 'user', reviewId: 0 }))
+        .rejects.toThrow(UnauthorizedException);
+      expect(refreshTokenRepository.save).not.toHaveBeenCalled();
+    });
+
     describe('on a fresh login', () => {
       let deleteQuery: DeepMocked<DeleteQueryBuilder<RefreshToken>>;
 
@@ -205,6 +224,7 @@ describe('AuthService', () => {
         expiresAt
       } as RefreshToken;
       const session = {
+        id: 42,
         userId: 1,
         sessionId: 'session-1',
         lastActivity: new Date(),
@@ -227,7 +247,8 @@ describe('AuthService', () => {
       // A refresh is not an interaction and no longer a liveness sign either: it leaves
       // the session row alone, so the inactivity window keeps counting from the last click.
       expect(userSessionRepository.update).not.toHaveBeenCalled();
-      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({ sid: 'session-1' }));
+      // The new access token names the row, as the one from the login did (#2151).
+      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({ sid: 'session-1', rid: 42 }));
     });
 
     // A session with no unexpired refresh token is reported as orphaned and may be
@@ -406,6 +427,24 @@ describe('AuthService', () => {
       expect(result.refreshToken).toBeDefined();
       expect(refreshTokenRepository.save).toHaveBeenCalled();
       expect(userSessionRepository.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('hasValidSession', () => {
+    const inAnHour = new Date(Date.now() + 60 * 60 * 1000);
+
+    // A session opened anew under the id of an ended one is another row: the access tokens of the
+    // ended one must not come back with it (#2115, #2151). A token without a row predates them.
+    it.each([
+      ['the row of the session', 42, true],
+      ['the row of an ended session under the same id', 41, false],
+      ['no row', undefined, true]
+    ])('should judge a token naming %s', async (_, sessionRowId, expected) => {
+      userSessionRepository.findOne.mockResolvedValue({
+        id: 42, userId: 1, sessionId: 'session-1', expiresAt: inAnHour
+      } as UserSession);
+
+      expect(await service.hasValidSession(1, 'session-1', sessionRowId)).toBe(expected);
     });
   });
 

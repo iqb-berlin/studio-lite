@@ -8,13 +8,14 @@ import { AuthService } from '../services/auth.service';
 /**
  * What {@link AuthService} puts into an access token. The cryptic names are the JWT convention:
  * `sub` is the subject (the user id), `sub2` carries the review id of a review login, `sid` the
- * session the token belongs to.
+ * session the token belongs to and `rid` the row of that session (see `AuthService.hasValidSession`).
  */
 type JwtPayload = {
   sub: number;
   username: string;
   sub2: number;
   sid?: string;
+  rid?: number;
 };
 
 /**
@@ -54,7 +55,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    */
   async validate(payload: JwtPayload) {
     if (payload.sub) {
-      const isValid = !!payload.sid && await this.authService.hasValidSession(payload.sub, payload.sid);
+      const isValid = !!payload.sid &&
+        await this.authService.hasValidSession(payload.sub, payload.sid, payload.rid);
       if (!isValid) throw new UnauthorizedException(SESSION_ENDED_MESSAGE);
     }
     return {
