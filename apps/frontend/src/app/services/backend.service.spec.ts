@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting, TestRequest } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { AuthDataDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from './backend.service';
@@ -61,7 +61,8 @@ describe('BackendService', () => {
       expect(loginReq.request.method).toBe('POST');
       expect(loginReq.request.body).toEqual({
         username: 'testUser',
-        password: 'password'
+        password: 'password',
+        newSessionId: expect.any(String)
       });
       loginReq.flush(mockLoginResponse);
 
@@ -119,8 +120,53 @@ describe('BackendService', () => {
       service.login('user', 'pw', false).subscribe();
 
       const req = httpMock.expectOne(`${serverUrl}login`);
-      expect(req.request.body).toEqual({ username: 'user', password: 'pw', sessionId });
+      expect(req.request.body).toEqual({
+        username: 'user', password: 'pw', sessionId, newSessionId: expect.any(String)
+      });
       req.flush(null);
+    });
+
+    // The server may have opened the session of a login whose answer never arrived: the next login
+    // must name the same one, or it leaves that session behind (#2151). An account login answered
+    // with a token for another session -- its id is held by another account, on the same browser
+    // profile -- does not use the id up: the lost session may be that other person's to continue.
+    it('should keep the id for a new session until a token names it (#2151)', () => {
+      const tokenFor = (sid: string): string => `header.${btoa(JSON.stringify({ sid }))}.signature`;
+      const sendLogin = (): TestRequest => {
+        service.login('user', 'pw', false).subscribe();
+        return httpMock.expectOne(`${serverUrl}login`);
+      };
+      const lostLogin = sendLogin();
+      const lostLoginId = lostLogin.request.body.newSessionId;
+      lostLogin.error(new ProgressEvent('error'));
+
+      const otherSessionLogin = sendLogin();
+      expect(otherSessionLogin.request.body.newSessionId).toBe(lostLoginId);
+      otherSessionLogin.flush({ accessToken: tokenFor('3f9b1c2e-8a4d-4e6f-b1c2-d3e4f5a6b7c8'), refreshToken: 'r' });
+      httpMock.expectOne(`${serverUrl}auth-data`).flush({});
+
+      const retry = sendLogin();
+      expect(retry.request.body.newSessionId).toBe(lostLoginId);
+      retry.flush({ accessToken: tokenFor(lostLoginId), refreshToken: 'r' });
+      httpMock.expectOne(`${serverUrl}auth-data`).flush({});
+
+      const nextLogin = sendLogin();
+      expect(nextLogin.request.body.newSessionId).not.toBe(lostLoginId);
+      nextLogin.flush(null);
+    });
+
+    // A late answer of one tab must not drop the id another tab has chosen since.
+    it('should keep an id for a new session that another tab has chosen meanwhile (#2151)', () => {
+      const tokenFor = (sid: string): string => `header.${btoa(JSON.stringify({ sid }))}.signature`;
+      service.login('user', 'pw', false).subscribe();
+      const lateLogin = httpMock.expectOne(`${serverUrl}login`);
+      const otherTabId = '3f9b1c2e-8a4d-4e6f-b1c2-d3e4f5a6b7c8';
+      localStorage.setItem('new_session_id', otherTabId);
+
+      lateLogin.flush({ accessToken: tokenFor(lateLogin.request.body.newSessionId), refreshToken: 'r' });
+      httpMock.expectOne(`${serverUrl}auth-data`).flush({});
+
+      expect(localStorage.getItem('new_session_id')).toBe(otherTabId);
     });
 
     it('should return false when auth-data fails after successful login', done => {

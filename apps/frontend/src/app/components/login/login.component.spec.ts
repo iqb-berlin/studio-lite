@@ -77,9 +77,9 @@ describe('LoginComponent', () => {
     fixture.detectChanges();
   });
 
-  // Every login without a sessionId creates its own session row, and the frontend keeps the
-  // tokens of the last response only -- so a second call leaves behind a session nobody can
-  // reach or log out for a whole inactivity window (#1617).
+  // A second call lands in the same session (#2151), but adds a refresh token the frontend
+  // overwrites with the next answer: a key nobody holds, which keeps the session resumable for
+  // the inactivity window (#1617).
   describe('protection against a second submit', () => {
     it('should send only one login while the first is still in flight', () => {
       backendService.login.mockReturnValue(new Subject<boolean>());
