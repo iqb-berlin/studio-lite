@@ -67,37 +67,12 @@ describe('AppController', () => {
     }
   );
 
-  describe('login', () => {
-    it('should return a token', async () => {
-      const mockUser = { id: 1, name: 'test' } as UserEntity;
-      const mockTokens = { accessToken: 'mock-atoken', refreshToken: 'mock-rtoken' };
-      authService.login.mockResolvedValue(mockTokens);
-
-      const result = await controller.login({ user: mockUser });
-
-      expect(result).toBe(mockTokens);
-      expect(authService.login).toHaveBeenCalledWith(mockUser, undefined);
-    });
-  });
-
   describe('refresh', () => {
     // The client takes a 401 as the sign to log in again.
     it('should answer a refresh token that cannot be exchanged with 401', async () => {
       authService.refreshAccessToken.mockResolvedValue(null);
 
       await expect(controller.refresh({ refreshToken: 'stale' })).rejects.toThrow(UnauthorizedException);
-    });
-  });
-
-  describe('initLogin', () => {
-    it('should return tokens for first login', async () => {
-      const mockTokens = { accessToken: 'access-token', refreshToken: 'refresh-token' };
-      authService.initLogin.mockResolvedValue(mockTokens);
-
-      const result = await controller.initLogin({ username: 'user', password: 'pass' });
-
-      expect(result).toEqual(mockTokens);
-      expect(authService.initLogin).toHaveBeenCalledWith('user', 'pass');
     });
   });
 

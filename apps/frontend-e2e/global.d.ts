@@ -35,7 +35,7 @@ declare namespace Cypress {
 
     // commands-api.ts
     addFirstUserAPI(username: string, password: string): Chainable<Response>; // 1
-    loginAPI(username: string, password: string): Chainable<Response>; // 2
+    loginAPI(username: string, password: string, newSessionId?: string): Chainable<Response>; // 2
     refreshTokenAPI(refreshToken: string): Chainable<Response>; // 2a
     logoutAPI(token: string, refreshToken: string): Chainable<Response>; // 2b
     logoutSilentAPI(refreshToken: string): Chainable<Response>; // 2c

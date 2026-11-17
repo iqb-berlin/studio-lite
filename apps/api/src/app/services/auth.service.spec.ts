@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import {
-  DeleteQueryBuilder, In, InsertQueryBuilder, LessThan, MoreThan, Repository, SelectQueryBuilder
+  In, InsertQueryBuilder, LessThan, MoreThan, QueryFailedError, Repository, SelectQueryBuilder
 } from 'typeorm';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -92,7 +92,7 @@ describe('AuthService', () => {
         sub: 1,
         sub2: 0
       }));
-      expect(userSessionRepository.save).toHaveBeenCalled();
+      expect(userSessionRepository.upsert).toHaveBeenCalled();
       expect(refreshTokenRepository.save).toHaveBeenCalled();
     });
 
@@ -111,7 +111,7 @@ describe('AuthService', () => {
       await service.login({ id: 1, name: 'user', reviewId: 0 });
 
       // A brand new session is created instead of latching onto the other browser's session.
-      expect(userSessionRepository.save).toHaveBeenCalled();
+      expect(userSessionRepository.upsert).toHaveBeenCalled();
       expect(userSessionRepository.update).not.toHaveBeenCalledWith(
         { userId: 1, sessionId: otherBrowserSession.sessionId },
         expect.any(Object)
@@ -121,56 +121,110 @@ describe('AuthService', () => {
       );
     });
 
-    it('should reuse the provided existingSessionId', async () => {
+    // The browser sends the id for a new session with every login; it only counts when there is
+    // no session of the token to continue. An expired row is no such session (#2115).
+    it('should continue the unexpired session of the token rather than open the chosen one (#2115)', async () => {
       const validSid = '550e8400-e29b-41d4-a716-446655440000';
       jwtService.sign.mockReturnValue('reused-token');
       userSessionRepository.update.mockResolvedValue({ affected: 1, raw: [], generatedMaps: [] });
 
-      await service.login({ id: 1, name: 'user', reviewId: 0 }, validSid);
+      await service.login({ id: 1, name: 'user', reviewId: 0 }, validSid, '7c9e6679-7425-40de-944b-e07fc1f90ae7');
 
       expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({
         sid: validSid
       }));
       expect(userSessionRepository.update).toHaveBeenCalledWith(
-        { userId: 1, sessionId: validSid },
+        { userId: 1, sessionId: validSid, expiresAt: MoreThan(expect.any(Date)) },
         expect.any(Object)
       );
+      expect(userSessionRepository.upsert).not.toHaveBeenCalled();
     });
 
     // The session the client names is gone (logged out, deleted by an admin): it is not revived.
     it('should open a session of its own when the one handed back no longer exists', async () => {
       const staleSid = '550e8400-e29b-41d4-a716-446655440000';
       userSessionRepository.update.mockResolvedValue({ affected: 0, raw: [], generatedMaps: [] });
-      userSessionRepository.create.mockImplementation(session => session as UserSession);
 
       await service.login({ id: 1, name: 'user', reviewId: 0 }, staleSid);
 
-      const newSid = userSessionRepository.save.mock.calls[0][0].sessionId;
+      const { sessionId: newSid } = userSessionRepository.upsert.mock.calls[0][0] as UserSession;
       expect(newSid).not.toBe(staleSid);
       expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({ sid: newSid }));
     });
 
-    // A review link is no account: nothing is left behind that could be resumed.
-    it('should give a review login neither a session nor a refresh token', async () => {
-      jwtService.sign.mockReturnValue('review-token');
+    // A login whose answer was lost has opened a session under this id already; the next one
+    // continues it instead of leaving it behind (#2151).
+    it.each([
+      ['without a token', undefined],
+      ['whose token names a session that has ended', '550e8400-e29b-41d4-a716-446655440000']
+    ])('should open the session under the id the client chose for it, %s (#2151)', async (_, staleSid) => {
+      const chosenSid = '7c9e6679-7425-40de-944b-e07fc1f90ae7';
+      userSessionRepository.update.mockResolvedValue({ affected: 0, raw: [], generatedMaps: [] });
 
-      const result = await service.login({ id: 0, name: '', reviewId: 5 });
+      await service.login({ id: 1, name: 'user', reviewId: 0 }, staleSid, chosenSid);
 
-      expect(result).toEqual({ accessToken: 'review-token', refreshToken: '' });
-      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({ sub: 0, sub2: 5 }));
-      expect(userSessionRepository.save).not.toHaveBeenCalled();
-      expect(refreshTokenRepository.save).not.toHaveBeenCalled();
+      expect(userSessionRepository.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({ userId: 1, sessionId: chosenSid }),
+        expect.anything()
+      );
+      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({ sid: chosenSid }));
+    });
+
+    // The ids arrive in the request body unchecked.
+    it.each([
+      ['no session id', 'not-a-session-id'],
+      ['no string', JSON.parse('["7c9e6679-7425-40de-944b-e07fc1f90ae7"]')]
+    ])('should open the session under a random id when the chosen one is %s', async (_, chosenSid) => {
+      await service.login({ id: 1, name: 'user', reviewId: 0 }, undefined, chosenSid);
+
+      const { sessionId } = userSessionRepository.upsert.mock.calls[0][0] as UserSession;
+      expect(sessionId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+      expect(sessionId).not.toEqual(chosenSid);
+    });
+
+    // The cleanup and the status of a session find its tokens by the id alone; two accounts
+    // sharing one id would read and delete each other's sessions. The database refuses the second.
+    const sessionIdTaken = (): QueryFailedError => new QueryFailedError(
+      'INSERT INTO "user_session"',
+      [],
+      Object.assign(new Error('duplicate key value'), { code: '23505', constraint: 'uq_user_session_session_id' })
+    );
+
+    it('should open a session under a random id when another account holds the chosen one', async () => {
+      const takenSid = '7c9e6679-7425-40de-944b-e07fc1f90ae7';
+      userSessionRepository.upsert.mockRejectedValueOnce(sessionIdTaken());
+      userSessionRepository.exists.mockResolvedValue(false);
+
+      await service.login({ id: 1, name: 'user', reviewId: 0 }, undefined, takenSid);
+
+      const { sessionId: randomSid } = userSessionRepository.upsert.mock.calls[1][0] as UserSession;
+      expect(randomSid).not.toBe(takenSid);
+      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({ sid: randomSid }));
+    });
+
+    // Two logins from the same storage at once: the database refuses the second row with the id
+    // although it is the account's own, and only the owner of the row tells the two cases apart.
+    it('should keep the chosen id when another login of the same account wrote it in the same moment', async () => {
+      const chosenSid = '7c9e6679-7425-40de-944b-e07fc1f90ae7';
+      userSessionRepository.upsert.mockRejectedValueOnce(sessionIdTaken());
+      userSessionRepository.exists.mockResolvedValue(true);
+
+      await service.login({ id: 1, name: 'user', reviewId: 0 }, undefined, chosenSid);
+
+      expect(userSessionRepository.exists).toHaveBeenCalledWith({ where: { userId: 1, sessionId: chosenSid } });
+      expect(userSessionRepository.upsert).toHaveBeenCalledTimes(1);
+      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({ sid: chosenSid }));
     });
 
     // A session opened anew under the id of an ended one is another row; tokens of the ended one
-    // are told apart by the row they name.
+    // are told apart by the row they name (#2151).
     it('should name the row of the session in the access token (#2151)', async () => {
       const sid = '7c9e6679-7425-40de-944b-e07fc1f90ae7';
       userSessionRepository.findOne.mockResolvedValue({ id: 42, userId: 1, sessionId: sid } as UserSession);
 
-      await service.login({ id: 1, name: 'user', reviewId: 0 });
+      await service.login({ id: 1, name: 'user', reviewId: 0 }, undefined, sid);
 
-      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({ rid: 42 }));
+      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({ sid, rid: 42 }));
     });
 
     it('should refuse the login when its session is gone before the tokens are issued', async () => {
@@ -181,34 +235,32 @@ describe('AuthService', () => {
       expect(refreshTokenRepository.save).not.toHaveBeenCalled();
     });
 
+    // A review link is no account: nothing is left behind that could be resumed. It does not take the
+    // id for a new session either; the browser keeps that id for its next account login (#2151).
+    it('should give a review login neither a session nor a refresh token', async () => {
+      const chosenSid = '7c9e6679-7425-40de-944b-e07fc1f90ae7';
+      jwtService.sign.mockReturnValue('review-token');
+
+      const result = await service.login({ id: 0, name: '', reviewId: 5 }, undefined, chosenSid);
+
+      expect(result).toEqual({ accessToken: 'review-token', refreshToken: '' });
+      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({ sub: 0, sub2: 5 }));
+      expect(jwtService.sign).not.toHaveBeenCalledWith(expect.objectContaining({ sid: chosenSid }));
+      expect(userSessionRepository.upsert).not.toHaveBeenCalled();
+      expect(refreshTokenRepository.save).not.toHaveBeenCalled();
+    });
+
     describe('on a fresh login', () => {
-      let deleteQuery: DeepMocked<DeleteQueryBuilder<RefreshToken>>;
-
-      beforeEach(() => {
-        deleteQuery = createMock<DeleteQueryBuilder<RefreshToken>>();
-        deleteQuery.where.mockReturnValue(deleteQuery);
-        const queryBuilder = createMock<SelectQueryBuilder<RefreshToken>>();
-        queryBuilder.delete.mockReturnValue(deleteQuery);
-        refreshTokenRepository.createQueryBuilder.mockReturnValue(queryBuilder);
-      });
-
-      it('should delete the expired sessions of the user together with their refresh tokens', async () => {
+      // Their refresh tokens go with them through the cascade. Deleted by the ids found first, the
+      // token another login has just written under a reused id would go as well (#2151).
+      it('should delete the expired sessions of the user and leave their tokens to the cascade (#2151)', async () => {
         userSessionRepository.find.mockResolvedValue([{ sessionId: 'expired-1' } as UserSession]);
 
         await service.login({ id: 1, name: 'user', reviewId: 0 });
 
-        expect(deleteQuery.where).toHaveBeenCalledWith(expect.any(String), { userId: 1, ids: ['expired-1'] });
-        expect(deleteQuery.execute).toHaveBeenCalled();
-        expect(userSessionRepository.delete).toHaveBeenCalledWith(expect.objectContaining({ userId: 1 }));
-      });
-
-      it('should delete nothing when no session of the user has expired', async () => {
-        userSessionRepository.find.mockResolvedValue([]);
-
-        await service.login({ id: 1, name: 'user', reviewId: 0 });
-
-        expect(deleteQuery.execute).not.toHaveBeenCalled();
-        expect(userSessionRepository.delete).not.toHaveBeenCalled();
+        expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 1, expiresAt: LessThan(expect.any(Date)) });
+        expect(refreshTokenRepository.delete).not.toHaveBeenCalled();
+        expect(refreshTokenRepository.createQueryBuilder).not.toHaveBeenCalled();
       });
     });
   });
@@ -290,7 +342,7 @@ describe('AuthService', () => {
 
       await service.refreshAccessToken('valid-token');
 
-      expect(userSessionRepository.save).not.toHaveBeenCalled();
+      expect(userSessionRepository.upsert).not.toHaveBeenCalled();
     });
 
     it('should record the exchanged token before deleting it', async () => {
@@ -406,16 +458,19 @@ describe('AuthService', () => {
       await expect(service.initLogin('user', 'pass')).rejects.toThrow(ForbiddenException);
     });
 
+    // Its session takes the id the client chose. After a lost answer and a reload, the next attempt
+    // goes to the normal login and continues it (#2151).
     it('should create user and return token if no users exist', async () => {
+      const chosenSid = '7c9e6679-7425-40de-944b-e07fc1f90ae7';
       usersService.hasUsers.mockResolvedValue(false);
       usersService.create.mockResolvedValue(1);
       jwtService.sign.mockReturnValue('access-token');
       refreshTokenRepository.create.mockReturnValue({} as RefreshToken);
       refreshTokenRepository.save.mockResolvedValue({} as RefreshToken);
-      userSessionRepository.create.mockReturnValue({} as UserSession);
-      userSessionRepository.save.mockResolvedValue({} as UserSession);
 
-      const result = await service.initLogin('user', 'pass');
+      const result = await service.initLogin('user', 'pass', chosenSid);
+
+      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({ sid: chosenSid }));
 
       expect(usersService.create).toHaveBeenCalledWith({
         name: 'user',
@@ -426,7 +481,7 @@ describe('AuthService', () => {
       expect(result.accessToken).toBe('access-token');
       expect(result.refreshToken).toBeDefined();
       expect(refreshTokenRepository.save).toHaveBeenCalled();
-      expect(userSessionRepository.save).toHaveBeenCalled();
+      expect(userSessionRepository.upsert).toHaveBeenCalled();
     });
   });
 

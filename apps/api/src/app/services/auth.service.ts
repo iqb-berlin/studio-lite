@@ -3,7 +3,9 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { In, LessThan, Repository } from 'typeorm';
+import {
+  In, LessThan, MoreThan, QueryFailedError, Repository
+} from 'typeorm';
 import * as crypto from 'crypto';
 import { UsersService } from './users.service';
 import { ReviewService } from './review.service';
@@ -23,7 +25,9 @@ import { PASSIVE_THRESHOLD_MS, REFRESH_TOKEN_REUSE_GRACE_MS } from '../app.const
  * "how long may a session be resumed" is answered in one place.
  *
  * Every login gets its own session unless the client hands back the id of one, which is what keeps
- * two browsers of the same person independent while a reload continues where it left off.
+ * two browsers of the same person independent while a reload continues where it left off. The
+ * client may also choose the id of the session a login opens, so that a login whose answer it never
+ * received leaves nothing behind (see {@link resumeOrOpenSession}).
  */
 @Injectable()
 export class AuthService {
@@ -61,11 +65,10 @@ export class AuthService {
       `Review with id '${user.reviewId}' is logging in.`;
   }
 
-  private static getSessionId(existingSessionId?: string): string {
-    if (existingSessionId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(existingSessionId)) {
-      return existingSessionId;
-    }
-    return crypto.randomUUID();
+  // The ids arrive in the request body unchecked; `RegExp.test` alone would also pass an array.
+  private static isSessionId(value?: unknown): value is string {
+    return typeof value === 'string' &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(value);
   }
 
   // `rid` names the row of the session, so that a token cannot outlive its row although a later
@@ -115,44 +118,19 @@ export class AuthService {
 
   async login(
     user: { id: number, name: string, reviewId: number },
-    existingSessionId?: string
+    existingSessionId?: string,
+    newSessionId?: string
   ): Promise<{ accessToken: string; refreshToken: string }> {
     this.logger.log(AuthService.getLoginMessage(user));
 
-    let sessionId = AuthService.getSessionId(existingSessionId);
-    const isNewSession = !existingSessionId;
-
-    // No user-scoped "most recent session" reuse here: every fresh login (i.e. no
-    // client-provided sessionId) gets its own session, so distinct browsers stay
-    // independent. Same-browser continuity is handled via the explicit
-    // existingSessionId that the client derives from the JWT `sid`.
-    //
-    // A session is therefore scoped to one localStorage, not to one browser: two windows
-    // of the same instance share it, while separate instances, private windows and
-    // container tabs each get their own row. A row left behind by a storage scope nobody
-    // uses any more stays usable until its refresh token expires, and expires with it.
-
     // Reviews do not keep long-lived user sessions.
     if (!user.id) {
+      const sessionId = AuthService.isSessionId(existingSessionId) ? existingSessionId : crypto.randomUUID();
       const accessToken = this.jwtService.sign(AuthService.getJwtPayload(user, sessionId));
       return { accessToken, refreshToken: '' };
     }
 
-    if (isNewSession) {
-      await this.cleanupExpiredSessions(user.id);
-      await this.createUserSession(user.id, sessionId);
-    } else {
-      // If we are reusing a session, update its expiry and last activity.
-      const updateResult = await this.updateUserSession(user.id, sessionId);
-
-      // If the session was not found (e.g. already deleted or wrong format rejected by regex),
-      // we must create a new one with a fresh UUID.
-      if (updateResult.affected === 0) {
-        sessionId = crypto.randomUUID();
-        await this.createUserSession(user.id, sessionId);
-      }
-    }
-
+    const sessionId = await this.resumeOrOpenSession(user.id, existingSessionId, newSessionId);
     const sessionRow = await this.userSessionRepository.findOne({ where: { userId: user.id, sessionId } });
     if (!sessionRow) {
       // Ended by a logout or the cleanup in the moment since it was opened.
@@ -163,40 +141,96 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
+  /**
+   * The session a login goes on in. The session of the client's token (`existingSessionId`, the
+   * JWT's `sid`) is continued while it exists and has not expired. Once it has ended -- logged out,
+   * ended by a new password, deleted by an admin, expired -- it is not revived: the tokens issued
+   * for it would be valid again (#2115).
+   *
+   * Otherwise the login opens a session under the id the client chose before sending it
+   * (`newSessionId`), or under a random one. A login whose answer never reached the client has
+   * already opened that session, and the next login from the same storage continues it instead of
+   * leaving it behind (#2151). An id whose session has ended can be opened again this way, but as a
+   * new row: the access tokens of the ended session name its row and stay refused (see
+   * hasValidSession).
+   *
+   * An id another account already holds is not taken, and the login gets a random one: the cleanup
+   * and the status of a session find its tokens by the id alone. The database refuses a second row
+   * with the id (`uq_user_session_session_id`), so two logins in the same moment cannot share it
+   * either.
+   *
+   * There is no user-scoped "most recent session" reuse, so that distinct browsers stay
+   * independent. A session is therefore scoped to one localStorage, not to one browser: two windows
+   * of the same instance share it, while separate instances, private windows and container tabs
+   * each get their own row. A row left behind by a storage scope nobody uses any more stays usable
+   * until its refresh token expires, and expires with it.
+   */
+  private async resumeOrOpenSession(
+    userId: number,
+    existingSessionId?: string,
+    newSessionId?: string
+  ): Promise<string> {
+    if (AuthService.isSessionId(existingSessionId)) {
+      const updateResult = await this.updateUserSession(userId, existingSessionId);
+      if (updateResult.affected) return existingSessionId;
+    }
+    await this.cleanupExpiredSessions(userId);
+    if (AuthService.isSessionId(newSessionId) && await this.openUserSession(userId, newSessionId)) {
+      return newSessionId;
+    }
+    const sessionId = crypto.randomUUID();
+    await this.openUserSession(userId, sessionId);
+    return sessionId;
+  }
+
+  // The refresh tokens of the rows go with them through the cascade. Deleting tokens by the ids
+  // found a moment before would also take the token another login of the account has just written,
+  // since the id an expired row had can be opened again (#2151).
   private async cleanupExpiredSessions(userId: number): Promise<void> {
+    await this.userSessionRepository.delete({ userId, expiresAt: LessThan(new Date()) });
+  }
+
+  /**
+   * Opens the session, or moves forward a row the account already has under this id: the login
+   * whose answer was lost left it, and two logins from the same storage may arrive at once. Answers
+   * false when another account holds the id.
+   */
+  private async openUserSession(userId: number, sessionId: string): Promise<boolean> {
     const now = new Date();
-    const expiredSessions = await this.userSessionRepository.find({
-      where: { userId, expiresAt: LessThan(now) },
-      select: { sessionId: true }
-    });
-    if (expiredSessions.length > 0) {
-      const expiredIds = expiredSessions.map(s => s.sessionId);
-      await this.refreshTokenRepository
-        .createQueryBuilder()
-        .delete()
-        .where('userId = :userId AND sessionId IN (:...ids)', { userId, ids: expiredIds })
-        .execute();
-      await this.userSessionRepository.delete({ userId, expiresAt: LessThan(now) });
+    try {
+      await this.userSessionRepository.upsert(
+        {
+          sessionId,
+          userId,
+          lastActivity: now,
+          expiresAt: new Date(now.getTime() + PASSIVE_THRESHOLD_MS)
+        },
+        ['userId', 'sessionId']
+      );
+      return true;
+    } catch (error) {
+      if (!AuthService.isSessionIdTaken(error)) throw error;
+      // Postgres settles only the upsert's own conflict without an error. A row that another login
+      // of the same account writes in the same moment raises it as well, committed by then: whose
+      // row it is decides.
+      return this.userSessionRepository.exists({ where: { userId, sessionId } });
     }
   }
 
-  private async createUserSession(userId: number, sessionId: string): Promise<void> {
-    const now = new Date();
-    const expiresAt = new Date(now.getTime() + PASSIVE_THRESHOLD_MS);
-    const session = this.userSessionRepository.create({
-      sessionId,
-      userId,
-      lastActivity: now,
-      expiresAt
-    });
-    await this.userSessionRepository.save(session);
+  // Postgres `unique_violation` of the constraint on the id alone.
+  private static isSessionIdTaken(error: unknown): boolean {
+    const driverError = error instanceof QueryFailedError ?
+      error.driverError as { code?: string, constraint?: string } | undefined :
+      undefined;
+    return driverError?.code === '23505' && driverError.constraint === 'uq_user_session_session_id';
   }
 
-  // A login counts as interaction, so it moves both timestamps.
+  // A login counts as interaction, so it moves both timestamps. An expired row stays as it is: its
+  // session has ended, only the cleanup has not reached it yet.
   private async updateUserSession(userId: number, sessionId: string): Promise<{ affected?: number }> {
     const now = new Date();
     return this.userSessionRepository.update(
-      { userId, sessionId },
+      { userId, sessionId, expiresAt: MoreThan(now) },
       {
         lastActivity: now,
         expiresAt: new Date(now.getTime() + PASSIVE_THRESHOLD_MS)
@@ -339,7 +373,14 @@ export class AuthService {
     return { accessToken, refreshToken: newRefreshToken };
   }
 
-  async initLogin(username: string, password: string): Promise<{ accessToken: string; refreshToken: string }> {
+  // The first login of an installation takes the id for its session as every other login does.
+  // After a reload the page knows the user exists, and the next attempt goes to the normal login and
+  // continues that session.
+  async initLogin(
+    username: string,
+    password: string,
+    newSessionId?: string
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     if (await this.usersService.hasUsers()) throw new ForbiddenException();
     const newUserId = await this.usersService.create({
       name: username,
@@ -348,7 +389,7 @@ export class AuthService {
       description: 'first initial user'
     });
     this.logger.log(`First User with id '${newUserId}' is logging in.`);
-    return this.login({ id: newUserId, name: username, reviewId: 0 });
+    return this.login({ id: newUserId, name: username, reviewId: 0 }, undefined, newSessionId);
   }
 
   /**
@@ -356,9 +397,9 @@ export class AuthService {
    * still renew the session. A session ended by a logout, a new password or the deletion of its
    * account has no row any more, and an expired one could not be resumed (#2115).
    *
-   * A session that ended and was opened again under the same id is a new row: a token naming the
-   * row of the ended one (`sessionRowId`) is refused. A token without a row was issued before tokens
-   * named it and is taken by its session id while it lasts.
+   * A login may open a session under the id of one that has ended (#2151). That is a new row, and
+   * a token naming the row of the ended one (`sessionRowId`) is refused. A token without a row was
+   * issued before tokens named it and is taken by its session id while it lasts.
    */
   async hasValidSession(userId: number, sessionId: string, sessionRowId?: number): Promise<boolean> {
     const userSession = await this.findValidUserSession(userId, sessionId);
