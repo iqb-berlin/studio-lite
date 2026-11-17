@@ -27,7 +27,7 @@ describe('Admin Workspaces Management', () => {
   });
 
   beforeEach(() => {
-    cy.intercept('GET', '/api/admin/workspaces', mockWorkspaces).as('getAllWorkspaces');
+    cy.intercept({ method: 'GET', pathname: '/api/workspaces' }, mockWorkspaces).as('getAllWorkspaces');
     cy.visit('/');
     cy.findAdminSettings().click();
     clickIndexTabAdmin('workspaces');

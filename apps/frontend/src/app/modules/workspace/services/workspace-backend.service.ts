@@ -65,7 +65,7 @@ export class WorkspaceBackendService {
 
   getMissingsProfiles():Observable<MissingsProfilesDto[]> {
     return this.http
-      .get<MissingsProfilesDto[]>(`${this.serverUrl}admin/settings/missings-profiles`)
+      .get<MissingsProfilesDto[]>(`${this.serverUrl}settings/missings-profiles`)
       .pipe(
         catchError(() => of([]))
       );
@@ -477,7 +477,7 @@ export class WorkspaceBackendService {
       params = params.set('workspaceGroupId', workspaceGroupId.toString());
     }
     return this.http
-      .get<UnitRichNoteTagDto[]>(`${this.serverUrl}admin/settings/unit-rich-note-tags`, { params })
+      .get<UnitRichNoteTagDto[]>(`${this.serverUrl}settings/unit-rich-note-tags`, { params })
       .pipe(
         catchError(() => of([]))
       );

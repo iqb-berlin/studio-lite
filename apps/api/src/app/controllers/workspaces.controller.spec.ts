@@ -8,6 +8,7 @@ import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.g
 import { AuthService } from '../services/auth.service';
 import { UserWorkspaceGroupNotAdminException } from '../exceptions/user-workspace-group-not-admin.exception';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { IsAdminGuard } from '../guards/is-admin.guard';
 
 describe('WorkspacesController', () => {
   let controller: WorkspacesController;
@@ -24,6 +25,7 @@ describe('WorkspacesController', () => {
         { provide: WorkspaceService, useValue: workspaceService },
         { provide: UsersService, useValue: usersService },
         { provide: IsWorkspaceGroupAdminGuard, useValue: { canActivate: jest.fn(() => true) } },
+        { provide: IsAdminGuard, useValue: { canActivate: jest.fn(() => true) } },
         { provide: AuthService, useValue: createMock<AuthService>() }
       ]
     }).compile();
@@ -32,6 +34,11 @@ describe('WorkspacesController', () => {
   });
 
   // The guards are the authorisation of each method; no other unit test sees them (#1953).
+  it('should let only administrators reach findAll', () => {
+    expect(Reflect.getMetadata('__guards__', WorkspacesController.prototype.findAll))
+      .toEqual([JwtAuthGuard, IsAdminGuard]);
+  });
+
   it.each(['remove', 'patchGroups'] as const)(
     'should let only admins of the group reach %s',
     method => {

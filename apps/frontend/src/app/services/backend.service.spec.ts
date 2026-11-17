@@ -270,7 +270,7 @@ describe('BackendService', () => {
         done();
       });
 
-      httpMock.expectOne(`${serverUrl}admin/settings/app-logo`).error(new ProgressEvent('error'));
+      httpMock.expectOne(`${serverUrl}settings/app-logo`).error(new ProgressEvent('error'));
     });
   });
 
@@ -281,7 +281,7 @@ describe('BackendService', () => {
         done();
       });
 
-      const req = httpMock.expectOne(`${serverUrl}admin/settings/config`);
+      const req = httpMock.expectOne(`${serverUrl}settings/config`);
       req.error(new ProgressEvent('error'));
     });
   });

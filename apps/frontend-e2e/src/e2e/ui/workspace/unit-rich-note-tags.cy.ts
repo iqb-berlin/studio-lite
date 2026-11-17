@@ -235,7 +235,7 @@ describe('Unit Rich Notes', () => {
         createRichNote(text, 0);
         cy.contains('.node-card', 'Transkript 3 für das Haupt-Audio').should('contain.text', text);
 
-        cy.intercept({ method: 'GET', pathname: '/api/admin/settings/unit-rich-note-tags' }, req => {
+        cy.intercept({ method: 'GET', pathname: '/api/settings/unit-rich-note-tags' }, req => {
           if (req.url.includes('workspaceGroupId=')) return;
           req.alias = 'getTagsWithoutGroup';
           req.on('response', res => { res.setDelay(2000); });

@@ -19,7 +19,7 @@ export function addModules(filenames: string[]): void {
   cy.findAdminSettings().click();
   clickIndexTabAdmin('v-modules');
 
-  cy.intercept('POST', '**/api/admin/verona-modules*').as('uploadModule');
+  cy.intercept('POST', '**/api/verona-modules*').as('uploadModule');
 
   filenames.forEach(filename => {
     cy.loadModule(filename);
@@ -41,7 +41,7 @@ export function deleteAllModules(): void {
   cy.selectModule('IQB-Editor');
   cy.get('[data-cy="delete-modules-button"]').click();
   cy.translate(Cypress.expose('locale')).then(json => {
-    cy.clickButtonWithResponseCheck(json.delete, [200], '/api/admin/verona-modules*', 'DELETE', 'deleteModule');
+    cy.clickButtonWithResponseCheck(json.delete, [200], '/api/verona-modules*', 'DELETE', 'deleteModule');
   });
 }
 

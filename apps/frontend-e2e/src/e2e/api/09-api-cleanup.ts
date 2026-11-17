@@ -97,7 +97,7 @@ describe('Cleanup API tests', () => {
     });
   });
 
-  describe('89. DELETE /api/admin/verona-modules', () => {
+  describe('89. DELETE /api/verona-modules', () => {
     let qs: string[];
     before(() => {
       qs = [];

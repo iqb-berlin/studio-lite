@@ -30,7 +30,7 @@ describe('Admin settings API tests', () => {
       });
   });
 
-  describe('100. GET /api/admin/settings/config', () => {
+  describe('100. GET /api/settings/config', () => {
     it('200 positive test: should successfully retrieve the current configuration ' +
       'text settings for an administrator', () => {
       cy.getSettingConfigAPI(Cypress.expose(`token_${Cypress.expose('username')}`))
@@ -56,7 +56,28 @@ describe('Admin settings API tests', () => {
     });
   });
 
-  describe('101. UPDATE /api/admin/settings/config', () => {
+  // A frontend from before #1216, still open after the update, asks the old paths; only 521 makes it
+  // show the reload prompt. The current version is sent to show that the answer does not depend on it.
+  describe('/api/admin/* and /api/group-admin/* (frontends before #1216)', () => {
+    [
+      ['GET', '/api/admin/settings/config'],
+      ['PATCH', '/api/group-admin/users/1/workspaces']
+    ].forEach(([method, url]) => {
+      it(`521 negative test: should tell a frontend that sends ${method} ${url} to reload`, () => {
+        cy.request({
+          method,
+          url,
+          headers: { 'app-version': Cypress.expose('version') },
+          failOnStatusCode: false
+        })
+          .then(resp => {
+            expect(resp.status).to.equal(521);
+          });
+      });
+    });
+  });
+
+  describe('101. UPDATE /api/settings/config', () => {
     it('200 positive test: should allow an authorized administrator ' +
       'to update the system configuration settings', () => {
       cy.updateSettingConfigAPI(Cypress.expose(`token_${Cypress.expose('username')}`), 17)
@@ -86,7 +107,7 @@ describe('Admin settings API tests', () => {
     });
   });
 
-  describe('102. GET /api/admin/settings/app-logo', () => {
+  describe('102. GET /api/settings/app-logo', () => {
     it('200 positive test: should successfully retrieve application logo and ' +
       'color settings for an administrator', () => {
       cy.getSettingLogoAPI(Cypress.expose(`token_${Cypress.expose('username')}`))
@@ -112,7 +133,7 @@ describe('Admin settings API tests', () => {
     });
   });
 
-  describe('103. UPDATE /api/admin/settings/app-logo', () => {
+  describe('103. UPDATE /api/settings/app-logo', () => {
     it('200 positive test: should allow an authorized administrator to ' +
       'update the application logo and brand colors', () => {
       // Set the background to the color red
@@ -144,7 +165,7 @@ describe('Admin settings API tests', () => {
     });
   });
 
-  describe('104. GET /api/admin/settings/unit-export-config', () => {
+  describe('104. GET /api/settings/unit-export-config', () => {
     it('200 positive test: should successfully retrieve unit export ' +
       'configuration parameters for an administrator', () => {
       cy.getSettingLogoAPI(Cypress.expose(`token_${Cypress.expose('username')}`))
@@ -170,7 +191,7 @@ describe('Admin settings API tests', () => {
     });
   });
 
-  describe('105. UPDATE /api/admin/settings/unit-export-config', () => {
+  describe('105. UPDATE /api/settings/unit-export-config', () => {
     it('200 positive test: should allow an authorized administrator to update unit ' +
       'export validation parameters', () => {
       unitExport.unitXsdUrl = 'https://w3id.org/iqb/spec/unit-xml/17.4';
@@ -203,7 +224,7 @@ describe('Admin settings API tests', () => {
     });
   });
 
-  describe('106. GET /api/admin/settings/missings-profiles ', () => {
+  describe('106. GET /api/settings/missings-profiles ', () => {
     it('200 positive test: should successfully retrieve the configuration ' +
       'for missing value profiles as an administrator', () => {
       cy.getSettingMissingProfilesAPI(Cypress.expose(`token_${Cypress.expose('username')}`))
@@ -229,7 +250,7 @@ describe('Admin settings API tests', () => {
     });
   });
 
-  describe('107. UPDATE /api/admin/settings/missings-profiles ', () => {
+  describe('107. UPDATE /api/settings/missings-profiles ', () => {
     it('200 positive test: should allow an authorized administrator to successfully ' +
       'update the missing value profile definitions', () => {
       const profile = '[{"id":"missing_by_intention","label":"missing by intention","description":"(1) Item wurde gesehen (2a) Item wurde nicht bearbeitet oder (2b) wurde bearbeitet, aber wieder zurückgesetzt und (3) es gibt nachfolgend Items, die bearbeitet wurden","code":-99},{"id":"missing_not_reached","label":"missing not reached","description":"(1a) Item wurde nicht gesehen oder (1b) Item wurde gesehen und nicht bearbeitet und (2) es folgen nur Items mit demselben Status","code":-96},{"id":"missing_invalid_response","label":"missing invalid response","description":"(1) Item wurde bearbeitet und (2a) leere Antwort oder (2b) sonstwie ungültige (Spaß-)Antwort","code":-98},{"id":"missing_coding_impossible","label":"missing coding impossible","description":"(1) Item müsste/könnte bearbeitet worden sein und (2) Antwort ist aufgrund technischer Probleme nicht auswertbar","code":-97},{"id":"missing_by_design","label":"missing by design","description":"Antwort liegt nicht vor, weil das Item der Testperson planmäßig nicht präsentiert wurde","code":-94}]';

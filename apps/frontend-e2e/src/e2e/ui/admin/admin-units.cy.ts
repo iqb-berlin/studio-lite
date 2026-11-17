@@ -35,7 +35,7 @@ describe('Admin Units Management', () => {
   });
 
   beforeEach(() => {
-    cy.intercept('GET', '/api/admin/units', mockUnits).as('getAllUnits');
+    cy.intercept({ method: 'GET', pathname: '/api/units' }, mockUnits).as('getAllUnits');
     cy.visit('/');
     cy.findAdminSettings().click();
     clickIndexTabAdmin('units');
@@ -93,9 +93,9 @@ describe('Admin Units Management', () => {
   });
 
   it('should trigger unit download', () => {
-    cy.intercept('GET', '/api/admin/units').as('downloadUnits');
+    cy.intercept({ method: 'GET', pathname: '/api/units' }).as('downloadUnits');
     cy.get('[data-cy="admin-units-menu-download"]').click();
-    cy.wait('@downloadUnits').its('request.url').should('include', '/api/admin/units');
+    cy.wait('@downloadUnits').its('request.url').should('include', '/api/units');
   });
 
   it('should show info count', () => {

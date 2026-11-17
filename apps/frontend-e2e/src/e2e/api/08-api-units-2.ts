@@ -959,7 +959,7 @@ describe('Unit API tests part II', () => {
 
   // The admin view links each item to /a/<workspace>/<unit>. Before #1709 the list carried no
   // workspace, and the link put the unit id in its place (#1698).
-  describe('GET /api/admin/unit-items', () => {
+  describe('GET /api/unit-items', () => {
     it('200 positive test: names the workspace each item\'s unit is in', () => {
       const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
       // section 84 imported M6_AK0011, which brings an item, into ws1 and ws2
@@ -985,7 +985,7 @@ describe('Unit API tests part II', () => {
   });
 
   // The admin view exports the list as CSV, whose column for the workspace stayed empty (#2012).
-  describe('GET /api/admin/units', () => {
+  describe('GET /api/units', () => {
     it('200 positive test: names the workspace each unit is in', () => {
       const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
       // section 84 imported M6_AK0011 into ws1 and ws2, and section 39 renamed ws1

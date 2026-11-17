@@ -10,7 +10,7 @@ describe('First login', () => {
   let delayConfig = true;
 
   it('should create the first user even when the config answers late', () => {
-    cy.intercept('GET', '/api/admin/settings/config', req => {
+    cy.intercept('GET', '/api/settings/config', req => {
       if (!delayConfig) return;
       req.on('response', res => {
         res.setDelay(4000);

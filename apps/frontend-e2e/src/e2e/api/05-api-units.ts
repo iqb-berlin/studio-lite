@@ -82,7 +82,7 @@ describe('Unit API tests', () => {
     });
   });
 
-  describe('26. GET /api/admin/units', () => {
+  describe('26. GET /api/units', () => {
     it('200 positive test: should retrieve a comprehensive list of all units across all workspaces', () => {
       cy.getAdminUnitsAPI(
         Cypress.expose(`token_${Cypress.expose('username')}`)
@@ -105,6 +105,22 @@ describe('Unit API tests', () => {
     it('401 negative test: should deny unit listing when an invalid token is provided', () => {
       cy.getAdminUnitsAPI(noId).then(resp => {
         expect(resp.status).to.equal(401);
+      });
+    });
+  });
+
+  describe('GET /api/workspaces', () => {
+    it('200 positive test: should list the workspaces of all groups for an administrator', () => {
+      cy.getAdminWorkspacesAPI(Cypress.expose(`token_${Cypress.expose('username')}`)).then(resp => {
+        expect(resp.status).to.equal(200);
+        const ids = (resp.body as { id: number }[]).map(ws => ws.id);
+        expect(ids).to.include.members([Cypress.expose(ws1.id), Cypress.expose(ws2.id)]);
+      });
+    });
+
+    it('403 negative test: should deny the list of all workspaces to a non-administrator user', () => {
+      cy.getAdminWorkspacesAPI(Cypress.expose(`token_${userGroupAdmin.username}`)).then(resp => {
+        expect(resp.status).to.equal(403);
       });
     });
   });
@@ -165,15 +181,6 @@ describe('Unit API tests', () => {
     it('401 negative test: should deny access to workspace details with an invalid token', () => {
       cy.getWsNormalAPI(Cypress.expose(ws2.id), noId).then(resp => {
         expect(resp.status).to.equal(401);
-      });
-    });
-
-    it('404 negative test: should return error for an invalid workspace ID format', () => {
-      cy.getWsNormalAPI(
-        '',
-        Cypress.expose(`token_${userGroupAdmin.username}`)
-      ).then(resp => {
-        expect(resp.status).to.equal(404);
       });
     });
 

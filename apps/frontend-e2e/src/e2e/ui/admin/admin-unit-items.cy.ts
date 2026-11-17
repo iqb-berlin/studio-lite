@@ -31,7 +31,7 @@ describe('Admin Unit Items Management', () => {
   });
 
   beforeEach(() => {
-    cy.intercept('GET', '/api/admin/unit-items', mockUnitItems).as('getAllUnitItems');
+    cy.intercept({ method: 'GET', pathname: '/api/unit-items' }, mockUnitItems).as('getAllUnitItems');
     cy.visit('/');
     cy.findAdminSettings().click();
     clickIndexTabAdmin('unit-items');

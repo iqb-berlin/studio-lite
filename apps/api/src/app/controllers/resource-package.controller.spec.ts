@@ -1,4 +1,5 @@
 import { ResourcePackageController } from './resource-package.controller';
+import { IsAdminGuard } from '../guards/is-admin.guard';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
 describe('ResourcePackageController', () => {
@@ -7,4 +8,12 @@ describe('ResourcePackageController', () => {
     expect(Reflect.getMetadata('__guards__', ResourcePackageController.prototype.findResourcePackages))
       .toEqual([JwtAuthGuard]);
   });
+
+  it.each(['removeIds', 'create'] as const)(
+    'should let only administrators reach %s',
+    method => {
+      expect(Reflect.getMetadata('__guards__', ResourcePackageController.prototype[method]))
+        .toEqual([JwtAuthGuard, IsAdminGuard]);
+    }
+  );
 });

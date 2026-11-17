@@ -29,8 +29,8 @@ describe('Admin settings API tests', () => {
           });
       });
   });
-  describe('108. POST /api/admin/resource-packages', () => {
-    // It is skipped because it results in [vite] http proxy error: /api/admin/resource-packages
+  describe('108. POST /api/resource-packages', () => {
+    // It is skipped because it results in [vite] http proxy error: /api/resource-packages
     // it.skip('500 negative test: should not add a resource package a false user', () => {
     //   cy.addPackageAPI(filename, 'noId')
     //     .then(resp => {
@@ -69,7 +69,7 @@ describe('Admin settings API tests', () => {
     });
   });
 
-  describe('110. DELETE /api/admin/resource-packages', () => {
+  describe('110. DELETE /api/resource-packages', () => {
     it('401 negative test: should deny resource package deletion to a user with regular permissions', () => {
       cy.deletePackageAPI(Cypress.expose(`token_${user2.username}`), '1')
         .then(resp => {

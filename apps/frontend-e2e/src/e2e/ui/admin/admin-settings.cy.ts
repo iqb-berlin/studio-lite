@@ -23,7 +23,7 @@ describe('Admin Settings Tab Configuration', () => {
     it('saves a start-page warning message', () => {
       goToSettings();
       setFormControl('globalWarningText', 'System-Wartung am 01.01.2026');
-      saveAndExpect('PATCH', '/api/admin/settings/config', 'saveConfig', 0);
+      saveAndExpect('PATCH', '/api/settings/config', 'saveConfig', 0);
     });
 
     it('saves application title and HTML content', () => {
@@ -31,7 +31,7 @@ describe('Admin Settings Tab Configuration', () => {
       setFormControl('appTitle', 'IQB Studio Test');
       setFormControl('introHtml', '<p>Willkommen im Testsystem</p>');
       setFormControl('imprintHtml', '<p>Impressum Test</p>');
-      saveAndExpect('PATCH', '/api/admin/settings/config', 'saveConfigFull', 0);
+      saveAndExpect('PATCH', '/api/settings/config', 'saveConfigFull', 0);
     });
 
     it('sets a warning expiration time to a day after today', () => {
@@ -47,7 +47,7 @@ describe('Admin Settings Tab Configuration', () => {
       setFormControl('globalWarningExpiredDay', `${day}.${month}.${year}`);
       saveAndExpect(
         'PATCH',
-        '/api/admin/settings/config',
+        '/api/settings/config',
         'saveConfigWithDate',
         0
       );
@@ -73,7 +73,7 @@ describe('Admin Settings Tab Configuration', () => {
       clearFormControl('imprintHtml');
       saveAndExpect(
         'PATCH',
-        '/api/admin/settings/config',
+        '/api/settings/config',
         'saveConfigClean',
         0
       );
@@ -91,7 +91,7 @@ describe('Admin Settings Tab Configuration', () => {
         .type('Dear {{user}},\n\nWelcome to Studio Lite.', { force: true, parseSpecialCharSequences: false });
       saveAndExpect(
         'PATCH',
-        '/api/admin/settings/email-template',
+        '/api/settings/email-template',
         'saveEmailTemplate',
         1
       );
@@ -103,7 +103,7 @@ describe('Admin Settings Tab Configuration', () => {
       clearFormControl('emailBody');
       saveAndExpect(
         'PATCH',
-        '/api/admin/settings/email-template',
+        '/api/settings/email-template',
         'clearEmailTemplate',
         1
       );
@@ -118,7 +118,7 @@ describe('Admin Settings Tab Configuration', () => {
       let release = (): void => undefined;
       const held = new Promise<void>(resolve => { release = resolve; });
       let saves = 0;
-      cy.intercept('PATCH', '/api/admin/settings/email-template', req => {
+      cy.intercept('PATCH', '/api/settings/email-template', req => {
         saves += 1;
         if (saves === 1) req.on('response', () => held);
       }).as('saveEmailTemplateSlowly');
@@ -141,7 +141,7 @@ describe('Admin Settings Tab Configuration', () => {
   describe('Logo and Colors card', () => {
     // Saving the empty form shown after a failed load would replace the stored logo (#1969).
     it('offers no saving of logo and colors that could not be loaded', () => {
-      cy.intercept('GET', '/api/admin/settings/app-logo', { statusCode: 500 });
+      cy.intercept('GET', '/api/settings/app-logo', { statusCode: 500 });
       goToSettings();
       cy.get('[data-cy="admin-app-logo-not-loaded"]').should('exist');
       cy.get('[formcontrolname="bodyBackground"]').should('not.exist');
@@ -150,7 +150,7 @@ describe('Admin Settings Tab Configuration', () => {
     it('replaces the red to black logo', () => {
       goToSettings();
       cy.loadModule('iqb-logo-black.png');
-      saveAndExpect('PATCH', '/api/admin/settings/app-logo', 'saveLogo', 2);
+      saveAndExpect('PATCH', '/api/settings/app-logo', 'saveLogo', 2);
     });
 
     it('saves a custom application background color', () => {
@@ -158,7 +158,7 @@ describe('Admin Settings Tab Configuration', () => {
       setFormControl('bodyBackground', '#f0f4f8');
       saveAndExpect(
         'PATCH',
-        '/api/admin/settings/app-logo',
+        '/api/settings/app-logo',
         'saveBackground',
         2
       );
@@ -177,7 +177,7 @@ describe('Admin Settings Tab Configuration', () => {
       setFormControl('boxBackground', '#ffffff');
       saveAndExpect(
         'PATCH',
-        '/api/admin/settings/app-logo',
+        '/api/settings/app-logo',
         'saveBoxBackground',
         2
       );
@@ -197,7 +197,7 @@ describe('Admin Settings Tab Configuration', () => {
       clearFormControl('boxBackground');
       saveAndExpect(
         'PATCH',
-        '/api/admin/settings/app-logo',
+        '/api/settings/app-logo',
         'originalBackground',
         2
       );
@@ -227,7 +227,7 @@ describe('Admin Settings Tab Configuration', () => {
       clearFormControl('testTakersXsdUrl');
       saveAndExpect(
         'PATCH',
-        '/api/admin/settings/unit-export-config',
+        '/api/settings/unit-export-config',
         'clearUnitExport',
         3
       );
@@ -240,7 +240,7 @@ describe('Admin Settings Tab Configuration', () => {
       setFormControl('testTakersXsdUrl', testTakersXsdUrl);
       saveAndExpect(
         'PATCH',
-        '/api/admin/settings/unit-export-config',
+        '/api/settings/unit-export-config',
         'saveUnitExport',
         3
       );
@@ -261,7 +261,7 @@ describe('Admin Settings Tab Configuration', () => {
       clearFormControl('csvUrl');
       saveAndExpect(
         'PATCH',
-        '/api/admin/settings/profiles-registry',
+        '/api/settings/profiles-registry',
         'clearRegistry',
         4
       );
@@ -272,7 +272,7 @@ describe('Admin Settings Tab Configuration', () => {
       setFormControl('csvUrl', testUrl);
       saveAndExpect(
         'PATCH',
-        '/api/admin/settings/profiles-registry',
+        '/api/settings/profiles-registry',
         'saveRegistry',
         4
       );
@@ -299,7 +299,7 @@ describe('Admin Settings Tab Configuration', () => {
       setFormControl('csvUrl', originalUrl);
       saveAndExpect(
         'PATCH',
-        '/api/admin/settings/profiles-registry',
+        '/api/settings/profiles-registry',
         'saveRegistry',
         4
       );
@@ -332,7 +332,7 @@ describe('Admin Settings Tab Configuration', () => {
         .type(validJson, { parseSpecialCharSequences: false, delay: 0 });
       saveAndExpect(
         'PATCH',
-        '/api/admin/settings/missings-profiles',
+        '/api/settings/missings-profiles',
         'saveMissings',
         5
       );
@@ -343,7 +343,7 @@ describe('Admin Settings Tab Configuration', () => {
       setFormControl('iqbStandardMissings', '[]');
       saveAndExpect(
         'PATCH',
-        '/api/admin/settings/missings-profiles',
+        '/api/settings/missings-profiles',
         'clearMissings',
         5
       );
@@ -357,13 +357,13 @@ describe('Admin Settings Tab Configuration', () => {
       cy.get('studio-lite-unit-rich-note-tags-config input').last()
         .clear({ force: true })
         .type('https://w3id.org/iqb/v06/t1/index.json', { force: true });
-      saveAndExpect('PATCH', '/api/admin/settings/unit-rich-note-tags', 'saveRichNoteTags', 6);
+      saveAndExpect('PATCH', '/api/settings/unit-rich-note-tags-config', 'saveRichNoteTags', 6);
     });
 
     it('deletes the second rich note tags JSON and set again the default', () => {
       goToSettings();
       cy.get('studio-lite-unit-rich-note-tags-config .delete-button').last().click();
-      saveAndExpect('PATCH', '/api/admin/settings/unit-rich-note-tags', 'deleteRichNoteTags', 6);
+      saveAndExpect('PATCH', '/api/settings/unit-rich-note-tags-config', 'deleteRichNoteTags', 6);
     });
 
     it('resets the default JSON', () => {
@@ -372,7 +372,7 @@ describe('Admin Settings Tab Configuration', () => {
         .last()
         .clear({ force: true })
         .type('https://w3id.org/iqb/v05/r1/index.json', { force: true });
-      saveAndExpect('PATCH', '/api/admin/settings/unit-rich-note-tags', 'resetRichNoteTags', 6);
+      saveAndExpect('PATCH', '/api/settings/unit-rich-note-tags-config', 'resetRichNoteTags', 6);
     });
   });
 });

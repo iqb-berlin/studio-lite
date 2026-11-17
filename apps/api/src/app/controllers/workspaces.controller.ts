@@ -1,5 +1,5 @@
 import {
-  Body, Controller, Delete, ParseArrayPipe, Patch, Query, UseFilters, UseGuards
+  Body, Controller, Delete, Get, ParseArrayPipe, Patch, Query, UseFilters, UseGuards
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -8,20 +8,22 @@ import {
   ApiQuery,
   ApiTags
 } from '@nestjs/swagger';
-import { MoveToDto } from '@studio-lite-lib/api-dto';
+import { MoveToDto, WorkspaceFullDto } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceService } from '../services/workspace.service';
 import { UsersService } from '../services/users.service';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
+import { IsAdminGuard } from '../guards/is-admin.guard';
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
 import { UserId } from '../decorators/user-id.decorator';
 import { AnyWorkspaceGroupAdmin } from '../decorators/any-workspace-group-admin.decorator';
 import { UserWorkspaceGroupNotAdminException } from '../exceptions/user-workspace-group-not-admin.exception';
 
 /**
- * `workspaces` -- what is done to several workspaces at once: deleting them, and moving them into
- * another group. The workspaces may lie in different groups, so no group stands in the path for the
- * guard to check; the handlers ask about every group the request touches (#1005, #1984).
+ * `workspaces` -- the workspaces of the whole installation: the list, for administrators, and what
+ * is done to several workspaces at once: deleting them, and moving them into another group. The
+ * workspaces may lie in different groups, so no group stands in the path for the guard to check;
+ * the handlers ask about every group the request touches (#1005, #1984).
  *
  * A single workspace is {@link WorkspaceController}, who may work in it and at which level
  * {@link WorkspaceAccessController}, and creating one belongs to its group
@@ -34,6 +36,16 @@ export class WorkspacesController {
     private workspaceService: WorkspaceService,
     private userService: UsersService
   ) {}
+
+  @Get()
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Workspaces retrieved successfully.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
+  @ApiTags('workspaces')
+  async findAll(): Promise<WorkspaceFullDto[]> {
+    return this.workspaceService.getAllWorkspaces();
+  }
 
   @Delete()
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
