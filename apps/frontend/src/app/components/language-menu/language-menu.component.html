@@ -1,0 +1,20 @@
+@if (languageService.languages.length > 1) {
+  <button mat-button
+          [matMenuTriggerFor]="languageMenu"
+          [matTooltip]="'home.select-language' | translate"
+          matTooltipPosition="above"
+          data-cy="language-menu">
+    <studio-lite-wrapped-icon class="white-color" icon="translate"></studio-lite-wrapped-icon>
+  </button>
+  <mat-menu #languageMenu="matMenu">
+    @for (language of languageService.languages; track language.code) {
+      <button mat-menu-item
+              [attr.lang]="language.code"
+              [attr.data-cy]="'language-' + language.code"
+              (click)="select(language.code)">
+        <mat-icon>{{ language.code === languageService.active.code ? 'check' : '' }}</mat-icon>
+        <span>{{ language.name }}</span>
+      </button>
+    }
+  </mat-menu>
+}

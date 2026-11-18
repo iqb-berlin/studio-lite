@@ -3,6 +3,7 @@ import {
 } from '@angular/core';
 import { formatDate } from '@angular/common';
 import { UserSessionInfoDto } from '@studio-lite-lib/api-dto';
+import { I18nService } from '../services/i18n.service';
 
 export const PASSIVE_SESSION_TIMES_SHOWN = 10;
 
@@ -26,7 +27,10 @@ export interface PassiveSessionSummary {
   standalone: true
 })
 export class PassiveSessionSummaryPipe implements PipeTransform {
-  constructor(@Inject(LOCALE_ID) private locale: string) {}
+  constructor(
+    @Inject(LOCALE_ID) private locale: string,
+    private i18nService: I18nService
+  ) {}
 
   transform(sessions: UserSessionInfoDto[] | undefined): PassiveSessionSummary {
     const passive = (sessions || []).filter(session => session.activityStatus === 'passive');
@@ -37,7 +41,7 @@ export class PassiveSessionSummaryPipe implements PipeTransform {
       .slice(0, PASSIVE_SESSION_TIMES_SHOWN);
     return {
       count: passive.length,
-      times: shown.map(time => formatDate(time, 'dd.MM., HH:mm', this.locale)).join('\n'),
+      times: shown.map(time => formatDate(time, this.i18nService.shortDateTimeFormat, this.locale)).join('\n'),
       more: passive.length - shown.length
     };
   }

@@ -10,6 +10,7 @@ import {
 } from 'rxjs/operators';
 import { AppService } from './app.service';
 import { BackendService } from './backend.service';
+import { LanguageService } from './language.service';
 import {
   ACTIVE_THRESHOLD_MS,
   PASSIVE_THRESHOLD_MS,
@@ -43,6 +44,7 @@ export class HeartbeatService implements OnDestroy {
   private readonly inactivityTimeoutMs = PASSIVE_THRESHOLD_MS;
   private readonly passivePhaseMs = Math.max(this.inactivityTimeoutMs - this.activityThresholdMs, 0);
   private readonly ngZone = inject(NgZone);
+  private readonly languageService = inject(LanguageService);
 
   private readonly lastActivityPulse$ = new BehaviorSubject<number>(Date.now());
   private readonly activitySync$ = new Subject<void>();
@@ -197,14 +199,24 @@ export class HeartbeatService implements OnDestroy {
   }
 
   /**
-   * Own method so tests can observe the auto-logout redirect by stubbing it: assigning
-   * window.location.href makes jsdom attempt a real navigation, which it cannot do and reports as a
-   * "Not implemented: navigation" error.
+   * Own method so tests can observe the auto-logout redirect by stubbing it. The start page is the
+   * one in the language of the interface, which the address carries (#2175).
+   */
+  private redirectToHome(): void {
+    this.reloadAt(this.languageService.homeHref());
+  }
+
+  /**
+   * Loads the page anew at the given address, so nothing of the ended session stays in memory. The
+   * address is replaced first: assigned instead, an address that differs only in the hash would not
+   * load the page at all, and one that differs in the path would race the reload.
+   * Own method because jsdom cannot perform a navigation and reports "Not implemented: navigation".
    */
   // eslint-disable-next-line class-methods-use-this
-  private redirectToHome(): void {
+  private reloadAt(href: string): void {
     if (typeof window !== 'undefined') {
-      window.location.href = '/home';
+      window.history.replaceState(null, '', href);
+      window.location.reload();
     }
   }
 

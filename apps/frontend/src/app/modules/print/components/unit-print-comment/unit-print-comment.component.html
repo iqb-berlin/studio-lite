@@ -7,7 +7,7 @@
       <mat-icon>subdirectory_arrow_right</mat-icon>
     }
     {{comment.userName}}
-    <span class="comment-date">{{comment.changedAt | date : 'dd.MM.yyyy HH:mm' }}</span>
+    <span class="comment-date">{{comment.changedAt | date : i18nService.dateTimeFormat }}</span>
     @if (comment.itemUuids && comment.itemUuids.length && metadata) {
 
       <span class="comment-items">

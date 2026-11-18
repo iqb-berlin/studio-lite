@@ -12,3 +12,15 @@ describe('Application', () => {
     getAppTitle().contains('IQB-Studio');
   });
 });
+
+// Without the visit above: an address the page is loaded with, not one the hash changes to.
+describe('Language in the address', () => {
+  // The address may name the language; German is written without a prefix, so the address loses it
+  // and every link from before stays as it was (#2175).
+  it('opens an address with a language prefix and writes it without the prefix for German', () => {
+    cy.visit('/#/de/about');
+
+    cy.get('studio-lite-about [data-cy="home-button"]').should('be.visible');
+    cy.location('hash').should('eq', '#/about');
+  });
+});

@@ -1,8 +1,11 @@
+import { createMock } from '@golevelup/ts-jest';
 import { UserSessionInfoDto } from '@studio-lite-lib/api-dto';
 import { PassiveSessionSummaryPipe } from './passive-session-summary.pipe';
+import { I18nService } from '../services/i18n.service';
 
 describe('PassiveSessionSummaryPipe', () => {
   let pipe: PassiveSessionSummaryPipe;
+  const formatsIn = (shortDateTimeFormat: string) => createMock<I18nService>({ shortDateTimeFormat });
 
   const passiveAt = (sessionId: string, day: number): UserSessionInfoDto => ({
     sessionId,
@@ -11,7 +14,13 @@ describe('PassiveSessionSummaryPipe', () => {
   });
 
   beforeEach(() => {
-    pipe = new PassiveSessionSummaryPipe('en-US');
+    pipe = new PassiveSessionSummaryPipe('en-US', formatsIn('dd.MM., HH:mm'));
+  });
+
+  it('should write the times in the format of the interface language (#2175)', () => {
+    pipe = new PassiveSessionSummaryPipe('en-US', formatsIn('dd/MM, HH:mm'));
+
+    expect(pipe.transform([passiveAt('p1', 9)]).times).toBe('09/11, 09:30');
   });
 
   it('should count only the passive sessions and list their times newest first (#2150)', () => {

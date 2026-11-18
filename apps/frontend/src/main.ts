@@ -1,5 +1,5 @@
 import {
-  enableProdMode, ApplicationModule, importProvidersFrom, provideZoneChangeDetection
+  enableProdMode, ApplicationModule, importProvidersFrom, provideZoneChangeDetection, inject
 } from '@angular/core';
 
 import { MatSelectModule } from '@angular/material/select';
@@ -10,7 +10,8 @@ import {
   TranslateService, TranslateParser
 } from '@ngx-translate/core';
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
-import { provideRouter, withRouterConfig } from '@angular/router';
+import { provideRouter, UrlSerializer, withRouterConfig } from '@angular/router';
+import { DEFAULT_UI_LANGUAGE } from '@studio-lite/shared-code';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -31,7 +32,6 @@ import {
 } from '@angular/common/http';
 import { provideDateFnsAdapter } from '@angular/material-date-fns-adapter';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { de } from 'date-fns/locale';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { PaginatorIntlService } from './app/services/paginator-intl.service';
@@ -42,6 +42,9 @@ import { AppComponent } from './app/app.component';
 import { environment } from './environments/environment';
 import { BackendService } from './app/services/backend.service';
 import { createTranslateLoader } from './app/services/translation-loader';
+import { LanguageService } from './app/services/language.service';
+import { LanguageUrlSerializer } from './app/services/language-url-serializer';
+import { UI_LOCALE_DATA } from './app/services/ui-locale-data';
 // Named, not the whole file: esbuild then keeps just the version string in the bundle -- a default
 // import would ship all of package.json, dependency list included, to the browser.
 import { version as appVersion } from '../../../package.json';
@@ -53,6 +56,7 @@ if (environment.production) {
 bootstrapApplication(AppComponent, {
   providers: [
     provideZoneChangeDetection(), provideRouter(APP_ROUTES, withRouterConfig({ onSameUrlNavigation: 'reload' })),
+    { provide: UrlSerializer, useClass: LanguageUrlSerializer },
     provideHttpClient(withInterceptorsFromDi()),
     importProvidersFrom(
       ApplicationModule,
@@ -75,7 +79,7 @@ bootstrapApplication(AppComponent, {
       IqbComponentsModule.forRoot(),
       MetadataModule,
       TranslateModule.forRoot({
-        defaultLanguage: 'de',
+        defaultLanguage: DEFAULT_UI_LANGUAGE,
         loader: {
           provide: TranslateLoader,
           useFactory: createTranslateLoader,
@@ -99,7 +103,7 @@ bootstrapApplication(AppComponent, {
     },
     {
       provide: MAT_DATE_LOCALE,
-      useValue: de
+      useFactory: () => UI_LOCALE_DATA[inject(LanguageService).active.code].dateFns
     },
     provideDateFnsAdapter(),
     {
