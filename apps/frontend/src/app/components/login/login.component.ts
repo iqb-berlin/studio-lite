@@ -100,7 +100,9 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.appService.errorMessagesDisabled = false;
     if (ok) {
       if (this.redirectTo) {
-        await this.router.navigate([this.redirectTo]);
+        // A url, not a path: it comes from the router (`state.url`) with the language prefix and any
+        // query, which only parsing reads back -- navigate() would take `en` for a route (#2175).
+        await this.router.navigateByUrl(this.redirectTo);
       } else if (initLoginMode) {
         await this.router.navigate(['/admin']);
       }

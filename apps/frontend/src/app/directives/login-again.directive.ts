@@ -24,8 +24,10 @@ export class LoginAgainDirective {
 
   @HostListener('click') loginAgain(): void {
     const { url } = this.router.routerState.snapshot;
+    // Parsed rather than compared with '/': in any language but German the root is written '/en/' (#2175).
+    const atRoot = !this.router.parseUrl(url).root.hasChildren();
     this.backendService.logout();
     this.appService.clearErrorMessages();
-    this.router.navigate(['/'], { queryParams: { redirectTo: url === '/' ? '' : url } });
+    this.router.navigate(['/'], { queryParams: { redirectTo: atRoot ? '' : url } });
   }
 }

@@ -4,7 +4,7 @@ import {
   ComponentFixture, fakeAsync, TestBed, tick
 } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
-import { provideRouter, Router } from '@angular/router';
+import { provideRouter, Router, UrlSerializer } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { of, throwError } from 'rxjs';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
@@ -16,12 +16,18 @@ import { HeartbeatService } from './services/heartbeat.service';
 import { I18nService } from './services/i18n.service';
 import { AppHttpError } from './classes/app-http-error.class';
 import { UserMenuComponent } from './components/user-menu/user-menu.component';
+import { LanguageMenuComponent } from './components/language-menu/language-menu.component';
+import { LanguageService } from './services/language.service';
+import { LanguageUrlSerializer } from './services/language-url-serializer';
 
 @Component({ template: '', standalone: true })
 class EmptyComponent {}
 
 @Component({ selector: 'studio-lite-user-menu', template: '', standalone: true })
 class MockUserMenuComponent {}
+
+@Component({ selector: 'studio-lite-language-menu', template: '', standalone: true })
+class MockLanguageMenuComponent {}
 
 describe('AppComponent', () => {
   let fixture: ComponentFixture<AppComponent>;
@@ -30,6 +36,8 @@ describe('AppComponent', () => {
   let router: Router;
   // The component writes the stored logo into the shared standardLogo; it is restored after each test.
   const standard = { ...standardLogo };
+  // German unless a test says otherwise; the serializer reads the prefix on every url it writes.
+  let language: { codes: string[]; prefix: string };
 
   beforeEach(async () => {
     backendService = createMock<BackendService>({
@@ -38,10 +46,14 @@ describe('AppComponent', () => {
       getAuthData: jest.fn().mockReturnValue(of(AppService.defaultAuthData))
     });
 
+    language = { codes: ['de', 'en'], prefix: '' };
+
     await TestBed.configureTestingModule({
       imports: [AppComponent, TranslateModule.forRoot()],
       providers: [
         provideRouter([{ path: '**', component: EmptyComponent }]),
+        { provide: UrlSerializer, useClass: LanguageUrlSerializer },
+        { provide: LanguageService, useFactory: () => language },
         { provide: BackendService, useValue: backendService },
         {
           provide: HeartbeatService,
@@ -52,8 +64,8 @@ describe('AppComponent', () => {
         { provide: I18nService, useValue: createMock<I18nService>() }
       ]
     }).overrideComponent(AppComponent, {
-      remove: { imports: [UserMenuComponent] },
-      add: { imports: [MockUserMenuComponent] }
+      remove: { imports: [UserMenuComponent, LanguageMenuComponent] },
+      add: { imports: [MockUserMenuComponent, MockLanguageMenuComponent] }
     }).compileComponents();
   });
 
@@ -168,6 +180,30 @@ describe('AppComponent', () => {
     const header: HTMLElement = fixture.nativeElement.querySelector('header');
     expect(!!header.querySelector('[data-cy="app-info"]')).toBe(shown);
     expect(!!header.querySelector('[data-cy="goto-admin"]')).toBe(shown);
+  }));
+
+  // In any language but German the url starts with the prefix, and the area is what follows it.
+  // The language menu is wanted in a review as well, only a printout has none (#2175).
+  it.each([
+    ['/print?unitIds=1&workspaceId=2', false, false],
+    ['/review/3', false, true],
+    ['/a/5/12/editor', true, true]
+  ])('should read the area behind the language prefix on /en%s', fakeAsync((
+    url: string, linksShown: boolean, languageMenuShown: boolean
+  ) => {
+    language.prefix = '/en';
+    appService.authData = { ...AppService.defaultAuthData, userId: 1, isAdmin: true };
+    fixture.detectChanges();
+    tick();
+
+    router.navigateByUrl(`/en${url}`);
+    tick();
+    fixture.detectChanges();
+
+    const header: HTMLElement = fixture.nativeElement.querySelector('header');
+    expect(router.url).toBe(`/en${url}`);
+    expect(!!header.querySelector('[data-cy="app-info"]')).toBe(linksShown);
+    expect(!!header.querySelector('studio-lite-language-menu')).toBe(languageMenuShown);
   }));
 
   // A 403 means the same account without the right, and logging in again with it brings the same

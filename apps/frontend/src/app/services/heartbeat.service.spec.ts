@@ -5,6 +5,7 @@ import { AuthDataDto } from '@studio-lite-lib/api-dto';
 import { HeartbeatService } from './heartbeat.service';
 import { AppService } from './app.service';
 import { BackendService } from './backend.service';
+import { LanguageService } from './language.service';
 import {
   ACTIVE_THRESHOLD_MS, PASSIVE_THRESHOLD_MS, ACTIVITY_SYNC_THROTTLE_MS, AUTO_LOGOUT_REDIRECT_DELAY_MS
 } from '../app.constants';
@@ -53,8 +54,8 @@ describe('HeartbeatService', () => {
     });
   };
 
-  // The real implementation assigns window.location.href, which jsdom cannot
-  // perform and reports as an "Not implemented: navigation" error.
+  // The real implementation reloads the page, which jsdom cannot
+  // perform and reports as a "Not implemented: navigation" error.
   const stubRedirect = (): jest.SpyInstance => jest
     .spyOn(service as unknown as { redirectToHome: () => void }, 'redirectToHome')
     .mockImplementation();
@@ -175,6 +176,26 @@ describe('HeartbeatService', () => {
     await jest.advanceTimersByTimeAsync(AUTO_LOGOUT_REDIRECT_DELAY_MS);
 
     expect(redirectSpy).toHaveBeenCalled();
+  });
+
+  // The address carries the language; '/home' would bring an English session back in German (#2175).
+  it('should send to the start page in the language of the interface', async () => {
+    const reloadAt = jest.fn();
+    appServiceMock.authData = { userId: 1 } as AuthDataDto;
+    TestBed.configureTestingModule({
+      providers: [
+        HeartbeatService,
+        { provide: BackendService, useValue: backendServiceMock },
+        { provide: AppService, useValue: appServiceMock },
+        { provide: LanguageService, useValue: { homeHref: () => '/#/en/home', reloadAt } }
+      ]
+    });
+    service = TestBed.inject(HeartbeatService);
+    service.start();
+
+    await jest.advanceTimersByTimeAsync(PASSIVE_THRESHOLD_MS + AUTO_LOGOUT_REDIRECT_DELAY_MS * 2);
+
+    expect(reloadAt).toHaveBeenCalledWith('/#/en/home');
   });
 
   it('should not log out while no user is logged in', async () => {

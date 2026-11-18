@@ -59,6 +59,9 @@
         {{ appService.appConfig.pageTitle }}
       </div>
     }
+    @if (currentRoutePath !== 'print') {
+      <studio-lite-language-menu></studio-lite-language-menu>
+    }
     @if (currentRoutePath !== 'review' && currentRoutePath !== 'print') {
       @if (appService.authData.userId) {
         <button mat-button

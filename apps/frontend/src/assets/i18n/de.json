@@ -117,6 +117,7 @@
   "home": {
     "welcome": "Willkommen!",
     "home-page": "Startseite",
+    "select-language": "Sprache wählen",
     "go-home": "Gehe zur Startseite",
     "select-workspace": "Arbeitsbereich wählen",
     "select-review": "Aufgabenfolge starten",

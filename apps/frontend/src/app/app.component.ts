@@ -5,7 +5,7 @@ import {
   catchError, tap, of, forkJoin
 } from 'rxjs';
 import {
-  Router, RouterLink, RouterOutlet, NavigationEnd
+  Router, RouterLink, RouterOutlet, NavigationEnd, PRIMARY_OUTLET
 } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -24,6 +24,7 @@ import { WrappedIconComponent } from './components/wrapped-icon/wrapped-icon.com
 import { HeartbeatService } from './services/heartbeat.service';
 import { isNoAnswer } from './utils/no-answer.utils';
 import { LoginAgainDirective } from './directives/login-again.directive';
+import { LanguageMenuComponent } from './components/language-menu/language-menu.component';
 
 /**
  * The shell around everything: the bar with the session's remaining time and the user menu, the
@@ -40,7 +41,7 @@ import { LoginAgainDirective } from './directives/login-again.directive';
   imports: [
     MatProgressSpinner, MatButton, MatTooltip, MatIcon, RouterLink, RouterOutlet, TranslateModule,
     DataLoadingIsNumberPipe, DataLoadingAsTextPipe, IsInArrayPipe, UserMenuComponent, WrappedIconComponent,
-    AsyncPipe, LoginAgainDirective
+    AsyncPipe, LoginAgainDirective, LanguageMenuComponent
   ]
 })
 
@@ -63,8 +64,9 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
-        const urlParts = event.urlAfterRedirects.split(/[/?]/);
-        this.currentRoutePath = (urlParts.length > 1) ? urlParts[1] : '';
+        // Parsed, not split: the url starts with the language prefix in any language but German (#2175).
+        const segments = this.router.parseUrl(event.urlAfterRedirects).root.children[PRIMARY_OUTLET]?.segments;
+        this.currentRoutePath = segments?.[0]?.path ?? '';
       }
     });
     setTimeout(() => {

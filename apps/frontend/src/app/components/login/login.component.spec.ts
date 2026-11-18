@@ -180,25 +180,37 @@ describe('LoginComponent', () => {
   describe('the page after a login', () => {
     let appService: AppService;
     let navigate: jest.SpyInstance;
+    let navigateByUrl: jest.SpyInstance;
 
     beforeEach(() => {
       appService = TestBed.inject(AppService);
       navigate = jest.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+      navigateByUrl = jest.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
     });
 
-    it.each([
-      ['the page the user was sent away from', '/a/5/12/editor', true, ['/a/5/12/editor']],
-      ['the administration after the first login of an installation', undefined, false, ['/admin']]
-    ])('should open %s', async (_: string, redirectTo: string | undefined, hasUsers: boolean, page: string[]) => {
+    // The url comes from the router with the language prefix and the secondary view; taken as one
+    // path segment by navigate(), neither would be found again (#2175).
+    it('should open the page the user was sent away from, as the url it was', async () => {
+      const redirectTo = '/en/a/5/12/(editor//secondary:preview)';
       queryParams.next({ redirectTo });
-      appService.appConfig = new AppConfig(TestBed.inject(Title), { ...defaultAppConfig, hasUsers });
       fillForm();
 
       component.login();
       await fixture.whenStable();
 
-      expect(backendService.login).toHaveBeenCalledWith('user', 'pw', !hasUsers);
-      expect(navigate).toHaveBeenCalledWith(page);
+      expect(navigateByUrl).toHaveBeenCalledWith(redirectTo);
+      expect(navigate).not.toHaveBeenCalled();
+    });
+
+    it('should open the administration after the first login of an installation', async () => {
+      appService.appConfig = new AppConfig(TestBed.inject(Title), { ...defaultAppConfig, hasUsers: false });
+      fillForm();
+
+      component.login();
+      await fixture.whenStable();
+
+      expect(backendService.login).toHaveBeenCalledWith('user', 'pw', true);
+      expect(navigate).toHaveBeenCalledWith(['/admin']);
     });
 
     // The start page shows the workspaces and reviews of whoever has logged in on it.
@@ -209,6 +221,7 @@ describe('LoginComponent', () => {
       await fixture.whenStable();
 
       expect(navigate).not.toHaveBeenCalled();
+      expect(navigateByUrl).not.toHaveBeenCalled();
     });
   });
 });

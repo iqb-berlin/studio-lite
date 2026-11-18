@@ -10,6 +10,7 @@ import {
 } from 'rxjs/operators';
 import { AppService } from './app.service';
 import { BackendService } from './backend.service';
+import { LanguageService } from './language.service';
 import {
   ACTIVE_THRESHOLD_MS,
   PASSIVE_THRESHOLD_MS,
@@ -43,6 +44,7 @@ export class HeartbeatService implements OnDestroy {
   private readonly inactivityTimeoutMs = PASSIVE_THRESHOLD_MS;
   private readonly passivePhaseMs = Math.max(this.inactivityTimeoutMs - this.activityThresholdMs, 0);
   private readonly ngZone = inject(NgZone);
+  private readonly languageService = inject(LanguageService);
 
   private readonly lastActivityPulse$ = new BehaviorSubject<number>(Date.now());
   private readonly activitySync$ = new Subject<void>();
@@ -197,15 +199,12 @@ export class HeartbeatService implements OnDestroy {
   }
 
   /**
-   * Own method so tests can observe the auto-logout redirect by stubbing it: assigning
-   * window.location.href makes jsdom attempt a real navigation, which it cannot do and reports as a
-   * "Not implemented: navigation" error.
+   * Loads the start page anew, so nothing of the ended session stays in memory; the start page in
+   * the language of the interface, which the address carries (#2175). Own method so tests can
+   * observe the redirect by stubbing it: jsdom cannot perform a navigation.
    */
-  // eslint-disable-next-line class-methods-use-this
   private redirectToHome(): void {
-    if (typeof window !== 'undefined') {
-      window.location.href = '/home';
-    }
+    this.languageService.reloadAt(this.languageService.homeHref());
   }
 
   ngOnDestroy(): void {

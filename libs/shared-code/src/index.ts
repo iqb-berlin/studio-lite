@@ -34,3 +34,4 @@ export {
 } from './lib/time.constants';
 export { SESSION_ENDED_MESSAGE } from './lib/session-ended';
 export { compareText, byText } from './lib/compare-text';
+export { UiLanguage, UI_LANGUAGES, DEFAULT_UI_LANGUAGE } from './lib/ui-languages';

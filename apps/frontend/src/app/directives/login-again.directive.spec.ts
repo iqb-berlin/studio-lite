@@ -1,24 +1,37 @@
 import { TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { Router, UrlTree } from '@angular/router';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { LoginAgainDirective } from './login-again.directive';
 import { BackendService } from '../services/backend.service';
 import { AppService } from '../services/app.service';
+import { LanguageUrlSerializer } from '../services/language-url-serializer';
+import { LanguageService } from '../services/language.service';
 
 describe('LoginAgainDirective', () => {
   let backendService: DeepMocked<BackendService>;
   let appService: DeepMocked<AppService>;
-  let router: { routerState: { snapshot: { url: string } }, navigate: jest.Mock };
+  let router: {
+    routerState: { snapshot: { url: string } },
+    navigate: jest.Mock,
+    parseUrl: (url: string) => UrlTree
+  };
 
   beforeEach(() => {
     backendService = createMock<BackendService>();
     appService = createMock<AppService>();
-    router = { routerState: { snapshot: { url: '' } }, navigate: jest.fn().mockResolvedValue(true) };
+    router = {
+      routerState: { snapshot: { url: '' } },
+      navigate: jest.fn().mockResolvedValue(true),
+      // The router reads urls through the serializer of the app, which knows the language prefixes.
+      parseUrl: url => TestBed.inject(LanguageUrlSerializer).parse(url)
+    };
     TestBed.configureTestingModule({
       providers: [
         { provide: BackendService, useValue: backendService },
         { provide: AppService, useValue: appService },
-        { provide: Router, useValue: router }
+        { provide: Router, useValue: router },
+        LanguageUrlSerializer,
+        { provide: LanguageService, useValue: { codes: ['de', 'en'], prefix: '' } }
       ]
     });
   });
@@ -26,7 +39,9 @@ describe('LoginAgainDirective', () => {
   it.each([
     ['/a/5/12/editor', '/a/5/12/editor'],
     ['/review/7/start', '/review/7/start'],
-    ['/', '']
+    ['/', ''],
+    ['/en/a/5/12/editor', '/en/a/5/12/editor'],
+    ['/en/', '']
   ])('should log out on %s and return to %j after the login', (url: string, back: string) => {
     router.routerState.snapshot.url = url;
     const directive = TestBed.runInInjectionContext(() => new LoginAgainDirective());

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { DatePipe } from '@angular/common';
@@ -6,6 +6,7 @@ import { ItemsMetadataValues } from '@studio-lite-lib/api-dto';
 import { Comment } from '../../../comments/models/comment.interface';
 import { SortAscendingPipe } from '../../../comments/pipes/sort-ascending.pipe';
 import { MapItemUuidsIdsPipe } from '../../../comments/pipes/map-item-uuids-ids.pipe';
+import { I18nService } from '../../../../services/i18n.service';
 
 /**
  * One comment of the printed list: author, date, the items it is about, and the text. A reply is
@@ -18,6 +19,7 @@ import { MapItemUuidsIdsPipe } from '../../../comments/pipes/map-item-uuids-ids.
   imports: [MatIcon, DatePipe, TranslateModule, SortAscendingPipe, MapItemUuidsIdsPipe]
 })
 export class UnitPrintCommentComponent {
+  i18nService = inject(I18nService);
   @Input() comment!: Comment;
   @Input() metadata!: ItemsMetadataValues[] | null;
   @Input() isReply = false;
