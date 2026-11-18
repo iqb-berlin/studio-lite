@@ -222,7 +222,7 @@ export function addState(stateName: string): void {
 }
 
 /**
- * Deletes a state in workspace group settings
+ * Deletes a state in workspace group settings and saves the settings
  * @param stateName - The label of the state to delete
  */
 export function deleteState(stateName: string): void {
@@ -236,11 +236,11 @@ export function deleteState(stateName: string): void {
 
   cy.get('studio-lite-delete-state').should('exist');
   cy.translate(Cypress.expose('locale')).then(json => {
-    cy.intercept('PATCH', '/api/workspace-groups/*').as(
-      'deleteStateRequest'
-    );
     cy.clickDialogButton(json.delete);
-    waitForSuccess('@deleteStateRequest');
   });
   cy.get('studio-lite-delete-state').should('not.exist');
+  // Deleting is a change like any other: only the save button stores it (#2141).
+  cy.intercept('PATCH', '/api/workspace-groups/*').as('saveAfterDeletion');
+  cy.get('[data-cy="wsg-admin-settings-save-button"]').click();
+  waitForSuccess('@saveAfterDeletion');
 }

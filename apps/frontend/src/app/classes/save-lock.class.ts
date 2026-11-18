@@ -3,8 +3,8 @@ import { signal } from '@angular/core';
 /**
  * One save at a time, and what it sent. The answer to a save takes what was sent as saved, not what
  * is shown by then, so what is entered while the save is under way stays a change; and a second save
- * waits for the first, so that no answer overtakes another (#2094). {@link saving} locks the save
- * button meanwhile.
+ * is refused until the first is answered, so that no answer overtakes another (#2094). {@link saving}
+ * locks the save button meanwhile.
  */
 export class SaveLock {
   private readonly savingState = signal(false);
