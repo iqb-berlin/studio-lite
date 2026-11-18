@@ -203,16 +203,16 @@ describe('UnitPlayerComponent', () => {
   });
 
   describe('handleUnitStateData()', () => {
-    it('should update unitData responses when dataParts are provided', () => {
-      const testResponses = { answer1: 'test', answer2: 'data' };
-      const unitState = { dataParts: testResponses };
+    it('should keep the data parts the player does not send again (#2164)', () => {
+      component.unitData.responses = { answer1: 'test', answer2: 'data' };
+      const unitState = { dataParts: { answer2: 'changed' } };
 
       const handleMethod = (component as never as {
         handleUnitStateData: (state: { dataParts?: Record<string, unknown> }) => void
       }).handleUnitStateData;
       handleMethod.call(component, unitState);
 
-      expect(component.unitData.responses).toEqual(testResponses);
+      expect(component.unitData.responses).toEqual({ answer1: 'test', answer2: 'changed' });
     });
 
     it('should not update responses when dataParts is undefined', () => {

@@ -183,7 +183,8 @@ export class UnitPlayerComponent extends PreviewDirective {
   }
 
   protected handleUnitStateData(unitState: UnitState): void {
-    if (unitState.dataParts) this.unitData.responses = unitState.dataParts;
+    // a player may send only the data parts that changed; the others stay as they were (#2164)
+    if (unitState.dataParts) this.unitData.responses = { ...this.unitData.responses, ...unitState.dataParts };
   }
 
   gotoUnit(target: string): void {
