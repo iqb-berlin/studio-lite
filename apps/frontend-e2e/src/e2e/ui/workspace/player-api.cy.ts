@@ -98,6 +98,9 @@ describe('Player API 7.0 and older', () => {
   // report (#2164). It may leave the progress out as well, and the review gave none back (#2169).
   it('gives a player all data parts and its progress back when the review returns to the unit', () => {
     cy.visit(`/#/review/${reviewId}/u/0`);
+    // The review of the test before may still be open, its player started on another unit: what it
+    // reports before it is started on this one belongs to that other unit (#2172).
+    cy.reload();
     cy.getIFrameBody(reviewPlayer).within(() => {
       cy.get('#status', { timeout: 30000 }).should('have.text', 'started');
       cy.get('#report-progress').click();
@@ -113,6 +116,32 @@ describe('Player API 7.0 and older', () => {
     cy.getIFrameBody(reviewPlayer).within(() => {
       cy.get('#data-parts', { timeout: 10000 }).should('have.text', '{"a":"answer-a","b":"answer-b"}');
       cy.get('#progress').should('have.text', 'SOME/COMPLETE');
+    });
+  });
+
+  // aspect reports the unit it leaves once more while it takes it down, after the next start command
+  // has arrived, and the review kept that report with the next unit (#2172).
+  it('keeps a report that arrives after the next start with the unit it belongs to', () => {
+    cy.visit(`/#/review/${reviewId}/u/0`);
+    cy.reload();
+    cy.getIFrameBody(reviewPlayer).within(() => {
+      cy.get('#status', { timeout: 30000 }).should('have.text', 'started');
+      cy.get('#arm-final-report').click();
+      cy.get('#request-next').click();
+    });
+    cy.url().should('include', `/review/${reviewId}/u/1`);
+    cy.getIFrameBody(reviewPlayer).within(() => {
+      cy.get('#data-parts', { timeout: 10000 }).should('have.text', '{}');
+      cy.get('#request-previous').click();
+    });
+    cy.url().should('include', `/review/${reviewId}/u/0`);
+    cy.getIFrameBody(reviewPlayer).within(() => {
+      cy.get('#data-parts', { timeout: 10000 }).should('contain', 'final-answer');
+      cy.get('#request-next').click();
+    });
+    cy.url().should('include', `/review/${reviewId}/u/1`);
+    cy.getIFrameBody(reviewPlayer).within(() => {
+      cy.get('#data-parts', { timeout: 10000 }).should('have.text', '{}');
     });
   });
 });

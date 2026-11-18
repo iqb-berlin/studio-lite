@@ -161,6 +161,27 @@ describe('UnitSchemerComponent', () => {
       expect(schemeStore.setData.mock.calls).toEqual(taken ? [['new', 'iqb@3.4']] : []);
     });
 
+    // The schemer kept for the next unit is started under the session of that unit, so a scheme it still
+    // reports under the session of the unit before is not written into the next one (#2172).
+    it('does not take a scheme reported under the session of the unit before for the next unit', () => {
+      loadSchemeStoreWith(new UnitSchemeStore(5, { scheme: '', schemeType: 'iqb@3.4' }));
+      fromSchemer({ type: 'vosReadyNotification' });
+      const sessionOfTheUnitBefore = component.sessionId;
+      jest.spyOn(TestBed.inject(WorkspaceService).selectedUnit$, 'getValue').mockReturnValue(6);
+      component.sendChangeData();
+      const schemeStore = createMock<UnitSchemeStore>();
+      jest.spyOn(unitStores, 'schemeStore').mockReturnValue(schemeStore);
+
+      fromSchemer({
+        type: 'vosSchemeChangedNotification',
+        sessionId: sessionOfTheUnitBefore,
+        codingScheme: 'the scheme of the unit before',
+        codingSchemeType: 'iqb@3.4'
+      });
+
+      expect(schemeStore.setData).not.toHaveBeenCalled();
+    });
+
     it('hands the shared parameters a schemer reports to the next start', () => {
       component.sessionId = 's1';
       component.postMessageTarget = schemerWindow;

@@ -108,6 +108,8 @@ export abstract class VeronaModuleDirective implements AfterViewInit, OnDestroy 
       this.showNoModule(this.translateService.instant('workspace.unit-not-found'));
       return;
     }
+    // from here on, what the module reports under the session of the unit before no longer counts
+    this.sessionId = VeronaModuleDirective.sessionIdOf(unitId);
     this.unitStores
       .loadDefinitionStore(this.workspaceService.selectedWorkspaceId, unitId)
       .pipe(takeUntil(this.ngUnsubscribe))
@@ -240,7 +242,7 @@ export abstract class VeronaModuleDirective implements AfterViewInit, OnDestroy 
     // The module being replaced must not be able to talk to the studio any more. It cannot be
     // told apart by its window -- srcdoc navigation keeps one and the same contentWindow -- so the
     // session id is what distinguishes it from its successor, and the outgoing one stops counting
-    // here. The successor draws a new one when it reports ready.
+    // here. The successor is given the session of the unit it is started with.
     this.sessionId = '';
 
     if (!moduleId) {
@@ -287,6 +289,16 @@ export abstract class VeronaModuleDirective implements AfterViewInit, OnDestroy 
     return Array.from(mergedMap, ([key, value]) => ({ key, value }));
   }
 
+  /**
+   * The session a unit is started under: one per unit, as the testcenter keeps it with the unit's
+   * alias. A module kept for the next unit still reports the one it leaves after the next start
+   * command, and only the session tells the two apart (#2172).
+   */
+  static sessionIdOf(unitId: number): string {
+    return String(unitId);
+  }
+
+  /** A session of its own for what is not a unit, such as a widget a player calls. */
   static getSessionId(): string {
     const min = 10_000_000; // Kleinste 8-stellige Zahl
     const max = 99_999_999; // Größte 8-stellige Zahl

@@ -217,6 +217,21 @@ describe('VeronaModuleDirective', () => {
     expect(backendService.getUnitDefinition).toHaveBeenCalledTimes(1);
   });
 
+  // A module kept for the next unit tells the units apart only by the session it is started under,
+  // the same for a unit each time and another for every other unit (#2172).
+  it('starts each unit under a session of its own', () => {
+    const { directive, backendService } = createDirective();
+    backendService.getUnitDefinition.mockReturnValue(of({ definition: 'x', variables: [] }));
+    const sessions: string[] = [];
+    directive.postStore.mockImplementation(() => sessions.push(directive.sessionId));
+
+    [5, 6, 5].forEach(unitId => directive.sendUnitDefinition(unitId));
+
+    expect(sessions[0]).not.toBe('');
+    expect(sessions[1]).not.toBe(sessions[0]);
+    expect(sessions[2]).toBe(sessions[0]);
+  });
+
   it('returns empty module id when metadata store is missing', async () => {
     const { directive } = createDirective();
 

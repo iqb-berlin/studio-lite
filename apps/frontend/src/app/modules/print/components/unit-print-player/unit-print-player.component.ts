@@ -3,6 +3,7 @@ import {
 } from '@angular/core';
 import { fromEvent, Subject, takeUntil } from 'rxjs';
 import { PreviewDirective } from '../../../../directives/preview.directive';
+import { VeronaModuleDirective } from '../../../../directives/verona-module.directive';
 import { UnitState } from '../../../../models/verona.interface';
 import { WidgetCallData } from '../../../workspace/models/widget-call-data.interface';
 import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
@@ -40,6 +41,7 @@ export class UnitPrintPlayerComponent extends PreviewDirective implements AfterV
   }
 
   sendChangeData(): void {
+    this.sessionId = VeronaModuleDirective.sessionIdOf(this.unitId);
     this.backendService.getUnitDefinition(this.workspaceId, this.unitId)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(ued => {
