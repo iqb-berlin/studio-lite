@@ -25,7 +25,10 @@ export interface MoveComponentData {
   templateUrl: './move-workspace.component.html',
   styleUrls: ['./move-workspace.component.scss'],
 
-  imports: [MatDialogTitle, MatDialogContent, FormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatDialogActions, NgClass, MatButton, MatDialogClose, TranslateModule]
+  imports: [
+    MatDialogTitle, MatDialogContent, FormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatDialogActions,
+    NgClass, MatButton, MatDialogClose, TranslateModule
+  ]
 })
 
 export class MoveWorkspaceComponent {

@@ -14,7 +14,10 @@ import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.co
   templateUrl: './print-units-dialog.component.html',
   styleUrls: ['./print-units-dialog.component.scss'],
 
-  imports: [MatDialogTitle, MatDialogContent, SelectUnitListComponent, PrintOptionsComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [
+    MatDialogTitle, MatDialogContent, SelectUnitListComponent, PrintOptionsComponent, MatDialogActions, MatButton,
+    MatDialogClose, TranslateModule
+  ]
 })
 export class PrintUnitsDialogComponent {
   unitPrintSettings: {

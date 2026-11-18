@@ -33,7 +33,10 @@ export interface SelectUnitData {
   templateUrl: './select-unit.component.html',
   styleUrls: ['./select-unit.component.scss'],
 
-  imports: [MatDialogTitle, FormsModule, ReactiveFormsModule, MatFormField, MatSelect, MatOption, MatDialogContent, SelectUnitListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [
+    MatDialogTitle, FormsModule, ReactiveFormsModule, MatFormField, MatSelect, MatOption, MatDialogContent,
+    SelectUnitListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule
+  ]
 })
 export class SelectUnitComponent implements OnInit {
   @ViewChild('unitSelectionTable') unitSelectionTable: SelectUnitListComponent | undefined;

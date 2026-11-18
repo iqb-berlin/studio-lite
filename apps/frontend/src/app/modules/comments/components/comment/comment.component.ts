@@ -34,7 +34,12 @@ import { SortAscendingPipe } from '../../pipes/sort-ascending.pipe';
   templateUrl: './comment.component.html',
   styleUrls: ['./comment.component.scss'],
 
-  imports: [CommentBadgeComponent, CommentEditorComponent, ScrollEditorIntoViewDirective, MatIconButton, MatTooltip, WrappedIconComponent, ScrollCommentIntoViewDirective, TranslateModule, SafeResourceHTMLPipe, IsEditingPipe, IsReplyingPipe, FullTimestampPipe, ItemBadgeComponent, MapItemUuidsIdsPipe, SortAscendingPipe, MatBadgeModule, MatMenuModule]
+  imports: [
+    CommentBadgeComponent, CommentEditorComponent, ScrollEditorIntoViewDirective, MatIconButton, MatTooltip,
+    WrappedIconComponent, ScrollCommentIntoViewDirective, TranslateModule, SafeResourceHTMLPipe, IsEditingPipe,
+    IsReplyingPipe, FullTimestampPipe, ItemBadgeComponent, MapItemUuidsIdsPipe, SortAscendingPipe, MatBadgeModule,
+    MatMenuModule
+  ]
 })
 export class CommentComponent implements OnInit {
   @Input() comment!: Comment;

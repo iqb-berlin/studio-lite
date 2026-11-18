@@ -831,7 +831,9 @@ describe('Review API tests', () => {
     });
 
     const updateAs = (token: string, commentId: string) => cy
-      .updateCommentReviewAPI(Cypress.expose('id_review1'), Cypress.expose(unit4.shortname), commentId, comment('neu'), token);
+      .updateCommentReviewAPI(
+        Cypress.expose('id_review1'), Cypress.expose(unit4.shortname), commentId, comment('neu'), token
+      );
     const deleteAs = (token: string, commentId: string) => cy
       .deleteCommentReviewAPI(Cypress.expose('id_review1'), Cypress.expose(unit4.shortname), commentId, token);
 

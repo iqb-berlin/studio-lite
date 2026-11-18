@@ -1,6 +1,7 @@
 import { createMock } from '@golevelup/ts-jest';
 import {
-  UnitMetadataValues, UnitCommentDto, UnitDownloadSettingsDto, UnitExportConfigDto, UnitPropertiesDto, UnitDefinitionDto, UnitRichNoteDto, UnitRichNotesDto, UnitSchemeDto, VeronaModuleInListDto, VeronaModuleFileDto
+  UnitMetadataValues, UnitCommentDto, UnitDownloadSettingsDto, UnitExportConfigDto, UnitPropertiesDto,
+  UnitDefinitionDto, UnitRichNoteDto, UnitRichNotesDto, UnitSchemeDto, VeronaModuleInListDto, VeronaModuleFileDto
 } from '@studio-lite-lib/api-dto';
 // `unstable_mockModule` is missing from the global `jest` object's type, so it comes from here.
 // It is aliased because the global `jest` -- used for `jest.fn()` below -- types its mocks
@@ -211,7 +212,8 @@ describe('UnitDownloadClass', () => {
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-1');
       unitMetadataServiceMock.buildHideNumberingMap.mockResolvedValue({});
-      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({ definition: '{}', variables: [] } as UnitDefinitionDto);
+      unitDefinitionServiceMock.findOnesDefinition
+        .mockResolvedValue({ definition: '{}', variables: [] } as UnitDefinitionDto);
       unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({ scheme, schemeType: '' } as UnitSchemeDto);
       veronaModuleServiceMock.findAll.mockResolvedValue([]);
 
@@ -861,7 +863,8 @@ describe('UnitDownloadClass', () => {
       unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: '', variables: []
       } as unknown as UnitDefinitionDto);
-      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({ scheme: '', schemeType: '' } as unknown as UnitSchemeDto);
+      unitDefinitionServiceMock.findOnesScheme
+        .mockResolvedValue({ scheme: '', schemeType: '' } as unknown as UnitSchemeDto);
       unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
       veronaModuleServiceMock.findAll.mockResolvedValue([]);
 
@@ -953,7 +956,8 @@ describe('UnitDownloadClass', () => {
       unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: '', variables: []
       } as unknown as UnitDefinitionDto);
-      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({ scheme: '', schemeType: '' } as unknown as UnitSchemeDto);
+      unitDefinitionServiceMock.findOnesScheme
+        .mockResolvedValue({ scheme: '', schemeType: '' } as unknown as UnitSchemeDto);
       unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
       veronaModuleServiceMock.findAll.mockResolvedValue([]);
 

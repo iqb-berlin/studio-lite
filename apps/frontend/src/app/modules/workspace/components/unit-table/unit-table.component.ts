@@ -3,8 +3,8 @@ import {
 } from '@angular/core';
 import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
 import {
-
-  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
+  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef,
+  MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
 import { State, UnitInListDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';

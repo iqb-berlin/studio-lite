@@ -447,8 +447,8 @@ describe('Workspace API tests', () => {
   });
 
   // The two routes that name their groups in the query or the body, because the workspaces may lie
-  // in several groups, and through which a group admin reached every other group until #1005. userGroupAdmin administers groupVera; group2
-  // belongs to the main administrator alone since 17.
+  // in several groups, and through which a group admin reached every other group until #1005.
+  // userGroupAdmin administers groupVera; group2 belongs to the main administrator alone since 17.
   describe('the group-admin area with a group the user does not administer (#1005)', () => {
     it('403 negative test: should deny deleting a workspace of a group the user does not administer', () => {
       cy.deleteWsAPI(

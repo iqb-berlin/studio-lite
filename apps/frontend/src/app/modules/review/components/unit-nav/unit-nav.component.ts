@@ -13,7 +13,9 @@ import { ReviewService } from '../../services/review.service';
   templateUrl: './unit-nav.component.html',
   styleUrls: ['./unit-nav.component.scss'],
 
-  imports: [MatFabAnchor, MatTooltip, MatAnchor, MatSelectionList, MatListOption, TranslateModule, MatFabButton, MatButton]
+  imports: [
+    MatFabAnchor, MatTooltip, MatAnchor, MatSelectionList, MatListOption, TranslateModule, MatFabButton, MatButton
+  ]
 })
 export class UnitNavComponent {
   constructor(public reviewService: ReviewService) {}

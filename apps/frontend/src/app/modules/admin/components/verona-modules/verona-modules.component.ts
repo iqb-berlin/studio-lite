@@ -29,7 +29,10 @@ import { ModuleSelectionChange } from '../../models/module-selection-change.inte
   templateUrl: './verona-modules.component.html',
   styleUrls: ['./verona-modules.component.scss'],
 
-  imports: [MatButton, MatTooltip, WrappedIconComponent, IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent, VeronaModulesTableComponent, TranslateModule]
+  imports: [
+    MatButton, MatTooltip, WrappedIconComponent, IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent,
+    VeronaModulesTableComponent, TranslateModule
+  ]
 })
 export class VeronaModulesComponent extends ModulesDirective {
   protected readonly pageTitleKey = 'modules.title';

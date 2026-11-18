@@ -50,7 +50,12 @@ import { TextSortTableDataSource } from '../../../../models/text-sort-table-data
   templateUrl: './workspace-groups.component.html',
   styleUrls: ['./workspace-groups.component.scss'],
 
-  imports: [WorkspaceGroupsMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent]
+  imports: [
+    WorkspaceGroupsMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef,
+    MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
+    MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, MatFabButton, MatIconButton, MatIcon,
+    EntriesDividerComponent
+  ]
 })
 export class WorkspaceGroupsComponent implements OnInit, OnDestroy {
   objectsDatasource = new TextSortTableDataSource<WorkspaceGroupInListDto>();

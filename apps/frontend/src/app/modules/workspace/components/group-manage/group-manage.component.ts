@@ -36,7 +36,12 @@ import { TextSortTableDataSource } from '../../../../models/text-sort-table-data
   templateUrl: './group-manage.component.html',
   styleUrls: ['./group-manage.component.scss'],
 
-  imports: [MatDialogTitle, MatDialogContent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatBadge, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, GroupMenuComponent, SelectUnitListComponent, SaveChangesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [
+    MatDialogTitle, MatDialogContent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef,
+    MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatBadge, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
+    GroupMenuComponent, SelectUnitListComponent, SaveChangesComponent, MatDialogActions, MatButton, MatDialogClose,
+    TranslateModule
+  ]
 })
 
 export class GroupManageComponent implements OnInit {

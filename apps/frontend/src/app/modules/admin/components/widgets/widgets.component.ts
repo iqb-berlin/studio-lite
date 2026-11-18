@@ -29,7 +29,10 @@ import { UpperSnakeCaseToKebabCasePipe } from '../../pipes/upper-snake-case-to-k
   templateUrl: './widgets.component.html',
   styleUrls: ['./widgets.component.scss'],
 
-  imports: [MatButton, MatTooltip, WrappedIconComponent, IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent, VeronaModulesTableComponent, TranslateModule, UpperSnakeCaseToKebabCasePipe]
+  imports: [
+    MatButton, MatTooltip, WrappedIconComponent, IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent,
+    VeronaModulesTableComponent, TranslateModule, UpperSnakeCaseToKebabCasePipe
+  ]
 })
 export class WidgetsComponent extends ModulesDirective {
   protected readonly pageTitleKey = 'modules.widgets-title';

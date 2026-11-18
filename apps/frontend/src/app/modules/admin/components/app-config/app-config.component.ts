@@ -26,7 +26,10 @@ import { SaveLock } from '../../../../classes/save-lock.class';
   templateUrl: './app-config.component.html',
   styleUrls: ['./app-config.component.scss'],
 
-  imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatSelect, MatOption, CdkTextareaAutosize, MatButton, TranslateModule, ToTimePipe]
+  imports: [
+    FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatDatepickerInput, MatDatepickerToggle,
+    MatSuffix, MatDatepicker, MatSelect, MatOption, CdkTextareaAutosize, MatButton, TranslateModule, ToTimePipe
+  ]
 })
 
 export class AppConfigComponent implements OnInit, OnDestroy {

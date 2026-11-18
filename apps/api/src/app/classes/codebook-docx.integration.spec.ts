@@ -75,7 +75,8 @@ describe('CodebookDocxGenerator integration', () => {
     expect(xml.split(`>${text}</w:t>`).length - 1).toBe(2);
   });
 
-  it.each([' ', '\t\r\n', '\u00a0'])('does not add a paragraph for general instruction %p', async generalInstruction => {
+  const blankInstructions = [' ', '\t\r\n', '\u00a0'];
+  it.each(blankInstructions)('does not add a paragraph for general instruction %p', async generalInstruction => {
     const units = buildUnits('<p>Bewerten</p>');
     const settings = { ...defaultSettings, hasGeneralInstructions: true };
     const baselineFile = await generateDocx(units, settings);

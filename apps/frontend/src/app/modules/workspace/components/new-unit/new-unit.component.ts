@@ -24,7 +24,10 @@ import { WorkspaceService } from '../../services/workspace.service';
   templateUrl: './new-unit.component.html',
   styleUrls: ['./new-unit.component.scss'],
 
-  imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatError, MatSelect, MatOption, MatIconButton, MatTooltip, MatIcon, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [
+    MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatError, MatSelect,
+    MatOption, MatIconButton, MatTooltip, MatIcon, MatDialogActions, MatButton, MatDialogClose, TranslateModule
+  ]
 })
 export class NewUnitComponent {
   newUnitForm: UntypedFormGroup;

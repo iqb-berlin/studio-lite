@@ -69,7 +69,9 @@ export class EditMyDataDirective implements OnDestroy {
                   if (newLastName !== myData.lastName) changedData.lastName = newLastName;
                   if (newEmail !== myData.email) changedData.email = newEmail;
 
-                  if (newEmailApproval !== myData.emailPublishApproved) changedData.emailPublishApproved = newEmailApproval;
+                  if (newEmailApproval !== myData.emailPublishApproved) {
+                    changedData.emailPublishApproved = newEmailApproval;
+                  }
                   this.backendService.setMyData(changedData)
                     .pipe(takeUntil(this.ngUnsubscribe))
                     .subscribe(

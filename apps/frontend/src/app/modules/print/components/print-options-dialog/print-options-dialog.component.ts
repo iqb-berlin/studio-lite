@@ -11,7 +11,10 @@ import { PrintOptionsComponent } from '../../../../components/print-options/prin
   templateUrl: './print-options-dialog.component.html',
   styleUrls: ['./print-options-dialog.component.scss'],
 
-  imports: [MatDialogTitle, MatDialogContent, PrintOptionsComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [
+    MatDialogTitle, MatDialogContent, PrintOptionsComponent, MatDialogActions, MatButton, MatDialogClose,
+    TranslateModule
+  ]
 })
 export class PrintOptionsDialogComponent {
   constructor(public dialogRef: MatDialogRef<PrintOptionsDialogComponent>) {

@@ -650,7 +650,8 @@ describe('WorkspaceService', () => {
       (workspaceRepository.findOne as jest.Mock)
         .mockImplementation(async ({ where }) => ([ws].find(w => w.id === Number(where.id)) ?? null));
 
-      await expect(service.patchDropBoxId('1' as unknown as number, 1)).rejects.toThrow(AdminWorkspaceNotFoundException);
+      await expect(service.patchDropBoxId('1' as unknown as number, 1))
+        .rejects.toThrow(AdminWorkspaceNotFoundException);
     });
   });
 
@@ -705,7 +706,8 @@ describe('WorkspaceService', () => {
         itemMDProfile: itemProfile
       } as WorkspaceSettingsDto);
 
-      it('keeps the stored profiles and does not reclassify when the PATCH does not carry the profile keys', async () => {
+      it('keeps the stored profiles and does not reclassify when the PATCH does not carry ' +
+        'the profile keys', async () => {
         const ws = { id: 1, settings: storedSettings() };
         (workspaceRepository.findOne as jest.Mock).mockResolvedValue(ws);
         (unitService.getUnitIdsByWorkspaceId as jest.Mock).mockResolvedValue([7, 8]);

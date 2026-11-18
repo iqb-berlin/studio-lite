@@ -27,7 +27,10 @@ export interface InputTextData {
   templateUrl: './input-text.component.html',
   styleUrls: ['./input-text.component.scss'],
 
-  imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatHint, MatInput, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [
+    MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatHint, MatInput,
+    MatDialogActions, MatButton, MatDialogClose, TranslateModule
+  ]
 })
 export class InputTextComponent {
   textInputForm: UntypedFormGroup;

@@ -29,7 +29,10 @@ import { AreaTitleComponent } from '../area-title/area-title.component';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 
-  imports: [AreaTitleComponent, WarningComponent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatButton, TranslateModule]
+  imports: [
+    AreaTitleComponent, WarningComponent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatButton,
+    TranslateModule
+  ]
 })
 export class LoginComponent implements OnInit, OnDestroy {
   loginForm: UntypedFormGroup;
