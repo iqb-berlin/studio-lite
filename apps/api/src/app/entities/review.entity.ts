@@ -3,6 +3,7 @@ import {
 } from 'typeorm';
 import { ReviewSettingsDto } from '@studio-lite-lib/api-dto';
 
+// eslint-disable-next-line import-x/no-cycle -- TypeORM relation in both directions, see review-unit.entity.ts
 import ReviewUnit from './review-unit.entity';
 
 /**

@@ -2,6 +2,7 @@ import {
   Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, Relation
 } from 'typeorm';
 
+// eslint-disable-next-line import-x/no-cycle -- TypeORM relation in both directions, made safe by `Relation` below
 import Review from './review.entity';
 
 /** Which units a review shows, and in which order. */
