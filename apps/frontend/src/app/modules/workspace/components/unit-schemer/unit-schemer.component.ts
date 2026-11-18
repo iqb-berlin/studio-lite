@@ -6,6 +6,7 @@ import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 import {
   UnitDefinitionDirective
 } from '../../../../directives/unit-definition.directive';
+import { VeronaModuleDirective } from '../../../../directives/verona-module.directive';
 import { RolePipe } from '../../pipes/role.pipe';
 import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
 
@@ -49,7 +50,6 @@ export class UnitSchemerComponent extends UnitDefinitionDirective {
     const msgType = msgData.type;
     switch (msgType) {
       case 'vosReadyNotification':
-        this.sessionId = UnitSchemerComponent.getSessionId();
         this.postMessageTarget = m.source as Window;
         this.sendScheme(this.workspaceService.selectedUnit$.getValue());
         break;
@@ -88,6 +88,8 @@ export class UnitSchemerComponent extends UnitDefinitionDirective {
       this.showNoModule(this.translateService.instant('workspace.unit-not-found'));
       return;
     }
+    // from here on, what the schemer reports under the session of the unit before no longer counts (#2172)
+    this.sessionId = VeronaModuleDirective.sessionIdOf(unitId);
     this.unitStores
       .loadSchemeStore(this.workspaceService.selectedWorkspaceId, unitId)
       .pipe(takeUntil(this.ngUnsubscribe))

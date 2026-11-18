@@ -6,7 +6,6 @@ import { ComponentPortal } from '@angular/cdk/portal';
 import { UnitDefinitionDirective } from './unit-definition.directive';
 import { PageData } from '../modules/workspace/models/page-data.interface';
 import { Progress } from '../modules/workspace/models/types';
-import { VeronaModuleDirective } from './verona-module.directive';
 import { UnitState } from '../models/verona.interface';
 import {
   RuntimeError,
@@ -43,10 +42,11 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
 
   abstract gotoUnit(target: string): void;
   /**
-   * A report of the unit's state. Its progress has already been taken into `presentationProgress`
-   * and `responseProgress`.
+   * A report of the state of the unit started under `sessionId`, which need not be the one shown by
+   * now (#2172). Its progress has already been taken into `presentationProgress` and
+   * `responseProgress`.
    */
-  protected abstract handleUnitStateData(unitState: UnitState): void;
+  protected abstract handleUnitStateData(unitState: UnitState, sessionId?: string): void;
 
   private readonly widgetModuleService = inject(ModuleService);
   private readonly widgetOverlay = inject(Overlay);
@@ -61,7 +61,6 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
         case 'player':
         case 'vo.FromPlayer.ReadyNotification':
           this.playerApiVersion = PreviewDirective.detectApiVersion(msgData);
-          this.sessionId = VeronaModuleDirective.getSessionId();
           this.postMessageTarget = m.source as Window;
           this.sendChangeData();
           break;
@@ -82,7 +81,7 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
           }
           if (msgData.unitState) {
             this.takeProgress(msgData.unitState.presentationProgress, msgData.unitState.responseProgress);
-            this.handleUnitStateData(msgData.unitState);
+            this.handleUnitStateData(msgData.unitState, msgData.sessionId);
           }
           break;
         }
@@ -281,20 +280,28 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
     this.progressAwaited = false;
   }
 
-  // Player spec 7.0 reports the progress in capitals, older players in lower case (#2064). The value
-  // comes from the player as it is: anything but a string counts as none instead of throwing.
   setPresentationStatus(s?: unknown): void {
-    const status = typeof s === 'string' ? s.toLowerCase() : undefined;
-    if (status === 'yes' || status === 'complete') this.presentationProgress = 'complete';
-    else if (status === 'some') this.presentationProgress = 'some';
-    else this.presentationProgress = 'none';
+    this.presentationProgress = PreviewDirective.presentationProgressOf(s);
   }
 
   setResponsesStatus(s?: unknown): void {
+    this.responseProgress = PreviewDirective.responseProgressOf(s);
+  }
+
+  // Player spec 7.0 reports the progress in capitals, older players in lower case (#2064). The value
+  // comes from the player as it is: anything but a string counts as none instead of throwing.
+  static presentationProgressOf(s: unknown): Progress {
     const status = typeof s === 'string' ? s.toLowerCase() : undefined;
-    if (status === 'all' || status === 'complete') this.responseProgress = 'complete';
-    else if (status === 'yes' || status === 'some') this.responseProgress = 'some';
-    else this.responseProgress = 'none';
+    if (status === 'yes' || status === 'complete') return 'complete';
+    if (status === 'some') return 'some';
+    return 'none';
+  }
+
+  static responseProgressOf(s: unknown): Progress {
+    const status = typeof s === 'string' ? s.toLowerCase() : undefined;
+    if (status === 'all' || status === 'complete') return 'complete';
+    if (status === 'yes' || status === 'some') return 'some';
+    return 'none';
   }
 
   setFocusStatus(status: boolean): void {

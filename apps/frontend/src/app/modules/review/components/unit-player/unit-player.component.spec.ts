@@ -202,85 +202,116 @@ describe('UnitPlayerComponent', () => {
     });
   });
 
-  describe('handleUnitStateData()', () => {
-    it('should keep the data parts the player does not send again (#2164)', () => {
-      component.unitData.responses = { answer1: 'test', answer2: 'data' };
-      const unitState = { dataParts: { answer2: 'changed' } };
+  // What a player reports is kept with the unit of the review it belongs to, and handed back to the
+  // player when the review returns to that unit.
+  describe('the state a player reports', () => {
+    type StartCommand = {
+      sessionId: string,
+      unitState: { dataParts: object, presentationProgress: string, responseProgress: string }
+    };
 
-      const handleMethod = (component as never as {
-        handleUnitStateData: (state: { dataParts?: Record<string, unknown> }) => void
-      }).handleUnitStateData;
-      handleMethod.call(component, unitState);
+    const unit = (sequenceId: number): UnitData => ({
+      ...mockUnitData, responses: {}, databaseId: 10 + sequenceId, sequenceId
+    });
+    let units: UnitData[];
 
-      expect(component.unitData.responses).toEqual({ answer1: 'test', answer2: 'changed' });
+    beforeEach(() => {
+      units = [unit(0), unit(1), unit(2)];
+      mockReviewService.units = units;
+      component.playerApiVersion = 7;
     });
 
-    it('should not update responses when dataParts is undefined', () => {
-      const initialResponses = { existing: 'data' };
-      component.unitData.responses = initialResponses;
-      const unitState = {};
-
-      const handleMethod = (component as never as {
-        handleUnitStateData: (state: { dataParts?: Record<string, unknown> }) => void
-      }).handleUnitStateData;
-      handleMethod.call(component, unitState);
-
-      expect(component.unitData.responses).toEqual(initialResponses);
-    });
-  });
-
-  // A player reports only what has changed since it was started, and stars and nemo take the
-  // progress of the start command over (#2169).
-  describe('the progress of a unit', () => {
-    const unit = (sequenceId: number): UnitData => ({ ...mockUnitData, databaseId: 10 + sequenceId, sequenceId });
-
+    /** Shows the unit, as paging to it does, before the player is started on it. */
     const showUnit = (unitData: UnitData): void => {
       component.unitData = unitData;
       component.onLoadUnitProperties();
     };
 
-    const report = (unitState: object): void => component.handleIncomingMessage({
-      data: { type: 'vopStateChangedNotification', unitState },
+    /** Starts the player on the unit shown and answers the start command. */
+    const start = (): StartCommand => {
+      const postMessage = jest.fn();
+      (component as { postMessageTarget: Window | undefined }).postMessageTarget = { postMessage } as never;
+      component.sendChangeData();
+      return postMessage.mock.calls[0][0] as StartCommand;
+    };
+
+    const visit = (unitData: UnitData): StartCommand => {
+      showUnit(unitData);
+      return start();
+    };
+
+    const report = (unitState: object, sessionId?: string): void => component.handleIncomingMessage({
+      data: { type: 'vopStateChangedNotification', sessionId, unitState },
       source: component.iFrameElement!.contentWindow
     } as MessageEvent);
 
-    const progressOfStartCommand = (): string[] => {
-      const postMessage = jest.fn();
-      (component as { postMessageTarget: Window | undefined }).postMessageTarget = { postMessage } as never;
-      component.playerApiVersion = 7;
-      component.postStore('test definition');
-      const { unitState } = postMessage.mock.calls[0][0] as {
-        unitState: { presentationProgress: string, responseProgress: string }
-      };
-      return [unitState.presentationProgress, unitState.responseProgress];
-    };
+    it('should keep the data parts the player does not send again (#2164)', () => {
+      const { sessionId } = visit(units[0]);
+      report({ dataParts: { answer1: 'test', answer2: 'data' } }, sessionId);
+      report({ dataParts: { answer2: 'changed' } }, sessionId);
+      report({}, sessionId);
 
-    it('should give a player back the progress it reported last when the review returns to the unit', () => {
-      const first = unit(0);
-      showUnit(first);
-      report({ presentationProgress: 'SOME', responseProgress: 'COMPLETE' });
-      report({ dataParts: { a: 'answer' } });
-      showUnit(unit(1));
-
-      showUnit(first);
-
-      expect(progressOfStartCommand()).toEqual(['SOME', 'COMPLETE']);
+      expect(visit(units[0]).unitState.dataParts).toEqual({ answer1: 'test', answer2: 'changed' });
     });
 
-    it('should not give the progress of one unit to another', () => {
-      const first = unit(0);
-      const second = unit(1);
-      showUnit(first);
-      report({ presentationProgress: 'COMPLETE', responseProgress: 'COMPLETE' });
-      showUnit(second);
-      const firstVisit = progressOfStartCommand();
-      report({ dataParts: { b: 'answer' } });
-      showUnit(first);
+    // A player reports only what has changed since it was started, and stars and nemo take the
+    // progress of the start command over (#2169).
+    it('should give a player back the progress it reported last when the review returns to the unit', () => {
+      const { sessionId } = visit(units[0]);
+      report({ presentationProgress: 'SOME', responseProgress: 'COMPLETE' }, sessionId);
+      report({ dataParts: { a: 'answer' } }, sessionId);
+      visit(units[1]);
 
-      showUnit(second);
+      const { unitState } = visit(units[0]);
 
-      expect(firstVisit).toEqual(['NONE', 'NONE']);
-      expect(progressOfStartCommand()).toEqual(['NONE', 'NONE']);
+      expect([unitState.presentationProgress, unitState.responseProgress]).toEqual(['SOME', 'COMPLETE']);
+    });
+
+    it('should not give the progress of one unit to another (#2169)', () => {
+      const first = visit(units[0]);
+      report({ presentationProgress: 'COMPLETE', responseProgress: 'COMPLETE' }, first.sessionId);
+      const second = visit(units[1]);
+      report({ dataParts: { b: 'answer' } }, second.sessionId);
+      visit(units[0]);
+
+      const { unitState } = visit(units[1]);
+
+      expect([second.unitState.presentationProgress, unitState.presentationProgress, unitState.responseProgress])
+        .toEqual(['NONE', 'NONE', 'NONE']);
+    });
+
+    // aspect reports the unit it leaves while it takes it down, which it does on the next start
+    // command: the report arrives after that start, under the session of the unit left (#2172)
+    it('should keep a report that arrives after the next start with the unit it belongs to', () => {
+      const first = visit(units[0]);
+      visit(units[1]);
+
+      report({ dataParts: { a: 'last answer' }, presentationProgress: 'COMPLETE' }, first.sessionId);
+
+      expect(visit(units[1]).unitState.dataParts).toEqual({});
+      const { unitState } = visit(units[0]);
+      expect(unitState.dataParts).toEqual({ a: 'last answer' });
+      expect(unitState.presentationProgress).toBe('COMPLETE');
+    });
+
+    // paging on twice: the review shows the third unit before the player is started on it (#2172)
+    it('should keep a report with the unit it belongs to when the review has moved on', () => {
+      const second = visit(units[1]);
+      showUnit(units[2]);
+
+      report({ dataParts: { b: 'answer' } }, second.sessionId);
+
+      expect(start().unitState.dataParts).toEqual({});
+      expect(visit(units[1]).unitState.dataParts).toEqual({ b: 'answer' });
+    });
+
+    // the session names the unit a report belongs to; the player API requires it in every report
+    it('should keep no report without a session (#2172)', () => {
+      visit(units[0]);
+
+      report({ dataParts: { a: 'answer' } });
+
+      expect(visit(units[0]).unitState.dataParts).toEqual({});
     });
   });
 

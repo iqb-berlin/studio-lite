@@ -9,6 +9,7 @@ import { ReviewBackendService } from '../../services/review-backend.service';
 import { PageNavigationComponent } from '../../../../components/page-navigation/page-navigation.component';
 import { UnitInfoComponent } from '../unit-info/unit-info.component';
 import { PreviewDirective } from '../../../../directives/preview.directive';
+import { VeronaModuleDirective } from '../../../../directives/verona-module.directive';
 import { UnitState } from '../../../../models/verona.interface';
 import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
 
@@ -114,15 +115,14 @@ export class UnitPlayerComponent extends PreviewDirective {
   }
 
   onLoadUnitProperties(): void {
-    // the player is started with the progress it reported last for this unit, and a report that leaves
-    // the progress out keeps it (#2169)
-    this.presentationProgress = this.unitData.presentationProgress ?? 'none';
-    this.responseProgress = this.unitData.responseProgress ?? 'none';
+    this.setPresentationStatus('none');
+    this.setResponsesStatus('none');
     this.clearPageList();
     this.subscribeForUnitPropertiesChanges();
   }
 
   sendChangeData(): void {
+    this.sessionId = VeronaModuleDirective.sessionIdOf(this.unitData.databaseId);
     if (this.unitData.definition) {
       this.postStore(this.unitData.definition);
     } else {
@@ -184,12 +184,24 @@ export class UnitPlayerComponent extends PreviewDirective {
     this.unitLoaded.next(true);
   }
 
-  protected handleUnitStateData(unitState: UnitState): void {
-    // a player may send only the data parts that changed; the others stay as they were (#2164)
-    if (unitState.dataParts) this.unitData.responses = { ...this.unitData.responses, ...unitState.dataParts };
-    // the player gets its progress back as well when the review returns to the unit (#2169)
-    this.unitData.presentationProgress = this.presentationProgress;
-    this.unitData.responseProgress = this.responseProgress;
+  /**
+   * Keeps a report with the unit its session names. That need not be the unit shown: a player still
+   * reports the unit it leaves after the next start command, and the review shows the next unit
+   * before it starts the player on it (#2172). A report without a session names no unit.
+   */
+  protected handleUnitStateData(unitState: UnitState, sessionId?: string): void {
+    const unit = this.reviewService.units
+      .find(u => VeronaModuleDirective.sessionIdOf(u.databaseId) === sessionId);
+    if (!unit) return;
+    // a player may send only what changed; the data parts and the progress it leaves out stay as
+    // they were (#2164, #2169)
+    if (unitState.dataParts) unit.responses = { ...unit.responses, ...unitState.dataParts };
+    if (unitState.presentationProgress !== undefined) {
+      unit.presentationProgress = PreviewDirective.presentationProgressOf(unitState.presentationProgress);
+    }
+    if (unitState.responseProgress !== undefined) {
+      unit.responseProgress = PreviewDirective.responseProgressOf(unitState.responseProgress);
+    }
   }
 
   gotoUnit(target: string): void {

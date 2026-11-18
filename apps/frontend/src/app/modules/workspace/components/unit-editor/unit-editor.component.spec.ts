@@ -390,6 +390,23 @@ describe('UnitEditorComponent', () => {
       );
     });
 
+    // The editor kept for the next unit is started under the session of that unit, so a change it still
+    // reports under the session of the unit before is not written into the next one (#2172).
+    it('should not take a change reported under the session of the unit before for the next unit', () => {
+      fromEditor({ type: 'voeReadyNotification', metadata: { specVersion: '4.0' } });
+      const sessionOfTheUnitBefore = component.sessionId;
+      component.sendUnitDefinition(2);
+
+      fromEditor({
+        type: 'voeDefinitionChangedNotification',
+        sessionId: sessionOfTheUnitBefore,
+        variables: [],
+        unitDefinition: 'the definition of the unit before'
+      });
+
+      expect(store.setData).not.toHaveBeenCalled();
+    });
+
     // the definition stays as it is; saved, it would otherwise be lost
     it('should keep the definition when a change notification carries none', () => {
       component.sessionId = 's1';

@@ -9,7 +9,8 @@
     starts and shows whether a definition came with the start command (#719), which data parts
     (#2164) and which progress (#2169), reports progress, reports one data part at a time, asks for
     the next and the previous unit in the capitals of 7.0, calls a widget at the click of a button and
-    shows what the host returns.
+    shows what the host returns. Armed, it reports the unit it leaves once more when the next start
+    command has arrived, as aspect does when it takes a unit down (#2172).
   -->
   <script id="metadata" type="application/ld+json">
     {
@@ -36,10 +37,12 @@
   <button id="request-next" type="button">Nächste Aufgabe</button>
   <button id="request-previous" type="button">Vorige Aufgabe</button>
   <button id="call-widget" type="button">Widget aufrufen</button>
+  <button id="arm-final-report" type="button">Beim Verlassen noch melden</button>
   <p id="return-call-id"></p>
   <p id="return-state"></p>
   <script>
     let sessionId = '';
+    let finalReportArmed = false;
     // The frame is a srcdoc of the host and shares its origin: messages go there and nowhere else
     const hostOrigin = window.parent.location.origin;
 
@@ -47,6 +50,16 @@
       if (event.source !== window.parent) return;
       const message = event.data;
       if (message.type === 'vopStartCommand') {
+        // the report of the unit left goes out under its session, before the next one is taken over
+        if (finalReportArmed) {
+          finalReportArmed = false;
+          window.parent.postMessage({
+            type: 'vopStateChangedNotification',
+            sessionId,
+            timeStamp: new Date().toISOString(),
+            unitState: { dataParts: { final: 'final-answer' } }
+          }, hostOrigin);
+        }
         sessionId = message.sessionId;
         document.getElementById('status').textContent = 'started';
         document.getElementById('definition').textContent =
@@ -59,6 +72,10 @@
         document.getElementById('return-call-id').textContent = message.callId;
         document.getElementById('return-state').textContent = message.state;
       }
+    });
+
+    document.getElementById('arm-final-report').addEventListener('click', () => {
+      finalReportArmed = true;
     });
 
     document.getElementById('report-progress').addEventListener('click', () => {

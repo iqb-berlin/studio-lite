@@ -13,7 +13,6 @@ import { UnitStoresService } from '../modules/workspace/services/unit-stores.ser
 import { ModuleService } from '../services/module.service';
 import { UnitState } from '../models/verona.interface';
 import { PreviewDirective } from './preview.directive';
-import { VeronaModuleDirective } from './verona-module.directive';
 
 const createIFrameWithWindow =
   (contentWindow: Window): HTMLIFrameElement => ({ contentWindow } as unknown as HTMLIFrameElement);
@@ -61,19 +60,16 @@ describe('PreviewDirective', () => {
     });
   });
 
-  it('handles ready notification and initializes session', () => {
+  it('handles ready notification', () => {
     const directive = createDirective();
     const mockWindow = window;
     directive.iFrameElement = createIFrameWithWindow(mockWindow);
-
-    jest.spyOn(VeronaModuleDirective, 'getSessionId').mockReturnValue('session-1');
 
     const message = createMessageEvent({ type: 'player', apiVersion: '2' }, mockWindow);
 
     directive.handleIncomingMessage(message);
 
     expect(directive.playerApiVersion).toBe(2);
-    expect(directive.sessionId).toBe('session-1');
     expect(directive.postMessageTarget).toBe(mockWindow as Window);
     expect(directive.sendChangeData).toHaveBeenCalled();
   });
@@ -438,7 +434,7 @@ describe('PreviewDirective', () => {
     expect(directive.pageList).toEqual(initialPageList);
     expect(directive.presentationProgress).toBe('complete');
     expect(directive.responseProgress).toBe('some');
-    expect(directive.handleUnitStateData).toHaveBeenCalledWith(unitState);
+    expect(directive.handleUnitStateData).toHaveBeenCalledWith(unitState, undefined);
     expect(directive.handleUnitStateData).toHaveBeenCalledTimes(1);
   });
 

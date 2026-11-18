@@ -80,7 +80,6 @@ export class UnitEditorComponent extends VeronaModuleDirective {
         } else {
           this.editorApiVersion = 1;
         }
-        this.sessionId = UnitEditorComponent.getSessionId();
         this.sendUnitDefinition(this.workspaceService.selectedUnit$.getValue());
         break;
 
