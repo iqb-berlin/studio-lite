@@ -94,8 +94,8 @@ export class ItemComponent implements OnInit, OnChanges, OnDestroy {
             type: 'input',
             key: 'id',
             props: {
-              placeholder: 'Item ID',
-              label: 'Item ID',
+              placeholder: this.translateService.instant('metadata.item-id'),
+              label: this.translateService.instant('metadata.item-id'),
               // as the column of the item's id holds; a longer one failed with a server problem (#2133)
               maxLength: 100,
               assignedIds: this.getOtherIds()

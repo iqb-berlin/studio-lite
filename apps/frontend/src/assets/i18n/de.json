@@ -23,7 +23,7 @@
   "id": "ID",
   "unit-patch": {
     "duplicate-unit-id": "Aufgabe bereits im Arbeitsbereich vorhanden",
-    "not-submitted": "Keine Abgabe in diese Drop-Box bekannt, Aufgabe kann nicht zurückgegeben werden",
+    "not-submitted": "Keine Abgabe in diesen Abgabebereich bekannt, Aufgabe kann nicht zurückgegeben werden",
     "other-group": "Der abgebende Arbeitsbereich liegt in einer anderen Bereichsgruppe, Aufgabe kann nicht zurückgegeben werden"
   },
   "unit-upload": {
@@ -289,6 +289,7 @@
     "edit-selected-group": "Name ändern",
     "download-xlsx": "Excel Bericht über Module in Arbeitsbereich(en) ",
     "group-name": "Name",
+    "workspace-group-id": "ID (Bereichsgruppe)",
     "invalid-group-name": "Mindestens drei Zeichen",
     "select-group": "Zugriffsrechte: Gruppe auswählen",
     "selected-group": "Zugriffsrechte für \"{{group}}\"",
@@ -341,6 +342,7 @@
     "item-content": "Inhalt für Item übernehmen",
     "choose-item-variable": "Variable auswählen",
     "variable-id": "Variablen Id",
+    "item-id": "Item ID",
     "id-assigned": "Item ID mehrfach zugewiesen",
     "description": "Notiz",
     "formly-field-required": "Pflichtfeld",
@@ -392,8 +394,8 @@
   },
   "profiles-registry": {
     "csv-url": "URL der CSV-Datei",
-    "csv-url-saved": "URl zur Profilregistrierung gespeichert",
-    "csv-url-not-saved": "Konnte URl zur Profilregistrierung nicht speichern"
+    "csv-url-saved": "URL zur Profilregistrierung gespeichert",
+    "csv-url-not-saved": "Konnte URL zur Profilregistrierung nicht speichern"
   },
   "config": {
     "start-page-warning": "Warnung auf der Startseite",
@@ -477,7 +479,7 @@
     "workspaces-not-moved": "Konnte Arbeitsbereich/e nicht verschieben",
     "workspace-added": "Arbeitsbereich hinzugefügt",
     "workspace-not-added": "Konnte Arbeitsbereich nicht hinzufügen",
-    "workspace-renamed": "Arbeitsbereich umbenennen",
+    "workspace-renamed": "Arbeitsbereich umbenannt",
     "workspace-not-renamed": "Konnte Arbeitsbereich nicht umbenennen",
     "workspace-settings-changed": "Einstellungen gespeichert",
     "workspace-settings-not-changed": "Einstellungen konnten nicht gespeichert werden",
@@ -782,11 +784,11 @@
     "target-workspace": "Ziel-Arbeitsbereich",
     "editor-not-loaded": "Der Editor \"{{id}}\" konnte nicht geladen werden.",
     "player-not-loaded": "Der Player \"{{id}}\" konnte nicht geladen werden.",
-    "schemer-not-loaded": "Der Editor für das Antwortschema \"{{id}}\" konnte nicht geladen werden.",
+    "schemer-not-loaded": "Der Editor für das Kodierschema \"{{id}}\" konnte nicht geladen werden.",
     "unit-not-found": "Aufgabe nicht gefunden oder Daten fehlerhaft.",
     "unit-not-loaded": "Konnte Aufgabendefinition nicht laden",
     "coding-check-error": "Kodierung erst anlegen und verändern!",
-    "coding-scheme-not-loaded": "Konnte Antwortschema nicht laden",
+    "coding-scheme-not-loaded": "Konnte Kodierschema nicht laden",
     "coding-check": "Kodierung prüfen",
     "coding-report": "Kodierbericht",
     "export-coding-book": "Codebook exportieren",
@@ -798,7 +800,7 @@
     "select-additional-coding-types": "zusätzliche Kodiertypen auswählen" ,
     "export-warning-no-coding-vars":"Variablen ohne Codes werden nicht mit dem Codebook exportiert.",
     "show-coding-report": "Kodierung von Aufgaben anzeigen",
-    "no-schemer": "Kein gültiger Editor für das Antwortschema zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
+    "no-schemer": "Kein gültiger Editor für das Kodierschema zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
     "no-editor": "Kein gültiger Editor zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
     "no-player": "Kein gültiger Player zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
     "definition-type-incompatible": "Der Player \"{{player}}\" gibt an, das Format \"{{definitionType}}\" dieser Aufgabe nicht zu lesen. Die Darstellung kann fehlerhaft sein.",
@@ -868,6 +870,7 @@
     "codingType": "Kodiertyp",
     "trainingEffort": "Schulungsaufwand",
     "csv-validation-details": "Validierungsdetails",
+    "coded-variables-only": "Nur mit Regeln kodierte Variablen",
     "code-reference": "Code: {{code}}",
     "problem-count-one": "1 Problem",
     "problem-count-many": "{{count}} Probleme",
