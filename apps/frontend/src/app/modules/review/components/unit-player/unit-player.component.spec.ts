@@ -229,6 +229,61 @@ describe('UnitPlayerComponent', () => {
     });
   });
 
+  // A player reports only what has changed since it was started, and stars and nemo take the
+  // progress of the start command over (#2169).
+  describe('the progress of a unit', () => {
+    const unit = (sequenceId: number): UnitData => ({ ...mockUnitData, databaseId: 10 + sequenceId, sequenceId });
+
+    const showUnit = (unitData: UnitData): void => {
+      component.unitData = unitData;
+      component.onLoadUnitProperties();
+    };
+
+    const report = (unitState: object): void => component.handleIncomingMessage({
+      data: { type: 'vopStateChangedNotification', unitState },
+      source: component.iFrameElement!.contentWindow
+    } as MessageEvent);
+
+    const progressOfStartCommand = (): string[] => {
+      const postMessage = jest.fn();
+      (component as { postMessageTarget: Window | undefined }).postMessageTarget = { postMessage } as never;
+      component.playerApiVersion = 7;
+      component.postStore('test definition');
+      const { unitState } = postMessage.mock.calls[0][0] as {
+        unitState: { presentationProgress: string, responseProgress: string }
+      };
+      return [unitState.presentationProgress, unitState.responseProgress];
+    };
+
+    it('should give a player back the progress it reported last when the review returns to the unit', () => {
+      const first = unit(0);
+      showUnit(first);
+      report({ presentationProgress: 'SOME', responseProgress: 'COMPLETE' });
+      report({ dataParts: { a: 'answer' } });
+      showUnit(unit(1));
+
+      showUnit(first);
+
+      expect(progressOfStartCommand()).toEqual(['SOME', 'COMPLETE']);
+    });
+
+    it('should not give the progress of one unit to another', () => {
+      const first = unit(0);
+      const second = unit(1);
+      showUnit(first);
+      report({ presentationProgress: 'COMPLETE', responseProgress: 'COMPLETE' });
+      showUnit(second);
+      const firstVisit = progressOfStartCommand();
+      report({ dataParts: { b: 'answer' } });
+      showUnit(first);
+
+      showUnit(second);
+
+      expect(firstVisit).toEqual(['NONE', 'NONE']);
+      expect(progressOfStartCommand()).toEqual(['NONE', 'NONE']);
+    });
+  });
+
   describe('postStore()', () => {
     beforeEach(() => {
       const componentWithPrivates = component as {

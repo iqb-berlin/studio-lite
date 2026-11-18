@@ -95,11 +95,12 @@ describe('Player API 7.0 and older', () => {
   });
 
   // A player may report only the data parts that changed, and the review kept only the last
-  // report (#2164).
-  it('gives a player all data parts of a unit back when the review returns to it', () => {
+  // report (#2164). It may leave the progress out as well, and the review gave none back (#2169).
+  it('gives a player all data parts and its progress back when the review returns to the unit', () => {
     cy.visit(`/#/review/${reviewId}/u/0`);
     cy.getIFrameBody(reviewPlayer).within(() => {
       cy.get('#status', { timeout: 30000 }).should('have.text', 'started');
+      cy.get('#report-progress').click();
       cy.get('#report-part-a').click();
       cy.get('#report-part-b').click();
       cy.get('#request-next').click();
@@ -111,6 +112,7 @@ describe('Player API 7.0 and older', () => {
     cy.url().should('include', `/review/${reviewId}/u/0`);
     cy.getIFrameBody(reviewPlayer).within(() => {
       cy.get('#data-parts', { timeout: 10000 }).should('have.text', '{"a":"answer-a","b":"answer-b"}');
+      cy.get('#progress').should('have.text', 'SOME/COMPLETE');
     });
   });
 });

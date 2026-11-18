@@ -6,10 +6,10 @@
   <!--
     A player for the e2e tests of the studio as host (#1763), written against the player API 7.0 and
     not against one release of a real player (#2064). It does no more than the tests ask of it: it
-    starts and shows whether a definition came with the start command (#719) and which data parts
-    (#2164), reports progress, reports one data part at a time, asks for the next and the previous
-    unit in the capitals of 7.0, calls a widget at the click of a button and shows what the host
-    returns.
+    starts and shows whether a definition came with the start command (#719), which data parts
+    (#2164) and which progress (#2169), reports progress, reports one data part at a time, asks for
+    the next and the previous unit in the capitals of 7.0, calls a widget at the click of a button and
+    shows what the host returns.
   -->
   <script id="metadata" type="application/ld+json">
     {
@@ -29,6 +29,7 @@
   <p id="status">waiting</p>
   <p id="definition"></p>
   <p id="data-parts"></p>
+  <p id="progress"></p>
   <button id="report-progress" type="button">Fortschritt melden</button>
   <button id="report-part-a" type="button">Teil a melden</button>
   <button id="report-part-b" type="button">Teil b melden</button>
@@ -50,8 +51,10 @@
         document.getElementById('status').textContent = 'started';
         document.getElementById('definition').textContent =
           'unitDefinition' in message ? `definition: ${JSON.stringify(message.unitDefinition)}` : 'no definition';
-        document.getElementById('data-parts').textContent =
-          JSON.stringify((message.unitState && message.unitState.dataParts) || {});
+        const unitState = message.unitState || {};
+        document.getElementById('data-parts').textContent = JSON.stringify(unitState.dataParts || {});
+        document.getElementById('progress').textContent =
+          `${unitState.presentationProgress}/${unitState.responseProgress}`;
       } else if (message.type === 'vopWidgetReturn' && message.sessionId === sessionId) {
         document.getElementById('return-call-id').textContent = message.callId;
         document.getElementById('return-state').textContent = message.state;

@@ -38,9 +38,14 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
   responseProgress: Progress = 'none';
   hasFocus = false;
   private pageListAwaited = false;
+  private progressAwaited = false;
   private runtimeErrorDialog?: MatDialogRef<VopRuntimeErrorNotificationDialogComponent>;
 
   abstract gotoUnit(target: string): void;
+  /**
+   * A report of the unit's state. Its progress has already been taken into `presentationProgress`
+   * and `responseProgress`.
+   */
   protected abstract handleUnitStateData(unitState: UnitState): void;
 
   private readonly widgetModuleService = inject(ModuleService);
@@ -64,8 +69,7 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
         case 'vo.FromPlayer.StartedNotification':
         case 'vo.FromPlayer.ChangedDataTransfer':
           this.setPageList(msgData.validPages, msgData.currentPage);
-          this.setPresentationStatus(msgData.presentationComplete);
-          this.setResponsesStatus(msgData.responsesGiven);
+          this.takeProgress(msgData.presentationComplete, msgData.responsesGiven);
           break;
 
         case 'vopStateChangedNotification': {
@@ -77,8 +81,7 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
             }
           }
           if (msgData.unitState) {
-            this.setPresentationStatus(msgData.unitState.presentationProgress);
-            this.setResponsesStatus(msgData.unitState.responseProgress);
+            this.takeProgress(msgData.unitState.presentationProgress, msgData.unitState.responseProgress);
             this.handleUnitStateData(msgData.unitState);
           }
           break;
@@ -256,6 +259,26 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
         '*'
       );
     }
+  }
+
+  /**
+   * The player has been started again with nothing seen and nothing answered, while the progress on
+   * screen stays until it reports, so that it does not blink on every change in the editor beside the
+   * preview. In its next report, a progress it leaves out is the none it was started with.
+   */
+  awaitProgressAfterRestart(): void {
+    this.progressAwaited = true;
+  }
+
+  /**
+   * The progress of a report. A player reports only what has changed since its start command, so a
+   * value it leaves out stays as it is (#2169), unless the player has been started again since, see
+   * {@link awaitProgressAfterRestart}.
+   */
+  private takeProgress(presentation: unknown, responses: unknown): void {
+    if (presentation !== undefined || this.progressAwaited) this.setPresentationStatus(presentation);
+    if (responses !== undefined || this.progressAwaited) this.setResponsesStatus(responses);
+    this.progressAwaited = false;
   }
 
   // Player spec 7.0 reports the progress in capitals, older players in lower case (#2064). The value

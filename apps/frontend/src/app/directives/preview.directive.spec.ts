@@ -188,6 +188,41 @@ describe('PreviewDirective', () => {
     expect(directive.responseProgress).toBe('none');
   });
 
+  // A player reports only what has changed since it was started (#2169).
+  describe('a report that leaves the progress out', () => {
+    const report = (directive: TestPreviewDirective, unitState: object): void => directive.handleIncomingMessage(
+      createMessageEvent({ type: 'vopStateChangedNotification', unitState }, window)
+    );
+
+    it('keeps the progress reported before', () => {
+      const directive = createDirective();
+      directive.iFrameElement = createIFrameWithWindow(window);
+      report(directive, { presentationProgress: 'SOME', responseProgress: 'COMPLETE' });
+
+      report(directive, { dataParts: { a: 'answer' } });
+
+      expect(directive.presentationProgress).toBe('some');
+      expect(directive.responseProgress).toBe('complete');
+    });
+
+    // The preview starts the player again on every change in the editor, with nothing seen and nothing
+    // answered, and leaves the progress on screen until the player reports.
+    it('takes it once as the none the player was started with after a restart', () => {
+      const directive = createDirective();
+      directive.iFrameElement = createIFrameWithWindow(window);
+      report(directive, { presentationProgress: 'COMPLETE', responseProgress: 'COMPLETE' });
+      directive.awaitProgressAfterRestart();
+
+      report(directive, { dataParts: { a: 'answer' } });
+      const afterRestart = [directive.presentationProgress, directive.responseProgress];
+      report(directive, { presentationProgress: 'SOME' });
+      report(directive, { dataParts: { a: 'changed' } });
+
+      expect(afterRestart).toEqual(['none', 'none']);
+      expect(directive.presentationProgress).toBe('some');
+    });
+  });
+
   // Player spec 7.0 dropped vopWindowFocusChangedNotification; the focus is that of the window in the
   // frame, whose window is new after every load (#2064).
   describe('the focus of the window in the frame', () => {

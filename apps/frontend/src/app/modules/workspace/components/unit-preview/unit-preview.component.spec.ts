@@ -474,6 +474,24 @@ describe('UnitPreviewComponent', () => {
 
       expect(component.pageList).toEqual([]);
     });
+
+    // The progress on screen stays until the restarted player reports. What it leaves out then is the
+    // none it was started with, not the progress from before the restart (#2169).
+    it('should take the progress a restarted player leaves out as the none it was started with', () => {
+      component.postMessageTarget = { postMessage: jest.fn() } as never;
+      component.playerApiVersion = 6;
+      component.setPresentationStatus('complete');
+
+      component.postStore(store);
+      const untilReport = component.presentationProgress;
+      component.handleIncomingMessage(new MessageEvent('message', {
+        data: { type: 'vopStateChangedNotification', unitState: { dataParts: {} } },
+        source: fixture.nativeElement.querySelector('iframe').contentWindow
+      }));
+
+      expect(untilReport).toBe('complete');
+      expect(component.presentationProgress).toBe('none');
+    });
   });
 
   // Player spec 7.0 writes the values of its enumerations in capitals; older players keep the spelling

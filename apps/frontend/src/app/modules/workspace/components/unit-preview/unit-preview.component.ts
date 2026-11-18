@@ -129,6 +129,7 @@ export class UnitPreviewComponent extends PreviewDirective {
     if (this.postMessageTarget) {
       this.definitionTypeWarning = this.getDefinitionTypeWarning(unitDef.definitionType);
       this.awaitPageListAfterRestart();
+      this.awaitProgressAfterRestart();
       if (this.playerApiVersion === 1) {
         this.postMessageTarget.postMessage(
           {
