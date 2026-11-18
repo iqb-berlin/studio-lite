@@ -48,8 +48,11 @@ jest.mock('@angular/common', () => ({
   registerLocaleData: jest.fn()
 }));
 
-// Mock the German locale data
+// Mock the locale data of the interface languages: they ship as ES modules, which Jest does not load
 jest.mock('@angular/common/locales/de', () => ({
+  default: {}
+}));
+jest.mock('@angular/common/locales/en-GB', () => ({
   default: {}
 }));
 

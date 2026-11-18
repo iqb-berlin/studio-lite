@@ -34,4 +34,11 @@ describe('ToTimePipe', () => {
     expect(result).toBe('15:00 Uhr');
     expect(translateService.instant).toHaveBeenCalledWith('hour');
   });
+
+  // English has no word for "Uhr" after a time (#2178).
+  it('should leave no space behind when the language writes the time alone', () => {
+    jest.spyOn(translateService, 'instant').mockReturnValue('');
+
+    expect(pipe.transform(14)).toBe('14:00');
+  });
 });

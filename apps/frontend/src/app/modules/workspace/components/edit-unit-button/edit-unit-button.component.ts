@@ -182,10 +182,9 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
 
   moveOrCopyUnitSubscription(uploadStatus: boolean | RequestReportDto, moveOnly: boolean): void {
     if (typeof uploadStatus === 'boolean') {
+      // Whole sentences, not a verb put into one: the word order differs between languages (#2178).
       this.snackBar.open(
-        this.translateService
-          .instant('workspace.unit-not-moved-or-copied',
-            { action: moveOnly ? 'verschieben' : 'kopieren' }),
+        this.translateService.instant(moveOnly ? 'workspace.units-not-moved' : 'workspace.units-not-copied'),
         this.translateService.instant('workspace.error'),
         { duration: 3000 }
       );
@@ -200,9 +199,7 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
         });
     } else {
       this.snackBar.open(
-        this.translateService
-          .instant('workspace.unit-moved-or-copied',
-            { action: moveOnly ? 'verschoben' : 'kopiert' }),
+        this.translateService.instant(moveOnly ? 'workspace.units-moved' : 'workspace.units-copied'),
         '',
         { duration: 5000 }
       );

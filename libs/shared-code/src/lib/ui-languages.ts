@@ -31,5 +31,14 @@ export const UI_LANGUAGES: readonly UiLanguage[] = [
     dateFormat: 'dd.MM.yyyy',
     dateTimeFormat: 'dd.MM.yyyy HH:mm',
     shortDateTimeFormat: 'dd.MM., HH:mm'
+  },
+  {
+    // British, as the spelling of the translation (TRANSLATION.md).
+    code: 'en',
+    name: 'English',
+    locale: 'en-GB',
+    dateFormat: 'dd/MM/yyyy',
+    dateTimeFormat: 'dd/MM/yyyy HH:mm',
+    shortDateTimeFormat: 'dd/MM, HH:mm'
   }
 ];
