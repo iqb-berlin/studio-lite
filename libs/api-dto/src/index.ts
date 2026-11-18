@@ -1,7 +1,11 @@
 export {
   CODING_SCHEME_PROBLEM_TYPES,
+  CodingReportCodingType,
   CodingReportDto,
-  CodingReportValidationProblemDto
+  CodingReportTrainingEffort,
+  CodingReportValidationProblemDto,
+  CodingReportValidationStatus,
+  CodingReportVariableType
 } from './lib/dtos/workspace/coding-report.dto';
 export { MissingsProfilesDto } from './lib/dtos/setting/missings-profiles.dto';
 export { ReviewConfigDto } from './lib/dtos/review/review-config.dto';

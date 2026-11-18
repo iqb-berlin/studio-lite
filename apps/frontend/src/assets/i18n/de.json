@@ -886,6 +886,27 @@
       "error": "Fehler",
       "warning": "Warnung"
     },
+    "validation-status": {
+      "OK": "OK",
+      "WARNING": "Warnung",
+      "ERROR": "Fehler",
+      "SCHEME_MISSING_OR_TOO_OLD": "Kodierschema mit Schemer Version ab 1.5 erzeugen!",
+      "SCHEME_UNREADABLE": "Kodierschema kann nicht ausgewertet werden"
+    },
+    "variable-type": {
+      "BASE": "Basisvariable",
+      "DERIVED": "abgeleitete Variable"
+    },
+    "coding-type": {
+      "AUTOMATIC": "automatisch",
+      "MANUAL": "manuell",
+      "SEMI_AUTOMATIC": "halbautomatisch",
+      "NO_RULES": "keine Regeln"
+    },
+    "training-effort": {
+      "INCREASED": "erhöht",
+      "NORMAL": "normal"
+    },
     "technical-type": "Technischer Typ: {{type}}",
     "validation-problems": {
       "VACANT": "Ohne Codes und nicht abgeleitet",

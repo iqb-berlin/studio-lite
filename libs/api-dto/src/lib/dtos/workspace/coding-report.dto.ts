@@ -20,6 +20,25 @@ export const CODING_SCHEME_PROBLEM_TYPES = Object.keys(
   codingSchemeProblemTypes
 ) as CodingSchemeProblemType[];
 
+/**
+ * The values of the coding report are codes; the interface translates them (#2180). A row for a unit
+ * whose scheme cannot be read has no variable, so its variable type, coding type and training effort
+ * are empty.
+ */
+export const CODING_REPORT_VALIDATION_STATUSES = [
+  'OK', 'WARNING', 'ERROR', 'SCHEME_MISSING_OR_TOO_OLD', 'SCHEME_UNREADABLE'
+] as const;
+export type CodingReportValidationStatus = typeof CODING_REPORT_VALIDATION_STATUSES[number];
+
+export const CODING_REPORT_VARIABLE_TYPES = ['BASE', 'DERIVED'] as const;
+export type CodingReportVariableType = typeof CODING_REPORT_VARIABLE_TYPES[number];
+
+export const CODING_REPORT_CODING_TYPES = ['AUTOMATIC', 'MANUAL', 'SEMI_AUTOMATIC', 'NO_RULES'] as const;
+export type CodingReportCodingType = typeof CODING_REPORT_CODING_TYPES[number];
+
+export const CODING_REPORT_TRAINING_EFFORTS = ['INCREASED', 'NORMAL'] as const;
+export type CodingReportTrainingEffort = typeof CODING_REPORT_TRAINING_EFFORTS[number];
+
 export class CodingReportValidationProblemDto {
   @ApiProperty({ enum: CODING_SCHEME_PROBLEM_TYPES })
   type!: CodingSchemeProblemType;
@@ -42,21 +61,21 @@ export class CodingReportDto {
   @ApiProperty({ })
   variable!: string;
 
-  @ApiProperty()
-  variableType!: string;
+  @ApiProperty({ enum: [...CODING_REPORT_VARIABLE_TYPES, ''] })
+  variableType!: CodingReportVariableType | '';
 
   @ApiProperty()
   item!: string;
 
-  @ApiProperty()
-  validation!: string;
+  @ApiProperty({ enum: CODING_REPORT_VALIDATION_STATUSES })
+  validation!: CodingReportValidationStatus;
 
   @ApiPropertyOptional({ type: [CodingReportValidationProblemDto] })
   validationProblems?: CodingReportValidationProblemDto[];
 
-  @ApiProperty()
-  codingType!: string;
+  @ApiProperty({ enum: [...CODING_REPORT_CODING_TYPES, ''] })
+  codingType!: CodingReportCodingType | '';
 
-  @ApiProperty()
-  trainingEffort!: string;
+  @ApiProperty({ enum: [...CODING_REPORT_TRAINING_EFFORTS, ''] })
+  trainingEffort!: CodingReportTrainingEffort | '';
 }

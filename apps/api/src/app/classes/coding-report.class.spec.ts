@@ -53,7 +53,7 @@ describe('CodingReportClass', () => {
 
       expect(result.find(row => row.variable === '_08_reached')?.validation)
         .toBe('OK');
-      expect(result.every(row => row.validation !== 'Fehler')).toBe(true);
+      expect(result.every(row => row.validation !== 'ERROR')).toBe(true);
     });
 
     // A list stored in the VariableInfo 2.x spelling is read as such (#1708).
@@ -91,7 +91,7 @@ describe('CodingReportClass', () => {
 
       const result = CodingReportClass.build(1, units);
 
-      expect(result.every(row => row.validation !== 'Fehler')).toBe(true);
+      expect(result.every(row => row.validation !== 'ERROR')).toBe(true);
     });
 
     // A scheme whose codes carry no rule sets of their own failed the whole report (#1873).
@@ -142,8 +142,8 @@ describe('CodingReportClass', () => {
       const result = CodingReportClass.build(1, units);
 
       expect(result.map(row => [row.variable, row.codingType, row.validation])).toEqual([
-        ['auto_1', 'automatisch', 'OK'],
-        ['manual_1', 'manuell', 'OK']
+        ['auto_1', 'AUTOMATIC', 'OK'],
+        ['manual_1', 'MANUAL', 'OK']
       ]);
       expect(result.map(row => row.validationProblems)).toEqual([[], []]);
     });
@@ -159,7 +159,7 @@ describe('CodingReportClass', () => {
         variable: '',
         variableType: '',
         item: '',
-        validation: 'Kodierschema mit Schemer Version ab 1.5 erzeugen!',
+        validation: 'SCHEME_MISSING_OR_TOO_OLD',
         validationProblems: [] as CodingReportValidationProblemDto[],
         codingType: '',
         trainingEffort: ''
@@ -171,7 +171,7 @@ describe('CodingReportClass', () => {
         id: 12, key: 'K', name: '', schemer: '', scheme
       }] as UnitPropertiesDto[]);
 
-      expect(rows.map(row => row.validation)).toEqual(['Kodierschema mit Schemer Version ab 1.5 erzeugen!']);
+      expect(rows.map(row => row.validation)).toEqual(['SCHEME_MISSING_OR_TOO_OLD']);
     });
 
     // The JSON format of the scheme names no schemer.
@@ -199,7 +199,7 @@ describe('CodingReportClass', () => {
         variable: '',
         variableType: '',
         item: '',
-        validation: 'Kodierschema kann nicht ausgewertet werden',
+        validation: 'SCHEME_UNREADABLE',
         validationProblems: [] as CodingReportValidationProblemDto[],
         codingType: '',
         trainingEffort: ''
@@ -244,7 +244,7 @@ describe('CodingReportClass', () => {
         ];
 
         expect(CodingReportClass.build(1, units)).toEqual([
-          expect.objectContaining({ variable: 'v1', codingType: 'halbautomatisch' }),
+          expect.objectContaining({ variable: 'v1', codingType: 'SEMI_AUTOMATIC' }),
           unreadableRow(2, 'BROKEN')
         ]);
         expect(warn).toHaveBeenCalledWith(expect.stringContaining('unit 2'));
@@ -312,7 +312,7 @@ describe('CodingReportClass', () => {
       }]);
       expect(
         CodingReportClass.getValidationStatus(validationProblems)
-      ).toBe('Fehler');
+      ).toBe('ERROR');
     });
 
     it('finds the problems of a coding without alias by its id', () => {
@@ -338,13 +338,13 @@ describe('CodingReportClass', () => {
     it('reports warnings when no problem is breaking', () => {
       expect(CodingReportClass.getValidationStatus([{
         type: 'VACANT', breaking: false
-      }])).toBe('Warnung');
+      }])).toBe('WARNING');
       expect(CodingReportClass.getValidationStatus([])).toBe('OK');
     });
   });
 
   describe('determineCodingType', () => {
-    it('maps closed coding to automatisch', () => {
+    it('maps closed coding to AUTOMATIC', () => {
       const codingType = CodingReportClass.determineCodingType({
         codes: [{
           type: 'RESIDUAL_AUTO',
@@ -353,10 +353,10 @@ describe('CodingReportClass', () => {
         }]
       } as unknown as VariableCodingData);
 
-      expect(codingType).toBe('automatisch');
+      expect(codingType).toBe('AUTOMATIC');
     });
 
-    it('maps rules-based coding to halbautomatisch', () => {
+    it('maps rules-based coding to SEMI_AUTOMATIC', () => {
       const codingType = CodingReportClass.determineCodingType({
         codes: [{
           manualInstruction: '',
@@ -364,10 +364,10 @@ describe('CodingReportClass', () => {
         }]
       } as unknown as VariableCodingData);
 
-      expect(codingType).toBe('halbautomatisch');
+      expect(codingType).toBe('SEMI_AUTOMATIC');
     });
 
-    it('maps manual coding to manuell', () => {
+    it('maps manual coding to MANUAL', () => {
       const codingType = CodingReportClass.determineCodingType({
         codes: [{
           manualInstruction: 'Hinweis',
@@ -375,10 +375,10 @@ describe('CodingReportClass', () => {
         }]
       } as unknown as VariableCodingData);
 
-      expect(codingType).toBe('manuell');
+      expect(codingType).toBe('MANUAL');
     });
 
-    it('maps codes without instruction and without rules to keine Regeln', () => {
+    it('maps codes without instruction and without rules to NO_RULES', () => {
       const codingType = CodingReportClass.determineCodingType({
         codes: [{
           type: 'FULL_CREDIT',
@@ -387,20 +387,20 @@ describe('CodingReportClass', () => {
         }]
       } as unknown as VariableCodingData);
 
-      expect(codingType).toBe('keine Regeln');
+      expect(codingType).toBe('NO_RULES');
     });
 
     // A variable without codes counted as coded by hand (#1988).
-    it.each([[[]], [undefined]])('maps a variable with codes %j to keine Regeln', codes => {
+    it.each([[[]], [undefined]])('maps a variable with codes %j to NO_RULES', codes => {
       const codingType = CodingReportClass.determineCodingType({
         id: 'v', sourceType: 'BASE', codes
       } as unknown as VariableCodingData);
 
-      expect(codingType).toBe('keine Regeln');
+      expect(codingType).toBe('NO_RULES');
     });
 
     // Codes without rule sets or manual instruction, both optional in the spec (#1873).
-    it('maps manual codes without rule sets to manuell', () => {
+    it('maps manual codes without rule sets to MANUAL', () => {
       const codingType = CodingReportClass.determineCodingType({
         id: 'v',
         sourceType: 'BASE',
@@ -408,7 +408,7 @@ describe('CodingReportClass', () => {
           { id: 0, type: 'NO_CREDIT', manualInstruction: '<p>Anweisung B</p>' }]
       });
 
-      expect(codingType).toBe('manuell');
+      expect(codingType).toBe('MANUAL');
     });
 
     // the schemer's editor leaves <p></p> behind when an instruction is emptied
@@ -419,11 +419,11 @@ describe('CodingReportClass', () => {
           id: 'v',
           sourceType: 'BASE',
           codes: [{ id: 1, type: 'FULL_CREDIT', manualInstruction }]
-        })).toBe('keine Regeln');
+        })).toBe('NO_RULES');
       }
     );
 
-    it('maps closed codes without rule sets to automatisch', () => {
+    it('maps closed codes without rule sets to AUTOMATIC', () => {
       const codingType = CodingReportClass.determineCodingType({
         id: 'v',
         sourceType: 'BASE',
@@ -431,17 +431,17 @@ describe('CodingReportClass', () => {
           { id: 0, type: 'RESIDUAL_AUTO', manualInstruction: '' }]
       });
 
-      expect(codingType).toBe('automatisch');
+      expect(codingType).toBe('AUTOMATIC');
     });
 
-    it('maps codes without rule sets and manual instruction to keine Regeln', () => {
+    it('maps codes without rule sets and manual instruction to NO_RULES', () => {
       const codingType = CodingReportClass.determineCodingType({
         id: 'v',
         sourceType: 'BASE',
         codes: [{ id: 1, type: 'FULL_CREDIT' }]
       });
 
-      expect(codingType).toBe('keine Regeln');
+      expect(codingType).toBe('NO_RULES');
     });
 
     it.each([
@@ -458,44 +458,44 @@ describe('CodingReportClass', () => {
           id: 'v',
           sourceType: 'BASE',
           codes: [{ id: 1, type: 'FULL_CREDIT', manualInstruction }]
-        })).toBe('manuell');
+        })).toBe('MANUAL');
       }
     );
   });
 
   describe('determineVariableType', () => {
-    it('maps base variables to Basisvariable', () => {
+    it('maps base variables to BASE', () => {
       const variableType = CodingReportClass.determineVariableType({
         sourceType: 'BASE'
       } as unknown as VariableCodingData);
 
-      expect(variableType).toBe('Basisvariable');
+      expect(variableType).toBe('BASE');
     });
 
-    it('maps derived variables to abgeleitete Variable', () => {
+    it('maps derived variables to DERIVED', () => {
       const variableType = CodingReportClass.determineVariableType({
         sourceType: 'SUM_SCORE'
       } as unknown as VariableCodingData);
 
-      expect(variableType).toBe('abgeleitete Variable');
+      expect(variableType).toBe('DERIVED');
     });
   });
 
   describe('determineTrainingEffort', () => {
-    it('returns erhöht when CODER_TRAINING_REQUIRED is set', () => {
+    it('returns INCREASED when CODER_TRAINING_REQUIRED is set', () => {
       const trainingEffort = CodingReportClass.determineTrainingEffort({
         processing: ['CODER_TRAINING_REQUIRED']
       } as unknown as VariableCodingData);
 
-      expect(trainingEffort).toBe('erhöht');
+      expect(trainingEffort).toBe('INCREASED');
     });
 
-    it('returns normal when CODER_TRAINING_REQUIRED is not set', () => {
+    it('returns NORMAL when CODER_TRAINING_REQUIRED is not set', () => {
       const trainingEffort = CodingReportClass.determineTrainingEffort({
         processing: []
       } as unknown as VariableCodingData);
 
-      expect(trainingEffort).toBe('normal');
+      expect(trainingEffort).toBe('NORMAL');
     });
   });
 });

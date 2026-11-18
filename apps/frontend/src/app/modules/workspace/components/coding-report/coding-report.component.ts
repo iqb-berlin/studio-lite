@@ -23,7 +23,14 @@ import { TextSortTableDataSource } from '../../../../models/text-sort-table-data
 type CodingReportColumn = Exclude<keyof CodingReportDto, 'validationProblems' | 'unitKey'> |
 'validationDetails';
 
-type CodingReportRow = CodingReportDto & {
+type TranslatedField = 'validation' | 'variableType' | 'codingType' | 'trainingEffort';
+
+/**
+ * A row as the table shows it. The report sends codes; here they become texts in the language of the
+ * interface, so that the filter field and the sorting see what is shown (#2180).
+ */
+type CodingReportRow = Omit<CodingReportDto, TranslatedField> & Record<TranslatedField, string> & {
+  withoutRules: boolean;
   validationDetails: string;
   validationSeverity: 'error' | 'warning' | 'ok';
   unstructuredValidationMessage: string | null;
@@ -113,10 +120,10 @@ export class CodingReportComponent implements OnInit {
         next: (codingReport: CodingReportDto[]) => {
           this.unitDataRows = codingReport.map(row => {
             const validationProblems = row.validationProblems || [];
+            const validation = this.translateCode('validation-status', row.validation);
+            // Only a scheme that cannot be used has a status other than OK without problems
             const unstructuredValidationMessage = validationProblems.length === 0 &&
-              row.validation?.trim() &&
-              row.validation.trim().toLowerCase() !== 'ok' ?
-              row.validation : null;
+              row.validation !== 'OK' ? validation : null;
             let validationSeverity: CodingReportRow['validationSeverity'] = 'ok';
             if (unstructuredValidationMessage) {
               validationSeverity = 'error';
@@ -126,6 +133,11 @@ export class CodingReportComponent implements OnInit {
             }
             return {
               ...row,
+              validation,
+              variableType: this.translateCode('variable-type', row.variableType),
+              codingType: this.translateCode('coding-type', row.codingType),
+              trainingEffort: this.translateCode('training-effort', row.trainingEffort),
+              withoutRules: row.codingType === 'NO_RULES',
               validationProblems,
               validationDetails: this.formatValidationDetails(row),
               validationSeverity,
@@ -152,7 +164,7 @@ export class CodingReportComponent implements OnInit {
    */
   private updateDataSource(): void {
     const filteredRows = this.codedVariablesOnly ?
-      this.unitDataRows.filter((row: CodingReportRow) => row.codingType !== 'keine Regeln') :
+      this.unitDataRows.filter((row: CodingReportRow) => !row.withoutRules) :
       this.unitDataRows;
 
     this.dataSource = new TextSortTableDataSource(filteredRows); // Refresh the data source
@@ -228,7 +240,7 @@ export class CodingReportComponent implements OnInit {
     const fileUrl = URL.createObjectURL(file);
     const link = document.createElement('a');
     link.href = fileUrl;
-    link.download = 'kodierbericht.csv';
+    link.download = `${this.translateService.instant('workspace.coding-report')}.csv`;
     link.click();
     URL.revokeObjectURL(fileUrl);
   }
@@ -247,6 +259,11 @@ export class CodingReportComponent implements OnInit {
     } while (sanitized !== previous);
 
     return sanitized;
+  }
+
+  /** The text of a code of the report; a row without a variable leaves its fields empty. */
+  private translateCode(group: string, code: string | undefined): string {
+    return code ? this.translateService.instant(`coding-report.${group}.${code}`) : '';
   }
 
   private formatValidationDetails(row: CodingReportDto): string {
