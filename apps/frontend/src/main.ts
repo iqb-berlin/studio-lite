@@ -1,5 +1,5 @@
 import {
-  enableProdMode, ApplicationModule, importProvidersFrom, provideZoneChangeDetection, inject
+  enableProdMode, ApplicationModule, importProvidersFrom, provideZoneChangeDetection, inject, LOCALE_ID
 } from '@angular/core';
 
 import { MatSelectModule } from '@angular/material/select';
@@ -32,7 +32,7 @@ import {
 } from '@angular/common/http';
 import { provideDateFnsAdapter } from '@angular/material-date-fns-adapter';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { LocationStrategy, HashLocationStrategy } from '@angular/common';
+import { LocationStrategy, HashLocationStrategy, registerLocaleData } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { PaginatorIntlService } from './app/services/paginator-intl.service';
 import { AuthInterceptor } from './app/interceptors/auth.interceptor';
@@ -104,6 +104,16 @@ bootstrapApplication(AppComponent, {
     {
       provide: MAT_DATE_LOCALE,
       useFactory: () => UI_LOCALE_DATA[inject(LanguageService).active.code].dateFns
+    },
+    {
+      // The date pipe's locale; without it every date pipe ran in en-US whatever the language. Its
+      // data are registered here, so that nothing that reads the locale can come before them.
+      provide: LOCALE_ID,
+      useFactory: () => {
+        const { code, locale } = inject(LanguageService).active;
+        registerLocaleData(UI_LOCALE_DATA[code].angular);
+        return locale;
+      }
     },
     provideDateFnsAdapter(),
     {

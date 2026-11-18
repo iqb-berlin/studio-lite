@@ -199,25 +199,12 @@ export class HeartbeatService implements OnDestroy {
   }
 
   /**
-   * Own method so tests can observe the auto-logout redirect by stubbing it. The start page is the
-   * one in the language of the interface, which the address carries (#2175).
+   * Loads the start page anew, so nothing of the ended session stays in memory; the start page in
+   * the language of the interface, which the address carries (#2175). Own method so tests can
+   * observe the redirect by stubbing it: jsdom cannot perform a navigation.
    */
   private redirectToHome(): void {
-    this.reloadAt(this.languageService.homeHref());
-  }
-
-  /**
-   * Loads the page anew at the given address, so nothing of the ended session stays in memory. The
-   * address is replaced first: assigned instead, an address that differs only in the hash would not
-   * load the page at all, and one that differs in the path would race the reload.
-   * Own method because jsdom cannot perform a navigation and reports "Not implemented: navigation".
-   */
-  // eslint-disable-next-line class-methods-use-this
-  private reloadAt(href: string): void {
-    if (typeof window !== 'undefined') {
-      window.history.replaceState(null, '', href);
-      window.location.reload();
-    }
+    this.languageService.reloadAt(this.languageService.homeHref());
   }
 
   ngOnDestroy(): void {

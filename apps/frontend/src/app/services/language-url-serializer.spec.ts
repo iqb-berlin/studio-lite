@@ -1,7 +1,15 @@
-import { TestBed } from '@angular/core/testing';
-import { PRIMARY_OUTLET } from '@angular/router';
+import { Component } from '@angular/core';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { Location } from '@angular/common';
+import { provideLocationMocks, SpyLocation } from '@angular/common/testing';
+import {
+  PRIMARY_OUTLET, provideRouter, Router, UrlSerializer
+} from '@angular/router';
 import { LanguageUrlSerializer } from './language-url-serializer';
 import { LanguageService } from './language.service';
+
+@Component({ template: '', standalone: true })
+class EmptyComponent {}
 
 describe('LanguageUrlSerializer', () => {
   const serializerIn = (prefix: string): LanguageUrlSerializer => {
@@ -44,4 +52,28 @@ describe('LanguageUrlSerializer', () => {
     expect(serializer.parse('/3f2c9a1e-0b7d-4c1a-9e7f-2a6b5c4d3e21').root.children[PRIMARY_OUTLET].segments[0].path)
       .toBe('3f2c9a1e-0b7d-4c1a-9e7f-2a6b5c4d3e21');
   });
+
+  // Back to an entry from before a switch, or another prefix typed into the address bar: the router
+  // goes there like to any address, guards included, and the language stays the one loaded (#2175).
+  it('should let the router write an address the browser brings in the active language', fakeAsync(() => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([{ path: '**', component: EmptyComponent }]),
+        provideLocationMocks(),
+        { provide: UrlSerializer, useClass: LanguageUrlSerializer },
+        { provide: LanguageService, useValue: { codes: ['de', 'en'], prefix: '/en' } }
+      ]
+    });
+    const router = TestBed.inject(Router);
+    const location = TestBed.inject(Location) as SpyLocation;
+    router.initialNavigation();
+    tick();
+
+    location.simulateHashChange('/a/5/12/editor');
+    tick();
+
+    expect(router.url).toBe('/en/a/5/12/editor');
+    expect(location.path()).toBe('/en/a/5/12/editor');
+  }));
 });

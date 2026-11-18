@@ -2,6 +2,7 @@
   <button mat-button
           [matMenuTriggerFor]="languageMenu"
           [matTooltip]="'home.select-language' | translate"
+          [attr.aria-label]="'home.select-language' | translate"
           matTooltipPosition="above"
           data-cy="language-menu">
     <studio-lite-wrapped-icon class="white-color" icon="translate"></studio-lite-wrapped-icon>
@@ -11,7 +12,7 @@
       <button mat-menu-item
               [attr.lang]="language.code"
               [attr.data-cy]="'language-' + language.code"
-              (click)="select(language.code)">
+              (click)="languageService.switchTo(language.code)">
         <mat-icon>{{ language.code === languageService.active.code ? 'check' : '' }}</mat-icon>
         <span>{{ language.name }}</span>
       </button>

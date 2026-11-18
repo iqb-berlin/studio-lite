@@ -39,10 +39,10 @@ describe('languageOfHash', () => {
   });
 
   it.each([
-    ['without a prefix', '#/a/5'],
-    ['without any address', ''],
-    ['with a prefix of a language not offered', '#/en/a/5']
-  ])('should take German %s', (_: string, hash: string) => {
-    expect(languageOfHash(hash, hash.startsWith('#/en') ? [de] : [de, en])).toBe(de);
+    ['without a prefix', '#/a/5', [de, en]],
+    ['without any address', '', [de, en]],
+    ['with a prefix of a language not offered', '#/en/a/5', [de]]
+  ])('should take German %s', (_: string, hash: string, offered: UiLanguage[]) => {
+    expect(languageOfHash(hash, offered)).toBe(de);
   });
 });
