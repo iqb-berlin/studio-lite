@@ -24,7 +24,10 @@ import { WorkspaceService } from '../../services/workspace.service';
   templateUrl: './move-unit.component.html',
   styleUrls: ['./move-unit.component.scss'],
 
-  imports: [MatDialogTitle, FormsModule, ReactiveFormsModule, MatFormField, MatSelect, MatOption, MatDialogContent, SelectUnitListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule, MatCheckbox]
+  imports: [
+    MatDialogTitle, FormsModule, ReactiveFormsModule, MatFormField, MatSelect, MatOption, MatDialogContent,
+    SelectUnitListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule, MatCheckbox
+  ]
 })
 
 export class MoveUnitComponent implements OnInit {

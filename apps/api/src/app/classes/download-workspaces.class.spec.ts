@@ -258,7 +258,9 @@ describe('DownloadWorkspacesClass', () => {
       units.findAllWithProperties.mockResolvedValue([{
         id: 1, key: 'U', name: 'Unit', scheme, metadata: { items: [] }
       }] as UnitPropertiesDto[]);
-      settings.findMissingsProfiles.mockResolvedValue([{ id: 8, label: 'Profil', missings: JSON.stringify([{ code: 0, label: 'Missing', description: 'Leer' }]) }]);
+      settings.findMissingsProfiles.mockResolvedValue([{
+        id: 8, label: 'Profil', missings: JSON.stringify([{ code: 0, label: 'Missing', description: 'Leer' }])
+      }]);
       const result = await DownloadWorkspacesClass.getWorkspaceCodingBook(1, units, settings, options, [1]);
       const data = JSON.parse(result.toString());
       expect(data[0].variables[0].codes.map(code => code.id)).toEqual(['0']);
@@ -417,7 +419,13 @@ describe('DownloadWorkspacesClass', () => {
     it('returns a real DOCX for an empty selection', async () => {
       const units = createMock<UnitService>(); const settings = createMock<SettingService>();
       units.findAllWithProperties.mockResolvedValue([]); settings.findMissingsProfiles.mockResolvedValue([]);
-      const result = await DownloadWorkspacesClass.getWorkspaceCodingBook(1, units, settings, { ...options, exportFormat: 'docx' }, []);
+      const result = await DownloadWorkspacesClass.getWorkspaceCodingBook(
+        1,
+        units,
+        settings,
+        { ...options, exportFormat: 'docx' },
+        []
+      );
       expect(Buffer.isBuffer(result)).toBe(true);
       expect(result.subarray(0, 2).toString()).toBe('PK');
     });

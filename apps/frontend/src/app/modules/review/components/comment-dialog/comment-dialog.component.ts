@@ -25,7 +25,10 @@ const NAME_LOCAL_STORAGE_KEY = 'iqb-studio-user-name-for-review-comments';
   templateUrl: './comment-dialog.component.html',
   styleUrls: ['./comment-dialog.component.scss'],
 
-  imports: [MatDialogTitle, MatFormField, MatLabel, MatInput, FormsModule, MatDialogContent, CommentsComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule, CdkDrag, CdkDragHandle]
+  imports: [
+    MatDialogTitle, MatFormField, MatLabel, MatInput, FormsModule, MatDialogContent, CommentsComponent,
+    MatDialogActions, MatButton, MatDialogClose, TranslateModule, CdkDrag, CdkDragHandle
+  ]
 })
 export class CommentDialogComponent implements OnInit, OnDestroy {
   userName = '';

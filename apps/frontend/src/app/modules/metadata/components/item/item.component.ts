@@ -27,7 +27,10 @@ import { ItemModel } from '../../models/item-model.interface';
   templateUrl: './item.component.html',
   styleUrls: ['./item.component.scss'],
 
-  imports: [MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, ReactiveFormsModule, FormlyModule, ProfileFormComponent, TranslateModule, MatIcon, AsyncPipe]
+  imports: [
+    MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, ReactiveFormsModule, FormlyModule,
+    ProfileFormComponent, TranslateModule, MatIcon, AsyncPipe
+  ]
 })
 export class ItemComponent implements OnInit, OnChanges, OnDestroy {
   @Input() variables!: AliasId[];

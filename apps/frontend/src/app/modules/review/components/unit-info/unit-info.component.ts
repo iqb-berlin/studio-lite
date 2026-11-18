@@ -25,7 +25,10 @@ const PanelWidthOffset = 40;
   templateUrl: './unit-info.component.html',
   styleUrls: ['./unit-info.component.scss'],
 
-  imports: [MatIcon, MatButton, MatTooltip, WrappedIconComponent, UnitPropertiesComponent, UnitLastChangesComponent, TranslateModule, PrintMetadataComponent, UnitPrintCommentsComponent, UnitPrintCodingComponent]
+  imports: [
+    MatIcon, MatButton, MatTooltip, WrappedIconComponent, UnitPropertiesComponent, UnitLastChangesComponent,
+    TranslateModule, PrintMetadataComponent, UnitPrintCommentsComponent, UnitPrintCodingComponent
+  ]
 })
 export class UnitInfoComponent implements AfterViewInit, OnDestroy {
   @ViewChild('infoPanelSplitter') splitterElement!: ElementRef;

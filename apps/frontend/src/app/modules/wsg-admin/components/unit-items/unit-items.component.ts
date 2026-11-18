@@ -36,7 +36,11 @@ import { TextSortTableDataSource } from '../../../../models/text-sort-table-data
   templateUrl: './unit-items.component.html',
   styleUrls: ['./unit-items.component.scss'],
 
-  imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, FormsModule, TranslateModule, SearchFilterComponent, RouterLink, DatePipe, MatPaginator, IncludePipe, MatIcon, MatIconButton, MatTooltip]
+  imports: [
+    MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader,
+    MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, FormsModule, TranslateModule, SearchFilterComponent, RouterLink,
+    DatePipe, MatPaginator, IncludePipe, MatIcon, MatIconButton, MatTooltip
+  ]
 })
 
 export class UnitItemsComponent implements OnInit, AfterViewInit, OnDestroy {

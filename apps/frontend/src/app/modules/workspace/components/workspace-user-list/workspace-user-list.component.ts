@@ -18,7 +18,9 @@ export interface WorkspaceUserListData {
   templateUrl: './workspace-user-list.component.html',
   styleUrls: ['./workspace-user-list.component.scss'],
 
-  imports: [MatDialogTitle, MatDialogContent, UserListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [
+    MatDialogTitle, MatDialogContent, UserListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule
+  ]
 })
 export class WorkspaceUserListComponent {
   title: string;

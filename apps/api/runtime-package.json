@@ -102,6 +102,18 @@
     },
     "@angular/build": {
       "undici": "^7.30.1"
+    },
+    "eslint": {
+      "minimatch": "^11.0.4"
+    },
+    "@eslint/config-array": {
+      "minimatch": "^11.0.4"
+    },
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.4"
+    },
+    "eslint-plugin-sonarjs": {
+      "minimatch": "^11.0.4"
     }
   }
 }

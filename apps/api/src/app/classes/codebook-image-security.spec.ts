@@ -14,7 +14,10 @@ describe('Codebook image parser security', () => {
       invalid.write('ic07', 8);
       invalid.writeUInt32BE(0, 12);
       assert.throws(() => parser.imageSize(invalid), /Invalid ICNS/);
-      const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX1sAAAAASUVORK5CYII=', 'base64');
+      const png = Buffer.from(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX1sAAAAASUVORK5CYII=',
+        'base64'
+      );
       const dimensions = parser.imageSize(png);
       assert.equal(dimensions.width, 1);
       assert.equal(dimensions.height, 1);

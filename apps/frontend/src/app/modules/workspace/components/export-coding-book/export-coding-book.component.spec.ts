@@ -59,8 +59,15 @@ describe('Studio shared codebook wrapper', () => {
     const fixture = TestBed.createComponent(ExportCodingBookComponent); fixture.detectChanges();
     const c = fixture.componentInstance;
     backend.getCodingBook.mockReturnValue(of(new Blob(['document'])));
-    c.exportCodingBook({ selectedUnits: [7], missingsProfileId: 8, contentOptions: { ...c.contentOptions, missingsProfile: 'Profil' } });
-    expect(backend.getCodingBook).toHaveBeenCalledWith(1, 'Profil', expect.objectContaining({ missingsProfile: 'Profil' }), [7]);
+    c.exportCodingBook({
+      selectedUnits: [7], missingsProfileId: 8, contentOptions: { ...c.contentOptions, missingsProfile: 'Profil' }
+    });
+    expect(backend.getCodingBook).toHaveBeenCalledWith(
+      1,
+      'Profil',
+      expect.objectContaining({ missingsProfile: 'Profil' }),
+      [7]
+    );
     expect(saveAs).toHaveBeenCalledTimes(1); expect(app.dataLoading).toBe(false);
     expect(dialog.close).toHaveBeenCalledWith({ selectedUnits: [7] }); fixture.destroy();
   });

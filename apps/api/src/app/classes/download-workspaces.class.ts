@@ -178,7 +178,8 @@ export class DownloadWorkspacesClass {
       let aliases = new Map<string, string>();
       try {
         const schema = JSON.parse(unit.scheme || '{}');
-        aliases = new Map((schema.variableCodings || []).map((variable: { id: string; alias?: string }) => [variable.id, variable.alias || variable.id]));
+        aliases = new Map((schema.variableCodings || [])
+          .map((variable: { id: string; alias?: string }) => [variable.id, variable.alias || variable.id]));
       } catch { /* The shared generator reports malformed schemas with the unit key. */ }
       return {
         id: unit.id,

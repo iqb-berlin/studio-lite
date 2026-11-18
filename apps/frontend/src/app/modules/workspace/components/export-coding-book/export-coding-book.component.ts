@@ -8,7 +8,9 @@ import { forkJoin, Subject } from 'rxjs';
 import { finalize, takeUntil } from 'rxjs/operators';
 import { saveAs } from 'file-saver-es';
 import { CodebookExportComponent, DEFAULT_CODEBOOK_OPTIONS } from '@iqb/ngx-coding-components/codebook-export';
-import type { CodebookExportConfig, MissingsProfile, UnitSelectionItem } from '@iqb/ngx-coding-components/codebook-models';
+import type {
+  CodebookExportConfig, MissingsProfile, UnitSelectionItem
+} from '@iqb/ngx-coding-components/codebook-models';
 import { WorkspaceService } from '../../services/workspace.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { UnitStoresService } from '../../services/unit-stores.service';
@@ -50,8 +52,12 @@ export class ExportCodingBookComponent implements OnInit, OnDestroy {
           this.units = units.map(unit => ({
             unitId: unit.id, key: unit.key, unitName: unit.name || '', groupName: unit.groupName || ''
           }));
-          this.unitList = units.filter(unit => unit.id === this.workspaceService.selectedUnit$.value).map(unit => unit.id);
-          this.missingsProfiles = profiles.map((profile, index) => ({ id: profile.id || index + 1, label: profile.label }));
+          this.unitList = units
+            .filter(unit => unit.id === this.workspaceService.selectedUnit$.value)
+            .map(unit => unit.id);
+          this.missingsProfiles = profiles.map((profile, index) => ({
+            id: profile.id || index + 1, label: profile.label
+          }));
         },
         error: () => { this.error = true; }
       });
@@ -62,7 +68,12 @@ export class ExportCodingBookComponent implements OnInit, OnDestroy {
     this.exporting = true;
     this.error = false;
     this.appService.dataLoading = true;
-    this.backendService.getCodingBook(this.workspaceService.selectedWorkspaceId, config.contentOptions.missingsProfile, config.contentOptions, config.selectedUnits)
+    this.backendService.getCodingBook(
+      this.workspaceService.selectedWorkspaceId,
+      config.contentOptions.missingsProfile,
+      config.contentOptions,
+      config.selectedUnits
+    )
       .pipe(takeUntil(this.destroyed), finalize(() => {
         this.exporting = false;
         this.appService.dataLoading = false;
@@ -71,7 +82,8 @@ export class ExportCodingBookComponent implements OnInit, OnDestroy {
         next: data => {
           if (!data) { this.error = true; return; }
           const date = new DatePipe(this.i18nService.fullLocale).transform(new Date(), this.i18nService.fileDateFormat);
-          saveAs(data, `${date} Codebook ${this.workspaceService.selectedWorkspaceName}.${config.contentOptions.exportFormat}`);
+          const workspaceName = this.workspaceService.selectedWorkspaceName;
+          saveAs(data, `${date} Codebook ${workspaceName}.${config.contentOptions.exportFormat}`);
           this.dialogRef?.close({ selectedUnits: config.selectedUnits });
         },
         error: () => { this.error = true; }

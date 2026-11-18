@@ -13,7 +13,10 @@ import { UserIssuesPipe } from '../../pipes/user-issues.pipe';
   templateUrl: './user-workspaces-groups.component.html',
   styleUrls: ['./user-workspaces-groups.component.scss'],
 
-  imports: [MatAnchor, RouterLink, MatTooltip, WrappedIconComponent, UserIssuesComponent, TranslateModule, UserIssuesPipe, MatButton]
+  imports: [
+    MatAnchor, RouterLink, MatTooltip, WrappedIconComponent, UserIssuesComponent, TranslateModule, UserIssuesPipe,
+    MatButton
+  ]
 })
 
 export class UserWorkspacesGroupsComponent {

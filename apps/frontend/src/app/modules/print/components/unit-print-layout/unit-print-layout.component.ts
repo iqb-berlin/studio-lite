@@ -29,7 +29,11 @@ import { UnitLastChangesComponent } from '../../../../components/unit-last-chang
   templateUrl: './unit-print-layout.component.html',
   styleUrls: ['./unit-print-layout.component.scss'],
 
-  imports: [UnitPropertiesComponent, UnitLastChangesComponent, PrintMetadataComponent, UnitPrintCommentsComponent, UnitPrintCodingComponent, UnitPrintPlayerComponent, MatFormField, MatLabel, MatInput, FormsModule, IncludePipe, TranslateModule]
+  imports: [
+    UnitPropertiesComponent, UnitLastChangesComponent, PrintMetadataComponent, UnitPrintCommentsComponent,
+    UnitPrintCodingComponent, UnitPrintPlayerComponent, MatFormField, MatLabel, MatInput, FormsModule, IncludePipe,
+    TranslateModule
+  ]
 })
 export class UnitPrintLayoutComponent implements OnInit {
   @Input() unitId!: number;

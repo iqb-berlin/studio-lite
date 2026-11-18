@@ -2,8 +2,8 @@ import {
   AfterViewInit, Component, Input, ViewChild
 } from '@angular/core';
 import {
-
-  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
+  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef,
+  MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
 import { UserInListDto } from '@studio-lite-lib/api-dto';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
@@ -15,7 +15,10 @@ import { TextSortTableDataSource } from '../../../../models/text-sort-table-data
   templateUrl: './user-list.component.html',
   styleUrls: ['./user-list.component.scss'],
 
-  imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, TranslateModule]
+  imports: [
+    MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell,
+    MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, TranslateModule
+  ]
 })
 export class UserListComponent implements AfterViewInit {
   @ViewChild(MatSort) sort!: MatSort;

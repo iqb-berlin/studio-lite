@@ -17,7 +17,10 @@ import { WorkspaceService } from '../../services/workspace.service';
   templateUrl: './unit-data-area.component.html',
   styleUrls: ['./unit-data-area.component.scss'],
 
-  imports: [MatTabNav, MatTabLink, RouterLinkActive, RouterLink, MatIconAnchor, MatIcon, MatTabNavPanel, RouterOutlet, AsyncPipe, TranslateModule, NamedRouterLinkPipe]
+  imports: [
+    MatTabNav, MatTabLink, RouterLinkActive, RouterLink, MatIconAnchor, MatIcon, MatTabNavPanel, RouterOutlet,
+    AsyncPipe, TranslateModule, NamedRouterLinkPipe
+  ]
 })
 export class UnitDataAreaComponent {
   @ViewChild(MatTabNav) nav: MatTabNav | undefined;

@@ -15,7 +15,10 @@ import { AppService } from '../../services/app.service';
   templateUrl: './user-menu.component.html',
   styleUrls: ['./user-menu.component.scss'],
 
-  imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, AccountActionComponent, ChangePasswordDirective, EditMyDataDirective, LogoutDirective, TranslateModule]
+  imports: [
+    MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, AccountActionComponent,
+    ChangePasswordDirective, EditMyDataDirective, LogoutDirective, TranslateModule
+  ]
 })
 export class UserMenuComponent {
   userName: string;

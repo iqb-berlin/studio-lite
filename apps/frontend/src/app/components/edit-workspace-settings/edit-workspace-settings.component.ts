@@ -44,7 +44,10 @@ type SelectedRow = {
   templateUrl: './edit-workspace-settings.component.html',
   styleUrls: ['./edit-workspace-settings.component.scss'],
 
-  imports: [MatDialogTitle, MatDialogContent, MatLabel, SelectModuleComponent, MatCheckbox, MatError, MatSelect, MatOption, MatDialogActions, MatButton, MatDialogClose, TranslateModule, IncludePipe]
+  imports: [
+    MatDialogTitle, MatDialogContent, MatLabel, SelectModuleComponent, MatCheckbox, MatError, MatSelect, MatOption,
+    MatDialogActions, MatButton, MatDialogClose, TranslateModule, IncludePipe
+  ]
 })
 export class EditWorkspaceSettingsComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();

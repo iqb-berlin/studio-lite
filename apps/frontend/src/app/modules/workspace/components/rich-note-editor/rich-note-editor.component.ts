@@ -1,7 +1,5 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { AnyExtension } from '@tiptap/core';
-// tiptap exportiert StarterKit als Default UND unter gleichem Namen; der Default ist die dokumentierte Form.
-// eslint-disable-next-line import-x/no-named-as-default
 import StarterKit from '@tiptap/starter-kit';
 import { TranslateModule } from '@ngx-translate/core';
 import { TiptapEditorDirective } from 'ngx-tiptap';

@@ -41,7 +41,12 @@ import { TextSortTableDataSource } from '../../../../models/text-sort-table-data
   templateUrl: './reviews.component.html',
   styleUrls: ['./reviews.component.scss'],
 
-  imports: [MatDialogTitle, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, ReviewMenuComponent, SelectUnitListComponent, ReviewConfigComponent, SaveChangesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule, DatePipe]
+  imports: [
+    MatDialogTitle, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell,
+    MatSortHeader, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, ReviewMenuComponent,
+    SelectUnitListComponent, ReviewConfigComponent, SaveChangesComponent, MatDialogActions, MatButton, MatDialogClose,
+    TranslateModule, DatePipe
+  ]
 })
 
 export class ReviewsComponent extends CheckForChangesDirective implements OnInit, OnDestroy {

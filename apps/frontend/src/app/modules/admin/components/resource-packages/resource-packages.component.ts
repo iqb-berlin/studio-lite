@@ -24,7 +24,10 @@ import { ChangeResultService } from '../../../../services/change-result.service'
   templateUrl: './resource-packages.component.html',
   styleUrls: ['./resource-packages.component.scss'],
 
-  imports: [IqbFilesUploadInputForDirective, MatButton, MatTooltip, WrappedIconComponent, IqbFilesUploadQueueComponent, ResourcePackagesTableComponent, AsyncPipe, TranslateModule, TableDataSourcePipe]
+  imports: [
+    IqbFilesUploadInputForDirective, MatButton, MatTooltip, WrappedIconComponent, IqbFilesUploadQueueComponent,
+    ResourcePackagesTableComponent, AsyncPipe, TranslateModule, TableDataSourcePipe
+  ]
 })
 
 export class ResourcePackagesComponent implements OnInit, OnDestroy {

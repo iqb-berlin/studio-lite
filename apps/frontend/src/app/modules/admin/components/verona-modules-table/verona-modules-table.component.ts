@@ -34,7 +34,11 @@ import { TextSortTableDataSource } from '../../../../models/text-sort-table-data
   templateUrl: './verona-modules-table.component.html',
   styleUrls: ['./verona-modules-table.component.scss'],
 
-  imports: [MatButton, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatAnchor, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe, BytesPipe, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe]
+  imports: [
+    MatButton, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell,
+    MatSortHeader, MatAnchor, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe, BytesPipe,
+    TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe
+  ]
 })
 export class VeronaModulesTableComponent implements OnInit, OnDestroy {
   @Input() type!: string;

@@ -19,7 +19,9 @@ import { SaveLock } from '../../../../classes/save-lock.class';
   templateUrl: './email-template.component.html',
   styleUrls: ['./email-template.component.scss'],
 
-  imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, CdkTextareaAutosize, MatButton, TranslateModule]
+  imports: [
+    FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, CdkTextareaAutosize, MatButton, TranslateModule
+  ]
 })
 
 export class EmailTemplateComponent implements OnInit, OnDestroy {

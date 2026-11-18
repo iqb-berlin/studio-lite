@@ -17,7 +17,10 @@ import { BookletConfigEditComponent } from '../booklet-config-edit/booklet-confi
   templateUrl: './review-config.component.html',
   styleUrls: ['./review-config.component.scss'],
 
-  imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatFormField, MatInput, FormsModule, ReviewConfigEditComponent, BookletConfigEditComponent, TranslateModule, MatLabel]
+  imports: [
+    MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatFormField, MatInput,
+    FormsModule, ReviewConfigEditComponent, BookletConfigEditComponent, TranslateModule, MatLabel
+  ]
 })
 export class ReviewConfigComponent {
   @Input() selectedReviewId!: number;

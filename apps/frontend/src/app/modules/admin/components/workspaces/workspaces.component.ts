@@ -31,7 +31,11 @@ import { TextSortTableDataSource } from '../../../../models/text-sort-table-data
   templateUrl: './workspaces.component.html',
   styleUrls: ['./workspaces.component.scss'],
 
-  imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, FormsModule, TranslateModule, SearchFilterComponent, RouterLink, MatPaginator, WorkspacesMenuComponent, MatIcon, MatTooltip]
+  imports: [
+    MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader,
+    MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, FormsModule, TranslateModule, SearchFilterComponent, RouterLink,
+    MatPaginator, WorkspacesMenuComponent, MatIcon, MatTooltip
+  ]
 })
 
 export class WorkspacesComponent implements OnInit, AfterViewInit {
