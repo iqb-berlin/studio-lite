@@ -366,7 +366,7 @@
     "state-configs": "Status Konfigurationen",
     "add-state": "Status hinzufügen",
     "changed": "Einstellungen geändert",
-    "delete-state-warning": "Soll dieser Status gelöscht werden? Dadurch verliert dieser seine Gültigkeit und den Aufgaben muss ein neuer Status zugewiesen werden!",
+    "delete-state-warning": "Soll dieser Status gelöscht werden? Dadurch verliert dieser seine Gültigkeit und den Aufgaben muss ein neuer Status zugewiesen werden! Die Löschung wird mit „Speichern“ übernommen.",
     "delete-state": "Status löschen",
     "changed-settings-warning": "Sollen die Änderungen in den Einstellungen gespeichert werden?",
     "route-visibility": "Arbeitsfläche",

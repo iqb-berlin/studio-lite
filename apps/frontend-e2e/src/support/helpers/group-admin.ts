@@ -239,9 +239,7 @@ export function deleteState(stateName: string): void {
     cy.clickDialogButton(json.delete);
   });
   cy.get('studio-lite-delete-state').should('not.exist');
-  // Deleting is a change like any other and sends nothing: a save under way, or one already answered,
-  // would leave the button disabled (#2141).
-  cy.get('[data-cy="wsg-admin-settings-save-button"]').should('be.enabled');
+  // Deleting is a change like any other: only the save button stores it (#2141).
   cy.intercept('PATCH', '/api/workspace-groups/*').as('saveAfterDeletion');
   cy.get('[data-cy="wsg-admin-settings-save-button"]').click();
   waitForSuccess('@saveAfterDeletion');

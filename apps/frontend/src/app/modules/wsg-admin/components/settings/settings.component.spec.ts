@@ -227,11 +227,14 @@ describe('WorkspaceSettingsComponent with the states', () => {
   // Deleting a state sent all settings of the page, unsaved profiles as well (#2141).
   it('should send nothing when a state is deleted, and offer the deletion to save', () => {
     const element: HTMLElement = fixture.nativeElement;
+    const saveButton = element.querySelector('[data-cy="wsg-admin-settings-save-button"]') as HTMLButtonElement;
+    expect(saveButton.disabled).toBe(true);
+
     (element.querySelector('.delete-button') as HTMLButtonElement).click();
     fixture.detectChanges();
 
     expect(setWorkspaceGroupSettings).not.toHaveBeenCalled();
     expect(fixture.componentInstance.settings.states).toEqual([]);
-    expect(TestBed.inject(WsgAdminService).settingsChanged).toBe(true);
+    expect(saveButton.disabled).toBe(false);
   });
 });
