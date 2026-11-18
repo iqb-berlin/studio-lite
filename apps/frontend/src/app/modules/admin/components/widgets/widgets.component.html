@@ -9,7 +9,7 @@
       </button>
       <button mat-button
               [disabled]="!selectedModules.length"
-              matTooltip="Markierte löschen"
+              [matTooltip]="'admin.delete-selected' | translate"
               matTooltipPosition="above"
               (click)="fileUploadQueue.removeAll(); deleteFiles()"
               data-cy="delete-widgets-button">
