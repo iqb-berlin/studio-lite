@@ -114,8 +114,10 @@ export class UnitPlayerComponent extends PreviewDirective {
   }
 
   onLoadUnitProperties(): void {
-    this.setPresentationStatus('none');
-    this.setResponsesStatus('none');
+    // the player is started with the progress it reported last for this unit, and a report that leaves
+    // the progress out keeps it (#2169)
+    this.presentationProgress = this.unitData.presentationProgress ?? 'none';
+    this.responseProgress = this.unitData.responseProgress ?? 'none';
     this.clearPageList();
     this.subscribeForUnitPropertiesChanges();
   }
@@ -161,8 +163,8 @@ export class UnitPlayerComponent extends PreviewDirective {
           sessionId: this.sessionId,
           unitState: {
             dataParts: this.unitData.responses || {},
-            presentationProgress: this.toPlayerValue('none'),
-            responseProgress: this.toPlayerValue('none')
+            presentationProgress: this.toPlayerValue(this.unitData.presentationProgress ?? 'none'),
+            responseProgress: this.toPlayerValue(this.unitData.responseProgress ?? 'none')
           },
           playerConfig: {
             ...this.legacyStateReportPolicy(),
@@ -185,6 +187,9 @@ export class UnitPlayerComponent extends PreviewDirective {
   protected handleUnitStateData(unitState: UnitState): void {
     // a player may send only the data parts that changed; the others stay as they were (#2164)
     if (unitState.dataParts) this.unitData.responses = { ...this.unitData.responses, ...unitState.dataParts };
+    // the player gets its progress back as well when the review returns to the unit (#2169)
+    this.unitData.presentationProgress = this.presentationProgress;
+    this.unitData.responseProgress = this.responseProgress;
   }
 
   gotoUnit(target: string): void {
