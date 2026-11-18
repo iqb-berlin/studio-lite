@@ -64,14 +64,12 @@ describe('StatesComponent', () => {
   it('should delete state', () => {
     const stateToDelete = component.states[0];
     jest.spyOn(component.hasChanged, 'emit');
-    jest.spyOn(component.stateDeleted, 'emit');
 
     component.deleteState(stateToDelete);
 
     expect(mockMatDialog.open).toHaveBeenCalled();
     expect(component.states.length).toBe(0);
-    expect(component.hasChanged.emit).toHaveBeenCalled();
-    expect(component.stateDeleted.emit).toHaveBeenCalled();
+    expect(component.hasChanged.emit).toHaveBeenCalledWith([]);
   });
 
   it('should rename only the state whose label was typed in', () => {
@@ -89,28 +87,26 @@ describe('StatesComponent', () => {
     ]);
   });
 
-  // Deleting saves the group settings at once; Esc and a click beside the dialog give undefined (#1844).
+  // Esc and a click beside the dialog give undefined (#1844).
   it.each([false, undefined])('should keep a state when its deletion closes with %s', result => {
     mockMatDialog.open.mockReturnValue({ afterClosed: () => of(result) });
     jest.spyOn(component.hasChanged, 'emit');
-    jest.spyOn(component.stateDeleted, 'emit');
 
     component.deleteState(component.states[0]);
 
     expect(component.states).toEqual([{ id: 1, label: 'State 1', color: '#000000' }]);
     expect(component.hasChanged.emit).not.toHaveBeenCalled();
-    expect(component.stateDeleted.emit).not.toHaveBeenCalled();
   });
 
-  // Deleting saves at once, and the dialog promises to save the changes made before (#2009).
-  it('should save the unsaved label of another state when deleting one', () => {
+  // The change a deletion reports keeps the unsaved label of another state (#2009).
+  it('should keep the unsaved label of another state when deleting one', () => {
     component.addState();
-    jest.spyOn(component.stateDeleted, 'emit');
+    jest.spyOn(component.hasChanged, 'emit');
     component.stateSelectionChange('In Arbeit', 'text', '1');
 
     component.deleteState(component.states[1]);
 
-    expect(component.stateDeleted.emit).toHaveBeenCalledWith([{ id: 1, label: 'In Arbeit', color: '#000000' }]);
+    expect(component.hasChanged.emit).toHaveBeenLastCalledWith([{ id: 1, label: 'In Arbeit', color: '#000000' }]);
   });
 
   // Units keep the id of a deleted state, and would show a new state that got it again (#2009).

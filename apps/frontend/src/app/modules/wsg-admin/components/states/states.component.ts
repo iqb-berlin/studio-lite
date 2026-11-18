@@ -29,7 +29,6 @@ export class StatesComponent implements OnInit, OnDestroy {
   isError: boolean = false;
 
   @Output() hasChanged = new EventEmitter<State[]>();
-  @Output() stateDeleted = new EventEmitter<State[]>();
   constructor(
     private wsgAdminService: WsgAdminService,
     private deleteStateDialog: MatDialog,
@@ -84,7 +83,6 @@ export class StatesComponent implements OnInit, OnDestroy {
           this.changedStates = this.changedStates.filter((s: State) => s.id !== state.id);
           this.states = this.changedStates;
           this.hasChanged.emit(this.changedStates);
-          this.stateDeleted.emit(this.changedStates);
         }
       });
   }

@@ -1,5 +1,5 @@
 import {
-  Component, OnDestroy, OnInit, signal
+  Component, OnDestroy, OnInit
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
@@ -32,8 +32,6 @@ export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
   settings!: WorkspaceGroupSettingsDto;
   // One save at a time, and what it sent: what is entered meanwhile stays a change (#2094).
   readonly save = new SaveLock();
-  // Asked for while a save is under way, by deleting a state (#2009): sent once that save is answered.
-  private readonly saveRequested = signal(false);
   private ngUnsubscribe = new Subject<void>();
 
   constructor(
@@ -59,10 +57,7 @@ export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
   async saveGroupSettings() {
     // a copy: what is sent must not change with the edits made while it is under way
     const sent = structuredClone(this.settings);
-    if (!this.save.start(sent)) {
-      this.saveRequested.set(true);
-      return;
-    }
+    if (!this.save.start(sent)) return;
     this.wsgAdminService.setWorkspaceGroupSettings(
       this.wsgAdminService.selectedWorkspaceGroupId.value, sent)
       .pipe(
@@ -87,10 +82,6 @@ export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
               this.translateService.instant('error'),
               { duration: 3000 }
             );
-          }
-          if (this.saveRequested()) {
-            this.saveRequested.set(false);
-            this.saveGroupSettings();
           }
         }
       );

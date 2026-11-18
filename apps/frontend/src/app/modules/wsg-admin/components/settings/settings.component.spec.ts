@@ -9,7 +9,7 @@ import {
   State, WorkspaceGroupSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { BehaviorSubject, of, Subject } from 'rxjs';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { CoreProfile, ProfilesComponent } from '../../../../components/profiles/profiles.component';
 import { SettingsLoad, WsgAdminService } from '../../services/wsg-admin.service';
 import { StatesComponent } from '../states/states.component';
@@ -135,28 +135,6 @@ describe('WorkspaceSettingsComponent', () => {
     expect(mockWsgAdminService.selectedWorkspaceGroupSettings.value.richNoteTags).toEqual(['http://danach']);
   });
 
-  // #2009 with #2094: deleting a state saves at once; while another save is under way, it waits for that one
-  it('saves a state deleted while saving once that save is answered', () => {
-    const first = new Subject<boolean>();
-    const second = new Subject<boolean>();
-    mockWsgAdminService.setWorkspaceGroupSettings
-      .mockReturnValueOnce(first)
-      .mockReturnValueOnce(second);
-    const kept: State = { id: 1, label: 'State 1', color: '#ffffff' };
-    component.stateSettingsChange([kept, { id: 2, label: 'State 2', color: '#ffffff' }]);
-    component.saveGroupSettings();
-    component.stateSettingsChange([kept]);
-    component.saveGroupSettings();
-
-    expect(mockWsgAdminService.setWorkspaceGroupSettings).toHaveBeenCalledTimes(1);
-    first.next(true);
-
-    expect(mockWsgAdminService.setWorkspaceGroupSettings).toHaveBeenCalledTimes(2);
-    expect(mockWsgAdminService.setWorkspaceGroupSettings.mock.calls[1][1].states).toEqual([kept]);
-    second.next(true);
-    expect(mockWsgAdminService.settingsChanged).toBe(false);
-  });
-
   it('should handle save error', () => {
     mockWsgAdminService.setWorkspaceGroupSettings.mockReturnValue(of(false));
     component.saveGroupSettings();
@@ -204,5 +182,56 @@ describe('WorkspaceSettingsComponent', () => {
     const element: HTMLElement = fixture.nativeElement;
     expect(element.querySelector('[data-cy="wsg-admin-settings-not-loaded"]')).toBeNull();
     expect(element.querySelector('[data-cy="wsg-admin-settings-save-button"]')).not.toBeNull();
+  });
+});
+
+// The real states component: what deleting a state does reaches this page only through its outputs.
+describe('WorkspaceSettingsComponent with the states', () => {
+  let fixture: ComponentFixture<WorkspaceSettingsComponent>;
+  let setWorkspaceGroupSettings: jest.Mock;
+
+  beforeEach(async () => {
+    setWorkspaceGroupSettings = jest.fn().mockReturnValue(of(true));
+    const wsgAdminService = {
+      selectedWorkspaceGroupSettings: new BehaviorSubject<WorkspaceGroupSettingsDto>({
+        profiles: [],
+        states: [{ id: 1, label: 'State 1', color: '#ffffff' }],
+        defaultEditor: '',
+        defaultPlayer: '',
+        defaultSchemer: ''
+      }),
+      selectedWorkspaceGroupId: new BehaviorSubject<number>(1),
+      setWorkspaceGroupSettings,
+      settingsChanged: false,
+      settingsLoad: signal<SettingsLoad>('loaded')
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [WorkspaceSettingsComponent, TranslateModule.forRoot()],
+      providers: [
+        { provide: WsgAdminService, useValue: wsgAdminService },
+        { provide: MatSnackBar, useValue: { open: jest.fn() } },
+        { provide: MatDialog, useValue: { open: jest.fn().mockReturnValue({ afterClosed: () => of(true) }) } }
+      ]
+    })
+      .overrideComponent(WorkspaceSettingsComponent, {
+        remove: { imports: [ProfilesComponent, UnitRichNoteTagsConfigComponent] },
+        add: { imports: [MockProfilesComponent, MockUnitRichNoteTagsConfigComponent] }
+      })
+      .compileComponents();
+
+    fixture = TestBed.createComponent(WorkspaceSettingsComponent);
+    fixture.detectChanges();
+  });
+
+  // Deleting a state sent all settings of the page, unsaved profiles as well (#2141).
+  it('should send nothing when a state is deleted, and offer the deletion to save', () => {
+    const element: HTMLElement = fixture.nativeElement;
+    (element.querySelector('.delete-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(setWorkspaceGroupSettings).not.toHaveBeenCalled();
+    expect(fixture.componentInstance.settings.states).toEqual([]);
+    expect(TestBed.inject(WsgAdminService).settingsChanged).toBe(true);
   });
 });

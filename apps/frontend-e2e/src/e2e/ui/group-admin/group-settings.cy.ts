@@ -35,8 +35,8 @@ describe('The settings page of a workspace group', () => {
     deleteTestBaseAPI();
   });
 
-  // Deleting a state saves the group settings at once. It saved the states as they were loaded, without what had
-  // been changed before, and the next state got the id of the deleted one, which units keep (#2009).
+  // A deletion once saved the states as they were loaded, without what had been changed before, and the next
+  // state got the id of the deleted one, which units keep (#2009).
   it('saves a renamed state along with a deletion, and gives the next state an id of its own', () => {
     cy.findAdminGroupSettings(baseGroup).click();
     clickIndexTabWsgAdmin('settings');
