@@ -6,9 +6,10 @@
   <!--
     A player for the e2e tests of the studio as host (#1763), written against the player API 7.0 and
     not against one release of a real player (#2064). It does no more than the tests ask of it: it
-    starts and shows whether a definition came with the start command (#719), reports progress and
-    asks for the next unit in the capitals of 7.0, calls a widget at the click of a button and shows
-    what the host returns.
+    starts and shows whether a definition came with the start command (#719) and which data parts
+    (#2164), reports progress, reports one data part at a time, asks for the next and the previous
+    unit in the capitals of 7.0, calls a widget at the click of a button and shows what the host
+    returns.
   -->
   <script id="metadata" type="application/ld+json">
     {
@@ -27,8 +28,12 @@
 <body>
   <p id="status">waiting</p>
   <p id="definition"></p>
+  <p id="data-parts"></p>
   <button id="report-progress" type="button">Fortschritt melden</button>
+  <button id="report-part-a" type="button">Teil a melden</button>
+  <button id="report-part-b" type="button">Teil b melden</button>
   <button id="request-next" type="button">Nächste Aufgabe</button>
+  <button id="request-previous" type="button">Vorige Aufgabe</button>
   <button id="call-widget" type="button">Widget aufrufen</button>
   <p id="return-call-id"></p>
   <p id="return-state"></p>
@@ -45,6 +50,8 @@
         document.getElementById('status').textContent = 'started';
         document.getElementById('definition').textContent =
           'unitDefinition' in message ? `definition: ${JSON.stringify(message.unitDefinition)}` : 'no definition';
+        document.getElementById('data-parts').textContent =
+          JSON.stringify((message.unitState && message.unitState.dataParts) || {});
       } else if (message.type === 'vopWidgetReturn' && message.sessionId === sessionId) {
         document.getElementById('return-call-id').textContent = message.callId;
         document.getElementById('return-state').textContent = message.state;
@@ -60,12 +67,26 @@
       }, hostOrigin);
     });
 
-    document.getElementById('request-next').addEventListener('click', () => {
-      window.parent.postMessage({
-        type: 'vopUnitNavigationRequestedNotification',
-        sessionId,
-        target: 'NEXT'
-      }, hostOrigin);
+    // each report carries the one part that changed, as the player API allows
+    [['report-part-a', { a: 'answer-a' }], ['report-part-b', { b: 'answer-b' }]].forEach(([button, dataParts]) => {
+      document.getElementById(button).addEventListener('click', () => {
+        window.parent.postMessage({
+          type: 'vopStateChangedNotification',
+          sessionId,
+          timeStamp: new Date().toISOString(),
+          unitState: { dataParts }
+        }, hostOrigin);
+      });
+    });
+
+    [['request-next', 'NEXT'], ['request-previous', 'PREVIOUS']].forEach(([button, target]) => {
+      document.getElementById(button).addEventListener('click', () => {
+        window.parent.postMessage({
+          type: 'vopUnitNavigationRequestedNotification',
+          sessionId,
+          target
+        }, hostOrigin);
+      });
     });
 
     document.getElementById('call-widget').addEventListener('click', () => {

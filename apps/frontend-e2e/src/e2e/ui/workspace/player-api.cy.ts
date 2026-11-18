@@ -23,18 +23,24 @@ describe('Player API 7.0 and older', () => {
   ];
   const previewFrame = '[data-cy="unit-preview-iframe"]';
   const reviewName = 'Player API';
-  let token = '';
-  let wsId = '';
-  let unitIds: string[] = [];
+  const reviewPlayer = 'studio-lite-unit-player iframe';
+  let reviewId = '';
 
   before(() => {
     createTestBaseAPI({ units }).then(base => {
-      token = base.token;
-      wsId = base.wsId;
-      unitIds = base.unitIds;
       cy.addModuleAPI('verona-test-player-2.0.0.html', base.token).its('status').should('equal', 201);
       // its metadata take the old JSON-LD branch of VeronaModuleMetadataDto.getFromJsonLd
       cy.addModuleAPI('verona-test-player-legacy-1.0.0.html', base.token).its('status').should('equal', 201);
+      cy.addReviewAPI(base.wsId, reviewName, base.token).then(created => {
+        expect(created.status, reviewName).to.equal(201);
+        reviewId = String(created.body);
+        cy.getReviewAPI(base.wsId, reviewId, base.token).then(stored => {
+          expect(stored.status, 'link of the review').to.equal(200);
+          cy.updateReviewAPI(base.wsId, {
+            id: created.body, link: stored.body.link, name: reviewName, units: base.unitIds.map(Number)
+          }, base.token).its('status').should('equal', 200);
+        });
+      });
     });
   });
 
@@ -80,21 +86,31 @@ describe('Player API 7.0 and older', () => {
 
   // The target comes in capitals, and the review only showed a message (#2064).
   it('follows the request of a player of spec 7.0 for the next unit of a review', () => {
-    cy.addReviewAPI(wsId, reviewName, token).then(created => {
-      expect(created.status, reviewName).to.equal(201);
-      const reviewId = String(created.body);
-      cy.getReviewAPI(wsId, reviewId, token).then(stored => {
-        expect(stored.status, 'link of the review').to.equal(200);
-        cy.updateReviewAPI(wsId, {
-          id: created.body, link: stored.body.link, name: reviewName, units: unitIds.map(Number)
-        }, token).its('status').should('equal', 200);
-      });
-      cy.visit(`/#/review/${reviewId}/u/0`);
-      cy.getIFrameBody('studio-lite-unit-player iframe').within(() => {
-        cy.get('#status', { timeout: 30000 }).should('have.text', 'started');
-        cy.get('#request-next').click();
-      });
-      cy.url().should('include', `/review/${reviewId}/u/1`);
+    cy.visit(`/#/review/${reviewId}/u/0`);
+    cy.getIFrameBody(reviewPlayer).within(() => {
+      cy.get('#status', { timeout: 30000 }).should('have.text', 'started');
+      cy.get('#request-next').click();
+    });
+    cy.url().should('include', `/review/${reviewId}/u/1`);
+  });
+
+  // A player may report only the data parts that changed, and the review kept only the last
+  // report (#2164).
+  it('gives a player all data parts of a unit back when the review returns to it', () => {
+    cy.visit(`/#/review/${reviewId}/u/0`);
+    cy.getIFrameBody(reviewPlayer).within(() => {
+      cy.get('#status', { timeout: 30000 }).should('have.text', 'started');
+      cy.get('#report-part-a').click();
+      cy.get('#report-part-b').click();
+      cy.get('#request-next').click();
+    });
+    cy.url().should('include', `/review/${reviewId}/u/1`);
+    cy.getIFrameBody(reviewPlayer).within(() => {
+      cy.get('#request-previous').click();
+    });
+    cy.url().should('include', `/review/${reviewId}/u/0`);
+    cy.getIFrameBody(reviewPlayer).within(() => {
+      cy.get('#data-parts', { timeout: 10000 }).should('have.text', '{"a":"answer-a","b":"answer-b"}');
     });
   });
 });
