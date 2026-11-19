@@ -109,8 +109,8 @@ export class TableViewComponent implements OnInit {
   ngOnInit(): void {
     this.unitColumns = this.getTableUnitsColumnsDefinitions();
     this.itemColumns = this.getTableItemsColumnsDefinitions();
-    this.unitRows = this.createDataSource(this.getUnitRows(this.data.units), this.unitSort);
-    this.itemRows = this.createDataSource(this.getItemRows(this.data.units), this.itemSort);
+    this.unitRows = this.createDataSource(this.getUnitRows(this.data.units), this.unitColumns, this.unitSort);
+    this.itemRows = this.createDataSource(this.getItemRows(this.data.units), this.itemColumns, this.itemSort);
   }
 
   tabChanged(tabChangeEvent: MatTabChangeEvent): void {
@@ -230,20 +230,36 @@ export class TableViewComponent implements OnInit {
     return values;
   }
 
+  /** What a cell shows: the key of the unit rather than its link, a line per value rather than `<br>`. */
+  private cellText(row: ColumnValues, column: string): string {
+    return column === 'key' ? this.unitKeys.get(row) ?? '' : (row[column] ?? '').replace(/<br>/g, '\n');
+  }
+
   /**
-   * The table's rows, sorted by what a cell shows rather than by what it holds:
+   * The table's rows, filtered and sorted by what a cell shows rather than by what it holds:
    *
    * - The key is a link. Sorted by that, its address decided the order, and the rows moved away from
-   *   the order by key they are loaded in (#1872).
+   *   the order by key they are loaded in (#1872). Filtered by that, every unit had "a" in `#/a/`, and
+   *   any digit of its workspace or its own id (#2195).
+   * - Only the columns of the table are searched: a row can hold values of fields its table does not show.
    * - A profile field can hold numbers, which arrive as text. Where a field holds nothing else, they
    *   are compared as numbers, so that 0.25 stays in front of 0.5. Decided for the column and not
    *   value by value: numbers and text mixed in one comparison give no order at all.
    */
   private static readonly plainNumber = /^\s*-?\d+(\.\d+)?\s*$/;
 
-  private createDataSource(rows: ColumnValues[], sort: MatSort): MatTableDataSource<ColumnValues> {
+  private createDataSource(
+    rows: ColumnValues[],
+    columns: string[],
+    sort: MatSort
+  ): MatTableDataSource<ColumnValues> {
     const dataSource = new TextSortTableDataSource(rows);
     dataSource.sort = sort;
+    dataSource.filterPredicate = (row, filter) => columns
+      .map(column => this.cellText(row, column))
+      .join(' ')
+      .toLowerCase()
+      .includes(filter);
     const numberColumns = new Map<string, boolean>();
     const holdsNumbers = (column: string): boolean => {
       if (!numberColumns.has(column)) {
@@ -300,10 +316,7 @@ export class TableViewComponent implements OnInit {
         key: column,
         width: 30
       })),
-      rows.map(row => Object.fromEntries(columns.map(column => [
-        column,
-        column === 'key' ? this.unitKeys.get(row) ?? '' : (row[column] ?? '').replace(/<br>/g, '\n')
-      ])))
+      rows.map(row => Object.fromEntries(columns.map(column => [column, this.cellText(row, column)])))
     );
     const datePipe = new DatePipe(this.i18nService.fullLocale);
     const thisDate = datePipe.transform(new Date(), this.i18nService.fileDateFormat);

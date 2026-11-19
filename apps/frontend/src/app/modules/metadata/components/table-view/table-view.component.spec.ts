@@ -231,6 +231,19 @@ describe('TableViewComponent', () => {
       expect(component.unitRows.data).toEqual([{ key: link(1, 'K1'), Themen: 'Zahlen<br>Raum', Stufe: 'II' }]);
     });
 
+    // The unit cell holds its link as HTML, and the filter searched it: every unit had "a" in "#/a/" (#2195).
+    it('should filter by what the table shows, not by the address of the unit link (#2195)', () => {
+      component.data = {
+        units: [{ id: 1, key: 'A1' }, { id: 2, key: 'B1' }],
+        warning: ''
+      };
+      component.ngOnInit();
+
+      component.applyFilter('units', { target: { value: 'a' } } as unknown as Event);
+
+      expect(component.unitRows.filteredData.map(row => row.key)).toEqual([link(1, 'A1')]);
+    });
+
     const sortedBy = (rows: MatTableDataSource<ColumnValues>, column: string): ColumnValues[] => rows.sortData(
       [...rows.data],
       { active: column, direction: 'asc' } as MatSort
