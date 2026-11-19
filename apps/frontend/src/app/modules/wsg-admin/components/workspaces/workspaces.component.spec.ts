@@ -9,7 +9,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { WorkspaceInListDto, WorkspaceReportDto, WorkspaceUserInListDto } from '@studio-lite-lib/api-dto';
-import { BehaviorSubject, of, Subject } from 'rxjs';
+import {
+  BehaviorSubject, NEVER, of, Subject
+} from 'rxjs';
 import { saveAs } from 'file-saver-es';
 import { ConfirmDialogComponent } from '@studio-lite-lib/iqb-components';
 import { AppService } from '../../../../services/app.service';
@@ -399,6 +401,18 @@ describe('WorkspacesComponent', () => {
     mockBackendService.getWorkspaceReport.mockReturnValue(of(null));
 
     component.xlsxDownloadWorkspaceReport();
+
+    expect(saveAs).not.toHaveBeenCalled();
+    expect(mockAppService.dataLoading).toBe(false);
+  });
+
+  // takeUntil ends the request without an answer, and the spinner stayed on the next page
+  it('should take the spinner down when the page is left before the report arrives', () => {
+    jest.mocked(saveAs).mockClear();
+    mockBackendService.getWorkspaceReport.mockReturnValue(NEVER);
+
+    component.xlsxDownloadWorkspaceReport();
+    component.ngOnDestroy();
 
     expect(saveAs).not.toHaveBeenCalled();
     expect(mockAppService.dataLoading).toBe(false);

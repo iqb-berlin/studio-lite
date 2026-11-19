@@ -7,7 +7,7 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { TranslateModule } from '@ngx-translate/core';
 import { provideHttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
+import { NEVER, of } from 'rxjs';
 import { saveAs } from 'file-saver-es';
 import {
   Component, Input, Output, EventEmitter
@@ -133,6 +133,18 @@ describe('WorkspacesComponent', () => {
     (mockBackendService.getWorkspaceReport as jest.Mock).mockReturnValue(of(null));
 
     component.xlsxDownloadWorkspaceReport();
+
+    expect(saveAs).not.toHaveBeenCalled();
+    expect(mockAppService.dataLoading).toBe(false);
+  });
+
+  // takeUntil ends the request without an answer, and the spinner stayed on the next page
+  it('should take the spinner down when the page is left before the report arrives', () => {
+    jest.mocked(saveAs).mockClear();
+    (mockBackendService.getWorkspaceReport as jest.Mock).mockReturnValue(NEVER);
+
+    component.xlsxDownloadWorkspaceReport();
+    component.ngOnDestroy();
 
     expect(saveAs).not.toHaveBeenCalled();
     expect(mockAppService.dataLoading).toBe(false);

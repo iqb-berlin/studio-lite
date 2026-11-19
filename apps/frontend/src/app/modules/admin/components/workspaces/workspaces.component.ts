@@ -5,7 +5,7 @@ import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { DatePipe } from '@angular/common';
 import { saveAs } from 'file-saver-es';
 import {
-  catchError, of, Subject, switchMap, takeUntil
+  catchError, finalize, of, Subject, switchMap, takeUntil
 } from 'rxjs';
 import { WorkspaceFullDto } from '@studio-lite-lib/api-dto';
 import {
@@ -66,12 +66,15 @@ export class WorkspacesComponent implements OnInit, AfterViewInit, OnDestroy {
   private getAllWorkspaces(): void {
     this.appService.dataLoading = true;
     this.backendService.getAllWorkspaces()
-      .pipe(takeUntil(this.ngUnsubscribe))
+      .pipe(
+        takeUntil(this.ngUnsubscribe),
+        // also when the page is left before the answer: takeUntil ends without one
+        finalize(() => { this.appService.dataLoading = false; })
+      )
       .subscribe(workspaces => {
         if (Array.isArray(workspaces)) {
           this.dataSource.data = workspaces;
         }
-        this.appService.dataLoading = false;
       });
   }
 
@@ -96,7 +99,8 @@ export class WorkspacesComponent implements OnInit, AfterViewInit, OnDestroy {
           this.i18nService.dateFormat
         ) : of(null))),
         catchError(() => of(null)),
-        takeUntil(this.ngUnsubscribe)
+        takeUntil(this.ngUnsubscribe),
+        finalize(() => { this.appService.dataLoading = false; })
       )
       .subscribe(file => {
         if (file) {
@@ -104,7 +108,6 @@ export class WorkspacesComponent implements OnInit, AfterViewInit, OnDestroy {
           const thisDate = datePipe.transform(new Date(), this.i18nService.fileDateFormat);
           saveAs(file, `${thisDate} ${this.translateService.instant('wsg-admin.report-workspaces')}.xlsx`);
         }
-        this.appService.dataLoading = false;
       });
   }
 

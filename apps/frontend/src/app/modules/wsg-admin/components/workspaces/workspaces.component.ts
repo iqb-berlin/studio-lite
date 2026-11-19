@@ -20,7 +20,7 @@ import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { MatRadioButton } from '@angular/material/radio';
 import { MatIcon } from '@angular/material/icon';
 import {
-  catchError, of, Subject, Subscription, switchMap, takeUntil
+  catchError, finalize, of, Subject, Subscription, switchMap, takeUntil
 } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
@@ -254,7 +254,9 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
           this.i18nService.dateFormat
         ) : of(null))),
         catchError(() => of(null)),
-        takeUntil(this.ngUnsubscribe)
+        takeUntil(this.ngUnsubscribe),
+        // also when the page is left before the file is built: takeUntil ends without one
+        finalize(() => { this.appService.dataLoading = false; })
       )
       .subscribe(file => {
         if (file) {
@@ -265,7 +267,6 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
             this.translateService.instant('wsg-admin.workspaces-excel-name', { date: thisDate })
           );
         }
-        this.appService.dataLoading = false;
       });
   }
 
