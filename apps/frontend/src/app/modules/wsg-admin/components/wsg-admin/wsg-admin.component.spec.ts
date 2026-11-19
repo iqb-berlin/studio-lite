@@ -15,7 +15,6 @@ describe('WsgAdminComponent', () => {
     selectedWorkspaceGroupId: BehaviorSubject<number>;
     selectedWorkspaceGroupName: BehaviorSubject<string>;
     selectedWorkspaceGroupSettings: BehaviorSubject<WorkspaceGroupSettingsDto>;
-    settingsChanged: boolean; // Adding missing property if needed
     setSettingsLoad: jest.Mock;
   };
   let mockBackendService: {
@@ -34,7 +33,6 @@ describe('WsgAdminComponent', () => {
         defaultPlayer: '',
         defaultSchemer: ''
       }),
-      settingsChanged: false,
       setSettingsLoad: jest.fn()
     };
     mockBackendService = {

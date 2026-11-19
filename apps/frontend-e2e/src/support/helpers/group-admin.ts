@@ -226,8 +226,8 @@ export function addState(stateName: string): void {
  * @param stateName - The label of the state to delete
  */
 export function deleteState(stateName: string): void {
-  // A chain of queries, which Cypress runs again when the settings render the states anew after
-  // a save; an element taken out of the chain would be detached by then.
+  // A chain of queries, which Cypress runs again when the states are rendered anew; an element
+  // taken out of the chain would be detached by then.
   cy.get('studio-lite-states .state')
     .filter((_, el) => el.querySelector<HTMLInputElement>('.text-form-field input')?.value === stateName)
     .should('have.length', 1)

@@ -56,11 +56,13 @@ describe('WorkspaceSettingsComponent', () => {
     selectedWorkspaceGroupSettings: BehaviorSubject<WorkspaceGroupSettingsDto>;
     selectedWorkspaceGroupId: BehaviorSubject<number>;
     setWorkspaceGroupSettings: jest.Mock;
-    settingsChanged: boolean;
     settingsLoad: WritableSignal<SettingsLoad>;
   };
   let mockSnackBar: { open: jest.Mock };
   let mockMatDialogRef: { close: jest.Mock; afterClosed: jest.Mock };
+  const saveButtonOf = (page: ComponentFixture<WorkspaceSettingsComponent>): HTMLButtonElement => (
+    page.nativeElement as HTMLElement
+  ).querySelector('[data-cy="wsg-admin-settings-save-button"]') as HTMLButtonElement;
 
   beforeEach(async () => {
     mockWsgAdminService = {
@@ -73,7 +75,6 @@ describe('WorkspaceSettingsComponent', () => {
       }),
       selectedWorkspaceGroupId: new BehaviorSubject<number>(1),
       setWorkspaceGroupSettings: jest.fn().mockReturnValue(of(true)),
-      settingsChanged: false,
       settingsLoad: signal<SettingsLoad>('loaded')
     };
 
@@ -110,35 +111,102 @@ describe('WorkspaceSettingsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should save group settings successfully', () => {
+  it('should save group settings successfully', async () => {
     mockWsgAdminService.setWorkspaceGroupSettings.mockReturnValue(of(true));
-    component.saveGroupSettings();
+    await component.saveGroupSettings();
     expect(mockWsgAdminService.setWorkspaceGroupSettings).toHaveBeenCalledWith(1, component.settings);
-    expect(mockWsgAdminService.settingsChanged).toBe(false);
+    expect(component.settingsChanged()).toBe(false);
     expect(mockSnackBar.open).toHaveBeenCalledWith('wsg-settings.changed', '', { duration: 1000 });
   });
 
   // #2094: what is entered while the save is under way was not sent
-  it('keeps an entry made while saving unsaved', () => {
+  it('keeps an entry made while saving unsaved', async () => {
     const answer = new Subject<boolean>();
     mockWsgAdminService.setWorkspaceGroupSettings.mockReturnValue(answer);
     component.richNoteTagsSettingsChange(['http://gesendet']);
-    component.saveGroupSettings();
+    const saving = component.saveGroupSettings();
     component.richNoteTagsSettingsChange(['http://danach']);
     answer.next(true);
+    await saving;
 
     expect(mockWsgAdminService.setWorkspaceGroupSettings).toHaveBeenCalledTimes(1);
     expect(mockWsgAdminService.setWorkspaceGroupSettings.mock.calls[0][1].richNoteTags).toEqual(['http://gesendet']);
-    expect(mockWsgAdminService.settingsChanged).toBe(true);
-    // the page builds its form from what is published: the stored settings would reset the entry
+    expect(component.settingsChanged()).toBe(true);
     expect(component.settings.richNoteTags).toEqual(['http://danach']);
-    expect(mockWsgAdminService.selectedWorkspaceGroupSettings.value.richNoteTags).toEqual(['http://danach']);
   });
 
-  it('should handle save error', () => {
+  // Leaving the page discards what is not saved, but the page opened again offered it to save (#2163).
+  it('offers nothing to save on the page opened again after it was left unsaved', () => {
+    component.richNoteTagsSettingsChange(['http://ungespeichert']);
+    fixture.detectChanges();
+    expect(saveButtonOf(fixture).disabled).toBe(false);
+    fixture.destroy();
+
+    const reopened = TestBed.createComponent(WorkspaceSettingsComponent);
+    reopened.detectChanges();
+
+    expect(reopened.componentInstance.settings.richNoteTags).toBeUndefined();
+    expect(saveButtonOf(reopened).disabled).toBe(true);
+  });
+
+  // An entry made while saving came back as saved on the page opened again (#2163).
+  it('shows what was saved on the page opened again, not an entry made while saving', async () => {
+    const answer = new Subject<boolean>();
+    mockWsgAdminService.setWorkspaceGroupSettings.mockReturnValue(answer);
+    component.richNoteTagsSettingsChange(['http://gesendet']);
+    const saving = component.saveGroupSettings();
+    component.richNoteTagsSettingsChange(['http://danach']);
+    answer.next(true);
+    await saving;
+    fixture.destroy();
+
+    const reopened = TestBed.createComponent(WorkspaceSettingsComponent);
+    reopened.detectChanges();
+
+    expect(reopened.componentInstance.settings.richNoteTags).toEqual(['http://gesendet']);
+    expect(saveButtonOf(reopened).disabled).toBe(true);
+  });
+
+  // Leaving the page cancelled a save under way, which the API may have stored all the same, and the page opened
+  // again showed the settings from before it (#2163).
+  it('shows what was saved on the page opened again when it was left while saving', async () => {
+    const answer = new Subject<boolean>();
+    mockWsgAdminService.setWorkspaceGroupSettings.mockReturnValue(answer);
+    component.richNoteTagsSettingsChange(['http://gesendet']);
+    const saving = component.saveGroupSettings();
+    fixture.destroy();
+    answer.next(true);
+    await saving;
+
+    const reopened = TestBed.createComponent(WorkspaceSettingsComponent);
+    reopened.detectChanges();
+
+    expect(reopened.componentInstance.settings.richNoteTags).toEqual(['http://gesendet']);
+    expect(saveButtonOf(reopened).disabled).toBe(true);
+  });
+
+  it('publishes a save answered after the page was left only into the same group', async () => {
+    const answer = new Subject<boolean>();
+    mockWsgAdminService.setWorkspaceGroupSettings.mockReturnValue(answer);
+    component.richNoteTagsSettingsChange(['http://gruppe-1']);
+    const saving = component.saveGroupSettings();
+    fixture.destroy();
+    const otherGroup = {
+      ...mockWsgAdminService.selectedWorkspaceGroupSettings.value,
+      richNoteTags: ['http://gruppe-2']
+    };
+    mockWsgAdminService.selectedWorkspaceGroupId.next(2);
+    mockWsgAdminService.selectedWorkspaceGroupSettings.next(otherGroup);
+    answer.next(true);
+    await saving;
+
+    expect(mockWsgAdminService.selectedWorkspaceGroupSettings.value).toBe(otherGroup);
+  });
+
+  it('should handle save error', async () => {
     mockWsgAdminService.setWorkspaceGroupSettings.mockReturnValue(of(false));
-    component.saveGroupSettings();
-    expect(mockWsgAdminService.settingsChanged).toBe(true);
+    await component.saveGroupSettings();
+    expect(component.settingsChanged()).toBe(true);
     expect(mockSnackBar.open).toHaveBeenCalledWith('wsg-settings.changed', 'error', { duration: 3000 });
   });
 
@@ -146,14 +214,14 @@ describe('WorkspaceSettingsComponent', () => {
     const newProfiles = [{ id: 'p1', label: 'Profile 1' }] as unknown as CoreProfile[];
     component.profileSettingsChange(newProfiles);
     expect(component.settings.profiles).toEqual(newProfiles);
-    expect(mockWsgAdminService.settingsChanged).toBe(true);
+    expect(component.settingsChanged()).toBe(true);
   });
 
   it('should update states settings', () => {
     const newStates: State[] = [{ id: 1, label: 'State 1', color: '#ffffff' }];
     component.stateSettingsChange(newStates);
     expect(component.settings.states).toEqual(newStates);
-    expect(mockWsgAdminService.settingsChanged).toBe(true);
+    expect(component.settingsChanged()).toBe(true);
   });
 
   // Units keep the id of a deleted state, so it stays given out (#2009).
@@ -202,7 +270,6 @@ describe('WorkspaceSettingsComponent with the states', () => {
       }),
       selectedWorkspaceGroupId: new BehaviorSubject<number>(1),
       setWorkspaceGroupSettings,
-      settingsChanged: false,
       settingsLoad: signal<SettingsLoad>('loaded')
     };
 

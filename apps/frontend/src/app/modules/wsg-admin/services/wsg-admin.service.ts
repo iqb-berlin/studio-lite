@@ -20,7 +20,6 @@ export type SettingsLoad = 'loading' | 'loaded' | 'failed';
   providedIn: 'root'
 })
 export class WsgAdminService {
-  settingsChanged: boolean = false;
   profileStores: ProfileStoreWithProfiles[] = [];
   selectedWorkspaceGroupId: BehaviorSubject<number> = new BehaviorSubject(0);
   selectedWorkspaceGroupName: BehaviorSubject<string> = new BehaviorSubject('');

@@ -86,6 +86,59 @@ describe('The settings page of a workspace group', () => {
     storedStates().its('0.label').should('equal', 'Vorher danach');
   });
 
+  // Switching tabs discards what is not saved, but back on the settings the save button still offered it (#2163)
+  it('offers nothing to save after a tab switch discarded a renamed state', () => {
+    const saveButton = () => cy.get('[data-cy="wsg-admin-settings-save-button"]');
+    const firstStateLabel = () => cy.get('studio-lite-states .state').first().find('.text-form-field input');
+    cy.visit('/');
+    cy.findAdminGroupSettings(baseGroup).click();
+    clickIndexTabWsgAdmin('settings');
+
+    storedStates().its('0.label').then((stored: string) => {
+      firstStateLabel().should('have.value', stored).clear().type('Ungespeichert');
+      saveButton().should('be.enabled');
+
+      clickIndexTabWsgAdmin('units');
+      cy.get('studio-lite-settings').should('not.exist');
+      clickIndexTabWsgAdmin('settings');
+
+      firstStateLabel().should('have.value', stored);
+      saveButton().should('be.disabled');
+    });
+  });
+
+  // A tab switch cancelled the save under way, which the API had stored all the same, and back on the settings the
+  // page showed the state as it was before (#2163)
+  it('shows a state renamed and saved right before a tab switch as saved', () => {
+    const saveButton = () => cy.get('[data-cy="wsg-admin-settings-save-button"]');
+    const firstStateLabel = () => cy.get('studio-lite-states .state').first().find('.text-form-field input');
+    // the API's answer to the save is held back until the page is left
+    let answered = false;
+    let release = (): void => undefined;
+    const held = new Promise<void>(resolve => { release = resolve; });
+    cy.intercept('PATCH', `/api/workspace-groups/${groupId}`, req => {
+      req.on('response', () => {
+        answered = true;
+        return held;
+      });
+    });
+    cy.visit('/');
+    cy.findAdminGroupSettings(baseGroup).click();
+    clickIndexTabWsgAdmin('settings');
+
+    firstStateLabel().clear().type('Vor dem Wechsel');
+    saveButton().click();
+    cy.wrap(null).should(() => expect(answered, 'answered by the API').to.equal(true));
+    clickIndexTabWsgAdmin('units');
+    cy.get('studio-lite-settings').should('not.exist');
+    storedStates().its('0.label').should('equal', 'Vor dem Wechsel');
+    cy.then(() => release());
+    clickIndexTabWsgAdmin('settings');
+
+    firstStateLabel().should('have.value', 'Vor dem Wechsel');
+    saveButton().should('be.disabled');
+  });
+
   // After a failed load the page offered substitutes with empty default modules for saving, and the API lays what
   // it gets over the stored settings (#2010). A group that does not exist fails to load without a faked answer.
   it('offers nothing to save when the group cannot be loaded', () => {
