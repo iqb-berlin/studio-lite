@@ -202,9 +202,14 @@ export class BackendService {
       .pipe(succeeded());
   }
 
-  getEmailTemplate(): Observable<EmailTemplateDto> {
+  // Without a stored template the API answers an empty one, so null means only that the load failed: the admin
+  // card says so instead of showing empty fields, and the user dialog offers no mail (#2188).
+  getEmailTemplate(): Observable<EmailTemplateDto | null> {
     return this.http
-      .get<EmailTemplateDto>(`${this.serverUrl}settings/email-template`);
+      .get<EmailTemplateDto>(`${this.serverUrl}settings/email-template`)
+      .pipe(
+        catchError(() => of(null))
+      );
   }
 
   setEmailTemplate(emailTemplateDto: EmailTemplateDto): Observable<boolean> {

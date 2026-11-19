@@ -416,7 +416,8 @@
   },
   "email-template": {
     "template-saved": "Email template saved",
-    "template-not-saved": "Could not save the email template"
+    "template-not-saved": "Could not save the email template",
+    "template-not-loaded": "The email template could not be loaded."
   },
   "unit-export-config": {
     "test-taker-xml-path": "XSD path for Testtaker.xml",

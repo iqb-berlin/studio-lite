@@ -39,7 +39,7 @@ import { LanguageService } from '../../../../services/language.service';
 
 export class EditUserComponent implements OnInit {
   editUserForm: UntypedFormGroup;
-  emailTemplate!: EmailTemplateDto;
+  emailTemplate: EmailTemplateDto | null = null;
   // The mail comes in the language the administration is in, or in German where it has none (#2186)
   private readonly language = inject(LanguageService).active.code;
 
@@ -102,12 +102,12 @@ export class EditUserComponent implements OnInit {
   /** The mail to the user, from the template in the language of the interface. */
   mailToHref(): string {
     const email: string = trimEmail(this.editUserForm.get('email')?.value) || '';
-    const subject: string = textIn(this.emailTemplate.emailSubject, this.language);
+    const subject: string = textIn(this.emailTemplate?.emailSubject, this.language);
     return `mailto:${email}?subject=${subject}&body=${this.getEmailBody()}`;
   }
 
   private getEmailBody(): string {
-    const template = textIn(this.emailTemplate.emailBody, this.language);
+    const template = textIn(this.emailTemplate?.emailBody, this.language);
     const firstName = this.editUserForm.get('firstName')?.value || '';
     const lastName = this.editUserForm.get('lastName')?.value || '';
     const name = this.editUserForm.get('name')?.value || '';

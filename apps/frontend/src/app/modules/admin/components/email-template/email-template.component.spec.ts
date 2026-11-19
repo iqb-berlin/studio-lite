@@ -122,17 +122,16 @@ describe('EmailTemplateComponent', () => {
     expect(snackBar.open).toHaveBeenCalledWith('email-template.template-not-saved', 'error', expect.anything());
   }));
 
-  it('should handle null email template response', fakeAsync(() => {
-    backendService.getEmailTemplate.mockReturnValue(of(null as unknown as EmailTemplateDto));
+  // Empty fields after a failed load looked like no template stored, with saving grey and no reason given (#2188).
+  it('should say that the template was not loaded and offer no form to save', () => {
+    backendService.getEmailTemplate.mockReturnValue(of(null));
+    component.updateFormFields();
+    fixture.detectChanges();
 
-    const newFixture = TestBed.createComponent(EmailTemplateComponent);
-    const newComponent = newFixture.componentInstance;
-    newComponent.ngOnInit();
-    tick(200);
-
-    expect(newComponent.configForm.get('de.emailSubject')?.value).toBe('');
-    expect(newComponent.configForm.get('en.emailBody')?.value).toBe('');
-  }));
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelector('[data-cy="admin-email-template-not-loaded"]')).not.toBeNull();
+    expect(element.querySelector('[data-cy="admin-email-template-save-button"]')).toBeNull();
+  });
 
   it('should not save if configForm is null', () => {
     component.configForm = null as unknown as typeof component.configForm;

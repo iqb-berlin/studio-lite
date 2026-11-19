@@ -416,7 +416,8 @@
   },
   "email-template": {
     "template-saved": "E-Mail-Template gespeichert",
-    "template-not-saved": "Konnte E-Mail-Template nicht speichern"
+    "template-not-saved": "Konnte E-Mail-Template nicht speichern",
+    "template-not-loaded": "Das E-Mail-Template konnte nicht geladen werden."
   },
   "unit-export-config": {
     "test-taker-xml-path": "Xsd-Pfad für Testtaker.Xml",
