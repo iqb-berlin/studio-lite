@@ -10,6 +10,11 @@
       {{definitionTypeWarning}}
     </div>
   }
+  @if (dependencyWarning()) {
+    <div class="dependency-warning" data-cy="unit-preview-dependency-warning">
+      {{dependencyWarning()}}
+    </div>
+  }
   @if (loading) {
     <mat-spinner class="wait-animation fx-flex-fill"></mat-spinner>
   }
