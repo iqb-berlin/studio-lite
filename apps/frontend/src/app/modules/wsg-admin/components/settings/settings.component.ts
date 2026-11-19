@@ -6,7 +6,7 @@ import {
   State, WorkspaceGroupSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import { Subject, takeUntil } from 'rxjs';
+import { firstValueFrom, Subject, takeUntil } from 'rxjs';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -38,6 +38,7 @@ export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
   readonly settingsChanged = this.settingsChangedState.asReadonly();
   // What this page saved last, published when it is left (see ngOnDestroy).
   private saved?: WorkspaceGroupSettingsDto;
+  private left = false;
   private ngUnsubscribe = new Subject<void>();
 
   constructor(
@@ -56,6 +57,7 @@ export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.left = true;
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
     // The page, the states and the profiles are built from what is published. Published while the page is open,
@@ -68,30 +70,31 @@ export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
     // a copy: what is sent must not change with the edits made while it is under way
     const sent = structuredClone(this.settings);
     if (!this.save.start(sent)) return;
-    this.wsgAdminService.setWorkspaceGroupSettings(
-      this.wsgAdminService.selectedWorkspaceGroupId.value, sent)
-      .pipe(
-        takeUntil(this.ngUnsubscribe))
-      .subscribe(
-        respOk => {
-          this.save.finish();
-          if (respOk) {
-            this.saved = sent;
-            this.settingsChangedState.set(this.save.differsFromSent(this.settings));
-            this.snackBar.open(
-              this.translateService.instant('wsg-settings.changed'),
-              '',
-              { duration: 1000 });
-          } else {
-            this.settingsChangedState.set(true);
-            this.snackBar.open(
-              this.translateService.instant('wsg-settings.changed'),
-              this.translateService.instant('error'),
-              { duration: 3000 }
-            );
-          }
-        }
+    // Awaited, not cut off when the page is left: the API may have stored what was sent all the same, and the page
+    // opened again would show the settings from before (#2163).
+    const groupId = this.wsgAdminService.selectedWorkspaceGroupId.value;
+    const respOk = await firstValueFrom(this.wsgAdminService.setWorkspaceGroupSettings(groupId, sent));
+    this.save.finish();
+    if (respOk) {
+      this.saved = sent;
+      // Left while the save was under way: published now, as it is on leaving, unless another group is
+      // administered by now, whose page would show these settings and save them into that group.
+      if (this.left && this.wsgAdminService.selectedWorkspaceGroupId.value === groupId) {
+        this.wsgAdminService.selectedWorkspaceGroupSettings.next(sent);
+      }
+      this.settingsChangedState.set(this.save.differsFromSent(this.settings));
+      this.snackBar.open(
+        this.translateService.instant('wsg-settings.changed'),
+        '',
+        { duration: 1000 });
+    } else {
+      this.settingsChangedState.set(true);
+      this.snackBar.open(
+        this.translateService.instant('wsg-settings.changed'),
+        this.translateService.instant('error'),
+        { duration: 3000 }
       );
+    }
   }
 
   profileSettingsChange(profiles:CoreProfile[]) {
