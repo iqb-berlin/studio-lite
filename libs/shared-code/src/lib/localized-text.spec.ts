@@ -6,7 +6,9 @@ describe('toLocalizedText (#2186)', () => {
   });
 
   it('keeps the texts of every language and drops what is not text', () => {
-    expect(toLocalizedText({ de: 'Studio', en: 'Studio', fr: 3, it: null })).toEqual({ de: 'Studio', en: 'Studio' });
+    expect(toLocalizedText({
+      de: 'Studio', en: 'Studio', fr: 3, it: null
+    })).toEqual({ de: 'Studio', en: 'Studio' });
   });
 
   it('gives no text for nothing stored', () => {
