@@ -1,6 +1,11 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatTableModule } from '@angular/material/table';
-import { MatTab, MatTabChangeEvent, MatTabsModule } from '@angular/material/tabs';
+import {
+  ComponentFixture, TestBed, fakeAsync, tick
+} from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import {
+  MatTab, MatTabChangeEvent, MatTabGroup, MatTabsModule
+} from '@angular/material/tabs';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -12,7 +17,6 @@ import { TableViewComponent } from './table-view.component';
 import { MetadataService } from '../../services/metadata.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { I18nService } from '../../../../services/i18n.service';
-import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 import { buildXlsxFile } from '../../../../utils/xlsx-file.utils';
 
 jest.mock('file-saver-es', () => ({ saveAs: jest.fn() }));
@@ -76,7 +80,7 @@ describe('TableViewComponent', () => {
   it('should initialize data source on ngOnInit', () => {
     component.data = { units: [{ id: 1, key: 'K1' } as unknown as UnitPropertiesDto], warning: '' };
     component.ngOnInit();
-    expect(component.dataSource.data.length).toBe(1);
+    expect(component.unitRows.data.length).toBe(1);
   });
 
   // The report lacks the columns of a profile that could not be loaded, and says so (#2002).
@@ -102,12 +106,45 @@ describe('TableViewComponent', () => {
     expect(component.viewMode).toBe('units');
   });
 
-  it('should apply filter to data source', () => {
-    component.dataSource = new TextSortTableDataSource<ColumnValues>([]);
-    const event = { target: { value: ' test ' } } as unknown as Event;
-    component.applyFilter(event);
-    expect(component.dataSource.filter).toBe('test');
-  });
+  // Material builds the content of both tabs up front, a table and a sorter each. The item table hung on
+  // the sorter of the unit tab, and a switch of tabs built new rows without the filter in the field (#2184).
+  it('should keep the sorting and the filter of the item tab when the tabs are switched (#2184)', fakeAsync(() => {
+    const item = (id: string, description: string): ItemsMetadataValues => ({ id, variableId: 'v', description });
+    component.data = {
+      units: [
+        { id: 1, key: 'K1', metadata: { items: [item('I1', 'Notiz'), item('I2', 'Notiz')] } },
+        { id: 2, key: 'K2', metadata: { items: [item('I3', '')] } }
+      ],
+      warning: ''
+    };
+    component.ngOnInit();
+    const openTab = (index: number) => {
+      fixture.debugElement.query(By.directive(MatTabGroup)).componentInstance.selectedIndex = index;
+      // what the tab group's selectedTabChange calls; the test environment does not send it
+      component.tabChanged({ index, tab: null as unknown as MatTab } as MatTabChangeEvent);
+      fixture.detectChanges();
+      tick();
+      fixture.detectChanges();
+    };
+    const itemTab = () => fixture.nativeElement.querySelectorAll('mat-tab-body')[1] as HTMLElement;
+    const shownIds = () => Array.from(itemTab().querySelectorAll('tr.mat-mdc-row td:nth-child(2)'))
+      .map(cell => cell.textContent?.trim());
+    fixture.detectChanges();
+
+    openTab(1);
+    const idHeader = Array.from(itemTab().querySelectorAll('th'))
+      .find(header => header.textContent?.trim() === 'metadata.id') as HTMLElement;
+    idHeader.click(); // ascending
+    idHeader.click(); // descending
+    const filter = itemTab().querySelector('input') as HTMLInputElement;
+    filter.value = 'notiz';
+    filter.dispatchEvent(new KeyboardEvent('keyup'));
+    fixture.detectChanges();
+    openTab(0);
+    openTab(1);
+
+    expect(shownIds()).toEqual(['I2', 'I1']);
+  }));
 
   it('keys cell values under the same resolved label as the column header', () => {
     // 'de' deliberately NOT at index 0 to expose the label[0] vs extractLabelText mismatch
@@ -132,10 +169,10 @@ describe('TableViewComponent', () => {
     } as unknown as UnitPropertiesDto;
 
     component.data = { units: [unit], warning: '' };
-    component.tabChanged({ index: 0, tab: null as unknown as MatTab } as MatTabChangeEvent);
+    component.ngOnInit();
 
-    expect(component.columnsToDisplay).toContain('Aufgabenzeit');
-    expect(component.dataSource.data[0]).toMatchObject({ Aufgabenzeit: '42' });
+    expect(component.unitColumns).toContain('Aufgabenzeit');
+    expect(component.unitRows.data[0]).toMatchObject({ Aufgabenzeit: '42' });
   });
 
   describe('rows and report', () => {
@@ -166,9 +203,9 @@ describe('TableViewComponent', () => {
         warning: ''
       };
 
-      component.tabChanged(tab(1));
+      component.ngOnInit();
 
-      expect(component.dataSource.data).toEqual([
+      expect(component.itemRows.data).toEqual([
         {
           key: link(1, 'K1'), id: 'I1', variableId: 'v1', description: '', Zeit: '30'
         },
@@ -189,13 +226,13 @@ describe('TableViewComponent', () => {
         warning: ''
       };
 
-      component.tabChanged(tab(0));
+      component.ngOnInit();
 
-      expect(component.dataSource.data).toEqual([{ key: link(1, 'K1'), Themen: 'Zahlen<br>Raum', Stufe: 'II' }]);
+      expect(component.unitRows.data).toEqual([{ key: link(1, 'K1'), Themen: 'Zahlen<br>Raum', Stufe: 'II' }]);
     });
 
-    const sortedBy = (column: string): ColumnValues[] => component.dataSource.sortData(
-      [...component.dataSource.data],
+    const sortedBy = (rows: MatTableDataSource<ColumnValues>, column: string): ColumnValues[] => rows.sortData(
+      [...rows.data],
       { active: column, direction: 'asc' } as MatSort
     );
 
@@ -205,10 +242,11 @@ describe('TableViewComponent', () => {
         units: [{ id: 100, key: 'Aa' }, { id: 9, key: 'ab' }, { id: 12, key: 'Zz' }],
         warning: ''
       };
-      component.tabChanged(tab(0));
-      component.dataSource.data.reverse();
+      component.ngOnInit();
+      component.unitRows.data.reverse();
 
-      expect(sortedBy('key').map(row => row.key)).toEqual([link(100, 'Aa'), link(9, 'ab'), link(12, 'Zz')]);
+      expect(sortedBy(component.unitRows, 'key').map(row => row.key))
+        .toEqual([link(100, 'Aa'), link(9, 'ab'), link(12, 'Zz')]);
     });
 
     it('should read a number in a profile field as a number, and an item id as text (#1872)', () => {
@@ -220,10 +258,10 @@ describe('TableViewComponent', () => {
         units: [{ id: 1, key: 'K1', metadata: { items: [item('1.10', '0.5'), item('1.9', '0.25')] } }],
         warning: ''
       };
-      component.tabChanged(tab(1));
+      component.ngOnInit();
 
-      expect(sortedBy(field).map(row => row[field])).toEqual(['0.25', '0.5']);
-      expect(sortedBy('id').map(row => row.id)).toEqual(['1.9', '1.10']);
+      expect(sortedBy(component.itemRows, field).map(row => row[field])).toEqual(['0.25', '0.5']);
+      expect(sortedBy(component.itemRows, 'id').map(row => row.id)).toEqual(['1.9', '1.10']);
     });
 
     // The file is the table as it is shown, in the language of the interface (#2181).
@@ -248,6 +286,7 @@ describe('TableViewComponent', () => {
         units: [{ id: 1, key: 'K1' }, { id: 2, key: 'K2' }],
         warning: ''
       };
+      component.ngOnInit();
       component.tabChanged(tab(index));
 
       await component.downloadMetadata();
@@ -274,11 +313,11 @@ describe('TableViewComponent', () => {
         ],
         warning: ''
       };
-      component.tabChanged(tab(0));
-      component.dataSource.filter = 'raum';
-      component.dataSource.sort = TestBed.runInInjectionContext(() => new MatSort());
-      component.dataSource.sort.active = 'key';
-      component.dataSource.sort.direction = 'desc';
+      component.ngOnInit();
+      component.unitRows.filter = 'raum';
+      component.unitRows.sort = TestBed.runInInjectionContext(() => new MatSort());
+      component.unitRows.sort.active = 'key';
+      component.unitRows.sort.direction = 'desc';
 
       await component.downloadMetadata();
 

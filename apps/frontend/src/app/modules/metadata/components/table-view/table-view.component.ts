@@ -27,6 +27,8 @@ import { I18nService } from '../../../../services/i18n.service';
 import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 import { buildXlsxFile } from '../../../../utils/xlsx-file.utils';
 
+type Tab = 'units' | 'items';
+
 interface ColumnValues {
   key?: string;
   id?: string;
@@ -81,9 +83,20 @@ export class TableViewComponent implements OnInit {
   ) {}
 
   @ViewChild('tabGroup') tabGroup!: MatTabGroup;
-  viewMode = 'units';
+  // Material builds the content of both tabs when the dialog opens: each table has its sorter from the start.
+  @ViewChild('unitSort', { static: true }) private unitSort!: MatSort;
+  @ViewChild('itemSort', { static: true }) private itemSort!: MatSort;
+  viewMode: Tab = 'units';
   workspaceId = this.workspaceService.selectedWorkspaceId;
-  dataSource!: MatTableDataSource<ColumnValues>;
+  /**
+   * The rows of each tab, built once when the dialog opens, with the sorter and the filter field of their own
+   * table. Built anew on every switch of tabs, they lost the filter, and the item rows answered the sorter of
+   * the unit table, the first one `@ViewChild(MatSort)` found (#2184).
+   */
+  unitRows!: MatTableDataSource<ColumnValues>;
+  itemRows!: MatTableDataSource<ColumnValues>;
+  unitColumns: string[] = [];
+  itemColumns: string[] = [];
   /** The key of the unit a row belongs to; the row itself holds it as a link, which is no text to sort by. */
   private readonly unitKeys = new WeakMap<ColumnValues, string>();
   displayedColumns: string[] = [
@@ -93,40 +106,27 @@ export class TableViewComponent implements OnInit {
     'description'
   ];
 
-  @ViewChild(MatSort) set matSort(sort: MatSort) {
-    if (this.dataSource) {
-      this.dataSource.sort = sort;
-    }
-  }
-
-  columnsToDisplay: string[] =
-    this.viewMode === 'units' ?
-      this.getTableUnitsColumnsDefinitions().slice() :
-      this.getTableItemsColumnsDefinitions().slice();
-
   ngOnInit(): void {
-    this.getTableUnitsColumnsDefinitions();
-    this.setUnitsDataRows(this.data.units);
+    this.unitColumns = this.getTableUnitsColumnsDefinitions();
+    this.itemColumns = this.getTableItemsColumnsDefinitions();
+    this.unitRows = this.createDataSource(this.getUnitRows(this.data.units), this.unitSort);
+    this.itemRows = this.createDataSource(this.getItemRows(this.data.units), this.itemSort);
   }
 
   tabChanged(tabChangeEvent: MatTabChangeEvent): void {
-    if (tabChangeEvent.index === 1) {
-      this.viewMode = 'items';
-      this.columnsToDisplay = this.getTableItemsColumnsDefinitions();
-      this.setUnitsItemsDataRows(this.data.units);
-    } else {
-      this.viewMode = 'units';
-      this.columnsToDisplay = this.getTableUnitsColumnsDefinitions();
-      this.setUnitsDataRows(this.data.units);
-    }
+    this.viewMode = tabChangeEvent.index === 1 ? 'items' : 'units';
   }
 
-  applyFilter(event: Event) {
+  applyFilter(tab: Tab, event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+    this.rowsOf(tab).filter = filterValue.trim().toLowerCase();
   }
 
-  private setUnitsItemsDataRows(units: UnitPropertiesDto[]): void {
+  private rowsOf(tab: Tab): MatTableDataSource<ColumnValues> {
+    return tab === 'units' ? this.unitRows : this.itemRows;
+  }
+
+  private getItemRows(units: UnitPropertiesDto[]): ColumnValues[] {
     const allUnits: ColumnValues[][] = [];
     units.forEach(unit => {
       const totalValues: ColumnValues[] = [];
@@ -157,7 +157,7 @@ export class TableViewComponent implements OnInit {
       }
       allUnits.push(totalValues);
     });
-    this.dataSource = this.createDataSource(allUnits.flat());
+    return allUnits.flat();
   }
 
   private setItemColumnValues(
@@ -199,7 +199,7 @@ export class TableViewComponent implements OnInit {
     return values;
   }
 
-  private setUnitsDataRows(units: UnitPropertiesDto[]): void {
+  private getUnitRows(units: UnitPropertiesDto[]): ColumnValues[] {
     const totalValues: ColumnValues[] = [];
     units.forEach(unit => {
       const activeProfile =
@@ -217,7 +217,7 @@ export class TableViewComponent implements OnInit {
         totalValues.push(this.withUnitKey({}, unit));
       }
     });
-    this.dataSource = this.createDataSource(totalValues.flat());
+    return totalValues;
   }
 
   /**
@@ -241,8 +241,9 @@ export class TableViewComponent implements OnInit {
    */
   private static readonly plainNumber = /^\s*-?\d+(\.\d+)?\s*$/;
 
-  private createDataSource(rows: ColumnValues[]): MatTableDataSource<ColumnValues> {
+  private createDataSource(rows: ColumnValues[], sort: MatSort): MatTableDataSource<ColumnValues> {
     const dataSource = new TextSortTableDataSource(rows);
+    dataSource.sort = sort;
     const numberColumns = new Map<string, boolean>();
     const holdsNumbers = (column: string): boolean => {
       if (!numberColumns.has(column)) {
@@ -285,19 +286,21 @@ export class TableViewComponent implements OnInit {
    */
   async downloadMetadata(): Promise<void> {
     const forUnits = this.viewMode === 'units';
-    const rows = this.dataSource.sort ?
-      this.dataSource.sortData([...this.dataSource.filteredData], this.dataSource.sort) :
-      this.dataSource.filteredData;
+    const table = this.rowsOf(this.viewMode);
+    const columns = forUnits ? this.unitColumns : this.itemColumns;
+    const rows = table.sort ?
+      table.sortData([...table.filteredData], table.sort) :
+      table.filteredData;
     const file = await buildXlsxFile(
       this.translateService.instant(forUnits ? 'metadata.units' : 'metadata.items'),
-      this.columnsToDisplay.map(column => ({
+      columns.map(column => ({
         header: this.displayedColumns.includes(column) ?
           this.translateService.instant(`metadata.${column}`) :
           column,
         key: column,
         width: 30
       })),
-      rows.map(row => Object.fromEntries(this.columnsToDisplay.map(column => [
+      rows.map(row => Object.fromEntries(columns.map(column => [
         column,
         column === 'key' ? this.unitKeys.get(row) ?? '' : (row[column] ?? '').replace(/<br>/g, '\n')
       ])))

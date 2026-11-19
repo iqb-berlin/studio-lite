@@ -12,12 +12,12 @@
           <div mat-dialog-title class="fx-column-start-start title">
             <mat-form-field class="filter">
               <mat-label>{{'filter-by' | translate}}</mat-label>
-              <input matInput (keyup)="applyFilter($event)" #input>
+              <input matInput (keyup)="applyFilter('units', $event)" #input>
             </mat-form-field>
           </div>
           <div class="table-container">
-            <table mat-table [dataSource]="dataSource" matSort>
-              @for (column of columnsToDisplay; track column) {
+            <table mat-table [dataSource]="unitRows" matSort #unitSort="matSort">
+              @for (column of unitColumns; track column) {
                 <ng-container [matColumnDef]="column">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>
                     {{ (displayedColumns | include: column) ? ('metadata.' + column | translate) : column }}
@@ -27,8 +27,8 @@
                   </td>
                 </ng-container>
               }
-              <tr mat-header-row *matHeaderRowDef="columnsToDisplay;sticky:true"></tr>
-              <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
+              <tr mat-header-row *matHeaderRowDef="unitColumns;sticky:true"></tr>
+              <tr mat-row *matRowDef="let row; columns: unitColumns;"></tr>
             </table>
           </div>
         </mat-tab>
@@ -36,12 +36,12 @@
           <div mat-dialog-title class="fx-column-start-start title">
             <mat-form-field class="filter">
               <mat-label>{{'filter-by' | translate}}</mat-label>
-              <input matInput (keyup)="applyFilter($event)" #input>
+              <input matInput (keyup)="applyFilter('items', $event)" #input>
             </mat-form-field>
           </div>
           <div class="table-container">
-            <table mat-table [dataSource]="dataSource" matSort>
-              @for (column of columnsToDisplay; track column) {
+            <table mat-table [dataSource]="itemRows" matSort #itemSort="matSort">
+              @for (column of itemColumns; track column) {
                 <ng-container [matColumnDef]="column">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>
                     {{ (displayedColumns | include: column) ? ('metadata.' + column | translate) : column }}
@@ -51,8 +51,8 @@
                   </td>
                 </ng-container>
               }
-              <tr mat-header-row *matHeaderRowDef="columnsToDisplay;sticky:true"></tr>
-              <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
+              <tr mat-header-row *matHeaderRowDef="itemColumns;sticky:true"></tr>
+              <tr mat-row *matRowDef="let row; columns: itemColumns;"></tr>
             </table>
           </div>
         </mat-tab>
