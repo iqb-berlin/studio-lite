@@ -59,6 +59,24 @@ describe('UnitImportJsonData', () => {
     expect(new UnitImportJsonData(fileIoMock).definitionType).toBe('');
   });
 
+  it('should read the dependency lists from userInterface (#1602)', () => {
+    const data = new UnitImportJsonData(createMock<FileIo>({
+      originalname: 'UNIT01.json',
+      buffer: Buffer.from(buildIndex({
+        userInterface: {
+          player: 'iqb-player-aspect@3.0',
+          playerDependencies: [{ fileName: 'GeoGebra.itcr.zip', unpackBeforeProviding: true }, 'CALC'],
+          editorDependencies: [{ fileName: 'GeoGebra.itcr.zip', unpackBeforeProviding: true }]
+        }
+      }))
+    }));
+
+    expect(data.dependenciesToPlay).toEqual([
+      { id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }, { id: 'CALC', type: 'WIDGET' }
+    ]);
+    expect(data.dependenciesToEdit).toEqual([{ id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }]);
+  });
+
   // With `isDefinitionInline` the index carries the definition itself, not a file name (#1839).
   it('should take an inline definition as the definition, not as a file name', () => {
     const data = new UnitImportJsonData(createMock<FileIo>({

@@ -13,6 +13,7 @@ import { UnitDefinitionService } from '../services/unit-definition.service';
 import { VeronaModulesService } from '../services/verona-modules.service';
 import { SettingService } from '../services/setting.service';
 import { UsersService } from '../services/users.service';
+import { ResourcePackageService } from '../services/resource-package.service';
 import { WorkspaceUserService } from '../services/workspace-user.service';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { UnitRichNoteService } from '../services/unit-rich-note.service';
@@ -70,6 +71,10 @@ describe('WorkspaceController', () => {
         {
           provide: UsersService,
           useValue: createMock<UsersService>()
+        },
+        {
+          provide: ResourcePackageService,
+          useValue: createMock<ResourcePackageService>()
         },
         {
           provide: WorkspaceUserService,

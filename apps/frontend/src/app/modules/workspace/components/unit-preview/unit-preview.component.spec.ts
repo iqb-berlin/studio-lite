@@ -9,11 +9,12 @@ import {
 } from 'rxjs';
 import { createMock } from '@golevelup/ts-jest';
 import { UnitPropertiesDto } from '@studio-lite-lib/api-dto';
+import { UnitDependency } from '@studio-lite/shared-code';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { Router, UrlCreationOptions, UrlTree } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Overlay } from '@angular/cdk/overlay';
 import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
 import { CodingSchemeFactory } from '@iqb/responses';
@@ -627,6 +628,104 @@ describe('UnitPreviewComponent', () => {
       component.onSelectedUnitChange();
 
       expect(component.definitionTypeWarning).toBe('');
+    });
+  });
+
+  // What the unit needs to be played and the studio does not have (#1602).
+  describe('dependency warning', () => {
+    const storeWith = (dependenciesToPlay: UnitDependency[]) => ({
+      getData: () => ({ definition: 'def', dependenciesToPlay })
+    }) as never;
+    const calc = new VeronaModuleClass({
+      key: 'calc@1.0',
+      sortKey: 'calc@1.0',
+      metadata: {
+        id: 'calc', version: '1.0.0', model: 'CALC', type: 'WIDGET'
+      }
+    } as never);
+
+    beforeEach(() => {
+      component.postMessageTarget = { postMessage: jest.fn() } as never;
+      component.playerApiVersion = 6;
+      moduleServiceStub.widgets = { 'calc@1.0': calc };
+    });
+
+    it('should name the packages, widgets and files the studio does not have, each kind in a sentence', () => {
+      backendServiceStub.getResourcePackages = jest.fn().mockReturnValue(of([{ name: 'Videos' }]));
+      const instant = jest.spyOn(TestBed.inject(TranslateService), 'instant');
+
+      component.postStore(storeWith([
+        { id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' },
+        { id: 'videos.itcr.zip', type: 'FILE_TO_UNPACK' },
+        { id: 'CALC', type: 'WIDGET' },
+        { id: 'PERIODIC_TABLE', type: 'WIDGET' },
+        { id: 'sheet.pdf', type: 'FILE' }
+      ]));
+
+      expect(instant).toHaveBeenCalledWith('workspace.dependencies-missing-packages', { names: 'GeoGebra.itcr.zip' });
+      expect(instant).toHaveBeenCalledWith('workspace.dependencies-missing-widgets', { names: 'PERIODIC_TABLE' });
+      expect(instant).toHaveBeenCalledWith('workspace.dependencies-missing-files', { names: 'sheet.pdf' });
+      expect(component.dependencyWarning()).toBe([
+        'workspace.dependencies-missing-packages',
+        'workspace.dependencies-missing-widgets',
+        'workspace.dependencies-missing-files',
+        'workspace.dependencies-missing-hint',
+        'workspace.dependencies-missing-install-hint'
+      ].join(' '));
+    });
+
+    it('should leave out the sentence of a kind of which nothing is missing', () => {
+      backendServiceStub.getResourcePackages = jest.fn().mockReturnValue(of([]));
+
+      component.postStore(storeWith([{ id: 'PERIODIC_TABLE', type: 'WIDGET' }]));
+
+      expect(component.dependencyWarning()).toBe([
+        'workspace.dependencies-missing-widgets',
+        'workspace.dependencies-missing-hint',
+        'workspace.dependencies-missing-install-hint'
+      ].join(' '));
+    });
+
+    // other files the studio does not keep, so nobody can install them there (#1602)
+    it('should not point to the administration for files alone', () => {
+      backendServiceStub.getResourcePackages = jest.fn().mockReturnValue(of([]));
+
+      component.postStore(storeWith([{ id: 'sheet.pdf', type: 'FILE' }]));
+
+      expect(component.dependencyWarning())
+        .toBe('workspace.dependencies-missing-files workspace.dependencies-missing-hint');
+    });
+
+    it('should say nothing when the studio has everything the unit needs', () => {
+      backendServiceStub.getResourcePackages = jest.fn().mockReturnValue(of([{ name: 'GeoGebra' }]));
+
+      component.postStore(storeWith([
+        { id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }, { id: 'CALC', type: 'WIDGET' }
+      ]));
+
+      expect(component.dependencyWarning()).toBe('');
+    });
+
+    it('should say nothing when the packages cannot be read, and ask again for the next unit', () => {
+      backendServiceStub.getResourcePackages = jest.fn().mockReturnValue(of(null));
+
+      component.postStore(storeWith([{ id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }]));
+
+      expect(component.dependencyWarning()).toBe('');
+
+      (backendServiceStub.getResourcePackages as jest.Mock).mockReturnValue(of([]));
+      component.postStore(storeWith([{ id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }]));
+
+      expect(component.dependencyWarning()).toContain('workspace.dependencies-missing-packages');
+    });
+
+    it('should not ask for the packages of a unit that needs nothing', () => {
+      backendServiceStub.getResourcePackages = jest.fn().mockReturnValue(of([]));
+
+      component.postStore(storeWith([]));
+
+      expect(backendServiceStub.getResourcePackages).not.toHaveBeenCalled();
+      expect(component.dependencyWarning()).toBe('');
     });
   });
 

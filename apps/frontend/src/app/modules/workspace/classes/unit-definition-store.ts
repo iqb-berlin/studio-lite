@@ -2,13 +2,22 @@ import { UnitDefinitionDto } from '@studio-lite-lib/api-dto';
 import {
   EventEmitter, Signal, signal, WritableSignal
 } from '@angular/core';
-import { sameVariableLists, VariableInfoInEitherSpelling } from '@studio-lite/shared-code';
+import {
+  sameDependencyLists, sameVariableLists, UnitDependency, VariableInfoInEitherSpelling
+} from '@studio-lite/shared-code';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+
+/** What an editor reports the unit needs; editors below editor API 4.0 report nothing (#1602). */
+export type ReportedDependencies = {
+  toPlay: UnitDependency[];
+  toEdit: UnitDependency[];
+};
 
 type EditorReport = {
   variables: VariableInfoInEitherSpelling[];
   definition: string;
   definitionType?: string;
+  dependencies?: ReportedDependencies;
 };
 
 /**
@@ -56,9 +65,23 @@ export class UnitDefinitionStore {
    * format was recorded would count as edited the moment an editor that reports it opens it.
    * Reported by nobody alongside a changed definition, it is dropped, since the stored one may no
    * longer describe what the editor wrote (#1368).
+   *
+   * The dependency lists count as reported only when `newDependencies` is given; an editor that
+   * does not know them leaves the stored ones as they are. They are compared regardless of order
+   * (#1602).
    */
-  setData(newVariables: VariableInfoInEitherSpelling[], newDefinition: string, newDefinitionType?: string) {
-    this.reported = { variables: newVariables, definition: newDefinition, definitionType: newDefinitionType };
+  setData(
+    newVariables: VariableInfoInEitherSpelling[],
+    newDefinition: string,
+    newDefinitionType?: string,
+    newDependencies?: ReportedDependencies
+  ) {
+    this.reported = {
+      variables: newVariables,
+      definition: newDefinition,
+      definitionType: newDefinitionType,
+      dependencies: newDependencies
+    };
     this.notifyChange();
   }
 
@@ -72,6 +95,13 @@ export class UnitDefinitionStore {
     if (this.reported.definition !== this.originalData.definition) {
       changes.definition = this.reported.definition;
       if (this.reported.definitionType) changes.definitionType = this.reported.definitionType;
+    }
+    const { dependencies } = this.reported;
+    if (dependencies && !sameDependencyLists(dependencies.toPlay, this.originalData.dependenciesToPlay)) {
+      changes.dependenciesToPlay = dependencies.toPlay;
+    }
+    if (dependencies && !sameDependencyLists(dependencies.toEdit, this.originalData.dependenciesToEdit)) {
+      changes.dependenciesToEdit = dependencies.toEdit;
     }
     return changes;
   }

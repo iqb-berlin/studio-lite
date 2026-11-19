@@ -22,6 +22,7 @@ import { UnitRichNoteService } from '../services/unit-rich-note.service';
 import { entryHasContent, hasCodingScheme, hasMetadataContent } from '../utils/unit-export-contents';
 import { RichNotesDownloadClass } from './rich-notes-download.class';
 import { parseDerivedCodings } from '../utils/derived-codings';
+import { toUnitIndexDependencies } from '../utils/unit-dependencies';
 
 // Comment shape as defined by the iqb unit-comments@0.1 specification
 // (https://iqb-specifications.github.io/unit-comments/). Fields without a
@@ -268,6 +269,12 @@ export class UnitJsonDownloadClass {
     if (unitMetadata.lastChangedDefinition) {
       index.userInterface.modifiedAt = unitMetadata.lastChangedDefinition.toISOString();
     }
+    // what the unit needs to be played and edited (#1602); a service has no place in unit-index
+    const indexScope = new ExportReportScope(key, `${key}.json`, exportReport);
+    const playerDependencies = toUnitIndexDependencies(definitionData?.dependenciesToPlay, indexScope);
+    if (playerDependencies.length) index.userInterface.playerDependencies = playerDependencies;
+    const editorDependencies = toUnitIndexDependencies(definitionData?.dependenciesToEdit, indexScope);
+    if (editorDependencies.length) index.userInterface.editorDependencies = editorDependencies;
 
     const schemeData = await unitDefinitionService.findOnesScheme(unitId);
     // a missing flag means "add" -- see UnitDownloadSettingsDto

@@ -1,5 +1,10 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
-import { skip, takeUntil } from 'rxjs';
+import {
+  Component, ElementRef, signal, ViewChild
+} from '@angular/core';
+import {
+  forkJoin, from, map, Observable, of, shareReplay, skip, takeUntil, tap
+} from 'rxjs';
+import { UnitDependency } from '@studio-lite/shared-code';
 import { MatDialog } from '@angular/material/dialog';
 import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
 import { UnitSchemeDto } from '@studio-lite-lib/api-dto';
@@ -19,6 +24,7 @@ import { PreviewDirective } from '../../../../directives/preview.directive';
 import { UnitState } from '../../../../models/verona.interface';
 import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
 import { matchDefinitionType } from '../../utils/definition-type-match.utils';
+import { findMissingDependencies } from '../../utils/missing-dependencies.utils';
 
 /**
  * The preview in the workspace: the unit as a test taker would see it, running in the player the
@@ -34,6 +40,9 @@ import { matchDefinitionType } from '../../utils/definition-type-match.utils';
 export class UnitPreviewComponent extends PreviewDirective {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
   definitionTypeWarning = '';
+  /** What the unit needs to be played that the studio does not have (#1602); empty when nothing. */
+  readonly dependencyWarning = signal('');
+  private installedDependencies$?: Observable<{ packages: string[]; widgets: string[] } | null>;
   private dataParts!: Record<string, string> | null;
   private unitStateDataType: string | null = null;
 
@@ -81,6 +90,7 @@ export class UnitPreviewComponent extends PreviewDirective {
       this.unitStateDataType = null;
       this.message = '';
       this.definitionTypeWarning = '';
+      this.dependencyWarning.set('');
       this.workspaceService
         .loadUnitProperties()
         .pipe(takeUntil(this.ngUnsubscribe))
@@ -128,6 +138,7 @@ export class UnitPreviewComponent extends PreviewDirective {
     const unitDef = unitDefinitionStore.getData();
     if (this.postMessageTarget) {
       this.definitionTypeWarning = this.getDefinitionTypeWarning(unitDef.definitionType);
+      this.updateDependencyWarning(unitDef.dependenciesToPlay);
       this.awaitPageListAfterRestart();
       this.awaitProgressAfterRestart();
       if (this.playerApiVersion === 1) {
@@ -185,6 +196,61 @@ export class UnitPreviewComponent extends PreviewDirective {
       this.translateService.instant('workspace.definition-type-alternatives', { players: alternatives.join(', ') }) :
       this.translateService.instant('workspace.definition-type-no-alternative');
     return `${warning} ${hint}`;
+  }
+
+  /**
+   * A warning when the unit needs, to be played, a resource package, a widget or another file the
+   * studio does not have (#1602). The player still runs; it may only show part of the unit. Nothing
+   * is said when the packages cannot be read, and nothing for a unit left before they arrived.
+   */
+  private updateDependencyWarning(dependencies: UnitDependency[] | undefined): void {
+    this.dependencyWarning.set('');
+    if (!dependencies?.length) return;
+    const unitId = this.workspaceService.selectedUnit$.getValue();
+    this.loadInstalledDependencies()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(installed => {
+        if (!installed || this.workspaceService.selectedUnit$.getValue() !== unitId) return;
+        const missing = findMissingDependencies(dependencies, installed.packages, installed.widgets);
+        // one whole sentence per kind, with only the names put in: the word order differs between languages
+        const sentences = ([
+          ['workspace.dependencies-missing-packages', missing.packages],
+          ['workspace.dependencies-missing-widgets', missing.widgets],
+          ['workspace.dependencies-missing-files', missing.files]
+        ] as const)
+          .filter(([, names]) => names.length > 0)
+          .map(([key, names]) => this.translateService.instant(key, { names: names.join(', ') }));
+        if (sentences.length === 0) return;
+        sentences.push(this.translateService.instant('workspace.dependencies-missing-hint'));
+        // packages and widgets can be installed; other files the studio does not keep at all
+        if (missing.packages.length > 0 || missing.widgets.length > 0) {
+          sentences.push(this.translateService.instant('workspace.dependencies-missing-install-hint'));
+        }
+        this.dependencyWarning.set(sentences.join(' '));
+      });
+  }
+
+  /**
+   * The installed packages and widget types, read once for the preview. A failed read is not kept:
+   * the next unit asks again rather than going without a warning for the rest of the session.
+   */
+  private loadInstalledDependencies(): Observable<{ packages: string[]; widgets: string[] } | null> {
+    this.installedDependencies$ ??= forkJoin([
+      this.backendService.getResourcePackages(),
+      Object.keys(this.moduleService.widgets).length === 0 ? from(this.moduleService.loadWidgets()) : of(undefined)
+    ]).pipe(
+      map(([packages]) => (packages ?
+        {
+          packages: packages.map(resourcePackage => resourcePackage.name),
+          widgets: Object.values(this.moduleService.widgets).map(widget => widget.metadata?.model ?? '')
+        } :
+        null)),
+      tap(installed => {
+        if (!installed) this.installedDependencies$ = undefined;
+      }),
+      shareReplay(1)
+    );
+    return this.installedDependencies$;
   }
 
   gotoUnit(target: string): void {

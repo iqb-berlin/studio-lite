@@ -14,6 +14,7 @@ import type { UnitCommentService } from '../services/unit-comment.service';
 import type { VeronaModulesService } from '../services/verona-modules.service';
 import type { SettingService } from '../services/setting.service';
 import type { UnitRichNoteService } from '../services/unit-rich-note.service';
+import type { ResourcePackageService } from '../services/resource-package.service';
 
 // ESM module namespaces are frozen, so a replacement has to be registered before the module is
 // pulled in -- which is why the two imports below are dynamic.
@@ -178,6 +179,146 @@ describe('UnitDownloadClass', () => {
       const index = JSON.parse(await exportUnit('json'));
 
       expect(index.userInterface).not.toHaveProperty('type');
+    });
+  });
+
+  // What the unit needs to be played and edited, and the packages it names beside it (#1602).
+  describe('dependencies', () => {
+    const geogebra = { id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' as const };
+    const calc = { id: 'CALC', type: 'WIDGET' as const };
+    const service = { id: 'https://example.org/api', type: 'SERVICE' as const };
+
+    const exportUnits = async (
+      exportFormat: 'xml' | 'json',
+      units: Record<string, UnitDefinitionDto>,
+      installed: string[] = []
+    ) => {
+      mockZip.addFile.mockClear();
+      const keys = Object.keys(units);
+      const unitServiceMock = createMock<UnitService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
+      const settingServiceMock = createMock<SettingService>();
+      const veronaModuleServiceMock = createMock<VeronaModulesService>();
+      const resourcePackageServiceMock = createMock<ResourcePackageService>();
+      settingServiceMock.findUnitExportConfig.mockResolvedValue({} as UnitExportConfigDto);
+      unitServiceMock.findOnesProperties.mockImplementation(async id => ({
+        id, key: keys[id - 1], name: keys[id - 1], metadata: {}, player: 'iqb-player-aspect@3.0'
+      }) as unknown as UnitPropertiesDto);
+      unitServiceMock.ensureUuid.mockResolvedValue('uuid');
+      unitDefinitionServiceMock.findOnesDefinition.mockImplementation(async id => units[keys[id - 1]]);
+      unitDefinitionServiceMock.findOnesDependencies.mockImplementation(async id => [
+        ...(units[keys[id - 1]].dependenciesToPlay ?? []), ...(units[keys[id - 1]].dependenciesToEdit ?? [])
+      ]);
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({ scheme: '', schemeType: '' } as UnitSchemeDto);
+      veronaModuleServiceMock.findAll.mockResolvedValue([]);
+      resourcePackageServiceMock.findZippedResourcePackage.mockImplementation(async fileName => {
+        const name = installed.find(packageName => packageName.toLowerCase() === fileName.toLowerCase());
+        return name ? { fileName: name, file: Buffer.from(`zip of ${name}`) } : null;
+      });
+
+      await UnitDownloadClass.get(
+        1,
+        unitServiceMock,
+        createMock<UnitMetadataService>(),
+        unitDefinitionServiceMock,
+        createMock<UnitCommentService>(),
+        veronaModuleServiceMock,
+        settingServiceMock,
+        createMock<UnitRichNoteService>(),
+        {
+          unitIdList: keys.map((_, index) => index + 1),
+          addPlayers: false,
+          addComments: false,
+          addTestTakersHot: 0,
+          addTestTakersMonitor: 0,
+          addTestTakersReview: 0
+        } as unknown as UnitDownloadSettingsDto,
+        exportFormat,
+        resourcePackageServiceMock
+      );
+      const fileNamed = (name: string) => mockZip.addFile.mock.calls
+        .find((call: [string, Buffer]) => call[0] === name)?.[1]?.toString();
+      return {
+        files: mockZip.addFile.mock.calls.map((call: [string, Buffer]) => call[0]) as string[],
+        fileNamed
+      };
+    };
+
+    it('should write the lists into the unit XML, for player and editor, without widgets', async () => {
+      const { fileNamed } = await exportUnits('xml', {
+        U1: { definition: '{}', dependenciesToPlay: [geogebra, calc, service], dependenciesToEdit: [geogebra] }
+      });
+
+      const dependencies = fileNamed('U1.xml')?.match(/<Dependencies>[\s\S]*<\/Dependencies>/)?.[0];
+      expect(dependencies).toContain('<File for="player">GeoGebra.itcr.zip</File>');
+      expect(dependencies).toContain('<Service for="player">https://example.org/api</Service>');
+      expect(dependencies).toContain('<File for="editor">GeoGebra.itcr.zip</File>');
+      expect(dependencies).not.toContain('CALC');
+    });
+
+    it('should write no Dependencies element for a unit without any', async () => {
+      const { fileNamed } = await exportUnits('xml', { U1: { definition: '{}', dependenciesToPlay: [] } });
+
+      expect(fileNamed('U1.xml')).not.toContain('Dependencies');
+    });
+
+    it('should write the lists into userInterface of the JSON index, and report the service', async () => {
+      const { fileNamed } = await exportUnits('json', {
+        U1: { definition: '{}', dependenciesToPlay: [geogebra, calc, service], dependenciesToEdit: [geogebra] }
+      }, ['GeoGebra.itcr.zip']);
+
+      const index = JSON.parse(fileNamed('U1.json') as string);
+      expect(index.userInterface.playerDependencies)
+        .toEqual([{ fileName: 'GeoGebra.itcr.zip', unpackBeforeProviding: true }, 'CALC']);
+      expect(index.userInterface.editorDependencies)
+        .toEqual([{ fileName: 'GeoGebra.itcr.zip', unpackBeforeProviding: true }]);
+      expect(JSON.parse(fileNamed('_export-report.json') as string).messages)
+        .toEqual([expect.objectContaining({ unitKey: 'U1', messageKey: 'dropped-content.dependency-not-exported' })]);
+    });
+
+    it('should lay a package two units name once beside them, however they spell it', async () => {
+      const { files, fileNamed } = await exportUnits('xml', {
+        U1: { definition: '{}', dependenciesToPlay: [geogebra] },
+        U2: { definition: '{}', dependenciesToEdit: [{ id: 'geogebra.ITCR.zip', type: 'FILE_TO_UNPACK' }] }
+      }, ['GeoGebra.itcr.zip']);
+
+      expect(files.filter(name => name.toLowerCase() === 'geogebra.itcr.zip')).toEqual(['GeoGebra.itcr.zip']);
+      expect(fileNamed('GeoGebra.itcr.zip')).toBe('zip of GeoGebra.itcr.zip');
+    });
+
+    it('should lay no widget, service or other file beside the units', async () => {
+      const { files } = await exportUnits('xml', {
+        U1: { definition: '{}', dependenciesToPlay: [calc, service, { id: 'sheet.pdf', type: 'FILE' }] }
+      }, ['CALC', 'sheet.pdf']);
+
+      expect(files.sort()).toEqual(['U1.voud', 'U1.xml']);
+    });
+
+    // the studio keeps no files but packages, and a 5.0 editor may name others (#1602)
+    it('should report in the JSON export a file the index names that is no package, once per unit', async () => {
+      const sheet = { id: 'sheet.pdf', type: 'FILE' as const };
+      const { files, fileNamed } = await exportUnits('json', {
+        U1: {
+          definition: '{}', dependenciesToPlay: [sheet, { id: 'clip.mp4', type: 'STREAM' }], dependenciesToEdit: [sheet]
+        }
+      });
+
+      expect(files).not.toContain('sheet.pdf');
+      expect(JSON.parse(fileNamed('_export-report.json') as string).messages).toEqual([
+        { unitKey: 'U1', objectKey: 'sheet.pdf', messageKey: 'dropped-content.dependency-file-not-exported' },
+        { unitKey: 'U1', objectKey: 'clip.mp4', messageKey: 'dropped-content.dependency-file-not-exported' }
+      ]);
+    });
+
+    it('should leave a package that is not installed out and report it in the JSON export only', async () => {
+      const xml = await exportUnits('xml', { U1: { definition: '{}', dependenciesToPlay: [geogebra] } });
+      const json = await exportUnits('json', { U1: { definition: '{}', dependenciesToPlay: [geogebra] } });
+
+      expect(xml.files.sort()).toEqual(['U1.voud', 'U1.xml']);
+      expect(json.files).not.toContain('GeoGebra.itcr.zip');
+      expect(JSON.parse(json.fileNamed('_export-report.json') as string).messages).toEqual([{
+        unitKey: 'U1', objectKey: 'GeoGebra.itcr.zip', messageKey: 'dropped-content.resource-package-not-exported'
+      }]);
     });
   });
 

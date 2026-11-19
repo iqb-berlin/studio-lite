@@ -1,7 +1,9 @@
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { UnitMetadataValues } from '@studio-lite-lib/api-dto';
+import { UnitDependency } from '@studio-lite/shared-code';
 import { FileIo } from '../interfaces/file-io.interface';
 import { UnitIndexJson } from '../interfaces/unit-json-specs.interface';
+import { fromUnitIndexDependencies } from '../utils/unit-dependencies';
 
 export class UnitImportJsonData {
   key: string;
@@ -24,6 +26,9 @@ export class UnitImportJsonData {
   schemer = '';
   schemeType = '';
   baseVariables: VariableInfo[] = [];
+  // only the lists: a package named here is installed by an administrator, never by the import (#1602)
+  dependenciesToPlay: UnitDependency[] = [];
+  dependenciesToEdit: UnitDependency[] = [];
   codingScheme = '';
   codingSchemeFileName: string;
   variablesFileName: string;
@@ -49,6 +54,8 @@ export class UnitImportJsonData {
     this.player = index.userInterface.player ?? '';
     this.editor = index.userInterface.editor ?? '';
     this.definitionType = index.userInterface.type ?? '';
+    this.dependenciesToPlay = fromUnitIndexDependencies(index.userInterface.playerDependencies);
+    this.dependenciesToEdit = fromUnitIndexDependencies(index.userInterface.editorDependencies);
     // An inline definition is the definition itself, not the name of a file beside the index (#1839)
     if (index.userInterface.isDefinitionInline) {
       this.definition = index.userInterface.definition ?? '';

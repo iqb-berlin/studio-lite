@@ -29,3 +29,13 @@ DELETE FROM "public"."user_session" AS "older"
 ALTER TABLE "public"."user_session"
   ADD CONSTRAINT "uq_user_session_session_id" UNIQUE ("session_id");
 -- rollback ALTER TABLE "public"."user_session" DROP CONSTRAINT "uq_user_session_session_id";
+
+-- changeset jojohoch:3
+-- What a unit needs beside its player and editor -- a resource package such as GeoGebra, a widget, a
+-- service -- as the editor reports it with the definition (#1602): one list for playing, one for
+-- editing. They belong to the definition and are kept beside its format. Until now the studio kept
+-- neither, so every unit starts with two empty lists.
+ALTER TABLE "public"."unit_definition"
+  ADD COLUMN "dependencies_to_play" JSONB NOT NULL DEFAULT '[]'::jsonb,
+  ADD COLUMN "dependencies_to_edit" JSONB NOT NULL DEFAULT '[]'::jsonb;
+-- rollback ALTER TABLE "public"."unit_definition" DROP COLUMN "dependencies_to_play", DROP COLUMN "dependencies_to_edit";

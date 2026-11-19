@@ -24,7 +24,8 @@
 }
 
 // the warning colours of the coding report
-.definition-type-warning {
+.definition-type-warning,
+.dependency-warning {
   padding: 8px 16px;
   border-left: 4px solid #8a6500;
   color: #704d00;

@@ -13,6 +13,7 @@ import {
   RequestReportDto,
   ReviewFullDto,
   ReviewInListDto,
+  ResourcePackageDto,
   UnitDefinitionDto,
   UnitDownloadSettingsDto,
   UnitExportContentsDto,
@@ -369,6 +370,16 @@ export class WorkspaceBackendService {
 
   getDirectDownloadLink(): string {
     return `${this.serverUrl}packages/`;
+  }
+
+  /**
+   * The installed resource packages, for the preview's check of what a unit needs (#1602). Null
+   * when they could not be read: unknown is not missing, and the preview then warns about nothing.
+   */
+  getResourcePackages(): Observable<ResourcePackageDto[] | null> {
+    return this.http
+      .get<ResourcePackageDto[]>(`${this.serverUrl}resource-packages`)
+      .pipe(catchError(() => of(null)));
   }
 
   getUnitGroups(workspaceId: number): Observable <string[]> {

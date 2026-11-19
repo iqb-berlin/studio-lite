@@ -38,7 +38,8 @@
       "coding-scheme": "No valid coding scheme, unit was created without a scheme",
       "key-too-long": "Key longer than 20 characters, unit was not created",
       "name-too-long": "Name longer than 100 characters, shortened to 100 characters",
-      "value-too-long": "A value (such as an item ID) is longer than allowed, unit created incompletely"
+      "value-too-long": "A value (such as an item ID) is longer than allowed, unit created incompletely",
+      "resource-package-not-installed": "Resource package is not installed in the studio; only a system administrator can install it"
     },
     "menu-label": {
       "import": "Import",
@@ -807,6 +808,11 @@
     "definition-type-incompatible": "The player \"{{player}}\" states that it does not read the format \"{{definitionType}}\" of this unit. The unit may be shown incorrectly.",
     "definition-type-alternatives": "Players that state they read it: {{players}}. You can change the player under \"Properties\".",
     "definition-type-no-alternative": "No installed player states that it reads this format.",
+    "dependencies-missing-packages": "To be played, this unit needs resource packages that are not installed in the studio: {{names}}.",
+    "dependencies-missing-widgets": "To be played, this unit needs widgets that are not installed in the studio: {{names}}.",
+    "dependencies-missing-files": "To be played, this unit needs files that the studio cannot provide: {{names}}.",
+    "dependencies-missing-hint": "Without them, the unit may be shown incorrectly.",
+    "dependencies-missing-install-hint": "A system administrator can install resource packages and widgets.",
     "no-widget": "No matching widget found for the type \"{{widgetType}}\".",
     "player-send-page-navigation-request": "Player sends PageNavigationRequest: \"{{target}}\"",
     "player-send-unit-navigation-request": "Player sends UnitNavigationRequest: \"{{target}}\"",

@@ -107,6 +107,25 @@ describe('UnitImportData', () => {
     });
   });
 
+  it('should read the dependencies, also the deprecated lower-case file element (#1602)', () => {
+    const data = new UnitImportData(createMock<FileIo>({
+      originalname: 'u.xml',
+      buffer: Buffer.from(`<Unit><Metadata><Id>U1</Id></Metadata>
+        <Dependencies>
+          <File>GeoGebra.itcr.zip</File>
+          <file for="editor">sheet.pdf</file>
+          <Service for="player">https://example.org/api</Service>
+          <File for="coder">coder.zip</File>
+        </Dependencies></Unit>`)
+    }));
+
+    expect(data.dependenciesToPlay).toEqual([
+      { id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' },
+      { id: 'https://example.org/api', type: 'SERVICE' }
+    ]);
+    expect(data.dependenciesToEdit).toEqual([{ id: 'sheet.pdf', type: 'FILE' }]);
+  });
+
   it('should parse base variables correctly', () => {
     const data = new UnitImportData(fileIoMock);
 

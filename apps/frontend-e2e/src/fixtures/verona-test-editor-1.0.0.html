@@ -7,7 +7,8 @@
     An editor for the e2e tests of the studio as host, written against the editor API 5.0 and not
     against one release of a real editor (#2007). It does no more than the tests ask of it: it reports
     ready with its metadata as a string, as the API demands, and shows that the start command came and
-    the role it brought (#2065).
+    the role it brought (#2065). On a click it reports a definition together with what the unit needs
+    to be played and edited (#1602).
   -->
   <script id="metadata" type="application/ld+json">
     {
@@ -26,16 +27,32 @@
 <body>
   <p id="status">waiting</p>
   <p id="role"></p>
+  <button id="report-dependencies" type="button">report a definition with dependencies</button>
   <script>
     // The frame is a srcdoc of the host and shares its origin: messages go there and nowhere else
     const hostOrigin = window.parent.location.origin;
+    let sessionId = '';
 
     window.addEventListener('message', event => {
       if (event.source !== window.parent) return;
       if (event.data.type === 'voeStartCommand') {
+        sessionId = event.data.sessionId;
         document.getElementById('status').textContent = 'started';
         document.getElementById('role').textContent = event.data.editorConfig?.role ?? '';
       }
+    });
+
+    document.getElementById('report-dependencies').addEventListener('click', () => {
+      const geogebra = { id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' };
+      window.parent.postMessage({
+        type: 'voeDefinitionChangedNotification',
+        sessionId,
+        timeStamp: String(Date.now()),
+        unitDefinition: 'a definition that needs GeoGebra, a calculator and a sheet',
+        variables: [],
+        dependenciesToPlay: [geogebra, { id: 'CALC', type: 'WIDGET' }, { id: 'sheet.pdf', type: 'FILE' }],
+        dependenciesToEdit: [geogebra]
+      }, hostOrigin);
     });
 
     window.parent.postMessage({

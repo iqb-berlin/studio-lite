@@ -180,6 +180,49 @@ describe('UnitDefinitionStore', () => {
     });
   });
 
+  // What the unit needs to be played and edited, as the editor reports it (#1602).
+  describe('with dependencies', () => {
+    const vars = [buildVariable('v1', 'a1')];
+    const geogebra = { id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' as const };
+    const calc = { id: 'CALC', type: 'WIDGET' as const };
+    const stored: UnitDefinitionDto = {
+      variables: vars, definition: 'def-a', dependenciesToPlay: [geogebra, calc], dependenciesToEdit: [geogebra]
+    };
+
+    it('does not mark a unit as changed when the editor reports the same lists in another order', () => {
+      const store = new UnitDefinitionStore(1, stored);
+
+      store.setData([...vars], 'def-a', undefined, { toPlay: [calc, geogebra], toEdit: [geogebra] });
+
+      expect(store.isChanged()).toBe(false);
+    });
+
+    it('sends a changed list, also with an unchanged definition', () => {
+      const store = new UnitDefinitionStore(1, stored);
+
+      store.setData([...vars], 'def-a', undefined, { toPlay: [geogebra], toEdit: [geogebra] });
+
+      expect(store.getChangedData()).toEqual({ dependenciesToPlay: [geogebra] });
+    });
+
+    it('takes empty lists from an editor that reports none as a change', () => {
+      const store = new UnitDefinitionStore(1, stored);
+
+      store.setData([...vars], 'def-b', undefined, { toPlay: [], toEdit: [] });
+
+      expect(store.getChangedData()).toEqual({ definition: 'def-b', dependenciesToPlay: [], dependenciesToEdit: [] });
+    });
+
+    it('keeps the stored lists when the editor does not know them', () => {
+      const store = new UnitDefinitionStore(1, stored);
+
+      store.setData([...vars], 'def-b');
+
+      expect(store.getChangedData()).toEqual({ definition: 'def-b' });
+      expect(store.getData().dependenciesToPlay).toEqual([geogebra, calc]);
+    });
+  });
+
   // An editor following VariableInfo 2.0 writes type and format in upper case and leaves out
   // `page`. Studio stores what the editor sends (#1708) and compares regardless of spelling (#1606).
   describe('with an editor in the VariableInfo 2.0 spelling', () => {

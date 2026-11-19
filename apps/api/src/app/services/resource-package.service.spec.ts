@@ -58,6 +58,37 @@ describe('ResourcePackageService', () => {
     jest.clearAllMocks();
   });
 
+  // A unit names the package it needs by its file name, which the export lays beside it (#1602).
+  describe('a package named by a unit', () => {
+    beforeEach(() => {
+      resourcePackageRepository.find.mockResolvedValue(
+        [{ id: 1, name: 'GeoGebra' }, { id: 2, name: 'Videos' }] as ResourcePackage[]
+      );
+    });
+
+    it('should find the installed package whatever the case of the name', async () => {
+      expect(await service.findByFileName('geogebra.ITCR.zip')).toEqual({ id: 1, name: 'GeoGebra' });
+      expect(await service.findByFileName('GeoGebra')).toBeNull();
+      expect(await service.findByFileName('Other.itcr.zip')).toBeNull();
+    });
+
+    it('should hand out the uploaded zip under the name it was installed with', async () => {
+      (fs.existsSync as jest.Mock).mockReturnValue(true);
+      (fs.readFileSync as jest.Mock).mockReturnValue(Buffer.from('zip'));
+
+      const zipped = await service.findZippedResourcePackage('geogebra.itcr.zip');
+
+      expect(zipped).toEqual({ fileName: 'GeoGebra.itcr.zip', file: Buffer.from('zip') });
+      expect(fs.readFileSync).toHaveBeenCalledWith('./packages/GeoGebra/GeoGebra.itcr.zip');
+    });
+
+    it('should hand out nothing when the zip is not on disk', async () => {
+      (fs.existsSync as jest.Mock).mockReturnValue(false);
+
+      expect(await service.findZippedResourcePackage('GeoGebra.itcr.zip')).toBeNull();
+    });
+  });
+
   describe('removeResourcePackage', () => {
     it('should throw if not found', async () => {
       resourcePackageRepository.findOne.mockResolvedValue(null);

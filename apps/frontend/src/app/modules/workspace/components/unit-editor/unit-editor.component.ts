@@ -1,7 +1,8 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { takeUntil } from 'rxjs';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { UnitDefinitionStore } from '../../classes/unit-definition-store';
+import { toUnitDependencies } from '@studio-lite/shared-code';
+import { ReportedDependencies, UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { RolePipe } from '../../pipes/role.pipe';
 import { VeronaModuleDirective } from '../../../../directives/verona-module.directive';
 import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
@@ -45,6 +46,24 @@ export class UnitEditorComponent extends VeronaModuleDirective {
   private role(): string {
     const role = new RolePipe().transform(this.workspaceService.userAccessLevel);
     return this.editorApiVersion >= UnitEditorComponent.ROLE_IN_CAPITALS_FROM ? role.toUpperCase() : role;
+  }
+
+  // Editor spec 4.0 added dependenciesToPlay and dependenciesToEdit to the definition report (#1602).
+  private static readonly DEPENDENCIES_REPORTED_FROM = 4;
+
+  /**
+   * What the unit needs, as an editor that knows the lists reports it with a definition. A list it
+   * leaves out says there is nothing; an older editor reports nothing at all, and the stored lists
+   * stay as they are.
+   */
+  private reportedDependencies(
+    msgData: { dependenciesToPlay?: unknown; dependenciesToEdit?: unknown }
+  ): ReportedDependencies | undefined {
+    if (this.editorApiVersion < UnitEditorComponent.DEPENDENCIES_REPORTED_FROM) return undefined;
+    return {
+      toPlay: toUnitDependencies(msgData.dependenciesToPlay),
+      toEdit: toUnitDependencies(msgData.dependenciesToEdit)
+    };
   }
 
   protected startSubscriptions(): void {
@@ -93,7 +112,8 @@ export class UnitEditorComponent extends VeronaModuleDirective {
                 ?.setData(
                   msgData.variables,
                   msgData.unitDefinition,
-                  typeof msgData.unitDefinitionType === 'string' ? msgData.unitDefinitionType : undefined
+                  typeof msgData.unitDefinitionType === 'string' ? msgData.unitDefinitionType : undefined,
+                  this.reportedDependencies(msgData)
                 );
               // } else { TODO: find solution for voeGetDefinitionRequest
               //   this.postMessageTarget.postMessage({
