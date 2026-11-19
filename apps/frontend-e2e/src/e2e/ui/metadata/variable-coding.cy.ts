@@ -121,6 +121,9 @@ describe('Variable and Item Metadata Coherence', () => {
     cy.get('mat-dialog-container .mat-mdc-tab-body-active table')
       .should('contain.text', 'text-field_1')
       .and('not.contain.text', 'drop-list_1');
+    // every unit cell holds its link as HTML, "href" included, which no cell shows (#2195)
+    cy.get('mat-dialog-container .mat-mdc-tab-body-active input').type('href');
+    cy.get('mat-dialog-container .mat-mdc-tab-body-active tr.mat-mdc-row').should('not.exist');
     cy.get('[data-cy="metadata-table-view-close"]').click();
   });
 
