@@ -77,6 +77,13 @@
       "import": "Export",
       "import-tooltip": "Download unit files (*.xml, *.voud etc.)"
     },
+    "variable-id-conflicts": {
+      "title": "Duplicate variable IDs",
+      "intro-xml": "In the XML of these units, the same ID would stand for two variables. From version 19 on, the testcenter does not accept such units. The other units are not affected.",
+      "intro-json": "In the JSON of these units, the same ID would stand for two variables. Programs that match variables by their ID may confuse the two. The other units are not affected.",
+      "export-anyway": "Export anyway",
+      "check-failed": "Could not check whether a variable ID would appear twice in the export."
+    },
     "dialog": {
       "title": "Download unit(s) as a file",
       "ok-button-label": "Download",
@@ -608,6 +615,54 @@
     "NOT_REACHED": "No interaction possible yet",
     "DISPLAYED": "Was displayed",
     "VALUE_CHANGED": "Value changed"
+  },
+  "variable-id-conflicts": {
+    "id": "The ID",
+    "stands-for": "would stand for:",
+    "base": "the element",
+    "base-hint": "in the editor – the ID is its internal ID, which the editor does not show",
+    "derived": "the derived variable",
+    "derived-hint": "in coding",
+    "manual-fix": "Fix manually",
+    "manual-fix-intro": "One of the two variables needs a different name. You decide which – the studio renames nothing by itself.",
+    "keep-derived": {
+      "title": "Keep the name of the derived variable (usually the right way)",
+      "step-duplicate": "In the editor, duplicate the element and delete the original. The copy gets a new internal ID.",
+      "step-take-over": "Give the copy the position and ID of the original.",
+      "step-coding": "In coding, set up the copy like the original, e.g. deactivate it if the original was deactivated.",
+      "step-sources": "Switch derived variables that are formed from the element over to the copy.",
+      "step-items": "Link the items that were linked to the element again under \"Properties\".",
+      "note": "Responses already collected for the element are stored under its old internal ID."
+    },
+    "rename-derived": {
+      "title": "Rename the derived variable",
+      "step-rename": "In coding, give the derived variable a new name.",
+      "step-items": "Link the items that were linked to it again under \"Properties\".",
+      "note": "This changes the name the coders see. What has already been coded under the old name keeps it."
+    }
+  },
+  "unit-check": {
+    "title": "Unit check",
+    "hint": "The unit is checked as it is being edited, including what has not been saved yet.",
+    "ok": "OK",
+    "not-loaded": "Could not be loaded.",
+    "no-editor": "No editor assigned.",
+    "no-player": "No player assigned.",
+    "no-schemer": "No schemer assigned.",
+    "not-installed-editor": "The assigned editor \"{{module}}\" is not installed.",
+    "not-installed-player": "The assigned player \"{{module}}\" is not installed.",
+    "not-installed-schemer": "The assigned schemer \"{{module}}\" is not installed.",
+    "no-definition": "The unit has no content yet.",
+    "definition-not-loaded": "Could not load the content of the unit.",
+    "no-scheme": "The unit has no coding scheme yet.",
+    "variables-not-loaded": "Could not load the variables; duplicate IDs have not been checked.",
+    "scheme-not-loaded": "Could not load the coding scheme; duplicate IDs have not been checked.",
+    "fix-elsewhere": "This can only be fixed in the \"Editor\" and \"Coding\" tabs, which this workspace hides.",
+    "variable-id-conflicts": "The export would contain the same ID for two variables. From version 19 on, the testcenter does not accept such a unit.",
+    "comments-present": "Comments present",
+    "comments-absent": "No comments",
+    "notes-present": "Supplementary material present",
+    "notes-absent": "No supplementary material"
   },
   "workspace": {
     "no-responses": "There are no coding results",
