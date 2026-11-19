@@ -24,6 +24,10 @@ source; every other file is translated from it and has exactly its keys.
 
 The language menu appears once there are two languages; a language is offered only when its file is complete.
 
+The texts an administrator writes -- title, start page, imprint, the warning on the start page and the mail to new
+users -- get a tab for the new language in the administration's settings by themselves. Until someone fills it in,
+the interface in the new language shows the German texts (#2186).
+
 ## Glossary
 
 Binding terms. They follow the names in the code and in the English Verona specifications (plugin-editor,
