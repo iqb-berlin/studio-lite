@@ -123,7 +123,10 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
     if (orphanedNotes.length > 0) {
       this.displayNodes.push({
         tagId: 'unassigned',
-        label: [{ lang: 'de', value: this.translateService.instant('workspace.unassigned-rich-notes') }],
+        label: [{
+          lang: this.translateService.currentLang,
+          value: this.translateService.instant('workspace.unassigned-rich-notes')
+        }],
         notes: orphanedNotes,
         children: []
       });

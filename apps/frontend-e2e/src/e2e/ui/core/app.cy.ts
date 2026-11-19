@@ -21,4 +21,31 @@ describe('Application', () => {
     cy.get('studio-lite-about [data-cy="home-button"]').should('be.visible');
     cy.location('hash').should('eq', '#/about');
   });
+
+  // The menu reloads the page under the prefix of the language chosen, and back without one (#2178).
+  it('switches to English in the header and back to German', () => {
+    cy.visit('/#/about');
+    cy.translate('en').then(english => {
+      cy.get('[data-cy="language-menu"]').click();
+      cy.get('[data-cy="language-en"]').click();
+
+      cy.location('hash').should('eq', '#/en/about');
+      cy.get('html').should('have.attr', 'lang', 'en');
+      cy.get('studio-lite-about [data-cy="home-button"]').should('have.text', english.home['home-page']);
+    });
+
+    cy.get('[data-cy="language-menu"]').click();
+    cy.get('[data-cy="language-de"]').click();
+
+    cy.location('hash').should('eq', '#/about');
+    cy.get('html').should('have.attr', 'lang', 'de');
+  });
+
+  // A link with the prefix, loaded as a page: another path than before, so that it is not a hash change.
+  it('opens a link with the English prefix in English', () => {
+    cy.visit('/index.html#/en/about');
+
+    cy.get('html').should('have.attr', 'lang', 'en');
+    cy.location('hash').should('eq', '#/en/about');
+  });
 });

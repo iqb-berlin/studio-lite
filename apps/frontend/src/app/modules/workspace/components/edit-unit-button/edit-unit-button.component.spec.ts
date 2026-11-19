@@ -341,24 +341,24 @@ describe('EditUnitButtonComponent', () => {
       translate = jest.spyOn(component.translateService, 'instant');
     });
 
-    it.each([[true, 'verschieben'], [false, 'kopieren']])(
+    // One sentence per case: a German verb put into the English sentence read "Unit(s) verschoben" (#2178).
+    it.each([[true, 'workspace.units-not-moved'], [false, 'workspace.units-not-copied']])(
       'should say that the units could not be moved (%s) or copied: %s',
-      (moveOnly, action) => {
+      (moveOnly, message) => {
         component.moveOrCopyUnitSubscription(false, moveOnly);
 
-        expect(translate).toHaveBeenCalledWith('workspace.unit-not-moved-or-copied', { action });
-        expect(snackBarOpen)
-          .toHaveBeenCalledWith('workspace.unit-not-moved-or-copied', 'workspace.error', { duration: 3000 });
+        expect(translate).toHaveBeenCalledWith(message);
+        expect(snackBarOpen).toHaveBeenCalledWith(message, 'workspace.error', { duration: 3000 });
         expect(mockWorkspaceBackendService.getUnitGroups).not.toHaveBeenCalled();
       });
 
-    it.each([[true, 'verschoben'], [false, 'kopiert']])(
+    it.each([[true, 'workspace.units-moved'], [false, 'workspace.units-copied']])(
       'should confirm that the units were moved (%s) or copied: %s and reload the unit list',
-      (moveOnly, action) => {
+      (moveOnly, message) => {
         component.moveOrCopyUnitSubscription({ source: 'unit-patch', messages: [] }, moveOnly);
 
-        expect(translate).toHaveBeenCalledWith('workspace.unit-moved-or-copied', { action });
-        expect(snackBarOpen).toHaveBeenCalledWith('workspace.unit-moved-or-copied', '', { duration: 5000 });
+        expect(translate).toHaveBeenCalledWith(message);
+        expect(snackBarOpen).toHaveBeenCalledWith(message, '', { duration: 5000 });
         expect(mockWorkspaceBackendService.getUnitGroups).toHaveBeenCalledWith(1);
       });
 

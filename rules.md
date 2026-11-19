@@ -3,7 +3,7 @@
 ## General Frontend Rules
 
 ### Internationalization (i18n)
-- **Rule**: Every user-facing text (German/English) in the frontend MUST be managed through translation keys in `assets/i18n/de.json` (and `en.json` if available).
+- **Rule**: Every user-facing text in the frontend MUST be managed through translation keys, in `assets/i18n/de.json` and in every other language file (`en.json`). A new text goes into all of them; `translation-files.spec.ts` fails otherwise and names the missing keys. Terms and style rules are in `TRANSLATION.md`.
 - **Rationale**: Hardcoded strings are strictly forbidden as they prevent proper localization and make the codebase harder to maintain.
 - **Preferred Solution**: Use the `translate` pipe in templates or the `TranslateService` in components to retrieve localized strings.
 - **Exception**: The names of the languages in the language menu stand in `UI_LANGUAGES` (`libs/shared-code`), each in its own language. They are not translated: whoever is looking for their language has to recognise it whatever language the page is in (#2175).

@@ -7,6 +7,11 @@ export interface TranslationDifferences {
   extra: string[];
   /** Keys whose `{{…}}` placeholders differ: a value would stay unfilled or vanish. */
   placeholders: string[];
+  /**
+   * Keys whose text starts or ends with other white space: templates put such texts next to
+   * others, and a lost space glues two words together.
+   */
+  whitespace: string[];
 }
 
 const flatten = (texts: TranslationTexts, prefix = ''): Map<string, string> => new Map(
@@ -20,6 +25,8 @@ const placeholdersOf = (text: string): string => (text.match(/{{\s*[\w.]+\s*}}/g
   .sort()
   .join();
 
+const edgesOf = (text: string): string => `${/^\s*/.exec(text)?.[0]}|${/\s*$/.exec(text)?.[0]}`;
+
 /**
  * Where a translation file differs from the file it is translated from, key by key (#2174). A
  * language is offered only when nothing differs.
@@ -27,12 +34,13 @@ const placeholdersOf = (text: string): string => (text.match(/{{\s*[\w.]+\s*}}/g
 export function compareTranslations(source: TranslationTexts, translation: TranslationTexts): TranslationDifferences {
   const sourceTexts = flatten(source);
   const translatedTexts = flatten(translation);
+  const differingIn = (aspect: (text: string) => string): string[] => [...sourceTexts]
+    .filter(([key, text]) => translatedTexts.has(key) && aspect(text) !== aspect(translatedTexts.get(key) as string))
+    .map(([key]) => key);
   return {
     missing: [...sourceTexts.keys()].filter(key => !translatedTexts.has(key)),
     extra: [...translatedTexts.keys()].filter(key => !sourceTexts.has(key)),
-    placeholders: [...sourceTexts]
-      .filter(([key, text]) => translatedTexts.has(key) &&
-        placeholdersOf(text) !== placeholdersOf(translatedTexts.get(key) as string))
-      .map(([key]) => key)
+    placeholders: differingIn(placeholdersOf),
+    whitespace: differingIn(edgesOf)
   };
 }

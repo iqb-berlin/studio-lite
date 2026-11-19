@@ -11,6 +11,7 @@ export class ToTimePipe implements PipeTransform {
 
   transform(value: number): string {
     const hour = value.toString(10).padStart(2, '0');
-    return `${hour}:00 ${this.translateService.instant('hour')}`;
+    // English writes the time alone, so its suffix is empty (#2178).
+    return `${hour}:00 ${this.translateService.instant('hour')}`.trimEnd();
   }
 }

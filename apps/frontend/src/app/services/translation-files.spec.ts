@@ -8,6 +8,9 @@ import { compareTranslations, TranslationTexts } from '../utils/translation-chec
  * The translation files against the language list (#2174). A language is offered only when it is
  * complete -- every key of the German file, with the same placeholders -- so that no text appears as
  * its key and no `{{name}}` stays unfilled. German is the source every other file is translated from.
+ *
+ * Failing here after adding a text to `de.json`: add it to every other file as well; the failure
+ * names the keys. How to translate is in TRANSLATION.md.
  */
 describe('translation files', () => {
   const directory = join(__dirname, '../../assets/i18n');
@@ -27,9 +30,11 @@ describe('translation files', () => {
   offered
     .filter(code => code !== DEFAULT_UI_LANGUAGE)
     .forEach(code => {
-      it(`should translate every German text into ${code}, with the same placeholders`, () => {
+      it(`should translate every German text into ${code}, with the same placeholders and edge spaces`, () => {
         expect(compareTranslations(read(DEFAULT_UI_LANGUAGE), read(code)))
-          .toEqual({ missing: [], extra: [], placeholders: [] });
+          .toEqual({
+            missing: [], extra: [], placeholders: [], whitespace: []
+          });
       });
     });
 });
