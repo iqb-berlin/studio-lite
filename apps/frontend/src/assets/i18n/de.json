@@ -396,7 +396,8 @@
   "profiles-registry": {
     "csv-url": "URL der CSV-Datei",
     "csv-url-saved": "URL zur Profilregistrierung gespeichert",
-    "csv-url-not-saved": "Konnte URL zur Profilregistrierung nicht speichern"
+    "csv-url-not-saved": "Konnte URL zur Profilregistrierung nicht speichern",
+    "registry-not-loaded": "Die URL zur Profilregistrierung konnte nicht geladen werden."
   },
   "config": {
     "start-page-warning": "Warnung auf der Startseite",
@@ -424,7 +425,8 @@
     "booklet-xml-path": "Xsd-Pfad für Booklet.Xml",
     "unit-xml-path": "Xsd-Pfad für Unit.Xml",
     "params-saved": "Parameter für Unitexport gespeichert",
-    "params-not-saved": "Konnte Parameter für Unitexport nicht speichern"
+    "params-not-saved": "Konnte Parameter für Unitexport nicht speichern",
+    "params-not-loaded": "Die Parameter für den Unit-Export konnten nicht geladen werden."
   },
   "missings-profiles-config": {
     "iqb-standard": "IQB-Standard",

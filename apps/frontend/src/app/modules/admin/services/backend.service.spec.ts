@@ -72,6 +72,32 @@ describe('Admin BackendService', () => {
     });
   });
 
+  // Without stored settings the API answers its defaults, so null can only mean the load failed: the admin
+  // card then says so instead of showing empty fields (#2191).
+  describe('getProfilesRegistry', () => {
+    it('should answer a failed request with null', done => {
+      service.getProfilesRegistry().subscribe(result => {
+        expect(result).toBeNull();
+        done();
+      });
+
+      httpMock.expectOne(`${baseUrl}settings/profiles-registry`)
+        .flush('error', { status: 500, statusText: 'Server Error' });
+    });
+  });
+
+  describe('getUnitExportConfig', () => {
+    it('should answer a failed request with null', done => {
+      service.getUnitExportConfig().subscribe(result => {
+        expect(result).toBeNull();
+        done();
+      });
+
+      httpMock.expectOne(`${baseUrl}settings/unit-export-config`)
+        .flush('error', { status: 500, statusText: 'Server Error' });
+    });
+  });
+
   describe('getWorkspaceGroupAdmins', () => {
     // An empty list instead would show the group without admins, and saving one check would
     // replace the stored ones (#2070).

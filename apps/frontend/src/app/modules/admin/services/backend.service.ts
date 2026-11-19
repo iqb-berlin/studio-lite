@@ -260,9 +260,14 @@ export class BackendService {
       .pipe(succeeded());
   }
 
-  getProfilesRegistry(): Observable<ProfilesRegistryDto> {
+  // Without stored settings the API answers its defaults, so null means only that the load failed: the admin card
+  // says so instead of showing empty fields (#2191). The same holds for getUnitExportConfig.
+  getProfilesRegistry(): Observable<ProfilesRegistryDto | null> {
     return this.http
-      .get<ProfilesRegistryDto>(`${this.serverUrl}settings/profiles-registry`);
+      .get<ProfilesRegistryDto>(`${this.serverUrl}settings/profiles-registry`)
+      .pipe(
+        catchError(() => of(null))
+      );
   }
 
   setProfilesRegistry(profilesRegistryDto: ProfilesRegistryDto): Observable<boolean> {
@@ -274,9 +279,12 @@ export class BackendService {
       .pipe(succeeded());
   }
 
-  getUnitExportConfig(): Observable<UnitExportConfigDto> {
+  getUnitExportConfig(): Observable<UnitExportConfigDto | null> {
     return this.http
-      .get<UnitExportConfigDto>(`${this.serverUrl}settings/unit-export-config`);
+      .get<UnitExportConfigDto>(`${this.serverUrl}settings/unit-export-config`)
+      .pipe(
+        catchError(() => of(null))
+      );
   }
 
   setUnitExportConfig(unitExportConfig: UnitExportConfigDto): Observable<boolean> {

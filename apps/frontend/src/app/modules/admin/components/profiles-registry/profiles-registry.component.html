@@ -1,16 +1,20 @@
-<form [formGroup]="configForm"
-      class="fx-column-start-stretch">
-  <mat-form-field class="fx-column-start-stretch">
-    <mat-label>{{'profiles-registry.csv-url' | translate}}</mat-label>
-    <input matInput
-           formControlName="csvUrl">
-  </mat-form-field>
-  <div class="fx-row-end-center">
-    <button mat-raised-button
-            color="primary"
-            [disabled]="!dataChanged || save.saving()"
-            (click)="saveData()">
-      {{'save' | translate}}
-    </button>
-  </div>
-</form>
+@if (registryNotLoaded()) {
+  <p class="info" data-cy="admin-profiles-registry-not-loaded">{{'profiles-registry.registry-not-loaded' | translate}}</p>
+} @else {
+  <form [formGroup]="configForm"
+        class="fx-column-start-stretch">
+    <mat-form-field class="fx-column-start-stretch">
+      <mat-label>{{'profiles-registry.csv-url' | translate}}</mat-label>
+      <input matInput
+             formControlName="csvUrl">
+    </mat-form-field>
+    <div class="fx-row-end-center">
+      <button mat-raised-button
+              color="primary"
+              [disabled]="!dataChanged || save.saving()"
+              (click)="saveData()">
+        {{'save' | translate}}
+      </button>
+    </div>
+  </form>
+}

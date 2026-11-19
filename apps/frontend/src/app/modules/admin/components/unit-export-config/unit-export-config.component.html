@@ -1,26 +1,30 @@
-<form [formGroup]="configForm"
-      class="fx-column-start-stretch">
-  <mat-form-field class="fx-column-start-stretch">
-    <mat-label>{{'unit-export-config.unit-xml-path' | translate}}</mat-label>
-    <input matInput
-           formControlName="unitXsdUrl">
-  </mat-form-field>
-  <mat-form-field class="fx-column-start-stretch">
-    <mat-label>{{'unit-export-config.booklet-xml-path' | translate}}</mat-label>
-    <input matInput
-           formControlName="bookletXsdUrl">
-  </mat-form-field>
-  <mat-form-field class="fx-column-start-stretch">
-    <mat-label>{{'unit-export-config.test-taker-xml-path' | translate}}</mat-label>
-    <input matInput
-           formControlName="testTakersXsdUrl">
-  </mat-form-field>
-  <div class="fx-row-end-center">
-    <button mat-raised-button
-            color="primary"
-            [disabled]="!dataChanged || save.saving()"
-            (click)="saveData()">
-      {{'save' | translate}}
-    </button>
-  </div>
-</form>
+@if (configNotLoaded()) {
+  <p class="info" data-cy="admin-unit-export-config-not-loaded">{{'unit-export-config.params-not-loaded' | translate}}</p>
+} @else {
+  <form [formGroup]="configForm"
+        class="fx-column-start-stretch">
+    <mat-form-field class="fx-column-start-stretch">
+      <mat-label>{{'unit-export-config.unit-xml-path' | translate}}</mat-label>
+      <input matInput
+             formControlName="unitXsdUrl">
+    </mat-form-field>
+    <mat-form-field class="fx-column-start-stretch">
+      <mat-label>{{'unit-export-config.booklet-xml-path' | translate}}</mat-label>
+      <input matInput
+             formControlName="bookletXsdUrl">
+    </mat-form-field>
+    <mat-form-field class="fx-column-start-stretch">
+      <mat-label>{{'unit-export-config.test-taker-xml-path' | translate}}</mat-label>
+      <input matInput
+             formControlName="testTakersXsdUrl">
+    </mat-form-field>
+    <div class="fx-row-end-center">
+      <button mat-raised-button
+              color="primary"
+              [disabled]="!dataChanged || save.saving()"
+              (click)="saveData()">
+        {{'save' | translate}}
+      </button>
+    </div>
+  </form>
+}

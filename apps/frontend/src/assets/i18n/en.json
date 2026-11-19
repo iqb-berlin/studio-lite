@@ -396,7 +396,8 @@
   "profiles-registry": {
     "csv-url": "URL of the CSV file",
     "csv-url-saved": "URL of the profile registry saved",
-    "csv-url-not-saved": "Could not save the URL of the profile registry"
+    "csv-url-not-saved": "Could not save the URL of the profile registry",
+    "registry-not-loaded": "The URL of the profile registry could not be loaded."
   },
   "config": {
     "start-page-warning": "Warning on the home page",
@@ -424,7 +425,8 @@
     "booklet-xml-path": "XSD path for Booklet.xml",
     "unit-xml-path": "XSD path for Unit.xml",
     "params-saved": "Parameters for the unit export saved",
-    "params-not-saved": "Could not save the parameters for the unit export"
+    "params-not-saved": "Could not save the parameters for the unit export",
+    "params-not-loaded": "The parameters for the unit export could not be loaded."
   },
   "missings-profiles-config": {
     "iqb-standard": "IQB standard",
