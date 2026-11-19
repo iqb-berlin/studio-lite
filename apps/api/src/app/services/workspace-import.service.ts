@@ -7,6 +7,7 @@ import { RequestReportDto } from '@studio-lite-lib/api-dto';
 // works in both.
 import AdmZip from 'adm-zip';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import { isResourcePackageName } from '@studio-lite/shared-code';
 import Workspace from '../entities/workspace.entity';
 import { UNIT_KEY_MAX_LENGTH, UNIT_NAME_MAX_LENGTH } from '../entities/unit.entity';
 import { cutToColumn, fitsColumn, isValueTooLong } from '../utils/column-length';
@@ -19,6 +20,7 @@ import { UnitMetadataService } from './unit-metadata.service';
 import { UnitDefinitionService } from './unit-definition.service';
 import { UnitCommentService } from './unit-comment.service';
 import { UnitRichNoteService } from './unit-rich-note.service';
+import { ResourcePackageService } from './resource-package.service';
 import User from '../entities/user.entity';
 import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
 import { ZIP_MIME_TYPES } from '../constants/zip-mime-types';
@@ -49,7 +51,8 @@ export class WorkspaceImportService {
     private unitMetadataService: UnitMetadataService,
     private unitDefinitionService: UnitDefinitionService,
     private unitCommentService: UnitCommentService,
-    private unitRichNoteService: UnitRichNoteService
+    private unitRichNoteService: UnitRichNoteService,
+    private resourcePackageService: ResourcePackageService
   ) {}
 
   async uploadFiles(
@@ -240,6 +243,8 @@ export class WorkspaceImportService {
         await this.importDefinition(newUnitId, unitImportData);
       }
 
+      await this.acknowledgeResourcePackages(unitImportData, notXmlFiles, usedFiles, functionReturn);
+
       if (unitImportData.metadataFileName) {
         if (notXmlFiles[unitImportData.metadataFileName]) {
           const parsedMetadata = parseCompanionJson<unknown>(
@@ -329,6 +334,36 @@ export class WorkspaceImportService {
         messageKey: 'unit-patch.duplicate-unit-id'
       });
     }
+  }
+
+  /**
+   * A resource package the export laid beside a unit that names it (#1602). It belongs to the unit
+   * and is no "ignored file", but the import does not install it -- only an administrator installs
+   * packages. If the studio does not have it, the report says so.
+   */
+  private async acknowledgeResourcePackages(
+    unitImportData: UnitImportData | UnitImportJsonData,
+    notXmlFiles: { [fName: string]: FileIo },
+    usedFiles: string[],
+    functionReturn: RequestReportDto
+  ): Promise<void> {
+    const folder = unitImportData.fileName.substring(0, unitImportData.fileName.lastIndexOf('/') + 1);
+    const packageNames = [...unitImportData.dependenciesToPlay, ...unitImportData.dependenciesToEdit]
+      .filter(dependency => dependency.type !== 'WIDGET' && dependency.type !== 'SERVICE')
+      .map(dependency => dependency.id)
+      .filter(isResourcePackageName);
+    const enclosed = Object.keys(notXmlFiles).filter(fileName => fileName.startsWith(folder) &&
+      packageNames.some(name => fileName.substring(folder.length).toLowerCase() === name.toLowerCase()));
+    await Promise.all(enclosed.map(async fileName => {
+      if (usedFiles.includes(fileName)) return;
+      usedFiles.push(fileName);
+      if (!await this.resourcePackageService.findByFileName(fileName.substring(folder.length))) {
+        functionReturn.messages.push({
+          objectKey: fileName,
+          messageKey: 'unit-upload.api-warning.resource-package-not-installed'
+        });
+      }
+    }));
   }
 
   private static warnMissingFile(fileName: string, functionReturn: RequestReportDto): void {

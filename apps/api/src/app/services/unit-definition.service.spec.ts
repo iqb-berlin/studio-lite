@@ -78,6 +78,18 @@ describe('UnitDefinitionService', () => {
       expect(result.dependenciesToEdit).toEqual([]);
     });
 
+    it('should hand out both dependency lists as one, and none for a unit without a definition', async () => {
+      const geogebra = { id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' as const };
+      const calc = { id: 'CALC', type: 'WIDGET' as const };
+      unitDefinitionsRepository.findOne.mockResolvedValueOnce(
+        { dependenciesToPlay: [calc], dependenciesToEdit: [geogebra] } as UnitDefinition
+      );
+      unitDefinitionsRepository.findOne.mockResolvedValueOnce(null);
+
+      expect(await service.findOnesDependencies(1)).toEqual([calc, geogebra]);
+      expect(await service.findOnesDependencies(2)).toEqual([]);
+    });
+
     it('should give a unit without a stored definition an empty one', async () => {
       unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 1 } as Unit);
       unitDefinitionsRepository.findOne.mockResolvedValue(null);

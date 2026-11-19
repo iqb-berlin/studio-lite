@@ -1,5 +1,5 @@
 import AdmZip from 'adm-zip';
-import { createMock } from '@golevelup/ts-jest';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -11,6 +11,8 @@ import { UnitMetadataService } from './unit-metadata.service';
 import { UnitDefinitionService } from './unit-definition.service';
 import { UnitCommentService } from './unit-comment.service';
 import { UnitRichNoteService } from './unit-rich-note.service';
+import { ResourcePackageService } from './resource-package.service';
+import ResourcePackage from '../entities/resource-package.entity';
 import User from '../entities/user.entity';
 import { FileIo } from '../interfaces/file-io.interface';
 
@@ -22,6 +24,7 @@ describe('WorkspaceImportService', () => {
   let unitDefinitionService: UnitDefinitionService;
   let unitCommentService: UnitCommentService;
   let unitRichNoteService: UnitRichNoteService;
+  let resourcePackageService: DeepMocked<ResourcePackageService>;
 
   beforeEach(async () => {
     workspaceRepository = createMock<Repository<Workspace>>();
@@ -30,6 +33,7 @@ describe('WorkspaceImportService', () => {
     unitDefinitionService = createMock<UnitDefinitionService>();
     unitCommentService = createMock<UnitCommentService>();
     unitRichNoteService = createMock<UnitRichNoteService>();
+    resourcePackageService = createMock<ResourcePackageService>();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -39,7 +43,8 @@ describe('WorkspaceImportService', () => {
         { provide: UnitMetadataService, useValue: unitMetadataService },
         { provide: UnitDefinitionService, useValue: unitDefinitionService },
         { provide: UnitCommentService, useValue: unitCommentService },
-        { provide: UnitRichNoteService, useValue: unitRichNoteService }
+        { provide: UnitRichNoteService, useValue: unitRichNoteService },
+        { provide: ResourcePackageService, useValue: resourcePackageService }
       ]
     }).compile();
 
@@ -204,6 +209,55 @@ describe('WorkspaceImportService', () => {
         expect(unitDefinitionService.patchDefinition).toHaveBeenCalledWith(
           10, expect.objectContaining({ definition: '{"definition":1}' }), null, undefined
         );
+      });
+
+      // An export lays the resource packages its units name beside them (#1602).
+      describe('with a resource package beside a unit that names it', () => {
+        const exportWithPackage = (packageFile: string, named = 'GeoGebra.itcr.zip') => {
+          const zip = new AdmZip();
+          zip.addFile('U1.xml', Buffer.from(
+            '<Unit><Metadata><Id>U1</Id></Metadata><Definition player="p">{}</Definition>' +
+            `<Dependencies><File for="player">${named}</File></Dependencies></Unit>`
+          ));
+          zip.addFile(packageFile, Buffer.from('package'));
+          return zipFile(zip.toBuffer());
+        };
+
+        beforeEach(() => {
+          (unitService.create as jest.Mock).mockResolvedValue(10);
+          (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+        });
+
+        it('should take the package as part of the unit when the studio has it, and install nothing', async () => {
+          resourcePackageService.findByFileName.mockResolvedValue({ name: 'GeoGebra' } as ResourcePackage);
+
+          const result = await service.uploadFiles(1, [exportWithPackage('GeoGebra.itcr.zip')], user);
+
+          expect(result.messages).toEqual([]);
+          expect(resourcePackageService.create).not.toHaveBeenCalled();
+          expect(unitDefinitionService.patchDefinition).toHaveBeenCalledWith(10, expect.objectContaining({
+            dependenciesToPlay: [{ id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }]
+          }), null, undefined);
+        });
+
+        it('should say when the studio does not have the package, whatever its case', async () => {
+          resourcePackageService.findByFileName.mockResolvedValue(null);
+
+          const result = await service.uploadFiles(1, [exportWithPackage('geogebra.ITCR.zip')], user);
+
+          expect(result.messages).toEqual([{
+            objectKey: 'export.zip/geogebra.ITCR.zip',
+            messageKey: 'unit-upload.api-warning.resource-package-not-installed'
+          }]);
+        });
+
+        it('should still report a package no unit names as ignored', async () => {
+          const result = await service.uploadFiles(1, [exportWithPackage('Other.itcr.zip')], user);
+
+          expect(result.messages).toEqual([{
+            objectKey: 'export.zip/Other.itcr.zip', messageKey: 'unit-upload.api-warning.ignore-file'
+          }]);
+        });
       });
 
       it('should report a zip that cannot be read', async () => {

@@ -9,6 +9,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
+import { namesResourcePackage, RESOURCE_PACKAGE_ENDING } from '@studio-lite/shared-code';
 import { Express } from 'express';
 import 'multer';
 // adm-zip is CommonJS with no statically detectable named exports -- see the note on the adm-zip
@@ -41,6 +42,28 @@ export class ResourcePackageService {
       .find({
         order: { createdAt: 'DESC' }
       });
+  }
+
+  /**
+   * The installed package a unit names as a dependency (`GeoGebra.itcr.zip`), compared regardless of
+   * case as the testcenter does -- or null when none is installed under that name (#1602).
+   */
+  async findByFileName(fileName: string): Promise<ResourcePackage | null> {
+    const packages = await this.resourcePackageRepository.find();
+    return packages.find(resourcePackage => namesResourcePackage(fileName, resourcePackage.name)) ?? null;
+  }
+
+  /**
+   * The zip of an installed package as it was uploaded, under its own file name, for the unit export
+   * (#1602). Null when no package of that name is installed or its zip is not on disk.
+   */
+  async findZippedResourcePackage(fileName: string): Promise<{ fileName: string; file: Buffer } | null> {
+    const resourcePackage = await this.findByFileName(fileName);
+    if (!resourcePackage) return null;
+    const zipName = `${resourcePackage.name}${RESOURCE_PACKAGE_ENDING}`;
+    const zipPath = `${this.resourcePackagesPath}/${resourcePackage.name}/${zipName}`;
+    if (!fs.existsSync(zipPath)) return null;
+    return { fileName: zipName, file: fs.readFileSync(zipPath) };
   }
 
   async removeResourcePackages(ids: number[]): Promise<void> {

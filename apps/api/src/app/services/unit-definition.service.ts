@@ -6,7 +6,7 @@ import {
   UnitDefinitionFullDto,
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
-import { toUnitDependencies, toVariableInfoListV1 } from '@studio-lite/shared-code';
+import { toUnitDependencies, toVariableInfoListV1, UnitDependency } from '@studio-lite/shared-code';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
 import { isCodingScheme } from '../utils/coding-scheme';
@@ -51,6 +51,15 @@ export class UnitDefinitionService {
       returnUnit.dependenciesToEdit = unitDefinition.dependenciesToEdit ?? [];
     }
     return returnUnit;
+  }
+
+  /** Only the dependency lists, without the definition they belong to -- for the export's packages (#1602). */
+  async findOnesDependencies(unitId: number): Promise<UnitDependency[]> {
+    const unitDefinition = await this.unitDefinitionsRepository.findOne({
+      where: { unitId },
+      select: { dependenciesToPlay: true, dependenciesToEdit: true }
+    });
+    return [...(unitDefinition?.dependenciesToPlay ?? []), ...(unitDefinition?.dependenciesToEdit ?? [])];
   }
 
   /**
