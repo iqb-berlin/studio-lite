@@ -59,9 +59,6 @@
         {{ appService.appConfig.pageTitle }}
       </div>
     }
-    @if (currentRoutePath !== 'print') {
-      <studio-lite-language-menu></studio-lite-language-menu>
-    }
     @if (currentRoutePath !== 'review' && currentRoutePath !== 'print') {
       @if (appService.authData.userId) {
         <button mat-button
@@ -87,9 +84,13 @@
             icon="construction"></studio-lite-wrapped-icon>
         </button>
       }
-      @if (appService.authData.userId) {
-        <studio-lite-user-menu></studio-lite-user-menu>
-      }
+    }
+    <!-- the language next to last, before the user's menu; in a review as well, only a printout has none (#2175) -->
+    @if (currentRoutePath !== 'print') {
+      <studio-lite-language-menu></studio-lite-language-menu>
+    }
+    @if (currentRoutePath !== 'review' && currentRoutePath !== 'print' && appService.authData.userId) {
+      <studio-lite-user-menu></studio-lite-user-menu>
     }
     </div>
   </div>

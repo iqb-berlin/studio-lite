@@ -199,6 +199,23 @@ describe('AppComponent', () => {
     expect(!!header.querySelector('[data-cy="goto-admin"]')).toBe(shown);
   }));
 
+  // The language stands next to last, before the user's menu
+  it('should put the language menu between the administration and the user menu', fakeAsync(() => {
+    appService.authData = { ...AppService.defaultAuthData, userId: 1, isAdmin: true };
+    fixture.detectChanges();
+    tick();
+
+    router.navigateByUrl('/a/5/12/editor');
+    tick();
+    fixture.detectChanges();
+
+    const header: HTMLElement = fixture.nativeElement.querySelector('header');
+    const order = Array.from(header.querySelectorAll(
+      '[data-cy="app-info"], [data-cy="goto-admin"], studio-lite-language-menu, studio-lite-user-menu'
+    )).map(element => element.getAttribute('data-cy') ?? element.tagName.toLowerCase());
+    expect(order).toEqual(['app-info', 'goto-admin', 'studio-lite-language-menu', 'studio-lite-user-menu']);
+  }));
+
   // In any language but German the url starts with the prefix, and the area is what follows it.
   // The language menu is wanted in a review as well, only a printout has none (#2175).
   it.each([
