@@ -24,15 +24,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
-import {
-  FormlyChipsComponent,
-  FormlyWrapperPanel,
-  FormlyToggleComponent,
-  FormlyDurationComponent,
-  ProfileFormComponent,
-  NestedTreeComponent,
-  FormlyInlineComponent
-} from '@iqb/metadata-components';
+import { metadataFormlyConfig, ProfileFormComponent } from '@iqb/metadata-components';
 import { ItemsComponent } from './components/items/items.component';
 import { ItemComponent } from './components/item/item.component';
 import { TableViewComponent } from './components/table-view/table-view.component';
@@ -89,6 +81,7 @@ export function IdValidator(control: AbstractControl, field: FormlyFieldConfig):
     MatDialogModule,
     FormlyMatToggleModule,
     FormlyModule.forRoot({
+      ...metadataFormlyConfig,
       validators: [
         {
           name: 'id',
@@ -96,68 +89,21 @@ export function IdValidator(control: AbstractControl, field: FormlyFieldConfig):
           options: { ids: [] }
         }
       ],
-      wrappers: [
-        {
-          name: 'panel',
-          component: FormlyWrapperPanel
-        }
-      ],
       types: [
-        {
-          name: 'chips',
-          wrappers: ['form-field'],
-          component: FormlyChipsComponent,
-          defaultOptions: {
-            defaultValue: [],
-            props: {
-              maxLevel: 0
-            }
-          }
-        },
-        {
-          name: 'vocabInline',
-          wrappers: ['form-field'],
-          component: FormlyInlineComponent,
-          defaultOptions: {
-            defaultValue: [],
-            props: {
-              maxLevel: 0
-            }
-          }
-        },
-        {
-          name: 'formlyToggle',
-          wrappers: ['form-field'],
-          component: FormlyToggleComponent,
-          defaultOptions: {
-            defaultValue: false
-          }
-        },
-        {
-          name: 'duration',
-          wrappers: ['form-field'],
-          component: FormlyDurationComponent,
-          defaultOptions: {
-            props: {
-              floatLabel: 'always'
-            }
-          }
-        }
+        ...metadataFormlyConfig.types,
+        { name: 'chips', defaultOptions: { defaultValue: [], props: { maxLevel: 0 } } },
+        { name: 'vocabInline', defaultOptions: { defaultValue: [], props: { maxLevel: 0 } } },
+        { name: 'formlyToggle', defaultOptions: { defaultValue: false } },
+        { name: 'duration', defaultOptions: { props: { floatLabel: 'always' } } }
       ]
     }),
     FormlyMaterialModule,
     MatProgressSpinnerModule,
     MatListModule,
     MatTooltipModule,
-    FormlyChipsComponent,
-    FormlyWrapperPanel,
-    FormlyToggleComponent,
-    FormlyDurationComponent,
-    FormlyInlineComponent,
     ItemsComponent,
     ItemComponent,
     ProfileFormComponent,
-    NestedTreeComponent,
     TableViewComponent
   ],
   providers: [
