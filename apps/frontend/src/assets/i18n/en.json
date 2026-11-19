@@ -889,6 +889,27 @@
       "error": "Error",
       "warning": "Warning"
     },
+    "validation-status": {
+      "OK": "OK",
+      "WARNING": "Warning",
+      "ERROR": "Error",
+      "SCHEME_MISSING_OR_TOO_OLD": "Create the coding scheme with schemer version 1.5 or later.",
+      "SCHEME_UNREADABLE": "The coding scheme cannot be evaluated"
+    },
+    "variable-type": {
+      "BASE": "base variable",
+      "DERIVED": "derived variable"
+    },
+    "coding-type": {
+      "AUTOMATIC": "automatic",
+      "MANUAL": "manual",
+      "SEMI_AUTOMATIC": "semi-automatic",
+      "NO_RULES": "no rules"
+    },
+    "training-effort": {
+      "INCREASED": "increased",
+      "NORMAL": "normal"
+    },
     "technical-type": "Technical type: {{type}}",
     "validation-problems": {
       "VACANT": "Without codes and not derived",

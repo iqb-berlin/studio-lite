@@ -1,4 +1,4 @@
-import type { UnitInViewDto, WorkspaceGroupFullDto } from '@studio-lite-lib/api-dto';
+import type { CodingReportDto, UnitInViewDto, WorkspaceGroupFullDto } from '@studio-lite-lib/api-dto';
 import {
   AccessLevel,
   DefinitionUnit,
@@ -1783,6 +1783,15 @@ describe('Unit API tests', () => {
         ).then(resp => {
           expect(resp.status).to.equal(200);
           expect(resp.body[1].validation).to.equal('OK');
+          // Codes instead of German texts; the interface translates them (#2180). Scheme from updateUnitSchemeAPI.
+          const rowOf = (variable: string) => (resp.body as CodingReportDto[])
+            .find(row => row.variable === variable);
+          expect(rowOf('text-area_1')).to.include({
+            variableType: 'BASE', codingType: 'SEMI_AUTOMATIC', trainingEffort: 'NORMAL'
+          });
+          expect(rowOf('radio_1')).to.include({
+            variableType: 'BASE', codingType: 'AUTOMATIC', trainingEffort: 'NORMAL'
+          });
         });
       }
     );

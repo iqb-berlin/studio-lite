@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SimpleChange } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { provideHttpClient } from '@angular/common/http';
 import { of, Subject } from 'rxjs';
 import { VariableCodingData, SourceType } from '@iqbspecs/coding-scheme/coding-scheme.interface';
@@ -61,6 +61,20 @@ describe('UnitPrintCodingComponent', () => {
 
     fixture = TestBed.createComponent(UnitPrintCodingComponent);
     component = fixture.componentInstance;
+  });
+
+  it('names the variable type in the language of the interface (#2180)', () => {
+    const translateService = TestBed.inject(TranslateService);
+    translateService.setTranslation('en', {
+      'coding-report': { 'variable-type': { BASE: 'base variable', DERIVED: 'derived variable' } }
+    });
+    translateService.use('en');
+    component.codings = [createMockVariableCoding('BASE'), createMockVariableCoding('SUM_SCORE')];
+    fixture.detectChanges();
+
+    const headings = Array.from(fixture.nativeElement.querySelectorAll('h4') as NodeListOf<HTMLElement>)
+      .map(heading => heading.textContent?.trim());
+    expect(headings).toEqual(['alias1 base variable', 'alias1 derived variable']);
   });
 
   describe('ngOnChanges', () => {

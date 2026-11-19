@@ -18,25 +18,26 @@ describe('CodingReportComponent', () => {
   };
   let workspaceService: { selectedWorkspaceId: number };
 
+  // The report sends codes; the component shows their texts (#2180)
   const rows: CodingReportDto[] = [
     {
       unit: 'U1',
       unitKey: 'U1',
       variable: 'V1',
-      variableType: 'Basisvariable',
+      variableType: 'BASE',
       item: 'I1',
-      validation: 'ok',
+      validation: 'OK',
       validationProblems: [],
-      codingType: 'keine Regeln',
-      trainingEffort: 'normal'
-    } as CodingReportDto,
+      codingType: 'NO_RULES',
+      trainingEffort: 'NORMAL'
+    },
     {
       unit: 'U1',
       unitKey: 'U1',
       variable: 'V2',
-      variableType: 'abgeleitete Variable',
+      variableType: 'DERIVED',
       item: 'I2',
-      validation: 'ok',
+      validation: 'ERROR',
       validationProblems: [
         {
           type: 'INVALID_SOURCE', breaking: true
@@ -45,33 +46,33 @@ describe('CodingReportComponent', () => {
           type: 'RULE_PARAMETER_INVALID', breaking: false, code: '17'
         }
       ],
-      codingType: 'REGEL',
-      trainingEffort: 'erhöht'
-    } as CodingReportDto,
+      codingType: 'SEMI_AUTOMATIC',
+      trainingEffort: 'INCREASED'
+    },
     {
       unit: 'U1',
       unitKey: 'U1',
       variable: 'V3',
-      variableType: 'abgeleitete Variable',
+      variableType: 'DERIVED',
       item: 'I3',
-      validation: 'Warnung',
+      validation: 'WARNING',
       validationProblems: [{
         type: 'ONLY_ONE_SOURCE', breaking: false
       }],
-      codingType: 'REGEL',
-      trainingEffort: 'normal'
-    } as CodingReportDto,
+      codingType: 'AUTOMATIC',
+      trainingEffort: 'NORMAL'
+    },
     {
       unit: 'U2',
       unitKey: 'U2',
       variable: '',
       variableType: '',
       item: '',
-      validation: 'Kodierschema mit Schemer Version ab 1.5 erzeugen!',
+      validation: 'SCHEME_MISSING_OR_TOO_OLD',
       validationProblems: [],
       codingType: '',
       trainingEffort: ''
-    } as CodingReportDto
+    }
   ];
 
   beforeEach(async () => {
@@ -99,6 +100,7 @@ describe('CodingReportComponent', () => {
 
     const translateService = TestBed.inject(TranslateService);
     translateService.setTranslation('de', {
+      workspace: { 'coding-report': 'Kodierbericht' },
       'coding-report': {
         unit: 'Aufgabe',
         variable: 'Variable',
@@ -126,7 +128,19 @@ describe('CodingReportComponent', () => {
           error: 'Fehler',
           warning: 'Warnung'
         },
-        'technical-type': 'Technischer Typ: {{type}}'
+        'technical-type': 'Technischer Typ: {{type}}',
+        'validation-status': {
+          OK: 'OK',
+          WARNING: 'Warnung',
+          ERROR: 'Fehler',
+          SCHEME_MISSING_OR_TOO_OLD: 'Kodierschema mit Schemer Version ab 1.5 erzeugen!',
+          SCHEME_UNREADABLE: 'Kodierschema kann nicht ausgewertet werden'
+        },
+        'variable-type': { BASE: 'Basisvariable', DERIVED: 'abgeleitete Variable' },
+        'coding-type': {
+          AUTOMATIC: 'automatisch', MANUAL: 'manuell', SEMI_AUTOMATIC: 'halbautomatisch', NO_RULES: 'keine Regeln'
+        },
+        'training-effort': { INCREASED: 'erhöht', NORMAL: 'normal' }
       }
     });
     translateService.use('de');
@@ -149,6 +163,24 @@ describe('CodingReportComponent', () => {
       component.unitDataRows[2],
       component.unitDataRows[3]
     ]);
+  });
+
+  it('shows the codes of the report as texts of the interface (#2180)', () => {
+    const cellsOfV2 = Array.from(
+      fixture.nativeElement.querySelectorAll('.coding-report-row')[0]
+        .querySelectorAll('td') as NodeListOf<HTMLElement>
+    ).map(cell => cell.textContent?.trim());
+
+    expect(cellsOfV2).toEqual(expect.arrayContaining(['V2', 'abgeleitete Variable', 'halbautomatisch', 'erhöht']));
+  });
+
+  it('filters by the texts shown, not by the codes (#2180)', () => {
+    const input = document.createElement('input');
+    input.value = 'halbautomatisch';
+
+    component.applyFilter({ target: input } as unknown as Event);
+
+    expect(component.dataSource.filteredData.map(row => row.variable)).toEqual(['V2']);
   });
 
   it('shows a compact validation summary and expands structured details', () => {
@@ -424,11 +456,12 @@ describe('CodingReportComponent', () => {
       writable: true
     });
     const clickMock = jest.fn();
-    const createElementSpy = jest.spyOn(document, 'createElement').mockReturnValue({
+    const link = {
       href: '',
       download: '',
       click: clickMock
-    } as unknown as HTMLAnchorElement);
+    } as unknown as HTMLAnchorElement;
+    const createElementSpy = jest.spyOn(document, 'createElement').mockReturnValue(link);
 
     component.downloadCodingReport();
 
@@ -438,7 +471,9 @@ describe('CodingReportComponent', () => {
     expect(String(blobParts[0][0])).toContain(
       'Aufgabe;Variable;Variablentyp;Item;Validierung;Validierungsdetails;Kodiertyp;Schulungsaufwand'
     );
-    expect(String(blobParts[0][0])).toContain('"abgeleitete Variable"');
+    expect(String(blobParts[0][0])).toContain('"V2";"abgeleitete Variable";"I2";"Fehler";');
+    expect(String(blobParts[0][0])).toContain('"halbautomatisch";"erhöht"');
+    expect(link.download).toBe('Kodierbericht.csv');
     expect(String(blobParts[0][0])).toContain(
       '"Ungültige Quelle (INVALID_SOURCE) | ' +
       'Ungültiger Regelparameter (RULE_PARAMETER_INVALID) [Code: 17]"'
