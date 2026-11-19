@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { FormlyConfig } from '@ngx-formly/core';
+import { FormlyConfig, FormlyForm } from '@ngx-formly/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { metadataFormlyConfig } from '@iqb/metadata-components';
 import { IdValidator, MetadataModule } from './metadata.module';
@@ -7,7 +7,9 @@ import { IdValidator, MetadataModule } from './metadata.module';
 describe('MetadataModule Formly configuration', () => {
   it('keeps the shared field components and wrappers when applying Studio defaults', () => {
     TestBed.configureTestingModule({ imports: [TranslateModule.forRoot(), MetadataModule] });
-    const config = TestBed.inject(FormlyConfig);
+    const form = TestBed.createComponent(FormlyForm);
+    form.detectChanges();
+    const config = form.debugElement.injector.get(FormlyConfig);
 
     metadataFormlyConfig.types.forEach(type => {
       expect(config.getType(type.name)).toMatchObject(type);
