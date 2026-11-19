@@ -130,6 +130,19 @@ describe('EditUserComponent', () => {
       .toBe(`mailto:john.doe@example.com?subject=Welcome&body=${body}`);
   });
 
+  // Unencoded, the subject ended at an "&", and a "#" made the rest of the address, the text with the password
+  // included, a fragment the mail program never sees (#2189).
+  it('should keep subject and text whole whatever characters the subject holds', () => {
+    component.emailTemplate = {
+      emailSubject: { de: 'Zugang & Kennwort #1?' },
+      emailBody: { de: 'Ihr Kennwort: {{password}}' }
+    };
+
+    const mail = new URL(component.mailToHref());
+    expect(mail.searchParams.get('subject')).toBe('Zugang & Kennwort #1?');
+    expect(mail.searchParams.get('body')).toBe('Ihr Kennwort: testpass');
+  });
+
   it('should not hold saving back for blanks around the e-mail address (#2147)', () => {
     component.editUserForm.get('email')?.setValue(' john.doe@example.com ');
     expect(component.editUserForm.valid).toBe(true);

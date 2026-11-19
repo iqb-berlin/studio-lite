@@ -102,7 +102,9 @@ export class EditUserComponent implements OnInit {
   /** The mail to the user, from the template in the language of the interface. */
   mailToHref(): string {
     const email: string = trimEmail(this.editUserForm.get('email')?.value) || '';
-    const subject: string = textIn(this.emailTemplate?.emailSubject, this.language);
+    // Encoded like the text: an "&" in the subject would end it, a "#" the whole address (#2189). Not with
+    // URLSearchParams, whose "+" for a blank stays a plus in a mailto address.
+    const subject: string = encodeURIComponent(textIn(this.emailTemplate?.emailSubject, this.language));
     return `mailto:${email}?subject=${subject}&body=${this.getEmailBody()}`;
   }
 
