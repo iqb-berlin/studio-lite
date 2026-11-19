@@ -68,7 +68,9 @@ describe('Admin Settings Tab Configuration', () => {
     it('clears the warning message and restores defaults', () => {
       goToSettings();
       clearFormControl('globalWarningText');
-      clearFormControl('appTitle');
+      // The settings outlast the reset before each spec. An emptied title stays empty (#1964), and
+      // core/app.cy.ts, which looks for the title, saw it only while the config was still loading.
+      setFormControl('appTitle', 'IQB-Studio');
       clearFormControl('introHtml');
       clearFormControl('imprintHtml');
       saveAndExpect(
