@@ -2056,7 +2056,7 @@ Cypress.Commands.add('getReportAPI', (token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: '/api/workspace-groups?download=true',
+    url: '/api/workspace-groups/report',
     headers: {
       'app-version': Cypress.expose('version'),
       authorization
@@ -2066,12 +2066,11 @@ Cypress.Commands.add('getReportAPI', (token:string) => {
 });
 
 // 77
-// ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
-Cypress.Commands.add('downloadWsAPI', (groupId:string, token:string) => {
+Cypress.Commands.add('getGroupReportAPI', (groupId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'GET',
-    url: `/api/workspace-groups/${groupId}?download=true`,
+    url: `/api/workspace-groups/${groupId}/report`,
     headers: {
       'app-version': Cypress.expose('version'),
       authorization

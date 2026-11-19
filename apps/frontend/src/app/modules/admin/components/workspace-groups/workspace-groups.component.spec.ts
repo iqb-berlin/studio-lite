@@ -57,8 +57,7 @@ describe('WorkspaceGroupsComponent', () => {
       addWorkspaceGroup: jest.fn().mockReturnValue(of(true)),
       changeWorkspaceGroup: jest.fn().mockReturnValue(of(true)),
       setWorkspaceGroupProfiles: jest.fn().mockReturnValue(of(true)),
-      deleteWorkspaceGroups: jest.fn().mockReturnValue(of(true)),
-      getXlsWorkspaces: jest.fn().mockReturnValue(of(new Blob(['content'])))
+      deleteWorkspaceGroups: jest.fn().mockReturnValue(of(true))
     };
 
     mockAppService = {

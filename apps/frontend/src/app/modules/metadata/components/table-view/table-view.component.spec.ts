@@ -5,7 +5,6 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { of } from 'rxjs';
 import { MDProfileGroup } from '@iqbspecs/metadata-profile';
 import { ItemsMetadataValues, MetadataValuesEntry, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { saveAs } from 'file-saver-es';
@@ -14,8 +13,10 @@ import { MetadataService } from '../../services/metadata.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { I18nService } from '../../../../services/i18n.service';
 import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
+import { buildXlsxFile } from '../../../../utils/xlsx-file.utils';
 
 jest.mock('file-saver-es', () => ({ saveAs: jest.fn() }));
+jest.mock('../../../../utils/xlsx-file.utils', () => ({ buildXlsxFile: jest.fn() }));
 
 interface ColumnValues {
   key?: string;
@@ -35,8 +36,7 @@ describe('TableViewComponent', () => {
   beforeEach(async () => {
     mockMetadataService = {
       itemProfileColumns: { entries: [] } as unknown as MDProfileGroup,
-      unitProfileColumns: [],
-      downloadMetadataReport: jest.fn().mockReturnValue(of(new Blob()))
+      unitProfileColumns: []
     };
     mockWorkspaceService = {
       selectedWorkspaceId: 1
@@ -226,11 +226,21 @@ describe('TableViewComponent', () => {
       expect(sortedBy('id').map(row => row.id)).toEqual(['1.9', '1.10']);
     });
 
-    const itemColumns = ['key', 'id', 'variableId', 'description', 'Schwierigkeit'];
-    it.each<[string, number, string[], string]>([
-      ['unit', 0, ['key', 'Zeit'], 'metadata.unitMetadataReportFileName.xlsx'],
-      ['item', 1, itemColumns, 'metadata.itemsMetadataReportFileName.xlsx']
-    ])('should download the %s report from tab %i', (type, index, columns, fileName) => {
+    // The file is the table as it is shown, in the language of the interface (#2181).
+    it.each<[string, number, string, string[], string]>([
+      ['unit', 0, 'metadata.units', ['metadata.key', 'Zeit'], 'metadata.unitMetadataReportFileName.xlsx'],
+      ['item', 1, 'metadata.items', [
+        'metadata.key', 'metadata.id', 'metadata.variableId', 'metadata.description', 'Schwierigkeit'
+      ], 'metadata.itemsMetadataReportFileName.xlsx']
+    ])('should save the %s report from tab %i under the headers of the table', async (
+      _,
+      index,
+      sheetName,
+      headers,
+      fileName
+    ) => {
+      const file = new Blob(['xlsx']);
+      jest.mocked(buildXlsxFile).mockResolvedValue(file);
       mockI18nService.fullLocale = 'en-US'; // the locale whose data Angular brings along
       mockMetadataService.unitProfileColumns = [group('Zeit')];
       mockMetadataService.itemProfileColumns = group('Schwierigkeit');
@@ -240,11 +250,42 @@ describe('TableViewComponent', () => {
       };
       component.tabChanged(tab(index));
 
-      component.downloadMetadata();
+      await component.downloadMetadata();
 
-      expect(mockMetadataService.downloadMetadataReport).toHaveBeenCalledTimes(1);
-      expect(mockMetadataService.downloadMetadataReport).toHaveBeenCalledWith(type, columns, [1, 2]);
-      expect(saveAs).toHaveBeenCalledWith(expect.any(Blob), fileName);
+      expect(jest.mocked(buildXlsxFile).mock.lastCall?.[0]).toBe(sheetName);
+      expect(jest.mocked(buildXlsxFile).mock.lastCall?.[1].map(column => column.header)).toEqual(headers);
+      expect(saveAs).toHaveBeenCalledWith(file, fileName);
+    });
+
+    // Built by the API, the file listed every unit in the order loaded, with the values under the label
+    // the API took for the column, which was not always the one the table shows.
+    it('should write the rows the table shows, filtered and sorted, the unit by its key (#2181)', async () => {
+      jest.mocked(buildXlsxFile).mockResolvedValue(new Blob());
+      mockI18nService.fullLocale = 'en-US'; // the locale whose data Angular brings along
+      mockMetadataService.unitProfileColumns = [group('Themen')];
+      const themes = (...values: string[]) => ({
+        profiles: [{ order: 0, entries: [entry('Themen', values.map(value => ({ lang: 'de', value })))] }]
+      });
+      component.data = {
+        units: [
+          { id: 1, key: 'K1', metadata: themes('Zahlen', 'Raum') },
+          { id: 2, key: 'K2', metadata: themes('Raum') },
+          { id: 3, key: 'K3', metadata: themes('Zahlen') }
+        ],
+        warning: ''
+      };
+      component.tabChanged(tab(0));
+      component.dataSource.filter = 'raum';
+      component.dataSource.sort = TestBed.runInInjectionContext(() => new MatSort());
+      component.dataSource.sort.active = 'key';
+      component.dataSource.sort.direction = 'desc';
+
+      await component.downloadMetadata();
+
+      expect(jest.mocked(buildXlsxFile).mock.lastCall?.[2]).toEqual([
+        { key: 'K2', Themen: 'Raum' },
+        { key: 'K1', Themen: 'Zahlen\nRaum' }
+      ]);
     });
   });
 });

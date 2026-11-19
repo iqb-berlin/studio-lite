@@ -1,6 +1,6 @@
 import {
   Body,
-  Controller, Get, Patch, Post, Query, Res, StreamableFile, UseGuards
+  Controller, Get, Patch, Post, UseGuards
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -11,22 +11,20 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiParam,
-  ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
   ApiUnprocessableEntityResponse
 } from '@nestjs/swagger';
 import {
   CreateWorkspaceDto, NameDto, UnitInViewDto, UnitItemInViewDto, UserInListDto, WorkspaceGroupFullDto,
-  WorkspaceInListDto
+  WorkspaceInListDto, WorkspaceReportDto
 } from '@studio-lite-lib/api-dto';
-import type { Response } from 'express';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGroupService } from '../services/workspace-group.service';
 import { WorkspaceGroupId } from '../decorators/workspace-group.decorator';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 import { WorkspaceGroupAccessGuard } from '../guards/workspace-group-access.guard';
-import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
+import { WorkspaceReportClass } from '../classes/workspace-report.class';
 import { WorkspaceService } from '../services/workspace.service';
 import { UnitService } from '../services/unit.service';
 import { UnitItemService } from '../services/unit-item.service';
@@ -39,9 +37,8 @@ import { IsAdminGuard } from '../guards/is-admin.guard';
  * units and items -- is its admin's as well; who administers it is an administrator's to say.
  * All groups at once are {@link WorkspaceGroupsController}.
  *
- * The GET has a second shape: with `download` it answers with the xlsx report over all workspaces
- * of the group instead of the group itself. The group passes for its members, the report only for
- * its admin or an administrator -- see {@link WorkspaceGroupAccessGuard}.
+ * The group itself passes for its members ({@link WorkspaceGroupAccessGuard}); the report over its
+ * workspaces only for its admin or an administrator.
  */
 @Controller('workspace-groups/:workspace_group_id')
 export class WorkspaceGroupController {
@@ -57,35 +54,27 @@ export class WorkspaceGroupController {
   @UseGuards(JwtAuthGuard, WorkspaceGroupAccessGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspace-group retrieved successfully.' })
-  @ApiQuery({
-    name: 'download',
-    type: Boolean,
-    required: false
-  })
   @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
-  @ApiForbiddenResponse({
-    description: 'No workspace in the group, or the report without being the group\'s admin.'
-  })
+  @ApiForbiddenResponse({ description: 'No workspace in the group.' })
   @ApiNotFoundResponse({ description: 'Workspace-group not found.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiParam({ name: 'workspace_group_id', type: Number })
   @ApiTags('workspace-group')
-  async findOne(
-    @WorkspaceGroupId() id: number,
-    @Query('download') download: boolean,
-    @Res({ passthrough: true }) res: Response
-  ): Promise<WorkspaceGroupFullDto | StreamableFile> {
-    if (download) {
-      const file = await DownloadWorkspacesClass.getWorkspaceReport(
-        this.workspaceService, this.unitService, id
-      );
-      res.set({
-        'Content-Type': 'attachment; filename="iqb-studio-workspace-report.xlsx"',
-        'Content-Disposition': 'attachment; filename="iqb-studio-workspace-report.xlsx"'
-      });
-      return new StreamableFile(file as unknown as Uint8Array);
-    }
+  async findOne(@WorkspaceGroupId() id: number): Promise<WorkspaceGroupFullDto> {
     return this.workspaceGroupService.findOne(id);
+  }
+
+  /** The report over the workspaces of the group, which the interface turns into an Excel file (#2181). */
+  @Get('report')
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_group_id', type: Number })
+  @ApiOkResponse({ type: [WorkspaceReportDto] })
+  @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
+  @ApiForbiddenResponse({ description: 'Not the admin of the group.' })
+  @ApiTags('workspace-group')
+  async findReport(@WorkspaceGroupId() id: number): Promise<WorkspaceReportDto[]> {
+    return WorkspaceReportClass.build(this.workspaceService, this.unitService, id);
   }
 
   @Patch()

@@ -79,10 +79,17 @@ describe('Admin Workspaces Management', () => {
     cy.get('.mat-mdc-row').eq(0).should('contain', 'Workspace Beta');
   });
 
-  it('should trigger report download', () => {
-    cy.intercept('GET', '/api/workspace-groups?download=true').as('downloadReport');
+  // The browser builds the file from the figures the API sends, loading exceljs only now (#2181).
+  it('should save the report as an Excel file', () => {
+    cy.intercept('GET', '/api/workspace-groups/report').as('report');
     cy.get('[data-cy="admin-workspaces-menu-download"]').click();
-    cy.wait('@downloadReport');
+    cy.wait('@report').its('response.statusCode').should('equal', 200);
+    cy.translate(Cypress.expose('locale')).then(json => {
+      const day = new Date().toLocaleDateString('sv-SE'); // yyyy-MM-dd, the date in the file name
+      const file = `${Cypress.config('downloadsFolder')}/${day} ${json['wsg-admin']['report-workspaces']}.xlsx`;
+      // An xlsx file is a zip archive
+      cy.readFile(file, 'binary').should(content => expect(content.slice(0, 2)).to.equal('PK'));
+    });
   });
 
   it('should show info count', () => {

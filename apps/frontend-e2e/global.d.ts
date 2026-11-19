@@ -132,7 +132,7 @@ declare namespace Cypress {
     getWsForUserAPI(wsId:string, userId:string, token:string): Chainable<Response> // 75
     getReportAPI(token: string): Chainable<Response> // 76
     getReportAPI(groupId:string, token: string): Chainable<Response> // 76
-    downloadWsAPI(groupId: string, token: string): Chainable<Response>; // 77
+    getGroupReportAPI(groupId: string, token: string): Chainable<Response>; // 77
     downloadWsUnitsAPI(wsId: string, downloadQuery: string, token: string): Chainable<Response>; // 78
     deleteUnitsAPI(ids: string[], wsId: string, token: string): Chainable<Response>; // 79
     getMyData(token:string): Chainable<Response>; // 80

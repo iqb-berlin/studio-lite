@@ -928,6 +928,18 @@
       "VALUE_COPY_NOT_FROM_BASE": "Wert wird nicht aus einer Basisvariable kopiert"
     }
   },
+  "workspace-report": {
+    "sheet": "Arbeitsbereiche",
+    "group-name": "Gruppe Name",
+    "group-id": "Gruppe Id",
+    "workspace-name": "Arbeitsbereich Name",
+    "workspace-id": "Arbeitsbereich Id",
+    "last-change": "Letzte Änderung",
+    "unit-count": "Anzahl Units",
+    "no-editor": "Kein Editor",
+    "no-player": "Kein Player",
+    "no-schemer": "Kein Schemer"
+  },
   "unit-properties": {
     "title": "Aufgaben-Eigenschaften",
     "modules": "Verona-Module",

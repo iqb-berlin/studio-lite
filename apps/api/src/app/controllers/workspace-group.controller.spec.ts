@@ -1,8 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
-import { WorkspaceGroupFullDto } from '@studio-lite-lib/api-dto';
-import { StreamableFile } from '@nestjs/common';
-import { Response } from 'express';
 import { WorkspaceGroupController } from './workspace-group.controller';
 import { WorkspaceGroupService } from '../services/workspace-group.service';
 import { WorkspaceService } from '../services/workspace.service';
@@ -10,14 +7,13 @@ import { UnitService } from '../services/unit.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 import { WorkspaceGroupAccessGuard } from '../guards/workspace-group-access.guard';
-import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
+import { WorkspaceReportClass } from '../classes/workspace-report.class';
 import { UnitItemService } from '../services/unit-item.service';
 import { UsersService } from '../services/users.service';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 
 describe('WorkspaceGroupController', () => {
   let controller: WorkspaceGroupController;
-  let workspaceGroupService: WorkspaceGroupService;
   let workspaceService: WorkspaceService;
   let unitService: UnitService;
 
@@ -42,13 +38,12 @@ describe('WorkspaceGroupController', () => {
       .compile();
 
     controller = module.get<WorkspaceGroupController>(WorkspaceGroupController);
-    workspaceGroupService = module.get<WorkspaceGroupService>(WorkspaceGroupService);
     workspaceService = module.get<WorkspaceService>(WorkspaceService);
     unitService = module.get<UnitService>(UnitService);
   });
 
   // The guards are the authorisation of each method; no other unit test sees them (#1953).
-  it.each(['patch', 'createWorkspace', 'findWorkspaces', 'findUnits', 'findUnitItems'] as const)(
+  it.each(['patch', 'createWorkspace', 'findWorkspaces', 'findUnits', 'findUnitItems', 'findReport'] as const)(
     'should let only admins of the group reach %s',
     method => {
       expect(Reflect.getMetadata('__guards__', WorkspaceGroupController.prototype[method]))
@@ -72,35 +67,16 @@ describe('WorkspaceGroupController', () => {
     expect(workspaceService.create).toHaveBeenCalledWith({ groupId: 2, name: 'Neu' });
   });
 
-  describe('findOne', () => {
-    // The route asked for nothing but a valid token until #1712: any user could read any group
-    // and download its report.
-    it('should be guarded by WorkspaceGroupAccessGuard', () => {
-      const guards = Reflect.getMetadata('__guards__', WorkspaceGroupController.prototype.findOne);
-      expect(guards).toEqual([JwtAuthGuard, WorkspaceGroupAccessGuard]);
-    });
+  // The route asked for nothing but a valid token until #1712: any user could read any group.
+  it('should let the members of the group read it', () => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceGroupController.prototype.findOne))
+      .toEqual([JwtAuthGuard, WorkspaceGroupAccessGuard]);
+  });
 
-    it('should return a workspace group', async () => {
-      const result: WorkspaceGroupFullDto = { id: 1, name: 'Group 1' };
-      jest.spyOn(workspaceGroupService, 'findOne').mockResolvedValue(result);
+  it('should report over the workspaces of the group in the path (#2181)', async () => {
+    jest.spyOn(WorkspaceReportClass, 'build').mockResolvedValue([]);
 
-      const response = await controller.findOne(1, false, createMock<Response>());
-      expect(response).toEqual(result);
-    });
-
-    it('should download a report', async () => {
-      const mockFileBuffer = Buffer.from('test');
-      jest.spyOn(DownloadWorkspacesClass, 'getWorkspaceReport').mockResolvedValue(mockFileBuffer);
-      const res = createMock<Response>();
-
-      const result = await controller.findOne(1, true, res);
-
-      expect(DownloadWorkspacesClass.getWorkspaceReport).toHaveBeenCalledWith(workspaceService, unitService, 1);
-      expect(res.set).toHaveBeenCalledWith({
-        'Content-Type': 'attachment; filename="iqb-studio-workspace-report.xlsx"',
-        'Content-Disposition': 'attachment; filename="iqb-studio-workspace-report.xlsx"'
-      });
-      expect(result).toBeInstanceOf(StreamableFile);
-    });
+    expect(await controller.findReport(2)).toEqual([]);
+    expect(WorkspaceReportClass.build).toHaveBeenCalledWith(workspaceService, unitService, 2);
   });
 });

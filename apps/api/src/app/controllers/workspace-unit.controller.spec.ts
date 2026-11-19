@@ -12,7 +12,6 @@ import {
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import { StreamableFile } from '@nestjs/common';
-import { Response } from 'express';
 import { WorkspaceUnitController } from './workspace-unit.controller';
 import { AuthService } from '../services/auth.service';
 import { UnitService } from '../services/unit.service';
@@ -203,27 +202,6 @@ describe('WorkspaceUnitController', () => {
         expect(result).toBeInstanceOf(StreamableFile);
       }
     );
-  });
-
-  describe('findAllWithProperties', () => {
-    it('should return properties', async () => {
-      const result: UnitPropertiesDto[] = [];
-      jest.spyOn(unitService, 'findAllWithProperties').mockResolvedValue(result);
-
-      expect(await controller.findAllWithProperties(1, null, null, 'other', createMock<Response>())).toBe(result);
-    });
-
-    it('should download report', async () => {
-      const mockFileBuffer = Buffer.from('test');
-      jest.spyOn(DownloadWorkspacesClass, 'getWorkspaceMetadataReport').mockResolvedValue(mockFileBuffer);
-      const res = createMock<Response>();
-
-      const result = await controller.findAllWithProperties(1, ['col'], [1], 'unit', res);
-
-      expect(DownloadWorkspacesClass.getWorkspaceMetadataReport).toHaveBeenCalled();
-      expect(res.set).toHaveBeenCalled();
-      expect(result).toBeInstanceOf(StreamableFile);
-    });
   });
 
   describe('findExportContents', () => {

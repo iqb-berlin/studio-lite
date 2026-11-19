@@ -1,12 +1,14 @@
 /* eslint-disable max-classes-per-file */
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, fakeAsync, flushMicrotasks, TestBed
+} from '@angular/core/testing';
 import {
   Component, Input, Pipe, PipeTransform
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
-import { WorkspaceInListDto, WorkspaceUserInListDto } from '@studio-lite-lib/api-dto';
+import { WorkspaceInListDto, WorkspaceReportDto, WorkspaceUserInListDto } from '@studio-lite-lib/api-dto';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { saveAs } from 'file-saver-es';
 import { ConfirmDialogComponent } from '@studio-lite-lib/iqb-components';
@@ -23,8 +25,10 @@ import { WorkspaceMenuComponent } from '../workspace-menu/workspace-menu.compone
 import { WorkspacesComponent } from './workspaces.component';
 import { WorkspaceUserChecked } from '../../models/workspace-user-checked.class';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
+import { buildWorkspaceReportFile } from '../../../../utils/workspace-report.utils';
 
 jest.mock('file-saver-es', () => ({ saveAs: jest.fn() }));
+jest.mock('../../../../utils/workspace-report.utils', () => ({ buildWorkspaceReportFile: jest.fn() }));
 
 @Component({ selector: 'studio-lite-workspace-menu', template: '', standalone: true })
 class MockWorkspaceMenuComponent {
@@ -69,7 +73,7 @@ describe('WorkspacesComponent', () => {
     addWorkspace: jest.Mock;
     selectWorkspaceDropBox: jest.Mock;
     renameWorkspace: jest.Mock;
-    getXlsWorkspaces: jest.Mock;
+    getWorkspaceReport: jest.Mock;
   };
   let mockAppBackendService: {
     setWorkspaceSettings?: jest.Mock;
@@ -86,7 +90,7 @@ describe('WorkspacesComponent', () => {
   let mockSnackBar: {
     open: jest.Mock;
   };
-  let mockI18nService: Record<string, never>;
+  let mockI18nService: Partial<I18nService>;
 
   beforeEach(async () => {
     mockBackendService = {
@@ -99,7 +103,7 @@ describe('WorkspacesComponent', () => {
       addWorkspace: jest.fn().mockReturnValue(of(false)),
       selectWorkspaceDropBox: jest.fn().mockReturnValue(of(false)),
       renameWorkspace: jest.fn().mockReturnValue(of(false)),
-      getXlsWorkspaces: jest.fn().mockReturnValue(of(null))
+      getWorkspaceReport: jest.fn().mockReturnValue(of(null))
     };
     mockAppBackendService = {};
     mockWorkspaceBackendService = {};
@@ -114,7 +118,8 @@ describe('WorkspacesComponent', () => {
     mockSnackBar = {
       open: jest.fn()
     };
-    mockI18nService = {};
+    // en-US: the locale whose data Angular brings along
+    mockI18nService = { fullLocale: 'en-US', fileDateFormat: 'yyyy-MM-dd', dateFormat: 'dd.MM.yyyy' };
 
     await TestBed.configureTestingModule({
       imports: [WorkspacesComponent, TranslateModule.forRoot()],
@@ -371,10 +376,27 @@ describe('WorkspacesComponent', () => {
     expect(mockAppService.dataLoading).toBe(false);
   });
 
+  // The API sends the figures, and the file is built here, in the language of the interface (#2181)
+  it('should save the report over the workspaces of the group as a file built from the figures', fakeAsync(() => {
+    jest.mocked(saveAs).mockClear();
+    const report = [{ workspaceId: 10 }] as WorkspaceReportDto[];
+    const file = new Blob(['xlsx']);
+    mockBackendService.getWorkspaceReport.mockReturnValue(of(report));
+    jest.mocked(buildWorkspaceReportFile).mockResolvedValue(file);
+
+    component.xlsxDownloadWorkspaceReport();
+    flushMicrotasks();
+
+    expect(mockBackendService.getWorkspaceReport).toHaveBeenCalledWith(1);
+    expect(buildWorkspaceReportFile).toHaveBeenCalledWith(report, expect.any(Function), 'dd.MM.yyyy');
+    expect(saveAs).toHaveBeenCalledWith(file, 'wsg-admin.workspaces-excel-name');
+    expect(mockAppService.dataLoading).toBe(false);
+  }));
+
   // A failed report never reached the component, and the spinner stayed (#2106)
   it('should save no file and take the spinner down when the report could not be loaded', () => {
     jest.mocked(saveAs).mockClear();
-    mockBackendService.getXlsWorkspaces.mockReturnValue(of(null));
+    mockBackendService.getWorkspaceReport.mockReturnValue(of(null));
 
     component.xlsxDownloadWorkspaceReport();
 

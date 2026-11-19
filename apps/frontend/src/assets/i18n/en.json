@@ -925,6 +925,18 @@
       "VALUE_COPY_NOT_FROM_BASE": "Value is not copied from a base variable"
     }
   },
+  "workspace-report": {
+    "sheet": "Workspaces",
+    "group-name": "Group name",
+    "group-id": "Group ID",
+    "workspace-name": "Workspace name",
+    "workspace-id": "Workspace ID",
+    "last-change": "Last change",
+    "unit-count": "Number of units",
+    "no-editor": "No editor",
+    "no-player": "No player",
+    "no-schemer": "No schemer"
+  },
   "unit-properties": {
     "title": "Unit properties",
     "modules": "Verona modules",

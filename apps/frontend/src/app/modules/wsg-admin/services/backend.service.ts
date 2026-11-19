@@ -10,7 +10,8 @@ import {
   WorkspaceGroupFullDto,
   WorkspaceUserInListDto,
   UnitInViewDto,
-  UnitItemInViewDto
+  UnitItemInViewDto,
+  WorkspaceReportDto
 } from '@studio-lite-lib/api-dto';
 import { succeeded } from '../../../utils/succeeded.utils';
 
@@ -163,18 +164,8 @@ export class BackendService {
 
   // A failure is answered with null: passed on as an error, it never reached the handler that takes
   // the spinner down (#2106).
-  getXlsWorkspaces(workspaceGroupId: number): Observable<Blob | null> {
-    const queryParams = new HttpParams().set('download', 'true');
-    return this.http.get(
-      `${this.serverUrl}workspace-groups/${workspaceGroupId}`,
-      {
-        headers: {
-          Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        },
-        params: queryParams,
-        responseType: 'blob'
-      }
-    ).pipe(
+  getWorkspaceReport(workspaceGroupId: number): Observable<WorkspaceReportDto[] | null> {
+    return this.http.get<WorkspaceReportDto[]>(`${this.serverUrl}workspace-groups/${workspaceGroupId}/report`).pipe(
       catchError(() => of(null))
     );
   }

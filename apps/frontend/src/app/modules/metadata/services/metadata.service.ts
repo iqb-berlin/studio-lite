@@ -2,7 +2,7 @@ import { Inject, Injectable, signal } from '@angular/core';
 import { MDProfile, MDProfileGroup, ProfileEntryParametersVocabulary } from '@iqbspecs/metadata-profile';
 import { Observable, of, firstValueFrom } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { TopConcept, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { VocabularyProvider, Vocab, VocabularyEntry } from '@iqb/metadata-components';
 import { MetadataBackendService } from './metadata-backend.service';
@@ -174,21 +174,6 @@ export class MetadataService implements VocabularyProvider {
       });
     }
     return this.idLabelDictionary;
-  }
-
-  downloadMetadataReport(type: string, columns:string[], units:number[]): Observable<Blob> {
-    let queryParams = new HttpParams();
-    queryParams = queryParams.append('type', type);
-    columns.forEach(column => { queryParams = queryParams.append('column', column); });
-    units.forEach(unit => { queryParams = queryParams.append('id', unit); });
-    return this.http.get(
-      `${this.serverUrl}workspaces/${this.workspaceService.selectedWorkspaceId}/units/properties`, {
-        headers: {
-          Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        },
-        params: queryParams,
-        responseType: 'blob'
-      });
   }
 
   createMetadataReport(): Observable<boolean | UnitPropertiesDto[]> {
