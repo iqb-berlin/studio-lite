@@ -26,6 +26,7 @@ export { ResourcePackageDto } from './lib/dtos/resource-package/resource-package
 export { ConfigDto } from './lib/dtos/setting/config.dto';
 export { VeronaModuleFileDto } from './lib/dtos/verona-module/verona-module-file.dto';
 export { UnitDefinitionDto } from './lib/dtos/unit/unit-definition.dto';
+export { UnitDependencyDto } from './lib/dtos/unit/unit-dependency.dto';
 export { UnitPropertiesDto } from './lib/dtos/unit/unit-properties.dto';
 export { WorkspaceSettingsDto } from './lib/dtos/workspace/workspace-settings.dto';
 export { CreateUnitDto } from './lib/dtos/unit/create-unit.dto';

@@ -1,4 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { UnitDependency } from '@studio-lite/shared-code';
 
 /**
  * The unit's definition -- what the editor produced and the player renders -- kept out of
@@ -22,6 +23,24 @@ class UnitDefinition {
     nullable: true
   })
   type: string | null;
+
+  /**
+   * What the unit needs to be played and to be edited, as the editor reported it with `data`
+   * (`dependenciesToPlay`, `dependenciesToEdit`, #1602). Empty for every unit saved before 23.0.0.
+   */
+  @Column({
+    type: 'jsonb',
+    name: 'dependencies_to_play',
+    default: () => "'[]'"
+  })
+  dependenciesToPlay: UnitDependency[];
+
+  @Column({
+    type: 'jsonb',
+    name: 'dependencies_to_edit',
+    default: () => "'[]'"
+  })
+  dependenciesToEdit: UnitDependency[];
 
   @Column({
     name: 'unit_id'

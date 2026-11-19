@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import { UnitDependencyDto } from './unit-dependency.dto';
 
 export class UnitDefinitionDto {
   @ApiProperty()
@@ -16,4 +17,15 @@ export class UnitDefinitionDto {
    */
   @ApiProperty({ required: false })
   definitionType?: string;
+
+  /**
+   * What the unit needs to be played and to be edited, as the editor reports it with the
+   * definition (#1602). Left out, the stored lists stay as they are; an empty list says there is
+   * nothing.
+   */
+  @ApiProperty({ required: false, type: [UnitDependencyDto] })
+  dependenciesToPlay?: UnitDependencyDto[];
+
+  @ApiProperty({ required: false, type: [UnitDependencyDto] })
+  dependenciesToEdit?: UnitDependencyDto[];
 }

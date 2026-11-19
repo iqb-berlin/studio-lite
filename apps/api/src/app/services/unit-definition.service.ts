@@ -6,7 +6,7 @@ import {
   UnitDefinitionFullDto,
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
-import { toVariableInfoListV1 } from '@studio-lite/shared-code';
+import { toUnitDependencies, toVariableInfoListV1 } from '@studio-lite/shared-code';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
 import { isCodingScheme } from '../utils/coding-scheme';
@@ -47,6 +47,8 @@ export class UnitDefinitionService {
     if (unitDefinition) {
       returnUnit.definition = unitDefinition.data;
       if (unitDefinition.type) returnUnit.definitionType = unitDefinition.type;
+      returnUnit.dependenciesToPlay = unitDefinition.dependenciesToPlay ?? [];
+      returnUnit.dependenciesToEdit = unitDefinition.dependenciesToEdit ?? [];
     }
     return returnUnit;
   }
@@ -87,14 +89,26 @@ export class UnitDefinitionService {
     const definitionType = unitDefinitionDto.definition === undefined ?
       undefined :
       unitDefinitionDto.definitionType || null;
+    // The dependency lists are written whenever they are sent, also without the definition: an
+    // editor that reports them for the first time may leave the definition unchanged (#1602).
+    // Whatever sends them, only well-formed entries are kept -- the export writes them into files.
+    const dependencies = {
+      ...(unitDefinitionDto.dependenciesToPlay !== undefined &&
+        { dependenciesToPlay: toUnitDependencies(unitDefinitionDto.dependenciesToPlay) }),
+      ...(unitDefinitionDto.dependenciesToEdit !== undefined &&
+        { dependenciesToEdit: toUnitDependencies(unitDefinitionDto.dependenciesToEdit) })
+    };
 
     if (unitDefinitionToUpdate) {
       unitDefinitionToUpdate.data = unitDefinitionDto.definition;
       unitDefinitionToUpdate.type = definitionType;
+      Object.assign(unitDefinitionToUpdate, dependencies);
       await this.unitDefinitionsRepository.save(unitDefinitionToUpdate);
     } else {
       const newUnitDefinition = this.unitDefinitionsRepository
-        .create({ data: unitDefinitionDto.definition, type: definitionType, unitId });
+        .create({
+          data: unitDefinitionDto.definition, type: definitionType, unitId, ...dependencies
+        });
       await this.unitDefinitionsRepository.save(newUnitDefinition);
     }
     if (unitDefinitionDto.variables) {

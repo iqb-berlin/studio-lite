@@ -4,7 +4,7 @@ import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
-import { UnitMetadataValues, UnitSchemeDto } from '@studio-lite-lib/api-dto';
+import { UnitDefinitionDto, UnitMetadataValues, UnitSchemeDto } from '@studio-lite-lib/api-dto';
 import { UnitDefinitionService } from './unit-definition.service';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
@@ -63,6 +63,19 @@ describe('UnitDefinitionService', () => {
 
       const result = await service.findOnesDefinition(1);
       expect(result).not.toHaveProperty('definitionType');
+    });
+
+    it('should hand out the stored dependency lists (#1602)', async () => {
+      const geogebra = { id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' as const };
+      unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 1 } as Unit);
+      unitDefinitionsRepository.findOne.mockResolvedValue(
+        { data: 'xml', dependenciesToPlay: [geogebra], dependenciesToEdit: [] } as UnitDefinition
+      );
+
+      const result = await service.findOnesDefinition(1);
+
+      expect(result.dependenciesToPlay).toEqual([geogebra]);
+      expect(result.dependenciesToEdit).toEqual([]);
     });
 
     it('should give a unit without a stored definition an empty one', async () => {
@@ -260,6 +273,52 @@ describe('UnitDefinitionService', () => {
         expect(unitDefinitionsRepository.create).toHaveBeenCalledWith(
           expect.objectContaining({ type: 'aspect-unit-definition@4.12.0', unitId: 1 })
         );
+      });
+    });
+
+    // What the unit needs to be played and edited, as the editor reports it (#1602).
+    describe('with dependencies', () => {
+      const geogebra = { id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' as const };
+      const stored = { id: 1, dependenciesToPlay: [geogebra], dependenciesToEdit: [geogebra] };
+      const savedDefinition = () => unitDefinitionsRepository.save.mock.calls[0][0] as UnitDefinition;
+
+      beforeEach(() => {
+        unitsRepository.findOne.mockResolvedValue({ id: 1 } as Unit);
+      });
+
+      it('should store the lists sent, keeping only well-formed entries', async () => {
+        unitDefinitionsRepository.findOne.mockResolvedValue({ ...stored } as UnitDefinition);
+        const dependenciesToPlay = [
+          { id: 'PERIODIC_TABLE', type: 'WIDGET' },
+          { id: 'x', type: 'ARCHIVE' }
+        ] as UnitDefinitionDto['dependenciesToPlay'];
+
+        await service.patchDefinition(
+          1,
+          { definition: 'xml', dependenciesToPlay, dependenciesToEdit: [] },
+          'user',
+          null
+        );
+
+        expect(savedDefinition().dependenciesToPlay).toEqual([{ id: 'PERIODIC_TABLE', type: 'WIDGET' }]);
+        expect(savedDefinition().dependenciesToEdit).toEqual([]);
+      });
+
+      it('should store lists sent without a definition', async () => {
+        unitDefinitionsRepository.findOne.mockResolvedValue({ id: 1 } as UnitDefinition);
+
+        await service.patchDefinition(1, { dependenciesToPlay: [geogebra] }, 'user', null);
+
+        expect(savedDefinition().dependenciesToPlay).toEqual([geogebra]);
+      });
+
+      it('should leave the stored lists alone when none are sent', async () => {
+        unitDefinitionsRepository.findOne.mockResolvedValue({ ...stored } as UnitDefinition);
+
+        await service.patchDefinition(1, { definition: 'xml' }, 'user', null);
+
+        expect(savedDefinition().dependenciesToPlay).toEqual([geogebra]);
+        expect(savedDefinition().dependenciesToEdit).toEqual([geogebra]);
       });
     });
   });

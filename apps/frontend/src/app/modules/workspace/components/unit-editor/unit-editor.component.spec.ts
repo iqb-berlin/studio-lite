@@ -214,19 +214,83 @@ describe('UnitEditorComponent', () => {
     it('should hand the reported type to the store', () => {
       const store = notify({ unitDefinitionType: 'aspect-unit-definition@4.12.0' });
 
-      expect(store.setData).toHaveBeenCalledWith({ v: 1 }, '<xml />', 'aspect-unit-definition@4.12.0');
+      expect(store.setData)
+        .toHaveBeenCalledWith({ v: 1 }, '<xml />', 'aspect-unit-definition@4.12.0', expect.anything());
     });
 
     it('should hand on no type when the editor reports none', () => {
       const store = notify({});
 
-      expect(store.setData).toHaveBeenCalledWith({ v: 1 }, '<xml />', undefined);
+      expect(store.setData).toHaveBeenCalledWith({ v: 1 }, '<xml />', undefined, expect.anything());
     });
 
     it('should ignore a type that is not a string', () => {
       const store = notify({ unitDefinitionType: { name: 'aspect' } });
 
-      expect(store.setData).toHaveBeenCalledWith({ v: 1 }, '<xml />', undefined);
+      expect(store.setData).toHaveBeenCalledWith({ v: 1 }, '<xml />', undefined, expect.anything());
+    });
+  });
+
+  // Editor spec 4.0 reports what the unit needs beside the definition (#1602).
+  describe('dependencies in a definition change', () => {
+    const notify = (editorApiVersion: number, extra: Record<string, unknown>) => {
+      const frame = document.createElement('iframe');
+      document.body.appendChild(frame);
+      component.iFrameElement = frame;
+      component.sessionId = 's1';
+      component.editorApiVersion = editorApiVersion;
+      const store = { setData: jest.fn() } as unknown as UnitDefinitionStore;
+      unitStoresMock.definitionStore.mockReturnValue(store);
+      component.handleIncomingMessage(new MessageEvent('message', {
+        data: {
+          type: 'voeDefinitionChangedNotification', sessionId: 's1', variables: [], ...extra
+        },
+        source: frame.contentWindow as Window
+      }));
+      return store;
+    };
+
+    it('should hand on the lists of an editor of spec 5.0', () => {
+      const store = notify(5, {
+        unitDefinition: '<xml />',
+        dependenciesToPlay: [{ id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }, { id: 'CALC', type: 'WIDGET' }],
+        dependenciesToEdit: [{ id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }]
+      });
+
+      expect(store.setData).toHaveBeenCalledWith([], '<xml />', undefined, {
+        toPlay: [{ id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }, { id: 'CALC', type: 'WIDGET' }],
+        toEdit: [{ id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }]
+      });
+    });
+
+    it('should take the lower-case types of spec 4.0, and a missing list for none', () => {
+      const store = notify(4, {
+        unitDefinition: '<xml />',
+        dependenciesToPlay: [{ id: 'GeoGebra.itcr.zip', type: 'file' }, { id: 'https://example.org', type: 'service' }]
+      });
+
+      expect(store.setData).toHaveBeenCalledWith([], '<xml />', undefined, {
+        toPlay: [{ id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }, { id: 'https://example.org', type: 'SERVICE' }],
+        toEdit: []
+      });
+    });
+
+    it('should report no lists for an editor below spec 4.0', () => {
+      const store = notify(3, {
+        unitDefinition: '<xml />',
+        dependenciesToPlay: [{ id: 'GeoGebra.itcr.zip', type: 'file' }]
+      });
+
+      expect(store.setData).toHaveBeenCalledWith([], '<xml />', undefined, undefined);
+    });
+
+    it('should change nothing when the editor reports no definition', () => {
+      const store = notify(5, {
+        dependenciesToPlay: [{ id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }],
+        sharedParameters: []
+      });
+
+      expect(store.setData).not.toHaveBeenCalled();
     });
   });
 

@@ -34,4 +34,15 @@ export {
 } from './lib/time.constants';
 export { SESSION_ENDED_MESSAGE } from './lib/session-ended';
 export { compareText, byText } from './lib/compare-text';
+export {
+  UNIT_DEPENDENCY_TYPES,
+  UnitDependencyType,
+  UnitDependency,
+  RESOURCE_PACKAGE_ENDING,
+  isResourcePackageName,
+  namesResourcePackage,
+  fileDependencyType,
+  toUnitDependencies,
+  sameDependencyLists
+} from './lib/unit-dependencies';
 export { UiLanguage, UI_LANGUAGES, DEFAULT_UI_LANGUAGE } from './lib/ui-languages';
