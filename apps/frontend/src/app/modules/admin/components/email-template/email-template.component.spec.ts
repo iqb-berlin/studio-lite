@@ -56,8 +56,8 @@ describe('EmailTemplateComponent', () => {
     snackBar = TestBed.inject(MatSnackBar) as jest.Mocked<MatSnackBar>;
 
     backendService.getEmailTemplate.mockReturnValue(of({
-      emailSubject: 'Welcome {{user}}',
-      emailBody: 'Hello {{firstname}} {{lastname}}, your password is {{password}}'
+      emailSubject: { de: 'Willkommen {{user}}', en: 'Welcome {{user}}', fr: 'Bienvenue {{user}}' },
+      emailBody: { de: 'Hallo {{firstname}} {{lastname}}, Ihr Kennwort ist {{password}}' }
     }));
 
     fixture = TestBed.createComponent(EmailTemplateComponent);
@@ -68,36 +68,39 @@ describe('EmailTemplateComponent', () => {
     component.ngOnInit();
     tick(200);
     fixture.detectChanges();
-    expect(component.configForm.get('emailSubject')?.value).toBe('Welcome {{user}}');
-    expect(component.configForm.get('emailBody')?.value)
-      .toBe('Hello {{firstname}} {{lastname}}, your password is {{password}}');
+    expect(component.configForm.get('de.emailSubject')?.value).toBe('Willkommen {{user}}');
+    expect(component.configForm.get('en.emailSubject')?.value).toBe('Welcome {{user}}');
+    expect(component.configForm.get('de.emailBody')?.value)
+      .toBe('Hallo {{firstname}} {{lastname}}, Ihr Kennwort ist {{password}}');
+    expect(component.configForm.get('en.emailBody')?.value).toBe('');
   }));
 
   it('should set dataChanged flag when form values change', fakeAsync(() => {
     component.ngOnInit();
     tick(200);
     component.dataChanged = false;
-    component.configForm.get('emailSubject')?.setValue('New Subject');
+    component.configForm.get('de.emailSubject')?.setValue('New Subject');
     tick(100);
     expect(component.dataChanged).toBe(true);
   }));
 
-  it('should save email template successfully', fakeAsync(() => {
+  // Each language has its texts; a language the studio does not offer keeps its own (#2186)
+  it('should save the template of every language and keep that of a language the form does not show', fakeAsync(() => {
     backendService.setEmailTemplate.mockReturnValue(of(true));
     component.ngOnInit();
     tick(200);
 
     component.configForm.patchValue({
-      emailSubject: 'Test Subject',
-      emailBody: 'Test Body'
+      de: { emailSubject: 'Betreff' },
+      en: { emailSubject: 'Subject', emailBody: 'Body' }
     });
     component.dataChanged = true;
     component.saveData();
     tick(100);
 
     const expectedTemplate: EmailTemplateDto = {
-      emailSubject: 'Test Subject',
-      emailBody: 'Test Body'
+      emailSubject: { de: 'Betreff', en: 'Subject', fr: 'Bienvenue {{user}}' },
+      emailBody: { de: 'Hallo {{firstname}} {{lastname}}, Ihr Kennwort ist {{password}}', en: 'Body' }
     };
 
     expect(backendService.setEmailTemplate).toHaveBeenCalledWith(expectedTemplate);
@@ -127,8 +130,8 @@ describe('EmailTemplateComponent', () => {
     newComponent.ngOnInit();
     tick(200);
 
-    expect(newComponent.configForm.get('emailSubject')?.value).toBe('');
-    expect(newComponent.configForm.get('emailBody')?.value).toBe('');
+    expect(newComponent.configForm.get('de.emailSubject')?.value).toBe('');
+    expect(newComponent.configForm.get('en.emailBody')?.value).toBe('');
   }));
 
   it('should not save if configForm is null', () => {
@@ -143,9 +146,9 @@ describe('EmailTemplateComponent', () => {
     backendService.setEmailTemplate.mockReturnValue(answer);
     component.ngOnInit();
     tick();
-    component.configForm.get('emailSubject')?.setValue('Gesendet');
+    component.configForm.get('de.emailSubject')?.setValue('Gesendet');
     component.saveData();
-    component.configForm.get('emailSubject')?.setValue('Danach');
+    component.configForm.get('de.emailSubject')?.setValue('Danach');
     component.saveData();
     answer.next(true);
 

@@ -1,12 +1,16 @@
 import { DomSanitizer, SafeUrl, Title } from '@angular/platform-browser';
 import { ConfigDto } from '@studio-lite-lib/api-dto';
+import { DEFAULT_UI_LANGUAGE, textIn } from '@studio-lite/shared-code';
 
 /**
- * How the installation presents itself: its name, the intro and imprint texts, the address a
- * contact mail goes to, and the warning that can be shown to everyone until a given day and hour.
+ * How the installation presents itself: its name, the intro and imprint texts, and the warning that
+ * can be shown to everyone until a given day and hour.
  *
  * The HTML texts are configured by an administrator, so they pass the sanitizer once here rather
  * than at each place they are rendered.
+ *
+ * An administrator writes the texts once per language; each comes in the language of the interface,
+ * or in German where it has none in that language (#2186).
  */
 export class AppConfig {
   readonly appTitle: string;
@@ -14,26 +18,29 @@ export class AppConfig {
   hideTitlesOnPage = false;
   readonly introHtml: SafeUrl | undefined;
   readonly imprintHtml: SafeUrl | undefined;
-  readonly emailSubject: string;
-  readonly emailBody: string;
   private readonly _globalWarningText: string;
   private readonly _globalWarningExpiredDay: Date | undefined;
   private readonly _globalWarningExpiredHour: number | undefined;
   private readonly titleService: Title;
   readonly hasUsers: boolean;
 
-  constructor(titleService: Title, appConfig?: ConfigDto, sanitizer?: DomSanitizer) {
-    this.appTitle = appConfig ? appConfig.appTitle : 'IQB-Studio';
+  constructor(
+    titleService: Title,
+    appConfig?: ConfigDto,
+    sanitizer?: DomSanitizer,
+    language: string = DEFAULT_UI_LANGUAGE
+  ) {
+    this.appTitle = appConfig ? textIn(appConfig.appTitle, language) : 'IQB-Studio';
     this.pageTitle = '';
-    if (appConfig && appConfig.introHtml && sanitizer) {
-      this.introHtml = sanitizer.bypassSecurityTrustHtml(appConfig.introHtml);
+    const introHtml = textIn(appConfig?.introHtml, language);
+    if (introHtml && sanitizer) {
+      this.introHtml = sanitizer.bypassSecurityTrustHtml(introHtml);
     }
-    if (appConfig && appConfig.imprintHtml && sanitizer) {
-      this.imprintHtml = sanitizer.bypassSecurityTrustHtml(appConfig.imprintHtml);
+    const imprintHtml = textIn(appConfig?.imprintHtml, language);
+    if (imprintHtml && sanitizer) {
+      this.imprintHtml = sanitizer.bypassSecurityTrustHtml(imprintHtml);
     }
-    this.emailSubject = appConfig ? appConfig.emailSubject : '';
-    this.emailBody = appConfig ? appConfig.emailBody : '';
-    this._globalWarningText = appConfig ? appConfig.globalWarningText : '';
+    this._globalWarningText = textIn(appConfig?.globalWarningText, language);
     this._globalWarningExpiredDay = appConfig ? appConfig.globalWarningExpiredDay : undefined;
     this._globalWarningExpiredHour = appConfig ? appConfig.globalWarningExpiredHour : undefined;
     this.hasUsers = appConfig ? appConfig.hasUsers : true;

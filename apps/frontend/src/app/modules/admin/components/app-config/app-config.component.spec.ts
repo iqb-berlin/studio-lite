@@ -77,12 +77,10 @@ describe('AppConfigComponent', () => {
     snackBar = TestBed.inject(MatSnackBar) as jest.Mocked<MatSnackBar>;
 
     const mockConfig: ConfigDto = {
-      appTitle: 'Test App',
-      introHtml: '<p>Test Intro</p>',
-      imprintHtml: '<p>Test Imprint</p>',
-      emailSubject: 'Test Email Subject',
-      emailBody: 'Test Email Body',
-      globalWarningText: 'Test Warning',
+      appTitle: { de: 'Test App' },
+      introHtml: { de: '<p>Test Intro</p>' },
+      imprintHtml: { de: '<p>Test Imprint</p>' },
+      globalWarningText: { de: 'Test Warning' },
       globalWarningExpiredDay: new Date('2026-12-31'),
       globalWarningExpiredHour: 12,
       hasUsers: true
@@ -95,20 +93,18 @@ describe('AppConfigComponent', () => {
 
   it('should update form fields with loaded data', () => {
     fixture.detectChanges();
-    expect(component.configForm.get('appTitle')?.value).toBe('Test App');
-    expect(component.configForm.get('introHtml')?.value).toBe('<p>Test Intro</p>');
-    expect(component.configForm.get('imprintHtml')?.value).toBe('<p>Test Imprint</p>');
-    expect(component.configForm.get('globalWarningText')?.value).toBe('Test Warning');
+    expect(component.configForm.get('texts.de.appTitle')?.value).toBe('Test App');
+    expect(component.configForm.get('texts.de.introHtml')?.value).toBe('<p>Test Intro</p>');
+    expect(component.configForm.get('texts.de.imprintHtml')?.value).toBe('<p>Test Imprint</p>');
+    expect(component.configForm.get('texts.de.globalWarningText')?.value).toBe('Test Warning');
   });
 
   it('should convert globalWarningExpiredDay from string to Date object', () => {
     const stringConfig = {
-      appTitle: 'Test App',
-      introHtml: '<p>Test Intro</p>',
-      imprintHtml: '<p>Test Imprint</p>',
-      emailSubject: 'Test Email Subject',
-      emailBody: 'Test Email Body',
-      globalWarningText: 'Test Warning',
+      appTitle: { de: 'Test App' },
+      introHtml: { de: '<p>Test Intro</p>' },
+      imprintHtml: { de: '<p>Test Imprint</p>' },
+      globalWarningText: { de: 'Test Warning' },
       globalWarningExpiredDay: '2026-12-31T00:00:00.000Z',
       globalWarningExpiredHour: 12,
       hasUsers: true
@@ -124,12 +120,10 @@ describe('AppConfigComponent', () => {
 
   it('should offer the default expiry day for a config without one', () => {
     backendService.getAppConfig.mockReturnValue(of({
-      appTitle: 'Test App',
-      introHtml: '',
-      imprintHtml: '',
-      emailSubject: '',
-      emailBody: '',
-      globalWarningText: 'Test Warning',
+      appTitle: { de: 'Test App' },
+      introHtml: { de: '' },
+      imprintHtml: { de: '' },
+      globalWarningText: { de: 'Test Warning' },
       hasUsers: true
     }));
 
@@ -142,20 +136,20 @@ describe('AppConfigComponent', () => {
   describe('the shared default config (#1964)', () => {
     const editAndSave = (): void => {
       fixture.detectChanges();
-      component.configForm.get('appTitle')?.setValue('New Title');
+      component.configForm.get('texts.de.appTitle')?.setValue('New Title');
       backendService.setAppConfig.mockReturnValue(of(true));
       component.saveData();
     };
 
     it('should stay untouched when a config is loaded and saved', () => {
       editAndSave();
-      expect(defaultAppConfig.appTitle).toBe('IQB-Studio');
+      expect(defaultAppConfig.appTitle).toEqual({ de: 'IQB-Studio' });
     });
 
     it('should stay untouched when no config arrives and the form is saved', () => {
       backendService.getAppConfig.mockReturnValue(of(null));
       editAndSave();
-      expect(defaultAppConfig.appTitle).toBe('IQB-Studio');
+      expect(defaultAppConfig.appTitle).toEqual({ de: 'IQB-Studio' });
     });
   });
 
@@ -178,10 +172,10 @@ describe('AppConfigComponent', () => {
   });
 
   it('should show a text emptied on the server as empty (#1964)', () => {
-    backendService.getAppConfig.mockReturnValue(of({ ...defaultAppConfig, introHtml: '' }));
+    backendService.getAppConfig.mockReturnValue(of({ ...defaultAppConfig, introHtml: { de: '' } }));
     fixture.detectChanges();
 
-    expect(component.configForm.get('introHtml')?.value).toBe('');
+    expect(component.configForm.get('texts.de.introHtml')?.value).toBe('');
   });
 
   it('should save the parts of the config the form does not show (#1964)', () => {
@@ -190,15 +184,36 @@ describe('AppConfigComponent', () => {
     component.saveData();
 
     expect(backendService.setAppConfig).toHaveBeenCalledWith(expect.objectContaining({
-      emailSubject: 'Test Email Subject',
-      emailBody: 'Test Email Body'
+      hasUsers: true
+    }));
+  });
+
+  // Each text is written once per language; a language the studio does not offer keeps its text (#2186)
+  it('should save the texts of every language and keep those of a language the form does not show', () => {
+    backendService.getAppConfig.mockReturnValue(of({
+      ...defaultAppConfig,
+      appTitle: { de: 'Studio', fr: 'Studio FR' },
+      introHtml: { de: '<p>Willkommen</p>', en: '<p>Welcome</p>' }
+    }));
+    fixture.detectChanges();
+    expect(component.configForm.get('texts.en.introHtml')?.value).toBe('<p>Welcome</p>');
+    expect(component.configForm.get('texts.en.appTitle')?.value).toBe('');
+
+    component.configForm.get('texts.en.appTitle')?.setValue('Studio EN');
+    component.configForm.get('texts.en.introHtml')?.setValue('');
+    backendService.setAppConfig.mockReturnValue(of(true));
+    component.saveData();
+
+    expect(backendService.setAppConfig).toHaveBeenCalledWith(expect.objectContaining({
+      appTitle: { de: 'Studio', en: 'Studio EN', fr: 'Studio FR' },
+      introHtml: { de: '<p>Willkommen</p>', en: '' }
     }));
   });
 
   it('should set dataChanged flag when form values change', fakeAsync(() => {
     fixture.detectChanges();
     component.dataChanged = false;
-    component.configForm.get('appTitle')?.setValue('New Title');
+    component.configForm.get('texts.de.appTitle')?.setValue('New Title');
     tick(50);
     expect(component.dataChanged).toBe(true);
   }));
@@ -238,12 +253,10 @@ describe('AppConfigComponent', () => {
   it('should check if warning is expired', () => {
     const pastDate = new Date('2020-01-01');
     const pastConfig: ConfigDto = {
-      appTitle: 'Test',
-      introHtml: '',
-      imprintHtml: '',
-      emailSubject: '',
-      emailBody: '',
-      globalWarningText: 'Warning',
+      appTitle: { de: 'Test' },
+      introHtml: { de: '' },
+      imprintHtml: { de: '' },
+      globalWarningText: { de: 'Warning' },
       globalWarningExpiredDay: pastDate,
       globalWarningExpiredHour: 12,
       hasUsers: true
@@ -263,9 +276,9 @@ describe('AppConfigComponent', () => {
     backendService.setAppConfig.mockReturnValue(answer);
     fixture.detectChanges();
     tick(50);
-    component.configForm.get('appTitle')?.setValue('Gesendet');
+    component.configForm.get('texts.de.appTitle')?.setValue('Gesendet');
     component.saveData();
-    component.configForm.get('appTitle')?.setValue('Danach');
+    component.configForm.get('texts.de.appTitle')?.setValue('Danach');
     component.saveData();
     answer.next(true);
 

@@ -402,6 +402,7 @@
   "config": {
     "start-page-warning": "Warnung auf der Startseite",
     "warning-placeholder": "Warnung",
+    "missing-text-shows-german": "Ein leeres Feld zeigt den deutschen Text.",
     "show-warning-until": "Warnung anzeigen bis",
     "date": "Datum",
     "hour": "Stunde",

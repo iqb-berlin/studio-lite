@@ -1,5 +1,5 @@
 import {
-  Component, OnDestroy, OnInit, signal
+  Component, inject, OnDestroy, OnInit, signal
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
@@ -14,12 +14,18 @@ import { MatSelect } from '@angular/material/select';
 import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatTab, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
+import { DEFAULT_UI_LANGUAGE, LOCALIZED_CONFIG_TEXTS } from '@studio-lite/shared-code';
 
 import { ToTimePipe } from '../../pipes/to-time.pipe';
 import { AppConfig } from '../../../../classes/app-config.class';
 import { defaultAppConfig } from '../../../../services/app.service';
 import { BackendService } from '../../services/backend.service';
 import { SaveLock } from '../../../../classes/save-lock.class';
+import { LanguageService } from '../../../../services/language.service';
+import {
+  localizedFormValue, localizedTextsForm, localizedTextsFromForm
+} from '../../../../utils/localized-form.utils';
 
 @Component({
   selector: 'studio-lite-app-config',
@@ -28,13 +34,17 @@ import { SaveLock } from '../../../../classes/save-lock.class';
 
   imports: [
     FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatDatepickerInput, MatDatepickerToggle,
-    MatSuffix, MatDatepicker, MatSelect, MatOption, CdkTextareaAutosize, MatButton, TranslateModule, ToTimePipe
+    MatSuffix, MatDatepicker, MatSelect, MatOption, CdkTextareaAutosize, MatButton, TranslateModule, ToTimePipe,
+    MatTabGroup, MatTab, MatTabLabel
   ]
 })
 
 export class AppConfigComponent implements OnInit, OnDestroy {
   // A copy: the default is shared, among others with the start page, and this form writes into it (#1964).
   appConfig = { ...defaultAppConfig };
+  // A tab per language, in the order of the language menu; the time of the warning holds for all of them.
+  readonly languages = inject(LanguageService).languages;
+  readonly defaultLanguage = DEFAULT_UI_LANGUAGE;
 
   configForm: UntypedFormGroup;
   dataChanged = false;
@@ -55,10 +65,7 @@ export class AppConfigComponent implements OnInit, OnDestroy {
     private translateService: TranslateService
   ) {
     this.configForm = this.fb.group({
-      appTitle: this.fb.control(''),
-      introHtml: this.fb.control(''),
-      imprintHtml: this.fb.control(''),
-      globalWarningText: this.fb.control(''),
+      texts: localizedTextsForm(this.fb, this.languages, LOCALIZED_CONFIG_TEXTS),
       globalWarningExpiredDay: this.fb.control(new Date()),
       globalWarningExpiredHour: this.fb.control('')
     });
@@ -93,10 +100,7 @@ export class AppConfigComponent implements OnInit, OnDestroy {
         };
         if (this.configForm) {
           this.configForm.setValue({
-            appTitle: this.appConfig.appTitle,
-            introHtml: this.appConfig.introHtml,
-            imprintHtml: this.appConfig.imprintHtml,
-            globalWarningText: this.appConfig.globalWarningText,
+            texts: localizedFormValue(this.appConfig, this.languages, LOCALIZED_CONFIG_TEXTS),
             globalWarningExpiredDay: this.appConfig.globalWarningExpiredDay,
             globalWarningExpiredHour: this.appConfig.globalWarningExpiredHour
           }, { emitEvent: false });
@@ -125,10 +129,10 @@ export class AppConfigComponent implements OnInit, OnDestroy {
   saveData(): void {
     if (this.appConfig && this.configForm) {
       if (!this.save.start(this.configForm.getRawValue())) return;
-      this.appConfig.appTitle = this.configForm.get('appTitle')?.value;
-      this.appConfig.introHtml = this.configForm.get('introHtml')?.value;
-      this.appConfig.imprintHtml = this.configForm.get('imprintHtml')?.value;
-      this.appConfig.globalWarningText = this.configForm.get('globalWarningText')?.value;
+      Object.assign(
+        this.appConfig,
+        localizedTextsFromForm(this.appConfig, this.configForm.get('texts')?.value, LOCALIZED_CONFIG_TEXTS)
+      );
       this.appConfig.globalWarningExpiredDay = this.configForm.get('globalWarningExpiredDay')?.value;
       this.appConfig.globalWarningExpiredHour = this.configForm.get('globalWarningExpiredHour')?.value;
       this.backendService.setAppConfig(this.appConfig).subscribe(isOk => {

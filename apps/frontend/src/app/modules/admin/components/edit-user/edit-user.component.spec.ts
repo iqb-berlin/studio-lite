@@ -14,6 +14,7 @@ import { EditUserComponent } from './edit-user.component';
 import { EditUserComponentData } from '../../models/edit-user-component-data.type';
 import { BackendService } from '../../../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
+import { LanguageService } from '../../../../services/language.service';
 
 describe('EditUserComponent', () => {
   let component: EditUserComponent;
@@ -31,11 +32,11 @@ describe('EditUserComponent', () => {
     emailApproved: true
   };
 
-  const createTestModule = (dialogData: EditUserComponentData) => {
+  const createTestModule = (dialogData: EditUserComponentData, language = 'de') => {
     const backendServiceMock = {
       getEmailTemplate: jest.fn().mockReturnValue(of({
-        emailSubject: 'Test Subject',
-        emailBody: 'Hello {{firstname}} {{lastname}}, your user is {{user}} and password is {{password}}'
+        emailSubject: { de: 'Willkommen', en: 'Welcome' },
+        emailBody: { de: 'Hallo {{firstname}} {{lastname}}, Ihr Login ist {{user}}, Ihr Kennwort {{password}}' }
       }))
     };
 
@@ -58,6 +59,7 @@ describe('EditUserComponent', () => {
         { provide: BackendService, useValue: backendServiceMock },
         { provide: AppService, useValue: appServiceMock },
         { provide: MAT_DIALOG_DATA, useValue: dialogData },
+        { provide: LanguageService, useValue: { active: { code: language } } },
         { provide: 'SERVER_URL', useValue: environment.backendUrl }
       ]
     });
@@ -111,6 +113,21 @@ describe('EditUserComponent', () => {
     const errors = Array.from<HTMLElement>(storedFixture.nativeElement.querySelectorAll('mat-error'))
       .map(error => error.textContent?.trim());
     expect(errors).toEqual(['user.invalid-login-name', 'user.invalid-email']);
+  });
+
+  // The template is written once per language; one missing in the language of the interface is German (#2186)
+  it('should write the mail in the language of the interface, or in German where it has none', async () => {
+    const body = 'Hallo John Doe, Ihr Login ist testuser, Ihr Kennwort testpass';
+    expect(decodeURIComponent(component.mailToHref()))
+      .toBe(`mailto:john.doe@example.com?subject=Willkommen&body=${body}`);
+
+    TestBed.resetTestingModule();
+    await createTestModule(mockDialogData, 'en').compileComponents();
+    const englishFixture = TestBed.createComponent(EditUserComponent);
+    englishFixture.detectChanges();
+
+    expect(decodeURIComponent(englishFixture.componentInstance.mailToHref()))
+      .toBe(`mailto:john.doe@example.com?subject=Welcome&body=${body}`);
   });
 
   it('should not hold saving back for blanks around the e-mail address (#2147)', () => {
@@ -180,8 +197,8 @@ describe('EditUserComponent (new user)', () => {
   beforeEach(async () => {
     const backendServiceMock = {
       getEmailTemplate: jest.fn().mockReturnValue(of({
-        emailSubject: 'Test Subject',
-        emailBody: 'Hello {{firstname}} {{lastname}}, your user is {{user}} and password is {{password}}'
+        emailSubject: { de: 'Willkommen', en: 'Welcome' },
+        emailBody: { de: 'Hallo {{firstname}} {{lastname}}, Ihr Login ist {{user}}, Ihr Kennwort {{password}}' }
       }))
     };
 

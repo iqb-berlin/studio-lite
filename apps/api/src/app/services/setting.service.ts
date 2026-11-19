@@ -5,6 +5,9 @@ import {
   ConfigDto, AppLogoDto, UnitExportConfigDto, MissingsProfilesDto,
   ProfilesRegistryDto, EmailTemplateDto, UnitRichNoteTagDto, TopConcept
 } from '@studio-lite-lib/api-dto';
+import {
+  LOCALIZED_CONFIG_TEXTS, LOCALIZED_EMAIL_TEMPLATE_TEXTS, toLocalizedText
+} from '@studio-lite/shared-code';
 
 import Setting from '../entities/setting.entity';
 import WorkspaceGroup from '../entities/workspace-group.entity';
@@ -18,6 +21,18 @@ import { MetadataVocabularyService } from './metadata-vocabulary.service';
  * insert branch. That worked only because `key` is the primary key and `save` upserts.
  */
 const MISSINGS_PROFILES_KEY = 'missings-profile-iqb-standard';
+
+/**
+ * A stored setting with its texts as one per language. Read and written alike: a text stored before
+ * the texts had languages, or sent by a frontend from before them, is a plain string and counts as
+ * the German one -- so no stored setting needs converting (#2186).
+ */
+function withLocalizedTexts<T extends object>(setting: T, keys: readonly (keyof T & string)[]): T {
+  return {
+    ...setting,
+    ...Object.fromEntries(keys.map(key => [key, toLocalizedText(setting[key])]))
+  };
+}
 
 /**
  * The installation-wide settings, all of them rows of {@link Setting} whose content is JSON kept as
@@ -47,17 +62,17 @@ export class SettingService {
     const setting = await this.settingsRepository.findOne({ where: { key: 'config' } });
     const hasUsers = await this.usersService.hasUsers();
     if (setting) {
-      const settings = JSON.parse(setting.content) as ConfigDto;
+      const settings = withLocalizedTexts(JSON.parse(setting.content) as ConfigDto, LOCALIZED_CONFIG_TEXTS);
       settings.hasUsers = hasUsers;
       return settings;
     }
-    // TODO: Template ist Aufgabe des Frontends (findConfig ist get):
+    // The title is a name. The start page and the imprint are for an administrator to write, in each
+    // language; the API has no text of its own in any language (#132, #2186).
     return <ConfigDto> {
-      appTitle: 'IQB-Studio',
-      introHtml: '<p>Bitte ändern Sie diesen Text über die Admin-Funktion.</p>',
-      imprintHtml: '<p>Bitte ändern Sie diesen Text über die Admin-Funktion.</p>',
-      emailSubject: '',
-      emailBody: '',
+      appTitle: toLocalizedText('IQB-Studio'),
+      introHtml: {},
+      imprintHtml: {},
+      globalWarningText: {},
       hasUsers: hasUsers
     };
     // TODO: Exception anstatt des Templates
@@ -66,14 +81,15 @@ export class SettingService {
   // TODO: ist das in diesem Fall ein PUT?
   async patchConfig(settingContent: ConfigDto): Promise<void> {
     this.logger.log('Updating settings config.');
+    const content = JSON.stringify(withLocalizedTexts(settingContent, LOCALIZED_CONFIG_TEXTS));
     const settingToUpdate = await this.settingsRepository.findOne({ where: { key: 'config' } });
     if (settingToUpdate) {
-      settingToUpdate.content = JSON.stringify(settingContent);
+      settingToUpdate.content = content;
       await this.settingsRepository.save(settingToUpdate);
     } else {
       const newSetting = this.settingsRepository.create({
         key: 'config',
-        content: JSON.stringify(settingContent)
+        content
       });
       await this.settingsRepository.save(newSetting);
     }
@@ -167,20 +183,23 @@ export class SettingService {
 
   async findEmailTemplate(): Promise<EmailTemplateDto> {
     this.logger.log('Returning email template settings');
-    const profilesRegistry = await this.settingsRepository.findOne({ where: { key: 'email-template' } });
-    return profilesRegistry ? JSON.parse(profilesRegistry.content) : new EmailTemplateDto();
+    const emailTemplate = await this.settingsRepository.findOne({ where: { key: 'email-template' } });
+    return emailTemplate ?
+      withLocalizedTexts(JSON.parse(emailTemplate.content) as EmailTemplateDto, LOCALIZED_EMAIL_TEMPLATE_TEXTS) :
+      new EmailTemplateDto();
   }
 
   async patchEmailTemplate(emailTemplateDto: EmailTemplateDto) {
     this.logger.log('Updating email template settings.');
+    const content = JSON.stringify(withLocalizedTexts(emailTemplateDto, LOCALIZED_EMAIL_TEMPLATE_TEXTS));
     const settingToUpdate = await this.settingsRepository.findOne({ where: { key: 'email-template' } });
     if (settingToUpdate) {
-      settingToUpdate.content = JSON.stringify(emailTemplateDto);
+      settingToUpdate.content = content;
       await this.settingsRepository.save(settingToUpdate);
     } else {
       const newSetting = this.settingsRepository.create({
         key: 'email-template',
-        content: JSON.stringify(emailTemplateDto)
+        content
       });
       await this.settingsRepository.save(newSetting);
     }

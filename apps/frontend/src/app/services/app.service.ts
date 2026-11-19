@@ -14,12 +14,10 @@ export const standardLogo: AppLogoDto = {
   boxBackground: '#eeeeee'
 };
 export const defaultAppConfig = <ConfigDto>{
-  appTitle: 'IQB-Studio',
-  introHtml: '<p>nicht definiert</p>',
-  imprintHtml: '<p>nicht definiert</p>',
-  emailSubject: '',
-  emailBody: '',
-  globalWarningText: '',
+  appTitle: { de: 'IQB-Studio' },
+  introHtml: {},
+  imprintHtml: {},
+  globalWarningText: {},
   globalWarningExpiredHour: 0,
   globalWarningExpiredDay: new Date(),
   hasUsers: true

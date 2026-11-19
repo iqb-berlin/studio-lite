@@ -402,6 +402,7 @@
   "config": {
     "start-page-warning": "Warning on the home page",
     "warning-placeholder": "Warning",
+    "missing-text-shows-german": "An empty field shows the German text.",
     "show-warning-until": "Show warning until",
     "date": "Date",
     "hour": "Hour",

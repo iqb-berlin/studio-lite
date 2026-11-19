@@ -46,3 +46,6 @@ export {
   sameDependencyLists
 } from './lib/unit-dependencies';
 export { UiLanguage, UI_LANGUAGES, DEFAULT_UI_LANGUAGE } from './lib/ui-languages';
+export {
+  LocalizedText, LOCALIZED_CONFIG_TEXTS, LOCALIZED_EMAIL_TEMPLATE_TEXTS, toLocalizedText, textIn
+} from './lib/localized-text';

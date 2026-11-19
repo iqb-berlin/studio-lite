@@ -25,6 +25,7 @@ import { HeartbeatService } from './services/heartbeat.service';
 import { isNoAnswer } from './utils/no-answer.utils';
 import { LoginAgainDirective } from './directives/login-again.directive';
 import { LanguageMenuComponent } from './components/language-menu/language-menu.component';
+import { LanguageService } from './services/language.service';
 
 /**
  * The shell around everything: the bar with the session's remaining time and the user menu, the
@@ -53,6 +54,7 @@ export class AppComponent implements OnInit {
   private titleService = inject(Title);
   private router = inject(Router);
   private i18nService = inject(I18nService);
+  private languageService = inject(LanguageService);
 
   currentRoutePath = ''; // home, about, print, admin, a , wsg-admin, review
   activityStatus$ = this.heartbeatService.activityStatus$;
@@ -75,7 +77,12 @@ export class AppComponent implements OnInit {
       const config$ = this.backendService.getConfig().pipe(
         tap(newConfig => {
           if (newConfig) {
-            this.appService.appConfig = new AppConfig(this.titleService, newConfig, this.sanitizer);
+            this.appService.appConfig = new AppConfig(
+              this.titleService,
+              newConfig,
+              this.sanitizer,
+              this.languageService.active.code
+            );
             this.titleService.setTitle(this.appService.appConfig.appTitle);
             this.appService.globalWarning = this.appService.appConfig.globalWarningText();
           }

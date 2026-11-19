@@ -6,11 +6,12 @@ import {
 import { HttpErrorResponse } from '@angular/common/http';
 import { provideRouter, Router, UrlSerializer } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
+import { Title } from '@angular/platform-browser';
 import { of, throwError } from 'rxjs';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { AppLogoDto } from '@studio-lite-lib/api-dto';
 import { AppComponent } from './app.component';
-import { AppService, standardLogo } from './services/app.service';
+import { AppService, defaultAppConfig, standardLogo } from './services/app.service';
 import { BackendService } from './services/backend.service';
 import { HeartbeatService } from './services/heartbeat.service';
 import { I18nService } from './services/i18n.service';
@@ -37,7 +38,7 @@ describe('AppComponent', () => {
   // The component writes the stored logo into the shared standardLogo; it is restored after each test.
   const standard = { ...standardLogo };
   // German unless a test says otherwise; the serializer reads the prefix on every url it writes.
-  let language: { codes: string[]; prefix: string };
+  let language: { codes: string[]; prefix: string; active: { code: string } };
 
   beforeEach(async () => {
     backendService = createMock<BackendService>({
@@ -46,7 +47,7 @@ describe('AppComponent', () => {
       getAuthData: jest.fn().mockReturnValue(of(AppService.defaultAuthData))
     });
 
-    language = { codes: ['de', 'en'], prefix: '' };
+    language = { codes: ['de', 'en'], prefix: '', active: { code: 'de' } };
 
     await TestBed.configureTestingModule({
       imports: [AppComponent, TranslateModule.forRoot()],
@@ -107,6 +108,22 @@ describe('AppComponent', () => {
     expect(appService.appLogo).toEqual(shownLogo);
     expect(cssVariable('--st-body-background')).toBe(shownLogo.bodyBackground);
     expect(cssVariable('--st-box-background')).toBe(shownLogo.boxBackground);
+  }));
+
+  // The texts of the settings come in the language of the interface, the title of the page as well (#2186)
+  it('should take the texts of the config in the language of the interface', fakeAsync(() => {
+    language.active = { code: 'en' };
+    backendService.getConfig.mockReturnValue(of({
+      ...defaultAppConfig,
+      appTitle: { de: 'Studio', en: 'Studio EN' }
+    }));
+    const titleService = TestBed.inject(Title);
+
+    fixture.detectChanges();
+    tick();
+
+    expect(appService.appConfig.appTitle).toBe('Studio EN');
+    expect(titleService.getTitle()).toBe('Studio EN');
   }));
 
   // The guards wait for the authentication to be complete; until then every guarded link would hang.
@@ -180,6 +197,23 @@ describe('AppComponent', () => {
     const header: HTMLElement = fixture.nativeElement.querySelector('header');
     expect(!!header.querySelector('[data-cy="app-info"]')).toBe(shown);
     expect(!!header.querySelector('[data-cy="goto-admin"]')).toBe(shown);
+  }));
+
+  // The language stands next to last, before the user's menu
+  it('should put the language menu between the administration and the user menu', fakeAsync(() => {
+    appService.authData = { ...AppService.defaultAuthData, userId: 1, isAdmin: true };
+    fixture.detectChanges();
+    tick();
+
+    router.navigateByUrl('/a/5/12/editor');
+    tick();
+    fixture.detectChanges();
+
+    const header: HTMLElement = fixture.nativeElement.querySelector('header');
+    const order = Array.from(header.querySelectorAll(
+      '[data-cy="app-info"], [data-cy="goto-admin"], studio-lite-language-menu, studio-lite-user-menu'
+    )).map(element => element.getAttribute('data-cy') ?? element.tagName.toLowerCase());
+    expect(order).toEqual(['app-info', 'goto-admin', 'studio-lite-language-menu', 'studio-lite-user-menu']);
   }));
 
   // In any language but German the url starts with the prefix, and the area is what follows it.

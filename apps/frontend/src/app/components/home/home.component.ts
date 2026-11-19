@@ -6,6 +6,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../services/app.service';
 import { AppConfig } from '../../classes/app-config.class';
+import { LanguageService } from '../../services/language.service';
 import { AppInfoComponent } from '../app-info/app-info.component';
 import { UserReviewsAreaComponent } from '../user-reviews-area/user-reviews-area.component';
 import { UserWorkspacesAreaComponent } from '../user-workspaces-area/user-workspaces-area.component';
@@ -33,7 +34,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     private backendService: BackendService,
     private titleService: Title,
     private sanitizer: DomSanitizer,
-    private translateService: TranslateService
+    private translateService: TranslateService,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit(): void {
@@ -42,7 +44,12 @@ export class HomeComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(newConfig => {
           if (newConfig) {
-            this.appService.appConfig = new AppConfig(this.titleService, newConfig, this.sanitizer);
+            this.appService.appConfig = new AppConfig(
+              this.titleService,
+              newConfig,
+              this.sanitizer,
+              this.languageService.active.code
+            );
             this.appService.dataLoading = false;
             this.appService.globalWarning = this.appService.appConfig.globalWarningText();
           }
