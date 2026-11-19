@@ -80,8 +80,6 @@ describe('AppConfigComponent', () => {
       appTitle: { de: 'Test App' },
       introHtml: { de: '<p>Test Intro</p>' },
       imprintHtml: { de: '<p>Test Imprint</p>' },
-      emailSubject: 'Test Email Subject',
-      emailBody: 'Test Email Body',
       globalWarningText: { de: 'Test Warning' },
       globalWarningExpiredDay: new Date('2026-12-31'),
       globalWarningExpiredHour: 12,
@@ -106,8 +104,6 @@ describe('AppConfigComponent', () => {
       appTitle: { de: 'Test App' },
       introHtml: { de: '<p>Test Intro</p>' },
       imprintHtml: { de: '<p>Test Imprint</p>' },
-      emailSubject: 'Test Email Subject',
-      emailBody: 'Test Email Body',
       globalWarningText: { de: 'Test Warning' },
       globalWarningExpiredDay: '2026-12-31T00:00:00.000Z',
       globalWarningExpiredHour: 12,
@@ -127,8 +123,6 @@ describe('AppConfigComponent', () => {
       appTitle: { de: 'Test App' },
       introHtml: { de: '' },
       imprintHtml: { de: '' },
-      emailSubject: '',
-      emailBody: '',
       globalWarningText: { de: 'Test Warning' },
       hasUsers: true
     }));
@@ -190,8 +184,7 @@ describe('AppConfigComponent', () => {
     component.saveData();
 
     expect(backendService.setAppConfig).toHaveBeenCalledWith(expect.objectContaining({
-      emailSubject: 'Test Email Subject',
-      emailBody: 'Test Email Body'
+      hasUsers: true
     }));
   });
 
@@ -263,8 +256,6 @@ describe('AppConfigComponent', () => {
       appTitle: { de: 'Test' },
       introHtml: { de: '' },
       imprintHtml: { de: '' },
-      emailSubject: '',
-      emailBody: '',
       globalWarningText: { de: 'Warning' },
       globalWarningExpiredDay: pastDate,
       globalWarningExpiredHour: 12,

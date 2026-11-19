@@ -73,8 +73,6 @@ export class SettingService {
       introHtml: {},
       imprintHtml: {},
       globalWarningText: {},
-      emailSubject: '',
-      emailBody: '',
       hasUsers: hasUsers
     };
     // TODO: Exception anstatt des Templates

@@ -22,12 +22,6 @@ export class ConfigDto {
   })
   imprintHtml!: Record<string, string>;
 
-  @ApiProperty()
-  emailSubject = '';
-
-  @ApiProperty()
-  emailBody = '';
-
   @ApiProperty({
     type: 'object',
     additionalProperties: { type: 'string' },

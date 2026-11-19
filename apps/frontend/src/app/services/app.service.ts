@@ -17,8 +17,6 @@ export const defaultAppConfig = <ConfigDto>{
   appTitle: { de: 'IQB-Studio' },
   introHtml: {},
   imprintHtml: {},
-  emailSubject: '',
-  emailBody: '',
   globalWarningText: {},
   globalWarningExpiredHour: 0,
   globalWarningExpiredDay: new Date(),

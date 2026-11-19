@@ -3,8 +3,8 @@ import { ConfigDto } from '@studio-lite-lib/api-dto';
 import { DEFAULT_UI_LANGUAGE, textIn } from '@studio-lite/shared-code';
 
 /**
- * How the installation presents itself: its name, the intro and imprint texts, the address a
- * contact mail goes to, and the warning that can be shown to everyone until a given day and hour.
+ * How the installation presents itself: its name, the intro and imprint texts, and the warning that
+ * can be shown to everyone until a given day and hour.
  *
  * The HTML texts are configured by an administrator, so they pass the sanitizer once here rather
  * than at each place they are rendered.
@@ -18,8 +18,6 @@ export class AppConfig {
   hideTitlesOnPage = false;
   readonly introHtml: SafeUrl | undefined;
   readonly imprintHtml: SafeUrl | undefined;
-  readonly emailSubject: string;
-  readonly emailBody: string;
   private readonly _globalWarningText: string;
   private readonly _globalWarningExpiredDay: Date | undefined;
   private readonly _globalWarningExpiredHour: number | undefined;
@@ -42,8 +40,6 @@ export class AppConfig {
     if (imprintHtml && sanitizer) {
       this.imprintHtml = sanitizer.bypassSecurityTrustHtml(imprintHtml);
     }
-    this.emailSubject = appConfig ? appConfig.emailSubject : '';
-    this.emailBody = appConfig ? appConfig.emailBody : '';
     this._globalWarningText = textIn(appConfig?.globalWarningText, language);
     this._globalWarningExpiredDay = appConfig ? appConfig.globalWarningExpiredDay : undefined;
     this._globalWarningExpiredHour = appConfig ? appConfig.globalWarningExpiredHour : undefined;

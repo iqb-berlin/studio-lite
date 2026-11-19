@@ -7,8 +7,6 @@ describe('AppConfig', () => {
     appTitle: { de: 'Test Studio' },
     introHtml: { de: '<p>Intro</p>' },
     imprintHtml: { de: '<p>Imprint</p>' },
-    emailSubject: 'Subject',
-    emailBody: 'Body',
     globalWarningText: { de: 'Warning' },
     globalWarningExpiredDay: new Date('2030-01-01'),
     globalWarningExpiredHour: 1,
@@ -29,8 +27,6 @@ describe('AppConfig', () => {
     expect(config.hideTitlesOnPage).toBe(false);
     expect(config.introHtml).toBeUndefined();
     expect(config.imprintHtml).toBeUndefined();
-    expect(config.emailSubject).toBe('');
-    expect(config.emailBody).toBe('');
     expect(config.globalWarningText()).toBe('');
     expect(config.hasUsers).toBe(true);
   });
