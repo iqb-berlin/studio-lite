@@ -50,6 +50,17 @@ describe('UnitExportConfigComponent', () => {
     fixture.detectChanges();
   });
 
+  // Empty fields after a failed load looked like nothing stored, with saving grey and no reason given (#2191).
+  it('says that the parameters were not loaded and offers no form to save', () => {
+    backendService.getUnitExportConfig.mockReturnValue(of(null));
+    component.updateFormFields();
+    fixture.detectChanges();
+
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelector('[data-cy="admin-unit-export-config-not-loaded"]')).not.toBeNull();
+    expect(element.querySelector('[formcontrolname="unitXsdUrl"]')).toBeNull();
+  });
+
   it('updates form fields and marks dataChanged on value change', () => {
     backendService.getUnitExportConfig.mockReturnValue(of({
       unitXsdUrl: 'u.xsd',

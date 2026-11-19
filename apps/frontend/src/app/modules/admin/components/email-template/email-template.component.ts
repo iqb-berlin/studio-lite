@@ -1,11 +1,11 @@
 import {
-  Component, inject, OnDestroy, OnInit
+  Component, inject, OnDestroy, OnInit, signal
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   UntypedFormBuilder, UntypedFormGroup, FormsModule, ReactiveFormsModule
 } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
@@ -44,6 +44,10 @@ export class EmailTemplateComponent implements OnInit, OnDestroy {
   // One save at a time, and what it sent: what is entered meanwhile stays a change (#2094).
   readonly save = new SaveLock();
   private configDataChangedSubscription: Subscription | null = null;
+  private readonly templateNotLoadedState = signal(false);
+  // Without the stored template the form is not shown: its empty fields would look like no template stored (#2188).
+  readonly templateNotLoaded = this.templateNotLoadedState.asReadonly();
+  private ngUnsubscribe = new Subject<void>();
 
   constructor(
     private fb: UntypedFormBuilder,
@@ -62,21 +66,25 @@ export class EmailTemplateComponent implements OnInit, OnDestroy {
 
   updateFormFields(): void {
     this.backendService.getEmailTemplate()
+      .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(emailTemplate => {
         if (this.configDataChangedSubscription !== null) {
           this.configDataChangedSubscription.unsubscribe();
           this.configDataChangedSubscription = null;
         }
-        this.emailTemplate = emailTemplate ?? { emailSubject: {}, emailBody: {} };
-        this.configForm.setValue(
-          localizedFormValue(this.emailTemplate, this.languages, LOCALIZED_EMAIL_TEMPLATE_TEXTS),
-          { emitEvent: false }
-        );
-        this.configDataChangedSubscription = this.configForm.valueChanges.subscribe(() => {
-          if (this.configForm) {
-            this.dataChanged = true;
-          }
-        });
+        this.templateNotLoadedState.set(!emailTemplate);
+        if (emailTemplate) {
+          this.emailTemplate = emailTemplate;
+          this.configForm.setValue(
+            localizedFormValue(this.emailTemplate, this.languages, LOCALIZED_EMAIL_TEMPLATE_TEXTS),
+            { emitEvent: false }
+          );
+          this.configDataChangedSubscription = this.configForm.valueChanges.subscribe(() => {
+            if (this.configForm) {
+              this.dataChanged = true;
+            }
+          });
+        }
       });
   }
 
@@ -111,5 +119,7 @@ export class EmailTemplateComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.configDataChangedSubscription !== null) this.configDataChangedSubscription.unsubscribe();
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }

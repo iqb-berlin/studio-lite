@@ -46,6 +46,17 @@ describe('ProfilesRegistryComponent', () => {
     fixture.detectChanges();
   });
 
+  // Empty fields after a failed load looked like nothing stored, with saving grey and no reason given (#2191).
+  it('says that the registry was not loaded and offers no form to save', () => {
+    backendService.getProfilesRegistry.mockReturnValue(of(null));
+    component.updateFormFields();
+    fixture.detectChanges();
+
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelector('[data-cy="admin-profiles-registry-not-loaded"]')).not.toBeNull();
+    expect(element.querySelector('[formcontrolname="csvUrl"]')).toBeNull();
+  });
+
   it('updates form fields and marks dataChanged on value change', () => {
     backendService.getProfilesRegistry.mockReturnValue(of({ csvUrl: 'url.csv' }));
 

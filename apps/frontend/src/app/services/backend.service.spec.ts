@@ -274,6 +274,20 @@ describe('BackendService', () => {
     });
   });
 
+  describe('getEmailTemplate', () => {
+    // Without a stored template the API answers an empty one, so null can only mean the load failed:
+    // the admin card then says so instead of showing empty fields (#2188).
+    it('should answer a failed request with null', done => {
+      service.getEmailTemplate().subscribe(emailTemplate => {
+        expect(emailTemplate).toBeNull();
+        done();
+      });
+
+      httpMock.expectOne(`${serverUrl}settings/email-template`)
+        .flush('error', { status: 500, statusText: 'Server Error' });
+    });
+  });
+
   describe('getConfig', () => {
     it('should return default config on error', done => {
       service.getConfig().subscribe(config => {

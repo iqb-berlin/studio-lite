@@ -1,9 +1,11 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component, OnDestroy, OnInit, signal
+} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   UntypedFormBuilder, UntypedFormGroup, FormsModule, ReactiveFormsModule
 } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
@@ -24,6 +26,10 @@ export class UnitExportConfigComponent implements OnInit, OnDestroy {
   // One save at a time, and what it sent: what is entered meanwhile stays a change (#2094).
   readonly save = new SaveLock();
   private configDataChangedSubscription: Subscription | null = null;
+  private readonly configNotLoadedState = signal(false);
+  // Without the stored parameters the form is not shown: its empty fields would look like none stored (#2191).
+  readonly configNotLoaded = this.configNotLoadedState.asReadonly();
+  private ngUnsubscribe = new Subject<void>();
 
   constructor(
     private fb: UntypedFormBuilder,
@@ -45,21 +51,24 @@ export class UnitExportConfigComponent implements OnInit, OnDestroy {
   }
 
   updateFormFields(): void {
-    this.backendService.getUnitExportConfig().subscribe(unitExportConfig => {
+    this.backendService.getUnitExportConfig().pipe(takeUntil(this.ngUnsubscribe)).subscribe(unitExportConfig => {
       if (this.configDataChangedSubscription !== null) {
         this.configDataChangedSubscription.unsubscribe();
         this.configDataChangedSubscription = null;
       }
-      this.configForm.setValue({
-        unitXsdUrl: unitExportConfig.unitXsdUrl,
-        bookletXsdUrl: unitExportConfig.bookletXsdUrl,
-        testTakersXsdUrl: unitExportConfig.testTakersXsdUrl
-      });
-      this.configDataChangedSubscription = this.configForm.valueChanges.subscribe(() => {
-        if (this.configForm) {
-          this.dataChanged = true;
-        }
-      });
+      this.configNotLoadedState.set(!unitExportConfig);
+      if (unitExportConfig) {
+        this.configForm.setValue({
+          unitXsdUrl: unitExportConfig.unitXsdUrl,
+          bookletXsdUrl: unitExportConfig.bookletXsdUrl,
+          testTakersXsdUrl: unitExportConfig.testTakersXsdUrl
+        });
+        this.configDataChangedSubscription = this.configForm.valueChanges.subscribe(() => {
+          if (this.configForm) {
+            this.dataChanged = true;
+          }
+        });
+      }
     });
   }
 
@@ -92,5 +101,7 @@ export class UnitExportConfigComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.configDataChangedSubscription !== null) this.configDataChangedSubscription.unsubscribe();
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }
