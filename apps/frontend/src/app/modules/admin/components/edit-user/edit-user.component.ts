@@ -1,7 +1,9 @@
 import {
   MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
 } from '@angular/material/dialog';
-import { Component, Inject, OnInit } from '@angular/core';
+import {
+  Component, Inject, inject, OnInit
+} from '@angular/core';
 import {
   UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule
 } from '@angular/forms';
@@ -17,11 +19,13 @@ import {
 import { MatTooltip } from '@angular/material/tooltip';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { EmailTemplateDto } from '@studio-lite-lib/api-dto';
+import { textIn } from '@studio-lite/shared-code';
 import { EditUserComponentData } from '../../models/edit-user-component-data.type';
 import { AppService } from '../../../../services/app.service';
 import { BackendService } from '../../../../services/backend.service';
 import { FilledErrorStateMatcher } from '../../../../classes/filled-error-state-matcher.class';
 import { emailValidator, trimEmail } from '../../../../utils/email.utils';
+import { LanguageService } from '../../../../services/language.service';
 
 @Component({
   selector: 'studio-lite-edit-user',
@@ -36,6 +40,8 @@ import { emailValidator, trimEmail } from '../../../../utils/email.utils';
 export class EditUserComponent implements OnInit {
   editUserForm: UntypedFormGroup;
   emailTemplate!: EmailTemplateDto;
+  // The mail comes in the language the administration is in, or in German where it has none (#2186)
+  private readonly language = inject(LanguageService).active.code;
 
   constructor(private fb: UntypedFormBuilder,
               @Inject(MAT_DIALOG_DATA) public data: EditUserComponentData,
@@ -90,13 +96,18 @@ export class EditUserComponent implements OnInit {
   }
 
   mailTo(): void {
+    window.location.href = this.mailToHref();
+  }
+
+  /** The mail to the user, from the template in the language of the interface. */
+  mailToHref(): string {
     const email: string = trimEmail(this.editUserForm.get('email')?.value) || '';
-    const subject: string = this.emailTemplate.emailSubject;
-    window.location.href = `mailto:${email}?subject=${subject}&body=${this.getEmailBody()}`;
+    const subject: string = textIn(this.emailTemplate.emailSubject, this.language);
+    return `mailto:${email}?subject=${subject}&body=${this.getEmailBody()}`;
   }
 
   private getEmailBody(): string {
-    const template = this.emailTemplate.emailBody;
+    const template = textIn(this.emailTemplate.emailBody, this.language);
     const firstName = this.editUserForm.get('firstName')?.value || '';
     const lastName = this.editUserForm.get('lastName')?.value || '';
     const name = this.editUserForm.get('name')?.value || '';

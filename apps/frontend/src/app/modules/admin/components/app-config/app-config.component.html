@@ -3,70 +3,85 @@
 } @else {
   <form [formGroup]="configForm"
         class="fx-column-start-stretch">
-    <div class="fx-column-start-stretch">
-      <mat-form-field class="fx-flex-fill">
-        <mat-label>{{'config.start-page-warning' | translate}}</mat-label>
-        <textarea matInput
-                  rows="4"
-                  formControlName="globalWarningText"
-                  [placeholder]="'config.warning-placeholder' | translate">
-          </textarea>
-      </mat-form-field>
-      <div class="fx-row-start-start fx-gap-20">
-        <div class="fx-column-start-stretch fx-flex-fill">
-          <div class="fx-row-space-between-stretch fx-gap-20">
-            <mat-form-field class="fx-flex-fill">
-              <mat-label>{{'config.show-warning-until' | translate}}</mat-label>
-              <input matInput
-                formControlName="globalWarningExpiredDay"
-                [matDatepicker]="picker">
-              <mat-datepicker-toggle
-                matSuffix
-                [for]="picker">
-              </mat-datepicker-toggle>
-              <mat-datepicker #picker></mat-datepicker>
-            </mat-form-field>
-            <mat-form-field class="fx-flex-fill">
-              <mat-select [placeholder]="'config.hour' | translate"
-                formControlName="globalWarningExpiredHour">
-                @for (m of expiredHours; track m) {
-                  <mat-option
-                    [value]="m">
-                    {{m | toTime}}
-                  </mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-          @if (warningIsExpired) {
-            <div class="warning-warning">
-              {{'config.time-in-past' | translate}}
+    <mat-tab-group animationDuration="0ms">
+      @for (language of languages; track language.code) {
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <span [attr.data-cy]="'admin-app-config-language-' + language.code">{{ language.name }}</span>
+          </ng-template>
+          <div class="fx-column-start-stretch language-texts" formGroupName="texts">
+            <div class="fx-column-start-stretch" [formGroupName]="language.code">
+              @if (language.code !== defaultLanguage) {
+                <div class="info">{{ 'config.missing-text-shows-german' | translate }}</div>
+              }
+              <mat-form-field class="fx-flex-fill">
+                <mat-label>{{'config.start-page-warning' | translate}}</mat-label>
+                <textarea matInput
+                          rows="4"
+                          formControlName="globalWarningText"
+                          [placeholder]="'config.warning-placeholder' | translate">
+                </textarea>
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>{{'config.app-name' | translate}}</mat-label>
+                <input matInput
+                  formControlName="appTitle"
+                  [placeholder]="'config.app-name-placeholder' | translate">
+              </mat-form-field>
+              <mat-form-field class="fx-column-start-stretch">
+                <mat-label>{{'config.start-page-content-right' | translate}}</mat-label>
+                <textarea matInput
+                  formControlName="introHtml"
+                  cdkTextareaAutosize
+                cdkAutosizeMinRows="6"></textarea>
+              </mat-form-field>
+              <mat-form-field class="fx-column-start-stretch">
+                <mat-label>{{'config.imprint-content' | translate}}</mat-label>
+                <textarea matInput
+                  formControlName="imprintHtml"
+                  cdkTextareaAutosize
+                cdkAutosizeMinRows="6"></textarea>
+              </mat-form-field>
             </div>
-          }
+          </div>
+        </mat-tab>
+      }
+    </mat-tab-group>
+
+    <div class="fx-row-start-start fx-gap-20">
+      <div class="fx-column-start-stretch fx-flex-fill">
+        <div class="fx-row-space-between-stretch fx-gap-20">
+          <mat-form-field class="fx-flex-fill">
+            <mat-label>{{'config.show-warning-until' | translate}}</mat-label>
+            <input matInput
+              formControlName="globalWarningExpiredDay"
+              [matDatepicker]="picker">
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="picker">
+            </mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field class="fx-flex-fill">
+            <mat-select [placeholder]="'config.hour' | translate"
+              formControlName="globalWarningExpiredHour">
+              @for (m of expiredHours; track m) {
+                <mat-option
+                  [value]="m">
+                  {{m | toTime}}
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
         </div>
+        @if (warningIsExpired) {
+          <div class="warning-warning">
+            {{'config.time-in-past' | translate}}
+          </div>
+        }
       </div>
     </div>
 
-    <mat-form-field>
-      <mat-label>{{'config.app-name' | translate}}</mat-label>
-      <input matInput
-        formControlName="appTitle"
-        [placeholder]="'config.app-name-placeholder' | translate">
-    </mat-form-field>
-    <mat-form-field class="fx-column-start-stretch">
-      <mat-label>{{'config.start-page-content-right' | translate}}</mat-label>
-      <textarea matInput
-        formControlName="introHtml"
-        cdkTextareaAutosize
-      cdkAutosizeMinRows="6"></textarea>
-    </mat-form-field>
-    <mat-form-field class="fx-column-start-stretch">
-      <mat-label>{{'config.imprint-content' | translate}}</mat-label>
-      <textarea matInput
-        formControlName="imprintHtml"
-        cdkTextareaAutosize
-      cdkAutosizeMinRows="6"></textarea>
-    </mat-form-field>
     <div class="fx-row-end-center fx-gap-30">
       @if (dataChanged) {
         <div class="fx-flex-fill info ">

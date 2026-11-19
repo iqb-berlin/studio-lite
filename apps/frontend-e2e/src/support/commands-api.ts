@@ -2416,12 +2416,27 @@ Cypress.Commands.add('updateSettingConfigAPI', (token:string, hour:number) => {
       authorization
     },
     body: {
-      appTitle: 'IQB-Studio',
-      globalWarningText: 'Warnung Achtung 2',
+      appTitle: { de: 'IQB-Studio' },
+      globalWarningText: { de: 'Warnung Achtung 2', en: 'Warning 2' },
       globalWarningExpiredHour: `${hour}`,
       globalWarningExpiredDay: new Date(),
       hasUsers: true
     },
+    failOnStatusCode: false
+  });
+});
+
+// 101, with a config as a frontend sends it
+Cypress.Commands.add('patchSettingConfigAPI', (config: object, token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: '/api/settings/config',
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    body: config,
     failOnStatusCode: false
   });
 });

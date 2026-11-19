@@ -277,7 +277,7 @@ describe('BackendService', () => {
   describe('getConfig', () => {
     it('should return default config on error', done => {
       service.getConfig().subscribe(config => {
-        expect(config?.appTitle).toBe('IQB-Studio');
+        expect(config?.appTitle).toEqual({ de: 'IQB-Studio' });
         done();
       });
 

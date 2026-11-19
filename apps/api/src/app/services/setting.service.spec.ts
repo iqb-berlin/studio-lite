@@ -53,22 +53,43 @@ describe('SettingService', () => {
 
   describe('findConfig', () => {
     it('should return config if setting exists', async () => {
-      const config: ConfigDto = { appTitle: 'Test', hasUsers: true } as ConfigDto;
+      const config: Partial<ConfigDto> = { appTitle: { de: 'Test', en: 'Test EN' }, hasUsers: true };
       const setting = { key: 'config', content: JSON.stringify(config) } as Setting;
       settingsRepository.findOne.mockResolvedValue(setting);
       usersService.hasUsers.mockResolvedValue(true);
 
       const result = await service.findConfig();
-      expect(result.appTitle).toBe('Test');
+      expect(result.appTitle).toEqual({ de: 'Test', en: 'Test EN' });
       expect(result.hasUsers).toBe(true);
     });
 
-    it('should return default config if setting does not exist', async () => {
+    // Stored before the texts had languages: each text is a plain string and counts as German (#2186)
+    it('should read the texts of a config stored as plain strings as the German ones', async () => {
+      const setting = {
+        key: 'config',
+        content: JSON.stringify({
+          appTitle: 'Studio', introHtml: '<p>Willkommen</p>', globalWarningText: '', globalWarningExpiredHour: 3
+        })
+      } as Setting;
+      settingsRepository.findOne.mockResolvedValue(setting);
+
+      const result = await service.findConfig();
+      expect(result.appTitle).toEqual({ de: 'Studio' });
+      expect(result.introHtml).toEqual({ de: '<p>Willkommen</p>' });
+      expect(result.imprintHtml).toEqual({});
+      expect(result.globalWarningText).toEqual({ de: '' });
+      expect(result.globalWarningExpiredHour).toBe(3);
+    });
+
+    // The API has no text of its own for the start page and the imprint, in any language (#132, #2186)
+    it('should return the title and no texts if setting does not exist', async () => {
       settingsRepository.findOne.mockResolvedValue(null);
       usersService.hasUsers.mockResolvedValue(false);
 
       const result = await service.findConfig();
-      expect(result.appTitle).toBe('IQB-Studio');
+      expect(result.appTitle).toEqual({ de: 'IQB-Studio' });
+      expect(result.introHtml).toEqual({});
+      expect(result.imprintHtml).toEqual({});
       expect(result.hasUsers).toBe(false);
     });
   });
@@ -78,18 +99,22 @@ describe('SettingService', () => {
       const setting = { key: 'config', content: '{}' } as Setting;
       settingsRepository.findOne.mockResolvedValue(setting);
 
-      await service.patchConfig({ appTitle: 'New' } as ConfigDto);
+      await service.patchConfig({ appTitle: { de: 'Neu', en: 'New' } } as unknown as ConfigDto);
       expect(settingsRepository.save).toHaveBeenCalled();
-      expect(JSON.parse(setting.content).appTitle).toBe('New');
+      expect(JSON.parse(setting.content).appTitle).toEqual({ de: 'Neu', en: 'New' });
     });
 
-    it('should create new config if not exists', async () => {
+    // A frontend from before #2186, still open after the update, sends plain strings
+    it('should store a text sent as a plain string as the German one', async () => {
       settingsRepository.findOne.mockResolvedValue(null);
-      settingsRepository.create.mockReturnValue({ key: 'config' } as Setting);
+      settingsRepository.create.mockImplementation(entity => entity as Setting);
 
-      await service.patchConfig({ appTitle: 'New' } as ConfigDto);
+      await service.patchConfig({ appTitle: 'New', globalWarningText: 'Achtung' } as unknown as ConfigDto);
       expect(settingsRepository.create).toHaveBeenCalled();
-      expect(settingsRepository.save).toHaveBeenCalled();
+      const saved = settingsRepository.save.mock.calls[0][0] as Setting;
+      expect(JSON.parse(saved.content)).toEqual(expect.objectContaining({
+        appTitle: { de: 'New' }, globalWarningText: { de: 'Achtung' }, introHtml: {}
+      }));
     });
   });
 
@@ -187,13 +212,29 @@ describe('SettingService', () => {
       const result = await service.findEmailTemplate();
       expect(result).toBeInstanceOf(EmailTemplateDto);
     });
+
+    it('should read a template stored as plain strings as the German one (#2186)', async () => {
+      settingsRepository.findOne.mockResolvedValue({
+        key: 'email-template',
+        content: JSON.stringify({ emailSubject: 'Willkommen', emailBody: 'Hallo {{user}}' })
+      } as Setting);
+      const result = await service.findEmailTemplate();
+      expect(result).toEqual({ emailSubject: { de: 'Willkommen' }, emailBody: { de: 'Hallo {{user}}' } });
+    });
   });
 
   describe('patchEmailTemplate', () => {
-    it('should update template', async () => {
-      settingsRepository.findOne.mockResolvedValue({} as Setting);
-      await service.patchEmailTemplate({} as EmailTemplateDto);
+    it('should store the template per language (#2186)', async () => {
+      const setting = { key: 'email-template', content: '{}' } as Setting;
+      settingsRepository.findOne.mockResolvedValue(setting);
+      await service.patchEmailTemplate({
+        emailSubject: { de: 'Willkommen', en: 'Welcome' },
+        emailBody: 'Hallo'
+      } as unknown as EmailTemplateDto);
       expect(settingsRepository.save).toHaveBeenCalled();
+      expect(JSON.parse(setting.content)).toEqual({
+        emailSubject: { de: 'Willkommen', en: 'Welcome' }, emailBody: { de: 'Hallo' }
+      });
     });
   });
 

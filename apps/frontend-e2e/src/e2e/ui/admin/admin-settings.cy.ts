@@ -10,6 +10,7 @@ import {
   clickIndexTabAdmin
 } from '../../../support/helpers';
 import { baseGroup } from '../../../support/testData';
+import { getAppTitle } from '../../../support/app.po';
 
 describe('Admin Settings Tab Configuration', () => {
   before(() => {
@@ -65,12 +66,46 @@ describe('Admin Settings Tab Configuration', () => {
       login(Cypress.expose('username'), Cypress.expose('password'));
     });
 
+    // An administrator writes each text once per language; one missing in a language is the German one.
+    // The English page is loaded as a page of its own, since the language is fixed when it loads (#2186).
+    it('shows each text in the language of the interface, or the German one where it has none', () => {
+      goToSettings();
+      setFormControl('appTitle', 'Studio Deutsch');
+      setFormControl('introHtml', '<p>Willkommen im Studio</p>');
+      cy.get('[data-cy="admin-app-config-language-en"]').click();
+      clearFormControl('appTitle');
+      setFormControl('introHtml', '<p>Welcome to the studio</p>');
+      saveAndExpect('PATCH', '/api/settings/config', 'saveConfigPerLanguage', 0);
+      cy.get('@saveConfigPerLanguage').its('request.body').should('deep.include', {
+        appTitle: { de: 'Studio Deutsch', en: '' },
+        introHtml: { de: '<p>Willkommen im Studio</p>', en: '<p>Welcome to the studio</p>' }
+      });
+
+      cy.visit('/index.html#/en/home');
+      cy.get('html').should('have.attr', 'lang', 'en');
+      cy.get('studio-lite-app-info').should('contain.text', 'Welcome to the studio');
+      getAppTitle().should('contain.text', 'Studio Deutsch');
+
+      // back to German through the menu: the address stays in the language the page was loaded in
+      cy.get('[data-cy="language-menu"]').click();
+      cy.get('[data-cy="language-de"]').click();
+      cy.location('hash').should('eq', '#/home');
+      cy.get('html').should('have.attr', 'lang', 'de');
+      cy.get('studio-lite-app-info').should('contain.text', 'Willkommen im Studio');
+    });
+
     it('clears the warning message and restores defaults', () => {
       goToSettings();
       clearFormControl('globalWarningText');
       // The settings outlast the reset before each spec. An emptied title stays empty (#1964), and
       // core/app.cy.ts, which looks for the title, saw it only while the config was still loading.
       setFormControl('appTitle', 'IQB-Studio');
+      clearFormControl('introHtml');
+      clearFormControl('imprintHtml');
+      // the English texts as well, where an empty field shows the German one (#2186)
+      cy.get('[data-cy="admin-app-config-language-en"]').click();
+      clearFormControl('globalWarningText');
+      clearFormControl('appTitle');
       clearFormControl('introHtml');
       clearFormControl('imprintHtml');
       saveAndExpect(
@@ -131,10 +166,10 @@ describe('Admin Settings Tab Configuration', () => {
       // within the 10 s the held answer may wait, so that a missing lock fails here and says so
       cy.get('[data-cy="admin-email-template-save-button"]', { timeout: 2000 }).should('be.disabled');
       cy.then(() => release());
-      cy.wait('@saveEmailTemplateSlowly').its('request.body.emailSubject').should('equal', 'Vorher');
+      cy.wait('@saveEmailTemplateSlowly').its('request.body.emailSubject.de').should('equal', 'Vorher');
 
       saveButton().should('be.enabled').click();
-      cy.wait('@saveEmailTemplateSlowly').its('request.body.emailSubject').should('equal', 'Vorher danach');
+      cy.wait('@saveEmailTemplateSlowly').its('request.body.emailSubject.de').should('equal', 'Vorher danach');
       saveButton().should('be.disabled');
     });
   });

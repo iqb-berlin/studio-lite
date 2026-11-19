@@ -1,4 +1,6 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component, inject, OnDestroy, OnInit
+} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   UntypedFormBuilder, UntypedFormGroup, FormsModule, ReactiveFormsModule
@@ -9,10 +11,16 @@ import { MatButton } from '@angular/material/button';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatTab, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
+import { DEFAULT_UI_LANGUAGE, LOCALIZED_EMAIL_TEMPLATE_TEXTS } from '@studio-lite/shared-code';
 
 import { EmailTemplateDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from '../../../../services/backend.service';
 import { SaveLock } from '../../../../classes/save-lock.class';
+import { LanguageService } from '../../../../services/language.service';
+import {
+  localizedFormValue, localizedTextsForm, localizedTextsFromForm
+} from '../../../../utils/localized-form.utils';
 
 @Component({
   selector: 'studio-lite-email-template',
@@ -20,12 +28,18 @@ import { SaveLock } from '../../../../classes/save-lock.class';
   styleUrls: ['./email-template.component.scss'],
 
   imports: [
-    FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, CdkTextareaAutosize, MatButton, TranslateModule
+    FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, CdkTextareaAutosize, MatButton, TranslateModule,
+    MatTabGroup, MatTab, MatTabLabel
   ]
 })
 
 export class EmailTemplateComponent implements OnInit, OnDestroy {
   configForm: UntypedFormGroup;
+  readonly languages = inject(LanguageService).languages;
+  readonly defaultLanguage = DEFAULT_UI_LANGUAGE;
+  // What is stored, so that saving keeps the texts of a language the form does not show (#1964).
+  // A plain object: the DTO class would bring the API's decorators into the bundle.
+  private emailTemplate: EmailTemplateDto = { emailSubject: {}, emailBody: {} };
   dataChanged = false;
   // One save at a time, and what it sent: what is entered meanwhile stays a change (#2094).
   readonly save = new SaveLock();
@@ -37,10 +51,7 @@ export class EmailTemplateComponent implements OnInit, OnDestroy {
     private backendService: BackendService,
     private translateService: TranslateService
   ) {
-    this.configForm = this.fb.group({
-      emailSubject: this.fb.control(''),
-      emailBody: this.fb.control('')
-    });
+    this.configForm = localizedTextsForm(this.fb, this.languages, LOCALIZED_EMAIL_TEMPLATE_TEXTS);
   }
 
   ngOnInit(): void {
@@ -56,16 +67,11 @@ export class EmailTemplateComponent implements OnInit, OnDestroy {
           this.configDataChangedSubscription.unsubscribe();
           this.configDataChangedSubscription = null;
         }
-        if (emailTemplate) {
-          if (this.configForm) {
-            this.configForm.setValue({
-              emailSubject: emailTemplate.emailSubject,
-              emailBody: emailTemplate.emailBody
-            }, { emitEvent: false });
-          }
-        } else {
-          this.configForm.setValue({ emailSubject: '', emailBody: '' });
-        }
+        this.emailTemplate = emailTemplate ?? { emailSubject: {}, emailBody: {} };
+        this.configForm.setValue(
+          localizedFormValue(this.emailTemplate, this.languages, LOCALIZED_EMAIL_TEMPLATE_TEXTS),
+          { emitEvent: false }
+        );
         this.configDataChangedSubscription = this.configForm.valueChanges.subscribe(() => {
           if (this.configForm) {
             this.dataChanged = true;
@@ -77,10 +83,11 @@ export class EmailTemplateComponent implements OnInit, OnDestroy {
   saveData(): void {
     if (this.configForm) {
       if (!this.save.start(this.configForm.getRawValue())) return;
-      const emailTemplate: EmailTemplateDto = {
-        emailSubject: this.configForm.get('emailSubject')?.value,
-        emailBody: this.configForm.get('emailBody')?.value
-      };
+      const emailTemplate: EmailTemplateDto = localizedTextsFromForm(
+        this.emailTemplate,
+        this.configForm.getRawValue(),
+        LOCALIZED_EMAIL_TEMPLATE_TEXTS
+      );
       this.backendService.setEmailTemplate(emailTemplate)
         .subscribe(isOk => {
           this.save.finish();

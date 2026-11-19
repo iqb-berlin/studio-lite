@@ -88,6 +88,34 @@ describe('Admin settings API tests', () => {
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
+      // each text once per language (#2186)
+      cy.getSettingConfigAPI(noId)
+        .then(resp => {
+          expect(resp.body.appTitle).to.deep.equal({ de: 'IQB-Studio' });
+          expect(resp.body.globalWarningText).to.deep.equal({ de: 'Warnung Achtung 2', en: 'Warning 2' });
+        });
+    });
+
+    // A frontend from before the texts had languages, still open after the update, sends plain strings (#2186)
+    it('200 positive test: should store a text sent as a plain string as the German one', () => {
+      const token = Cypress.expose(`token_${Cypress.expose('username')}`);
+      // expired, as the command above leaves it, so that no later spec sees the warning
+      cy.patchSettingConfigAPI({
+        appTitle: 'IQB-Studio',
+        globalWarningText: 'Warnung',
+        globalWarningExpiredDay: new Date(),
+        globalWarningExpiredHour: '0',
+        hasUsers: true
+      }, token)
+        .then(resp => {
+          expect(resp.status).to.equal(200);
+        });
+      cy.getSettingConfigAPI(noId)
+        .then(resp => {
+          expect(resp.body.appTitle).to.deep.equal({ de: 'IQB-Studio' });
+          expect(resp.body.globalWarningText).to.deep.equal({ de: 'Warnung' });
+          expect(resp.body.introHtml).to.deep.equal({});
+        });
     });
 
     it('401 negative test: should deny configuration updates when no ' +
