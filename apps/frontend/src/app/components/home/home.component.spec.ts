@@ -9,8 +9,10 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { AuthDataDto } from '@studio-lite-lib/api-dto';
+import { UI_LANGUAGES } from '@studio-lite/shared-code';
 import { HomeComponent } from './home.component';
-import { AppService } from '../../services/app.service';
+import { AppService, defaultAppConfig } from '../../services/app.service';
+import { LanguageService } from '../../services/language.service';
 import { BackendService } from '../../services/backend.service';
 import { LoginComponent } from '../login/login.component';
 import { AuthCheckFailedComponent } from '../auth-check-failed/auth-check-failed.component';
@@ -99,6 +101,21 @@ describe('HomeComponent', () => {
     tick();
 
     expect(TestBed.inject(AppService).authData).toBe(authData);
+  }));
+
+  // The texts of the settings come in the language of the interface (#2186)
+  it('should take the texts of the config in the language of the interface', fakeAsync(() => {
+    const english = UI_LANGUAGES.find(language => language.code === 'en');
+    jest.replaceProperty(TestBed.inject(LanguageService), 'active', english!);
+    backendService.getConfig.mockReturnValue(of({
+      ...defaultAppConfig,
+      appTitle: { de: 'Studio', en: 'Studio EN' }
+    }));
+
+    fixture.detectChanges();
+    tick();
+
+    expect(TestBed.inject(AppService).appConfig.appTitle).toBe('Studio EN');
   }));
 
   it('should not ask for auth data without a stored login', fakeAsync(() => {
