@@ -56,11 +56,13 @@ describe('WorkspaceSettingsComponent', () => {
     selectedWorkspaceGroupSettings: BehaviorSubject<WorkspaceGroupSettingsDto>;
     selectedWorkspaceGroupId: BehaviorSubject<number>;
     setWorkspaceGroupSettings: jest.Mock;
-    settingsChanged: boolean;
     settingsLoad: WritableSignal<SettingsLoad>;
   };
   let mockSnackBar: { open: jest.Mock };
   let mockMatDialogRef: { close: jest.Mock; afterClosed: jest.Mock };
+  const saveButtonOf = (page: ComponentFixture<WorkspaceSettingsComponent>): HTMLButtonElement => (
+    page.nativeElement as HTMLElement
+  ).querySelector('[data-cy="wsg-admin-settings-save-button"]') as HTMLButtonElement;
 
   beforeEach(async () => {
     mockWsgAdminService = {
@@ -73,7 +75,6 @@ describe('WorkspaceSettingsComponent', () => {
       }),
       selectedWorkspaceGroupId: new BehaviorSubject<number>(1),
       setWorkspaceGroupSettings: jest.fn().mockReturnValue(of(true)),
-      settingsChanged: false,
       settingsLoad: signal<SettingsLoad>('loaded')
     };
 
@@ -114,7 +115,7 @@ describe('WorkspaceSettingsComponent', () => {
     mockWsgAdminService.setWorkspaceGroupSettings.mockReturnValue(of(true));
     component.saveGroupSettings();
     expect(mockWsgAdminService.setWorkspaceGroupSettings).toHaveBeenCalledWith(1, component.settings);
-    expect(mockWsgAdminService.settingsChanged).toBe(false);
+    expect(component.settingsChanged()).toBe(false);
     expect(mockSnackBar.open).toHaveBeenCalledWith('wsg-settings.changed', '', { duration: 1000 });
   });
 
@@ -129,16 +130,45 @@ describe('WorkspaceSettingsComponent', () => {
 
     expect(mockWsgAdminService.setWorkspaceGroupSettings).toHaveBeenCalledTimes(1);
     expect(mockWsgAdminService.setWorkspaceGroupSettings.mock.calls[0][1].richNoteTags).toEqual(['http://gesendet']);
-    expect(mockWsgAdminService.settingsChanged).toBe(true);
-    // the page builds its form from what is published: the stored settings would reset the entry
+    expect(component.settingsChanged()).toBe(true);
     expect(component.settings.richNoteTags).toEqual(['http://danach']);
-    expect(mockWsgAdminService.selectedWorkspaceGroupSettings.value.richNoteTags).toEqual(['http://danach']);
+  });
+
+  // Leaving the page discards what is not saved, but the page opened again offered it to save (#2163).
+  it('offers nothing to save on the page opened again after it was left unsaved', () => {
+    component.richNoteTagsSettingsChange(['http://ungespeichert']);
+    fixture.detectChanges();
+    expect(saveButtonOf(fixture).disabled).toBe(false);
+    fixture.destroy();
+
+    const reopened = TestBed.createComponent(WorkspaceSettingsComponent);
+    reopened.detectChanges();
+
+    expect(reopened.componentInstance.settings.richNoteTags).toBeUndefined();
+    expect(saveButtonOf(reopened).disabled).toBe(true);
+  });
+
+  // An entry made while saving came back as saved on the page opened again (#2163).
+  it('shows what was saved on the page opened again, not an entry made while saving', () => {
+    const answer = new Subject<boolean>();
+    mockWsgAdminService.setWorkspaceGroupSettings.mockReturnValue(answer);
+    component.richNoteTagsSettingsChange(['http://gesendet']);
+    component.saveGroupSettings();
+    component.richNoteTagsSettingsChange(['http://danach']);
+    answer.next(true);
+    fixture.destroy();
+
+    const reopened = TestBed.createComponent(WorkspaceSettingsComponent);
+    reopened.detectChanges();
+
+    expect(reopened.componentInstance.settings.richNoteTags).toEqual(['http://gesendet']);
+    expect(saveButtonOf(reopened).disabled).toBe(true);
   });
 
   it('should handle save error', () => {
     mockWsgAdminService.setWorkspaceGroupSettings.mockReturnValue(of(false));
     component.saveGroupSettings();
-    expect(mockWsgAdminService.settingsChanged).toBe(true);
+    expect(component.settingsChanged()).toBe(true);
     expect(mockSnackBar.open).toHaveBeenCalledWith('wsg-settings.changed', 'error', { duration: 3000 });
   });
 
@@ -146,14 +176,14 @@ describe('WorkspaceSettingsComponent', () => {
     const newProfiles = [{ id: 'p1', label: 'Profile 1' }] as unknown as CoreProfile[];
     component.profileSettingsChange(newProfiles);
     expect(component.settings.profiles).toEqual(newProfiles);
-    expect(mockWsgAdminService.settingsChanged).toBe(true);
+    expect(component.settingsChanged()).toBe(true);
   });
 
   it('should update states settings', () => {
     const newStates: State[] = [{ id: 1, label: 'State 1', color: '#ffffff' }];
     component.stateSettingsChange(newStates);
     expect(component.settings.states).toEqual(newStates);
-    expect(mockWsgAdminService.settingsChanged).toBe(true);
+    expect(component.settingsChanged()).toBe(true);
   });
 
   // Units keep the id of a deleted state, so it stays given out (#2009).
@@ -202,7 +232,6 @@ describe('WorkspaceSettingsComponent with the states', () => {
       }),
       selectedWorkspaceGroupId: new BehaviorSubject<number>(1),
       setWorkspaceGroupSettings,
-      settingsChanged: false,
       settingsLoad: signal<SettingsLoad>('loaded')
     };
 

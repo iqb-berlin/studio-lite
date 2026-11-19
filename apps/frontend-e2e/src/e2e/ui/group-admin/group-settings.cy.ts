@@ -86,6 +86,27 @@ describe('The settings page of a workspace group', () => {
     storedStates().its('0.label').should('equal', 'Vorher danach');
   });
 
+  // Switching tabs discards what is not saved, but back on the settings the save button still offered it (#2163)
+  it('offers nothing to save after a tab switch discarded a renamed state', () => {
+    const saveButton = () => cy.get('[data-cy="wsg-admin-settings-save-button"]');
+    const firstStateLabel = () => cy.get('studio-lite-states .state').first().find('.text-form-field input');
+    cy.visit('/');
+    cy.findAdminGroupSettings(baseGroup).click();
+    clickIndexTabWsgAdmin('settings');
+
+    storedStates().its('0.label').then((stored: string) => {
+      firstStateLabel().should('have.value', stored).clear().type('Ungespeichert');
+      saveButton().should('be.enabled');
+
+      clickIndexTabWsgAdmin('units');
+      cy.get('studio-lite-settings').should('not.exist');
+      clickIndexTabWsgAdmin('settings');
+
+      firstStateLabel().should('have.value', stored);
+      saveButton().should('be.disabled');
+    });
+  });
+
   // After a failed load the page offered substitutes with empty default modules for saving, and the API lays what
   // it gets over the stored settings (#2010). A group that does not exist fails to load without a faked answer.
   it('offers nothing to save when the group cannot be loaded', () => {
