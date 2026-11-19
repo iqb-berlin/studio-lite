@@ -22,7 +22,8 @@
           "apps/frontend/src/styles.scss",
           "apps/frontend/src/iqb-theme3.scss"
         ],
-        "scripts": []
+        "scripts": [],
+        "allowedCommonJsDependencies": ["exceljs"]
       },
       "configurations": {
         "production": {
@@ -92,7 +93,8 @@
           "apps/frontend/src/styles.scss",
           "apps/frontend/src/iqb-theme3.scss"
         ],
-        "scripts": []
+        "scripts": [],
+        "allowedCommonJsDependencies": ["exceljs"]
       }
     },
     "serve-coverage": {

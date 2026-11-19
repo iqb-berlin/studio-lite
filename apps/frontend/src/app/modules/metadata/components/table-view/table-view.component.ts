@@ -25,6 +25,7 @@ import { IncludePipe } from '../../../../pipes/include.pipe';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { I18nService } from '../../../../services/i18n.service';
 import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
+import { buildXlsxFile } from '../../../../utils/xlsx-file.utils';
 
 interface ColumnValues {
   key?: string;
@@ -277,42 +278,36 @@ export class TableViewComponent implements OnInit {
     return ['key', ...columnsDefinitions.flat()];
   }
 
-  downloadMetadata(): void {
+  /**
+   * The table as an Excel file: the rows it shows, filtered and sorted as they are, under the headers it
+   * shows, in the language of the interface (#2181). The unit is its key rather than the link, and a
+   * field with several values gets a line per value.
+   */
+  async downloadMetadata(): Promise<void> {
+    const forUnits = this.viewMode === 'units';
+    const rows = this.dataSource.sort ?
+      this.dataSource.sortData([...this.dataSource.filteredData], this.dataSource.sort) :
+      this.dataSource.filteredData;
+    const file = await buildXlsxFile(
+      this.translateService.instant(forUnits ? 'metadata.units' : 'metadata.items'),
+      this.columnsToDisplay.map(column => ({
+        header: this.displayedColumns.includes(column) ?
+          this.translateService.instant(`metadata.${column}`) :
+          column,
+        key: column,
+        width: 30
+      })),
+      rows.map(row => Object.fromEntries(this.columnsToDisplay.map(column => [
+        column,
+        column === 'key' ? this.unitKeys.get(row) ?? '' : (row[column] ?? '').replace(/<br>/g, '\n')
+      ])))
+    );
     const datePipe = new DatePipe(this.i18nService.fullLocale);
     const thisDate = datePipe.transform(new Date(), this.i18nService.fileDateFormat);
-    if (this.viewMode === 'units') {
-      this.metadataService
-        .downloadMetadataReport(
-          'unit',
-          this.getTableUnitsColumnsDefinitions(),
-          this.data.units.map(unit => unit.id)
-        )
-        .subscribe(b => {
-          saveAs(
-            b,
-            `${this.translateService.instant(
-              'metadata.unitMetadataReportFileName',
-              { date: thisDate }
-            )}.xlsx`
-          );
-        });
-    }
-    if (this.viewMode === 'items') {
-      this.metadataService
-        .downloadMetadataReport(
-          'item',
-          this.getTableItemsColumnsDefinitions(),
-          this.data.units.map(unit => unit.id)
-        )
-        .subscribe(b => {
-          saveAs(
-            b,
-            `${this.translateService.instant(
-              'metadata.itemsMetadataReportFileName',
-              { date: thisDate }
-            )}.xlsx`
-          );
-        });
-    }
+    const fileName = this.translateService.instant(
+      forUnits ? 'metadata.unitMetadataReportFileName' : 'metadata.itemsMetadataReportFileName',
+      { date: thisDate }
+    );
+    saveAs(file, `${fileName}.xlsx`);
   }
 }

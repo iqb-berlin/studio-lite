@@ -12,7 +12,7 @@ import {
   Post,
   Query,
   Req,
-  Res, StreamableFile,
+  StreamableFile,
   UseGuards
 } from '@nestjs/common';
 import {
@@ -40,7 +40,6 @@ import {
   UnitPropertiesDto,
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
-import type { Response } from 'express';
 import { UnitService } from '../services/unit.service';
 import { UnitMetadataService } from '../services/unit-metadata.service';
 import { UnitDefinitionService } from '../services/unit-definition.service';
@@ -90,8 +89,8 @@ import { isCopyBody, isSubmissionBody } from '../utils/unit-request-body';
  * Those guards ask about the workspace of the path alone. That the units are in it is asked first,
  * by {@link UnitInWorkspaceGuard} for the unit in the path, by {@link UnitsInWorkspaceGuard} for
  * the units of the body and by {@link QueryUnitsInWorkspaceGuard} for the units deleted through the
- * query (#1775). The reports that take units from the query (`coding-book`, `properties`) carry no
- * such guard: they read the units of the workspace and drop any other id.
+ * query (#1775). The report that takes units from the query (`coding-book`) carries no such guard:
+ * it reads the units of the workspace and drops any other id.
  *
  * Where units cross into another workspace, that one is asked about as well: the target of a move
  * ({@link MoveTargetAccessGuard}, #1780), and the sources a copy takes its units from -- its path
@@ -225,9 +224,8 @@ export class WorkspaceUnitController {
   }
 
   /**
-   * The properties of the workspace's units -- or, for `type` `unit` or `item`, the xlsx metadata
-   * report over them, narrowed to the given units and metadata columns. Two answers on one route:
-   * the report is the same data in a form to hand on.
+   * The properties of the workspace's units. The metadata report over them is built by the interface
+   * from its table, in its own language (#2181).
    */
   @Get('properties')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
@@ -236,41 +234,8 @@ export class WorkspaceUnitController {
   @ApiOkResponse()
   @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
-  @ApiQuery({
-    name: 'column',
-    type: String,
-    isArray: true,
-    required: false
-  })
-  @ApiQuery({
-    name: 'id',
-    type: Number,
-    isArray: true,
-    required: false
-  })
-  @ApiQuery({
-    name: 'type',
-    type: String
-  })
   @ApiTags('workspace unit')
-  async findAllWithProperties(
-    @WorkspaceId() workspaceId: number,
-    @Query('column') columns: string[],
-    @Query('id') units: number[],
-    @Query('type') type: string,
-    @Res({ passthrough: true }) res: Response
-  ): Promise<UnitPropertiesDto[] | StreamableFile> {
-    if (type === 'unit' || type === 'item') {
-      const file = await DownloadWorkspacesClass.getWorkspaceMetadataReport(
-        type, this.unitService, workspaceId, [columns].flat(), [units].flat());
-      const filename = type === 'unit' ?
-        'iqb-studio-unit-metadata-report.xlsx' : 'iqb-studio-unit-metadata-items-report.xlsx';
-      res.set({
-        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition': `attachment; filename="${filename}"`
-      });
-      return new StreamableFile(file as unknown as Uint8Array);
-    }
+  async findAllWithProperties(@WorkspaceId() workspaceId: number): Promise<UnitPropertiesDto[]> {
     return this.unitService.findAllWithProperties(workspaceId);
   }
 

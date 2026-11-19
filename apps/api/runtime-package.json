@@ -56,7 +56,6 @@
     "class-transformer": "0.5.1",
     "class-validator": "0.14.4",
     "domhandler": "5.0.3",
-    "exceljs": "4.4.0",
     "express": "5.2.1",
     "multer": "2.5.0",
     "ngx-tiptap": "14.0.1",

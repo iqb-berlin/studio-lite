@@ -19,7 +19,9 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { MatRadioButton } from '@angular/material/radio';
 import { MatIcon } from '@angular/material/icon';
-import { Subject, Subscription, takeUntil } from 'rxjs';
+import {
+  catchError, finalize, of, Subject, Subscription, switchMap, takeUntil
+} from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { RouterLink } from '@angular/router';
@@ -41,6 +43,7 @@ import { I18nService } from '../../../../services/i18n.service';
 import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
 import { ChangeResultService } from '../../../../services/change-result.service';
 import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
+import { buildWorkspaceReportFile } from '../../../../utils/workspace-report.utils';
 
 /**
  * The workspaces of a group as their admin sees them: creating, renaming, moving and deleting them,
@@ -240,20 +243,30 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
     this.tableSelectionRow.toggle(row);
   }
 
+  // The API sends the figures; the file is built here, in the language of the interface (#2181).
   xlsxDownloadWorkspaceReport() {
     this.appService.dataLoading = true;
-    this.backendService.getXlsWorkspaces(this.wsgAdminService.selectedWorkspaceGroupId.value)
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(workspace => {
-        if (workspace) {
+    this.backendService.getWorkspaceReport(this.wsgAdminService.selectedWorkspaceGroupId.value)
+      .pipe(
+        switchMap(report => (report ? buildWorkspaceReportFile(
+          report,
+          key => this.translateService.instant(key),
+          this.i18nService.dateFormat
+        ) : of(null))),
+        catchError(() => of(null)),
+        takeUntil(this.ngUnsubscribe),
+        // also when the page is left before the file is built: takeUntil ends without one
+        finalize(() => { this.appService.dataLoading = false; })
+      )
+      .subscribe(file => {
+        if (file) {
           const datePipe = new DatePipe(this.i18nService.fullLocale);
           const thisDate = datePipe.transform(new Date(), this.i18nService.fileDateFormat);
           saveAs(
-            workspace,
+            file,
             this.translateService.instant('wsg-admin.workspaces-excel-name', { date: thisDate })
           );
         }
-        this.appService.dataLoading = false;
       });
   }
 

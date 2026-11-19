@@ -1,14 +1,11 @@
-import { Response } from 'express';
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { StreamableFile } from '@nestjs/common';
-import { WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
 import { WorkspaceGroupsController } from './workspace-groups.controller';
 import { WorkspaceGroupService } from '../services/workspace-group.service';
 import { WorkspaceService } from '../services/workspace.service';
 import { UnitService } from '../services/unit.service';
 import { UsersService } from '../services/users.service';
-import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
+import { WorkspaceReportClass } from '../classes/workspace-report.class';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { AuthService } from '../services/auth.service';
 import { UnitItemService } from '../services/unit-item.service';
@@ -44,7 +41,7 @@ describe('WorkspaceGroupsController', () => {
   });
 
   // The guards are the authorisation of each method; no other unit test sees them (#1953).
-  it.each(['findAll', 'remove', 'create'] as const)(
+  it.each(['findAll', 'findReport', 'remove', 'create'] as const)(
     'should let only administrators reach %s',
     method => {
       expect(Reflect.getMetadata('__guards__', WorkspaceGroupsController.prototype[method]))
@@ -52,27 +49,11 @@ describe('WorkspaceGroupsController', () => {
     }
   );
 
-  describe('findAll', () => {
-    it('should return all workspace groups if download is false', async () => {
-      const mockGroups = [{ id: 1, name: 'G1' }] as WorkspaceGroupInListDto[];
-      workspaceGroupService.findAll.mockResolvedValue(mockGroups);
+  // The group id 0 stands for every group (#2181).
+  it('should report over the workspaces of every group', async () => {
+    jest.spyOn(WorkspaceReportClass, 'build').mockResolvedValue([]);
 
-      const result = await controller.findAll(false, createMock<Response>());
-
-      expect(result).toBe(mockGroups);
-      expect(workspaceGroupService.findAll).toHaveBeenCalled();
-    });
-
-    it('should return a StreamableFile if download is true', async () => {
-      const mockRes = createMock<Response>();
-      const mockBuffer = Buffer.from('test');
-      jest.spyOn(DownloadWorkspacesClass, 'getWorkspaceReport').mockResolvedValue(mockBuffer);
-
-      const result = await controller.findAll(true, mockRes);
-
-      expect(result).toBeInstanceOf(StreamableFile);
-      expect(mockRes.set).toHaveBeenCalled();
-      expect(DownloadWorkspacesClass.getWorkspaceReport).toHaveBeenCalled();
-    });
+    expect(await controller.findReport()).toEqual([]);
+    expect(WorkspaceReportClass.build).toHaveBeenCalledWith(workspaceService, unitService, 0);
   });
 });

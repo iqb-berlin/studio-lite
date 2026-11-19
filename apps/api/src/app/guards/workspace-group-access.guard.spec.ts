@@ -9,15 +9,13 @@ describe('WorkspaceGroupAccessGuard', () => {
   let authService: DeepMocked<AuthService>;
   let workspaceUserService: DeepMocked<WorkspaceUserService>;
 
-  const contextFor = (
-    userId: number,
-    params: Record<string, string>,
-    query: Record<string, string> = {}
-  ): ExecutionContext => createMock<ExecutionContext>({
-    switchToHttp: () => ({
-      getRequest: () => ({ user: { id: userId }, params, query })
+  const contextFor = (userId: number, params: Record<string, string>): ExecutionContext => (
+    createMock<ExecutionContext>({
+      switchToHttp: () => ({
+        getRequest: () => ({ user: { id: userId }, params })
+      })
     })
-  });
+  );
 
   beforeEach(() => {
     authService = createMock<AuthService>();
@@ -27,11 +25,10 @@ describe('WorkspaceGroupAccessGuard', () => {
     guard = new WorkspaceGroupAccessGuard(authService, workspaceUserService);
   });
 
-  it('should let the group admin (or an administrator) read the group and its report', async () => {
+  it('should let the group admin (or an administrator) read the group', async () => {
     authService.isWorkspaceGroupAdmin.mockResolvedValue(true);
 
     expect(await guard.canActivate(contextFor(3, { workspace_group_id: '7' }))).toBe(true);
-    expect(await guard.canActivate(contextFor(3, { workspace_group_id: '7' }, { download: 'true' }))).toBe(true);
     expect(authService.isWorkspaceGroupAdmin).toHaveBeenCalledWith(3, 7);
   });
 
@@ -40,22 +37,6 @@ describe('WorkspaceGroupAccessGuard', () => {
 
     expect(await guard.canActivate(contextFor(3, { workspace_group_id: '7' }))).toBe(true);
     expect(workspaceUserService.hasAccessToWorkspaceGroup).toHaveBeenCalledWith(3, 7);
-  });
-
-  // The report lists every workspace of the group; it is group administration, not membership.
-  it('should refuse the report to a member who does not administer the group', async () => {
-    workspaceUserService.hasAccessToWorkspaceGroup.mockResolvedValue(true);
-
-    await expect(guard.canActivate(contextFor(3, { workspace_group_id: '7' }, { download: 'true' })))
-      .rejects.toThrow(ForbiddenException);
-  });
-
-  // The controller takes any non-empty `download` for a download; the guard must read it alike.
-  it('should treat download=false as the report, as the controller does', async () => {
-    workspaceUserService.hasAccessToWorkspaceGroup.mockResolvedValue(true);
-
-    await expect(guard.canActivate(contextFor(3, { workspace_group_id: '7' }, { download: 'false' })))
-      .rejects.toThrow(ForbiddenException);
   });
 
   it('should refuse a user with no workspace in the group', async () => {

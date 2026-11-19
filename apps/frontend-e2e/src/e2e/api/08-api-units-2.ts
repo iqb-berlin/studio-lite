@@ -1,3 +1,4 @@
+import type { WorkspaceReportDto } from '@studio-lite-lib/api-dto';
 import {
   groupVera,
   group2,
@@ -57,12 +58,16 @@ describe('Unit API tests part II', () => {
     });
   });
 
-  describe('76. GET /api/workspace-groups download', () => {
-    it('200 positive test: should allow an administrator to retrieve the workspace report', () => {
+  // The interface builds the Excel file from these figures, in its own language (#2181).
+  describe('76. GET /api/workspace-groups/report', () => {
+    it('200 positive test: should give an administrator the report over the workspaces of every group', () => {
       cy.getReportAPI(
         Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
+        const report = resp.body as WorkspaceReportDto[];
+        expect(report.map(row => row.workspaceId))
+          .to.include.members([Number(Cypress.expose(ws1.id)), Number(Cypress.expose(ws3.id))]);
       });
     });
 
@@ -81,37 +86,42 @@ describe('Unit API tests part II', () => {
     });
   });
 
-  // ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
-  describe('77. GET /api/workspace-groups/{workspace_group_id} download=true', () => {
-    it('200 positive test: should allow an authorized user to download all workspaces within a group', () => {
-      cy.downloadWsAPI(
-        Cypress.expose(groupVera.id),
-        Cypress.expose(`token_${Cypress.expose('username')}`)
-      ).then(resp => {
+  describe('77. GET /api/workspace-groups/{workspace_group_id}/report', () => {
+    it('200 positive test: should count the units of each workspace of the group', () => {
+      const token = Cypress.expose(`token_${Cypress.expose('username')}`);
+      cy.getGroupReportAPI(Cypress.expose(groupVera.id), token).then(resp => {
         expect(resp.status).to.equal(200);
+        const report = resp.body as WorkspaceReportDto[];
+        expect(report).to.have.length.greaterThan(0);
+        expect(report.every(row => row.groupId === Number(Cypress.expose(groupVera.id)))).to.equal(true);
+        const row = report.find(workspace => workspace.workspaceId === Number(Cypress.expose(ws1.id)));
+        cy.getUnitsByWsAPI(Cypress.expose(ws1.id), token).then(units => {
+          expect(row?.unitCount).to.equal(units.body.length);
+          const editorCounts = Object.values(row?.editors ?? {});
+          expect(editorCounts.reduce((sum, count) => sum + count, 0)).to.equal(units.body.length);
+        });
       });
     });
 
-    it('401 negative test: should deny workspace group download when no valid credentials are provided', () => {
-      cy.downloadWsAPI(Cypress.expose(group2.id), noId).then(resp => {
+    it('401 negative test: should deny the report when no valid credentials are provided', () => {
+      cy.getGroupReportAPI(Cypress.expose(group2.id), noId).then(resp => {
         expect(resp.status).to.equal(401);
       });
     });
 
-    it('500/200 negative test: should return success but provide an empty file for an invalid group ID', () => {
-      cy.downloadWsAPI(
+    it('200 positive test: should give an empty report for a group that does not exist', () => {
+      cy.getGroupReportAPI(
         noId,
         Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
-        // It downloads an empty file with only headers
+        expect(resp.body).to.deep.equal([]);
       });
     });
 
-    // Until #1712 this route asked for nothing but a valid token: anyone logged in could read any
-    // group and download the report over all its workspaces.
-    it('200 positive test: should let the admin of the group download its report', () => {
-      cy.downloadWsAPI(
+    // Until #1712 the report asked for nothing but a valid token.
+    it('200 positive test: should let the admin of the group read its report', () => {
+      cy.getGroupReportAPI(
         Cypress.expose(groupVera.id),
         Cypress.expose(`token_${userGroupAdmin.username}`)
       ).then(resp => {
@@ -167,7 +177,7 @@ describe('Unit API tests part II', () => {
       });
 
       it('403 negative test: should deny the report to a member who does not administer the group', () => {
-        cy.downloadWsAPI(
+        cy.getGroupReportAPI(
           Cypress.expose(groupVera.id),
           Cypress.expose(`token_${user3.username}`)
         ).then(resp => {

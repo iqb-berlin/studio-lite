@@ -207,25 +207,6 @@ describe('MetadataService', () => {
     });
   });
 
-  describe('downloadMetadataReport', () => {
-    it('should make GET request with correct params', () => {
-      const reportType = 'test-type';
-      const columns = ['col1', 'col2'];
-      const units = [1, 2];
-
-      service.downloadMetadataReport(reportType, columns, units).subscribe();
-
-      const req = httpMock.expectOne(request => request.url === `${serverUrl}workspaces/123/units/properties` &&
-        request.params.get('type') === reportType &&
-        request.params.getAll('column')?.length === 2 &&
-        request.params.getAll('id')?.length === 2);
-
-      expect(req.request.method).toBe('GET');
-      expect(req.request.responseType).toBe('blob');
-      req.flush(new Blob());
-    });
-  });
-
   describe('createMetadataReport', () => {
     it('should return false on error', () => {
       service.createMetadataReport().subscribe(result => {

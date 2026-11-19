@@ -4,7 +4,7 @@ import {
   Delete,
   Get,
   ParseArrayPipe,
-  Post, Query, Res, StreamableFile,
+  Post, Query,
   UseGuards
 } from '@nestjs/common';
 import {
@@ -16,14 +16,13 @@ import {
   ApiTags,
   ApiForbiddenResponse
 } from '@nestjs/swagger';
-import { CreateWorkspaceGroupDto, WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
-import type { Response } from 'express';
+import { CreateWorkspaceGroupDto, WorkspaceGroupInListDto, WorkspaceReportDto } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGroupService } from '../services/workspace-group.service';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { WorkspaceService } from '../services/workspace.service';
 import { UnitService } from '../services/unit.service';
-import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
+import { WorkspaceReportClass } from '../classes/workspace-report.class';
 
 /**
  * `workspace-groups` -- all groups of the installation, for administrators: the list, the report
@@ -38,37 +37,30 @@ export class WorkspaceGroupsController {
     private unitService: UnitService
   ) {}
 
-  /**
-   * All groups -- or, with `download`, the xlsx report over every workspace of the installation.
-   * The group id 0 handed to the report is what stands for "no group in particular"; the same
-   * report narrowed to one group is served by {@link WorkspaceGroupController}.
-   */
   @Get()
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspace-groups retrieved successfully.' })
   @ApiForbiddenResponse({ description: 'No admin privileges.' })
-  @ApiQuery({
-    name: 'download',
-    type: Boolean,
-    required: false
-  })
   @ApiTags('workspace-groups')
-  async findAll(
-    @Query('download') download: boolean,
-    @Res({ passthrough: true }) res: Response
-  ): Promise<WorkspaceGroupInListDto[] | StreamableFile> {
-    if (download) {
-      const file = await DownloadWorkspacesClass.getWorkspaceReport(
-        this.workspaceService, this.unitService, 0
-      );
-      res.set({
-        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition': 'attachment; filename="iqb-studio-workspace-report.xlsx"'
-      });
-      return new StreamableFile(file as unknown as Uint8Array);
-    }
+  async findAll(): Promise<WorkspaceGroupInListDto[]> {
     return this.workspaceGroupService.findAll();
+  }
+
+  /**
+   * The report over every workspace of the installation, which the interface turns into an Excel
+   * file (#2181). The group id 0 stands for "no group in particular"; the same report narrowed to
+   * one group is served by {@link WorkspaceGroupController}. This controller is registered before
+   * that one, so `report` is not read as a group id.
+   */
+  @Get('report')
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: [WorkspaceReportDto] })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
+  @ApiTags('workspace-groups')
+  async findReport(): Promise<WorkspaceReportDto[]> {
+    return WorkspaceReportClass.build(this.workspaceService, this.unitService, 0);
   }
 
   @Delete()

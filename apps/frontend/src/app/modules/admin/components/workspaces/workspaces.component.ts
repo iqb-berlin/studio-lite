@@ -1,9 +1,12 @@
 import {
-  AfterViewInit, Component, OnInit, ViewChild
+  AfterViewInit, Component, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { DatePipe } from '@angular/common';
 import { saveAs } from 'file-saver-es';
+import {
+  catchError, finalize, of, Subject, switchMap, takeUntil
+} from 'rxjs';
 import { WorkspaceFullDto } from '@studio-lite-lib/api-dto';
 import {
   MatCell,
@@ -25,6 +28,7 @@ import { AppService } from '../../../../services/app.service';
 import { WorkspacesMenuComponent } from '../workspaces-menu/workspaces-menu.component';
 import { I18nService } from '../../../../services/i18n.service';
 import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
+import { buildWorkspaceReportFile } from '../../../../utils/workspace-report.utils';
 
 @Component({
   selector: 'studio-lite-workspaces',
@@ -38,12 +42,14 @@ import { TextSortTableDataSource } from '../../../../models/text-sort-table-data
   ]
 })
 
-export class WorkspacesComponent implements OnInit, AfterViewInit {
+export class WorkspacesComponent implements OnInit, AfterViewInit, OnDestroy {
   dataSource = new TextSortTableDataSource<WorkspaceFullDto>([]);
   displayedColumns: string[] = ['id', 'name', 'groupId', 'editor', 'preview', 'schemer', 'comments', 'notes'];
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  private ngUnsubscribe = new Subject<void>();
 
   constructor(
     private backendService: BackendService,
@@ -60,11 +66,15 @@ export class WorkspacesComponent implements OnInit, AfterViewInit {
   private getAllWorkspaces(): void {
     this.appService.dataLoading = true;
     this.backendService.getAllWorkspaces()
+      .pipe(
+        takeUntil(this.ngUnsubscribe),
+        // also when the page is left before the answer: takeUntil ends without one
+        finalize(() => { this.appService.dataLoading = false; })
+      )
       .subscribe(workspaces => {
         if (Array.isArray(workspaces)) {
           this.dataSource.data = workspaces;
         }
-        this.appService.dataLoading = false;
       });
   }
 
@@ -73,16 +83,32 @@ export class WorkspacesComponent implements OnInit, AfterViewInit {
     this.dataSource.paginator = this.paginator;
   }
 
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
+  }
+
+  // The API sends the figures; the file is built here, in the language of the interface (#2181).
   xlsxDownloadWorkspaceReport(): void {
     this.appService.dataLoading = true;
-    this.backendService.getXlsWorkspaces().subscribe(b => {
-      if (b) {
-        const datePipe = new DatePipe(this.i18nService.fullLocale);
-        const thisDate = datePipe.transform(new Date(), this.i18nService.fileDateFormat);
-        saveAs(b, `${thisDate} ${this.translateService.instant('wsg-admin.report-workspaces')}.xlsx`);
-      }
-      this.appService.dataLoading = false;
-    });
+    this.backendService.getWorkspaceReport()
+      .pipe(
+        switchMap(report => (report ? buildWorkspaceReportFile(
+          report,
+          key => this.translateService.instant(key),
+          this.i18nService.dateFormat
+        ) : of(null))),
+        catchError(() => of(null)),
+        takeUntil(this.ngUnsubscribe),
+        finalize(() => { this.appService.dataLoading = false; })
+      )
+      .subscribe(file => {
+        if (file) {
+          const datePipe = new DatePipe(this.i18nService.fullLocale);
+          const thisDate = datePipe.transform(new Date(), this.i18nService.fileDateFormat);
+          saveAs(file, `${thisDate} ${this.translateService.instant('wsg-admin.report-workspaces')}.xlsx`);
+        }
+      });
   }
 
   // eslint-disable-next-line class-methods-use-this
