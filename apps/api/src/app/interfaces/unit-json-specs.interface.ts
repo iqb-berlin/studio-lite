@@ -62,9 +62,18 @@ export interface ExternalDataBlock {
   modifiedAt?: string;
 }
 
+// A dependency as unit-index 18.1 writes it: a file beside the index, or a widget by its type.
+export type UnitIndexDependency = string | {
+  fileName: string;
+  unpackBeforeProviding?: boolean;
+  httpResponseMode?: 'STANDARD' | 'STREAM';
+};
+
 export interface UserInterfaceBlock {
   player: string;
+  playerDependencies?: UnitIndexDependency[];
   editor?: string;
+  editorDependencies?: UnitIndexDependency[];
   // data format of the definition, e.g. "aspect-unit-definition@4.12.0"
   type?: string;
   definition?: string;

@@ -2,9 +2,11 @@ import type { Element } from 'domhandler';
 import * as cheerio from 'cheerio';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { UnitMetadataValues } from '@studio-lite-lib/api-dto';
+import { UnitDependency } from '@studio-lite/shared-code';
 import { FileIo } from '../interfaces/file-io.interface';
 import { NotAUnitXmlError } from '../exceptions/not-a-unit-xml.error';
 import { readXsdBoolean } from '../utils/xsd-boolean';
+import { fromUnitXmlDependencies } from '../utils/unit-dependencies';
 
 export class UnitImportData {
   key: string;
@@ -29,6 +31,8 @@ export class UnitImportData {
   schemer: string;
   schemeType: string;
   baseVariables: VariableInfo[] = [];
+  dependenciesToPlay: UnitDependency[] = [];
+  dependenciesToEdit: UnitDependency[] = [];
   codingScheme: string;
   codingSchemeFileName: string;
   variablesFileName = '';
@@ -52,7 +56,22 @@ export class UnitImportData {
     this.setCommentsRef(xmlDocument);
     this.setRichNotesRef(xmlDocument);
     this.setBaseVariables(xmlDocument);
+    this.setDependencies(xmlDocument);
     this.setCodingSchemeRef(xmlDocument);
+  }
+
+  // What the unit needs to be played and edited (#1602). Only the list is read: a package named
+  // here is installed by an administrator, never by the import.
+  private setDependencies(xmlDocument: cheerio.CheerioAPI): void {
+    const entries = xmlDocument('Dependencies').first().children().toArray()
+      .map(element => ({
+        element: element.name,
+        target: element.attribs.for,
+        name: xmlDocument(element).text()
+      }));
+    const { dependenciesToPlay, dependenciesToEdit } = fromUnitXmlDependencies(entries);
+    this.dependenciesToPlay = dependenciesToPlay;
+    this.dependenciesToEdit = dependenciesToEdit;
   }
 
   private setCodingSchemeRef(xmlDocument: cheerio.CheerioAPI) {

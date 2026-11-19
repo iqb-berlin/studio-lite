@@ -23,6 +23,7 @@ import { hasItems, hasMetadataContent } from '../utils/unit-export-contents';
 import { LegacyMetadataDownloadClass } from './legacy-metadata-download.class';
 import { RichNotesDownloadClass } from './rich-notes-download.class';
 import { parseDerivedCodings } from '../utils/derived-codings';
+import { toUnitXmlDependencies } from '../utils/unit-dependencies';
 
 /**
  * A unit in the XML format the testcenter reads: the unit file with its references, and beside it
@@ -66,6 +67,7 @@ export class UnitXmlDownloadClass {
       unitMetadata,
       zip
     );
+    UnitXmlDownloadClass.addDependencies(definitionData, unitXml);
     UnitXmlDownloadClass.addVariables(definitionData, unitXml);
     if (unitDownloadSettings.addComments) {
       const comments = await unitCommentService.findOnesComments(unitId);
@@ -176,6 +178,21 @@ export class UnitXmlDownloadClass {
         }
       });
     }
+  }
+
+  /** What the unit needs to be played and edited, which the testcenter checks for (#1602). */
+  static addDependencies(
+    definitionData: UnitDefinitionDto,
+    unitXml: XMLBuilder
+  ): void {
+    const dependencies = toUnitXmlDependencies(definitionData);
+    if (dependencies.length === 0) return;
+    const dependenciesElement = unitXml.root().ele('Dependencies');
+    dependencies.forEach(dependency => {
+      dependenciesElement.ele({
+        [dependency.element]: { '@for': dependency.target, '#': dependency.name }
+      });
+    });
   }
 
   static addVariables(

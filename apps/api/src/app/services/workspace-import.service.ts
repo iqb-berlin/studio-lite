@@ -427,7 +427,9 @@ export class WorkspaceImportService {
       {
         definition: unitImportData.definition,
         definitionType: unitImportData.definitionType,
-        variables: unitImportData.baseVariables
+        variables: unitImportData.baseVariables,
+        dependenciesToPlay: unitImportData.dependenciesToPlay,
+        dependenciesToEdit: unitImportData.dependenciesToEdit
       },
       null,
       unitImportData.lastChangedDefinition
