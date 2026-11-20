@@ -59,6 +59,7 @@ import { MetadataBackendService } from '../../../metadata/services/metadata-back
 import { MetadataService } from '../../../metadata/services/metadata.service';
 import { I18nService } from '../../../../services/i18n.service';
 import { UnitCheckComponent } from '../unit-check/unit-check.component';
+import { UNIT_KEY_MAX_LENGTH, UNIT_KEY_MIN_LENGTH } from '../../utils/unit-key.utils';
 
 /**
  * Everything about a unit that is not its content: name and key, the modules it is opened with, its
@@ -228,8 +229,8 @@ export class UnitPropertiesComponent
         keyControl.markAsUntouched();
         keyControl.setValidators([
           Validators.required,
-          Validators.minLength(3),
-          Validators.maxLength(20),
+          Validators.minLength(UNIT_KEY_MIN_LENGTH),
+          Validators.maxLength(UNIT_KEY_MAX_LENGTH),
           Validators.pattern(WorkspaceService.unitKeyPatternString()),
           WorkspaceService.unitKeyUniquenessValidator(
             unitMetadata.id,

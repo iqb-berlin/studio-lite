@@ -172,6 +172,16 @@ describe('WorkspaceService', () => {
   });
 
   describe('resetUnitList', () => {
+    // a computed that derives from the list sees it only through the signal; the list may come after the unit
+    it('hands the list it builds out as a signal as well (#1842)', () => {
+      service.resetUnitList([{
+        id: 1, key: 'u1', name: 'Unit 1', groupName: 'Group A'
+      }]);
+
+      expect(service.units()).toBe(service.unitList);
+      expect(service.units()['Group A'][0].key).toBe('u1');
+    });
+
     it('should organize units by group', () => {
       const units: UnitInListDto[] = [
         {

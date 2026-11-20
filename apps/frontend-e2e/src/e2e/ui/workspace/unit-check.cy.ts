@@ -70,4 +70,18 @@ describe('Workspace Unit Check', () => {
       cy.get('[data-cy="variable-id-conflict"]').should('not.exist');
     });
   });
+
+  // the API takes a key the form would not, as an import brings it (#2135)
+  it('names a key that does not start with a letter under the properties', () => {
+    const invalidKeyUnit = { shortname: '00_CHECK', name: 'Kurzname mit Ziffer', group: '' };
+    cy.then(() => cy.createUnitAPI(base.wsId, invalidKeyUnit, base.token)
+      .its('status').should('equal', 201));
+    cy.visitWs(primaryWorkspace);
+    selectUnit(invalidKeyUnit.shortname);
+    clickIndexTabWorkspace('properties');
+
+    cy.get('[data-cy="unit-check-properties"]')
+      .contains('[data-cy="unit-check-finding"]', invalidKeyUnit.shortname)
+      .should('be.visible');
+  });
 });
