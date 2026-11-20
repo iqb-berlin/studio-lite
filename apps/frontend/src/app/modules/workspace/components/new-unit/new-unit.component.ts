@@ -18,6 +18,7 @@ import { MatFormField, MatError } from '@angular/material/form-field';
 
 import { NewUnitData } from '../../models/new-unit.interface';
 import { WorkspaceService } from '../../services/workspace.service';
+import { UNIT_KEY_MAX_LENGTH, UNIT_KEY_MIN_LENGTH } from '../../utils/unit-key.utils';
 
 @Component({
   selector: 'studio-lite-new-unit',
@@ -42,8 +43,8 @@ export class NewUnitComponent {
       key: this.fb.control(data.key, [
         Validators.required,
         Validators.pattern(WorkspaceService.unitKeyPatternString()),
-        Validators.minLength(3),
-        Validators.maxLength(20),
+        Validators.minLength(UNIT_KEY_MIN_LENGTH),
+        Validators.maxLength(UNIT_KEY_MAX_LENGTH),
         WorkspaceService.unitKeyUniquenessValidator(0, () => this.ds.unitList)
       ]),
       label: this.fb.control(data.label),

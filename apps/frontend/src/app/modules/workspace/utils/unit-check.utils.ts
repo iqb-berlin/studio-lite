@@ -158,3 +158,14 @@ export function checkUnit(input: UnitCheckInput): UnitCheckSection[] {
   if (shown('notes')) sections.push(infoSection('notes', input.hasRichNotes));
   return sections;
 }
+
+/**
+ * The sections with what is wrong with the key put first under the properties. The key is checked
+ * apart from {@link checkUnit}: it changes with every keystroke, and the check parses the scheme.
+ */
+export function withKeyFindings(sections: UnitCheckSection[], keyFindings: UnitCheckFinding[]): UnitCheckSection[] {
+  if (!keyFindings.length) return sections;
+  return sections.map(entry => (entry.tab === 'properties' ?
+    { ...entry, findings: [...keyFindings, ...entry.findings], ok: false } :
+    entry));
+}

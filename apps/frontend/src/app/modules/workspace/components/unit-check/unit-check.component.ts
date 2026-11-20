@@ -16,8 +16,9 @@ import { WorkspaceBackendService } from '../../services/workspace-backend.servic
 import { ModuleService } from '../../../../services/module.service';
 import { BackendService as CommentsBackendService } from '../../../comments/services/backend.service';
 import {
-  checkUnit, isTabShown, ModuleType, UnitCheckSection
+  checkUnit, isTabShown, ModuleType, UnitCheckFinding, UnitCheckSection, withKeyFindings
 } from '../../utils/unit-check.utils';
+import { checkUnitKey } from '../../utils/unit-key.utils';
 import { VariableIdConflictListComponent } from '../variable-id-conflict-list/variable-id-conflict-list.component';
 import { VariableIdConflictFixComponent } from '../variable-id-conflict-fix/variable-id-conflict-fix.component';
 
@@ -29,6 +30,7 @@ interface UnitCheckSources {
 }
 
 type Modules = Partial<Record<ModuleType, string>>;
+type UnitKey = { id: number; key: string | undefined };
 
 const sameModules = (a: Modules | undefined, b: Modules | undefined): boolean => a === b || (!!a && !!b &&
   a.editor === b.editor && a.player === b.player && a.schemer === b.schemer);
@@ -63,7 +65,22 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
     return { editor, player, schemer };
   }, { equal: sameModules });
 
-  readonly sections = computed((): UnitCheckSection[] | undefined => {
+  // the key as it is being typed, and only the key: a keystroke in the name changes nothing here
+  private readonly unitKey = computed((): UnitKey | undefined => {
+    const metadataStore = this.unitStores.metadataStore();
+    if (!metadataStore?.loaded) return undefined;
+    const { id, key } = metadataStore.data();
+    return { id, key };
+  }, { equal: (a, b) => a?.id === b?.id && a?.key === b?.key });
+
+  // checked apart from the rest, so that a keystroke in the key does not parse the scheme again; the
+  // list of units is read as a signal, as it may arrive after the unit (#1842)
+  private readonly keyFindings = computed((): UnitCheckFinding[] => {
+    const unitKey = this.unitKey();
+    return unitKey ? checkUnitKey(unitKey.key, unitKey.id, this.workspaceService.units()) : [];
+  });
+
+  private readonly checked = computed((): UnitCheckSection[] | undefined => {
     const sources = this.sources();
     if (!sources) return undefined;
     return checkUnit({
@@ -77,6 +94,11 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
       scheme: this.unitStores.schemeStore()?.data(),
       ...sources
     });
+  });
+
+  readonly sections = computed((): UnitCheckSection[] | undefined => {
+    const checked = this.checked();
+    return checked && withKeyFindings(checked, this.keyFindings());
   });
 
   constructor(

@@ -1,4 +1,6 @@
 import { ComponentFixture, fakeAsync, TestBed } from '@angular/core/testing';
+import { signal, WritableSignal } from '@angular/core';
+import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { BehaviorSubject, of } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { UnitCheckComponent } from './unit-check.component';
@@ -18,6 +20,7 @@ describe('UnitCheckComponent', () => {
   let getUnitDefinition: jest.Mock;
   let getUnitScheme: jest.Mock;
   let hasComments: jest.Mock;
+  let units: WritableSignal<{ [group: string]: UnitInListDto[] }>;
 
   const element = (): HTMLElement => fixture.nativeElement as HTMLElement;
   const tabs = () => Array.from(
@@ -35,6 +38,7 @@ describe('UnitCheckComponent', () => {
           useValue: {
             selectedUnit$: new BehaviorSubject(3),
             selectedWorkspaceId: 1,
+            units: units.asReadonly(),
             workspaceSettings: { hiddenRoutes }
           }
         },
@@ -42,7 +46,11 @@ describe('UnitCheckComponent', () => {
           provide: WorkspaceBackendService,
           useValue: {
             getUnitProperties: () => of({
-              id: 3, editor: 'iqb-editor-aspect@2.9', player: 'iqb-player-aspect@2.9', schemer: 'iqb-schemer@2.5'
+              id: 3,
+              key: 'UNIT_03',
+              editor: 'iqb-editor-aspect@2.9',
+              player: 'iqb-player-aspect@2.9',
+              schemer: 'iqb-schemer@2.5'
             }),
             getUnitDefinition,
             getUnitScheme,
@@ -74,6 +82,7 @@ describe('UnitCheckComponent', () => {
 
   beforeEach(() => {
     hiddenRoutes = [];
+    units = signal({ '': [{ id: 4, key: 'UNIT_04' }] });
     hasComments = jest.fn(() => of(true));
     getUnitRichNotes = jest.fn(() => of({ tags: [], notes: [] }));
     getUnitDefinition = jest.fn(() => of({ definition: '{}', variables: [{ id: '05', alias: '_00a' }] }));
@@ -149,5 +158,34 @@ describe('UnitCheckComponent', () => {
       sectionOf('properties')?.querySelectorAll('[data-cy="unit-check-finding"]') ?? [],
       finding => finding.textContent
     )).toEqual(['unit-check.no-player']);
+  }));
+
+  // a key the form would not let through can come with an import; the card names it as typed (#2135)
+  it('names a key the form would not accept under the properties', fakeAsync(() => {
+    create();
+    expect(sectionOf('properties')?.querySelector('[data-cy="unit-check-ok"]')).toBeTruthy();
+
+    unitStores.metadataStore()?.setBasicData('00_INVALID_NAME', '', '', '', '', '', '');
+    fixture.detectChanges();
+
+    expect(Array.from(
+      sectionOf('properties')?.querySelectorAll('[data-cy="unit-check-finding"]') ?? [],
+      finding => finding.textContent
+    )).toEqual(['unit-check.key-format']);
+  }));
+
+  // the list of units can arrive after the unit, when it is opened by its address (#1842)
+  it('names a key another unit has once the list of units arrives', fakeAsync(() => {
+    units.set({});
+    create();
+    expect(sectionOf('properties')?.querySelector('[data-cy="unit-check-ok"]')).toBeTruthy();
+
+    units.set({ '': [{ id: 4, key: 'unit_03' }] });
+    fixture.detectChanges();
+
+    expect(Array.from(
+      sectionOf('properties')?.querySelectorAll('[data-cy="unit-check-finding"]') ?? [],
+      finding => finding.textContent
+    )).toEqual(['unit-check.key-taken']);
   }));
 });

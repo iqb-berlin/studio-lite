@@ -20,6 +20,7 @@ import { AppService } from '../../../services/app.service';
 import { RichNoteTagsService } from './rich-note-tags.service';
 import { UnitStoresService } from './unit-stores.service';
 import { reconcileItemVariables } from '../utils/item-variables.utils';
+import { isUnitKeyTaken, UNIT_KEY_PATTERN } from '../utils/unit-key.utils';
 
 /**
  * The state of the workspace currently open: which unit is selected, what the user may do in it,
@@ -39,6 +40,9 @@ export class WorkspaceService {
   selectedUnit$ = new BehaviorSubject<number>(0);
   workspaceSettings: WorkspaceSettingsDto;
   unitList: { [key: string]: UnitInListDto[] } = {};
+  // the list again, for whoever derives from it: a computed cannot see the field replaced
+  private readonly unitListState = signal<{ [key: string]: UnitInListDto[] }>({});
+  readonly units = this.unitListState.asReadonly();
   private _isWorkspaceGroupAdmin = new BehaviorSubject<boolean>(false);
   private _userAccessLevel = new BehaviorSubject<number>(0);
 
@@ -119,7 +123,7 @@ export class WorkspaceService {
   }
 
   static unitKeyPatternString(): string {
-    return '[a-zA-Z][a-zA-Z0-9_-]*';
+    return UNIT_KEY_PATTERN;
   }
 
   /** As the column the group goes into on each of its units holds; a longer one failed there (#2131) */
@@ -135,15 +139,7 @@ export class WorkspaceService {
     unitList: () => { [key: string]: UnitInListDto[] }
   ): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const newKeyNormalised = control.value.toUpperCase().trim();
-      let allUnits: UnitInListDto[] = [];
-      Object.values(unitList()).forEach(units => {
-        allUnits = [...allUnits, ...units];
-      });
-      const allreadyIn = allUnits.filter(
-        u => u.key.toUpperCase().trim() === newKeyNormalised && u.id !== unitId
-      );
-      if (allreadyIn && allreadyIn.length > 0) {
+      if (isUnitKeyTaken(control.value, unitId, unitList())) {
         return {
           keyNotUnique:
             'Der Kurzname muss eindeutig innerhalb des Arbeitsbereiches sein.'
@@ -184,6 +180,7 @@ export class WorkspaceService {
     });
     const notUsedGroups = unitGroups.filter(g => !usedUnitGroups.includes(g));
     notUsedGroups.forEach(groupName => this.addEmptyUnitGroup(groupName));
+    this.unitListState.set(this.unitList);
   }
 
   private addEmptyUnitGroup(groupName: string) {

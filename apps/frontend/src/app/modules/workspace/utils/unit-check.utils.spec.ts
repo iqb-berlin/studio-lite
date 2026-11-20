@@ -1,5 +1,7 @@
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
-import { checkUnit, UnitCheckInput, UnitCheckSection } from './unit-check.utils';
+import {
+  checkUnit, UnitCheckInput, UnitCheckSection, withKeyFindings
+} from './unit-check.utils';
 
 const scheme = (variableCodings: unknown[]): string => JSON.stringify({ version: '3.0', variableCodings });
 
@@ -225,5 +227,27 @@ describe('checkUnit', () => {
 
       expect(section(checkUnit(input), 'properties')?.findings).toEqual([{ key: 'unit-check.no-player' }]);
     });
+  });
+});
+
+describe('withKeyFindings', () => {
+  const keyFinding = { key: 'unit-check.key-format', params: { key: '00_INVALID_NAME' } };
+
+  it('puts what is wrong with the key first under the properties, which are then not in order', () => {
+    const input = okInput();
+    input.modules = { ...input.modules, player: '' };
+    const sections = withKeyFindings(checkUnit(input), [keyFinding]);
+
+    expect(section(sections, 'properties')).toEqual(expect.objectContaining({
+      findings: [keyFinding, { key: 'unit-check.no-player' }],
+      ok: false
+    }));
+    expect(section(sections, 'editor')?.ok).toBe(true);
+  });
+
+  it('leaves the sections as they are when the key is in order', () => {
+    const sections = checkUnit(okInput());
+
+    expect(withKeyFindings(sections, [])).toBe(sections);
   });
 });
