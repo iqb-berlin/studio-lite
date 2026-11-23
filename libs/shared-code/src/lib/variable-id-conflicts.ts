@@ -28,8 +28,12 @@ export function findVariableIdConflicts(
   variables: { id: string; alias?: string }[] | null | undefined,
   scheme: string | null | undefined
 ): VariableIdConflict[] {
+  // the saved list as it is: the export check asks every unit of a workspace, and one list that is
+  // not one, or holds an entry that is no variable, must not fail it for all of them (#2135)
+  const baseVariables = (Array.isArray(variables) ? variables : [])
+    .filter(variable => !!variable && typeof variable === 'object');
   const written: VariableIdConflictVariable[] = [
-    ...(variables ?? []).map(variable => ({
+    ...baseVariables.map(variable => ({
       kind: 'base' as const,
       id: variable.id,
       ...(variable.alias && { alias: variable.alias })

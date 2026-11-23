@@ -149,5 +149,35 @@ describe('unit export contents', () => {
       // a copy from more than one source leaves the coding incomplete, but it runs
       expect(contents.schemeProblems).toEqual([{ type: 'NAME_TWICE', variable: 'text_1' }]);
     });
+
+    // a TypeError on one such unit failed the check for every unit of the workspace (#2135)
+    it('answers for every unit when the codings or the variables of one are not a list of them', async () => {
+      const unitService = createMock<UnitService>();
+      const unitCommentService = createMock<UnitCommentService>();
+      const unitRichNoteService = createMock<UnitRichNoteService>();
+      unitService.findAllExportSources.mockResolvedValue([
+        {
+          id: 3, metadata: null, scheme: JSON.stringify({ version: '3.0', variableCodings: [null] }), variables: []
+        },
+        {
+          id: 4, metadata: null, scheme: JSON.stringify({ version: '3.0', variableCodings: {} }), variables: []
+        },
+        {
+          id: 5, metadata: null, scheme: '', variables: JSON.parse('[null]')
+        }
+      ]);
+      unitCommentService.findUnitIdsWithComments.mockResolvedValue(new Set());
+      unitRichNoteService.findUnitIdsWithNotes.mockResolvedValue(new Set());
+
+      const contents = await findUnitExportContents(5, unitService, unitCommentService, unitRichNoteService);
+
+      expect(contents.map(({ unitId, variableIdConflicts, schemeProblems }) => (
+        { unitId, variableIdConflicts, schemeProblems }
+      ))).toEqual([
+        { unitId: 3, variableIdConflicts: [], schemeProblems: [{ type: 'UNREADABLE' }] },
+        { unitId: 4, variableIdConflicts: [], schemeProblems: [{ type: 'UNREADABLE' }] },
+        { unitId: 5, variableIdConflicts: [], schemeProblems: [] }
+      ]);
+    });
   });
 });

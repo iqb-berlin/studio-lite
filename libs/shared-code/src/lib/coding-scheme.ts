@@ -14,19 +14,25 @@ export function hasCodingScheme(scheme?: string | null): boolean {
 
 /**
  * The codings of a scheme that derive a variable rather than code one the player reports -- what
- * both export formats list as derived variables. A missing or unreadable scheme derives nothing.
+ * both export formats list as derived variables. A missing or unreadable scheme derives nothing,
+ * and neither does an entry that is no coding: the export check asks this of every unit of a
+ * workspace, and one broken scheme must not fail it for all of them (#2135).
  */
 export function parseDerivedCodings(scheme: string | null | undefined): VariableCodingData[] {
   if (!scheme) return [];
-  let codingScheme: CodingSchemeData;
+  let codingScheme: Partial<CodingSchemeData> | null;
   try {
-    codingScheme = JSON.parse(scheme) as CodingSchemeData;
+    codingScheme = JSON.parse(scheme) as Partial<CodingSchemeData> | null;
   } catch {
     return [];
   }
-  return codingScheme?.variableCodings?.filter(
-    vc => vc.sourceType !== 'BASE' && vc.sourceType !== 'BASE_NO_VALUE'
-  ) ?? [];
+  const codings: unknown = codingScheme?.variableCodings;
+  if (!Array.isArray(codings)) return [];
+  return codings.filter((coding: unknown): coding is VariableCodingData => (
+    !!coding && typeof coding === 'object' &&
+    (coding as VariableCodingData).sourceType !== 'BASE' &&
+    (coding as VariableCodingData).sourceType !== 'BASE_NO_VALUE'
+  ));
 }
 
 /**

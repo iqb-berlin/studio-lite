@@ -20,4 +20,12 @@ describe('parseDerivedCodings', () => {
     expect(parseDerivedCodings('{broken')).toEqual([]);
     expect(parseDerivedCodings('{}')).toEqual([]);
   });
+
+  // the export check asks every unit of a workspace; one such scheme failed it for all (#2135)
+  it('derives nothing from codings that are not a list, and skips entries that are no coding', () => {
+    expect(parseDerivedCodings(JSON.stringify({ version: '3.0', variableCodings: { id: 'sum' } }))).toEqual([]);
+    expect(parseDerivedCodings('null')).toEqual([]);
+    expect(parseDerivedCodings(schemeOf([null, 'sum', { id: 'sum', sourceType: 'SUM_SCORE' }]))
+      .map(coding => coding.id)).toEqual(['sum']);
+  });
 });

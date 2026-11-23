@@ -55,4 +55,14 @@ describe('findVariableIdConflicts', () => {
     expect(findVariableIdConflicts([{ id: '05' }], '{broken')).toEqual([]);
     expect(findVariableIdConflicts(null, null)).toEqual([]);
   });
+
+  // the export check asks every unit of a workspace; one such list failed it for all (#2135)
+  it('reads past variables that are not a list, and past entries that are no variable', () => {
+    const scheme = schemeOf([{ id: 'd_1', alias: '05', sourceType: 'MANUAL' }]);
+    const notAList = JSON.parse('{}');
+    const withNull = JSON.parse('[null, {"id": "05"}]');
+
+    expect(findVariableIdConflicts(notAList, scheme)).toEqual([]);
+    expect(findVariableIdConflicts(withNull, scheme).map(conflict => conflict.id)).toEqual(['05']);
+  });
 });
