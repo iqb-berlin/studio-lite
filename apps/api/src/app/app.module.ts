@@ -69,6 +69,7 @@ import { ReviewUnitController } from './controllers/review-unit.controller';
 import { ReviewUnitCommentController } from './controllers/review-unit-comment.controller';
 import { VeronaModuleController } from './controllers/verona-module.controller';
 import { ResourcePackageController } from './controllers/resource-package.controller';
+import { WorkspaceResourcePackageController } from './controllers/workspace-resource-package.controller';
 import { UsersController } from './controllers/users.controller';
 import { WorkspaceGroupUserController } from './controllers/workspace-group-user.controller';
 import { WorkspaceUnitItemController } from './controllers/workspace-unit-item.controller';
@@ -212,6 +213,7 @@ const ENTITIES = [
     SettingController,
     OutdatedFrontendController,
     ResourcePackageController,
+    WorkspaceResourcePackageController,
     VeronaModuleController,
     WorkspaceController,
     WorkspaceUnitController,

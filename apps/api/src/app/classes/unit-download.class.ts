@@ -87,6 +87,7 @@ export class UnitDownloadClass {
       await UnitDownloadClass.addDependencyFiles(
         unitDefinitionService,
         resourcePackageService,
+        workspaceId,
         unitsMetadata,
         zip,
         // the XML export goes to the testcenter, which reports a missing file itself
@@ -140,12 +141,14 @@ export class UnitDownloadClass {
   /**
    * Every file the exported units name as a dependency belongs beside the unit files: unit-index
    * names such a file "relative to the index file" (#1602). Of these files the studio keeps only
-   * resource packages; each installed one goes into the zip once. Any other file, and a package that
-   * is not installed or whose zip is not on disk, stays out and is reported.
+   * resource packages; the package that serves each in the workspace goes into the zip once, under
+   * the name the units give (#1358). Any other file, and a package that nothing serves or whose zip
+   * is not on disk, stays out and is reported.
    */
   static async addDependencyFiles(
     unitDefinitionService: UnitDefinitionService,
     resourcePackageService: ResourcePackageService,
+    workspaceId: number,
     units: UnitPropertiesDto[],
     zip: AdmZip,
     exportReport?: ExportReportMessage[]
@@ -171,7 +174,7 @@ export class UnitDownloadClass {
         });
     }));
     await Promise.all([...packages.values()].map(async ({ fileName, unitKeys }) => {
-      const zipped = await resourcePackageService.findZippedResourcePackage(fileName);
+      const zipped = await resourcePackageService.findZippedResourcePackage(fileName, workspaceId);
       if (zipped) {
         zip.addFile(zipped.fileName, zipped.file);
       } else {

@@ -12,7 +12,6 @@ import { UnitDefinitionService } from './unit-definition.service';
 import { UnitCommentService } from './unit-comment.service';
 import { UnitRichNoteService } from './unit-rich-note.service';
 import { ResourcePackageService } from './resource-package.service';
-import ResourcePackage from '../entities/resource-package.entity';
 import User from '../entities/user.entity';
 import { FileIo } from '../interfaces/file-io.interface';
 
@@ -229,11 +228,13 @@ describe('WorkspaceImportService', () => {
         });
 
         it('should take the package as part of the unit when the studio has it, and install nothing', async () => {
-          resourcePackageService.findByFileName.mockResolvedValue({ name: 'GeoGebra' } as ResourcePackage);
+          resourcePackageService.isServed.mockResolvedValue(true);
 
           const result = await service.uploadFiles(1, [exportWithPackage('GeoGebra.itcr.zip')], user);
 
           expect(result.messages).toEqual([]);
+          // whether it is served depends on the target workspace's group (#1358)
+          expect(resourcePackageService.isServed).toHaveBeenCalledWith('GeoGebra.itcr.zip', 1);
           expect(resourcePackageService.create).not.toHaveBeenCalled();
           expect(unitDefinitionService.patchDefinition).toHaveBeenCalledWith(10, expect.objectContaining({
             dependenciesToPlay: [{ id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }]
@@ -241,7 +242,7 @@ describe('WorkspaceImportService', () => {
         });
 
         it('should say when the studio does not have the package, whatever its case', async () => {
-          resourcePackageService.findByFileName.mockResolvedValue(null);
+          resourcePackageService.isServed.mockResolvedValue(false);
 
           const result = await service.uploadFiles(1, [exportWithPackage('geogebra.ITCR.zip')], user);
 

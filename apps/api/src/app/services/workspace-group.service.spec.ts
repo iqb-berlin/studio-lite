@@ -239,7 +239,9 @@ describe('WorkspaceGroupService', () => {
     it.each([
       [{ states: 'x' }], [{ states: [null] }], [{ states: [{ label: 'a' }] }], [{ states: [{ id: 'abc' }] }],
       [{ profiles: 5 }], [{ profiles: ['id'] }], [{ profiles: [{ id: 5 }] }],
-      [{ lastStateId: 'abc' }], [{ richNoteTags: ['https://a.example', 5] }]
+      [{ lastStateId: 'abc' }], [{ richNoteTags: ['https://a.example', 5] }],
+      // #1358: a package per package name
+      [{ chosenResourcePackages: ['GeoGebra-5.3'] }], [{ chosenResourcePackages: { GeoGebra: 5 } }]
     ])('should refuse malformed fields in the settings: %j', async settings => {
       mockRepository.findOne.mockResolvedValue({ id: 1, name: 'g', settings: {} });
 
@@ -257,7 +259,8 @@ describe('WorkspaceGroupService', () => {
         states: [{ id: '3', label: 'alt' }],
         profiles: null,
         lastStateId: null,
-        richNoteTags: 'https://example.org/vocabulary'
+        richNoteTags: 'https://example.org/vocabulary',
+        chosenResourcePackages: { GeoGebra: 'GeoGebra-5.3' }
       };
 
       await service.patch(1, { id: 1, settings } as unknown as WorkspaceGroupFullDto);
