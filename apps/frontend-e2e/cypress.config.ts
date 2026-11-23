@@ -83,6 +83,11 @@ export default defineConfig({
             await client.query(
               'TRUNCATE TABLE  "public"."resource_package" RESTART IDENTITY;'
             );
+            // The defaults name packages, which are gone now; a setting kept would point at nothing,
+            // or at the package of the same name the next spec installs (#1358).
+            await client.query(
+              'DELETE FROM "public"."setting" WHERE "key" = \'resource-package-defaults\';'
+            );
             await client.query(
               'TRUNCATE TABLE  "public"."user" RESTART IDENTITY CASCADE;'
             );
