@@ -73,7 +73,7 @@ export class UnitPrintPlayerComponent extends PreviewDirective implements AfterV
           ...this.legacyStateReportPolicy(),
           pagingMode: this.toPlayerValue('concat-scroll'),
           printMode: this.toPlayerValue(this.printElementIds ? 'on-with-ids' : 'on'),
-          directDownloadUrl: this.backendService.getDirectDownloadLink(),
+          directDownloadUrl: this.backendService.getDirectDownloadLink(this.workspaceId),
           sharedParameters: this.sharedParameters
         },
         // a unit without a definition sends none, as the testcenter does, not an empty one (#719)

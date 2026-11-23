@@ -20,6 +20,7 @@ import {
   UnitRichNoteTagDto,
   WorkspaceReportDto
 } from '@studio-lite-lib/api-dto';
+import { ResourcePackageChoice, ResourcePackageGroup } from '@studio-lite/shared-code';
 import { succeeded } from '../../../utils/succeeded.utils';
 import { withTrimmedEmail } from '../../../utils/email.utils';
 import { Profile } from '../../../models/profile.type';
@@ -249,6 +250,30 @@ export class BackendService {
     return this.http
       .patch(`${this.serverUrl}settings/app-logo`, appLogo)
       .pipe(succeeded());
+  }
+
+  /** Sets the default package per package name, as a whole (#1358). */
+  setResourcePackageDefaults(defaults: ResourcePackageChoice): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}resource-packages/defaults`, defaults)
+      .pipe(succeeded());
+  }
+
+  /** Gives an installed package another package name, the name it stands in for (#1358). */
+  setResourcePackageName(id: number, packageName: string): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}resource-packages/${id}`, { packageName })
+      .pipe(succeeded());
+  }
+
+  /**
+   * Every workspace group with the packages it chose (#1358): whom a new default or an overwritten
+   * package reaches. Null when they could not be read.
+   */
+  getResourcePackageGroups(): Observable<ResourcePackageGroup[] | null> {
+    return this.http
+      .get<ResourcePackageGroup[]>(`${this.serverUrl}resource-packages/groups`)
+      .pipe(catchError(() => of(null)));
   }
 
   deleteResourcePackages(ids: number[]): Observable<boolean> {

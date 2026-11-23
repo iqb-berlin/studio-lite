@@ -187,7 +187,7 @@ export class UnitEditorComponent extends VeronaModuleDirective {
             sessionId: this.sessionId,
             editorConfig: {
               ...this.legacyDefinitionReportPolicy(),
-              directDownloadUrl: this.backendService.getDirectDownloadLink(),
+              directDownloadUrl: this.backendService.getDirectDownloadLink(this.workspaceService.selectedWorkspaceId),
               role: this.role(),
               sharedParameters: this.sharedParameters
             },

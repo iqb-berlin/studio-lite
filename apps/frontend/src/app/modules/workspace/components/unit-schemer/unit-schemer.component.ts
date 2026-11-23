@@ -134,7 +134,7 @@ export class UnitSchemerComponent extends UnitDefinitionDirective {
             role: new RolePipe().transform(
               this.workspaceService.userAccessLevel
             ),
-            directDownloadUrl: this.backendService.getDirectDownloadLink(),
+            directDownloadUrl: this.backendService.getDirectDownloadLink(this.workspaceService.selectedWorkspaceId),
             sharedParameters: this.sharedParameters
           },
           codingScheme: unitScheme.scheme || '',

@@ -1,5 +1,5 @@
 import {
-  Component, Inject, Input, OnChanges, OnDestroy, signal, SimpleChanges, ViewChild
+  Component, Inject, Input, OnChanges, OnDestroy, output, signal, SimpleChanges, ViewChild
 } from '@angular/core';
 import {
   MatTableDataSource, MatTable, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatColumnDef, MatHeaderCellDef,
@@ -9,12 +9,16 @@ import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 import { SelectionModel } from '@angular/cdk/collections';
 import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
+import { ResourcePackageChoice } from '@studio-lite/shared-code';
 import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
 import { SafeUrlPipe } from '../../pipes/safe-url.pipe';
+import { ResourcePackageServingPipe } from '../../pipes/resource-package-serving.pipe';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { I18nService } from '../../../../services/i18n.service';
 import { IsSelectedPipe } from '../../../../pipes/is-selected.pipe';
@@ -28,12 +32,13 @@ import { deselectHidden, SelectionScope, toggleAllInScope } from '../../../../ut
 
   imports: [
     MatTable, MatSort, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatColumnDef, MatHeaderCellDef, MatHeaderCell,
-    MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatSlideToggle, MatTooltip, DatePipe,
-    TranslateModule, SafeUrlPipe, SearchFilterComponent, IsSelectedPipe, SelectionScopeStatePipe
+    MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatSlideToggle, MatTooltip, MatIconButton, MatIcon, DatePipe,
+    TranslateModule, SafeUrlPipe, SearchFilterComponent, IsSelectedPipe, SelectionScopeStatePipe,
+    ResourcePackageServingPipe
   ]
 })
 export class ResourcePackagesTableComponent implements OnChanges, OnDestroy {
-  resourcePackageProperties: string[] = ['name', 'createdAt'];
+  resourcePackageProperties: string[] = ['name', 'packageName', 'default', 'createdAt'];
   displayedColumns: string[] = ['selectCheckbox', ...this.resourcePackageProperties];
   resourcePackagesPath!: string;
   // The selection lives here and not in the checkboxes of the rows shown: a package filtered out
@@ -44,6 +49,11 @@ export class ResourcePackagesTableComponent implements OnChanges, OnDestroy {
 
   @Input() dataSource!: MatTableDataSource<ResourcePackageDto>;
   @Input() selectedResourcePackages!: BehaviorSubject<number[]>;
+  /** The default package per package name, to mark the package groups without a choice get (#1358). */
+  @Input() defaults: ResourcePackageChoice = {};
+
+  readonly setDefault = output<ResourcePackageDto>();
+  readonly editPackageName = output<ResourcePackageDto>();
 
   @ViewChild(MatSort) sort!: MatSort;
 
