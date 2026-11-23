@@ -24,6 +24,7 @@ export { EmailTemplateDto } from './lib/dtos/setting/email-template.dto';
 export { UnitDownloadSettingsDto, UnitDownloadBookletSettingsDto } from './lib/dtos/unit/unit-download-settings.dto';
 export { UnitExportContentsDto } from './lib/dtos/unit/unit-export-contents.dto';
 export { VariableIdConflictDto } from './lib/dtos/unit/variable-id-conflict.dto';
+export { SchemeProblemDto } from './lib/dtos/unit/scheme-problem.dto';
 export { VariableIdConflictVariableDto } from './lib/dtos/unit/variable-id-conflict-variable.dto';
 export { RequestReportDto } from './lib/dtos/request-report.dto';
 export { UnitSchemeDto } from './lib/dtos/unit/unit-scheme.dto';

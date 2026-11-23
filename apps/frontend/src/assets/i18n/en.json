@@ -77,12 +77,15 @@
       "import": "Export",
       "import-tooltip": "Download unit files (*.xml, *.voud etc.)"
     },
+    "export-problems": {
+      "title": "Problems before the export",
+      "intro-scheme": "Coding with the coding scheme of these units fails: the schemer rejects it, or it could not be read. The other units are not affected."
+    },
     "variable-id-conflicts": {
-      "title": "Duplicate variable IDs",
       "intro-xml": "In the XML of these units, the same ID would stand for two variables. From version 19 on, the testcenter does not accept such units. The other units are not affected.",
       "intro-json": "In the JSON of these units, the same ID would stand for two variables. Programs that match variables by their ID may confuse the two. The other units are not affected.",
       "export-anyway": "Export anyway",
-      "check-failed": "Could not check whether a variable ID would appear twice in the export."
+      "check-failed": "Could not check whether the export writes a variable ID twice or the schemer rejects a coding."
     },
     "dialog": {
       "title": "Download unit(s) as a file",

@@ -69,3 +69,6 @@ export {
 export {
   VariableIdConflict, VariableIdConflictVariable, findVariableIdConflicts
 } from './lib/variable-id-conflicts';
+export {
+  SchemeProblem, SchemeProblemType, SchemeValidation, findSchemeProblems
+} from './lib/scheme-problems';

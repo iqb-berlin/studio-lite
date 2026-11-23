@@ -225,7 +225,8 @@ describe('WorkspaceUnitController', () => {
           codingScheme: true,
           comments: false,
           richNotes: true,
-          variableIdConflicts: []
+          variableIdConflicts: [],
+          schemeProblems: []
         },
         {
           unitId: 2,
@@ -234,7 +235,8 @@ describe('WorkspaceUnitController', () => {
           codingScheme: false,
           comments: true,
           richNotes: false,
-          variableIdConflicts: []
+          variableIdConflicts: [],
+          schemeProblems: []
         }
       ]);
       expect(unitService.findAllExportSources).toHaveBeenCalledWith(7);

@@ -24,9 +24,8 @@ import { ExportUnitFileConfigComponent } from '../export-unit-file-config/export
 import { mapBookletConfigToModernKeys, normalizeLegacyBookletConfig } from '../../utils/booklet-config-export.utils';
 import { HasTakersPipe } from '../../pipes/has-takers.pipe';
 import { ExportFileSelection } from '../../utils/export-file-options.utils';
-import {
-  UnitVariableIdConflicts, VariableIdConflictsComponent
-} from '../variable-id-conflicts/variable-id-conflicts.component';
+import { ExportProblemsComponent, UnitExportProblems } from '../export-problems/export-problems.component';
+import { schemeProblemFinding } from '../../utils/scheme-problems.utils';
 
 @Component({
   templateUrl: './export-unit.component.html',
@@ -65,9 +64,9 @@ export class ExportUnitComponent implements OnDestroy {
 
   // undefined until the file config has the export contents; the download waits for them (#2119).
   // null when they could not be read: the export stays possible, with a note that nothing was checked.
-  private readonly unitsWithVariableIdConflictsState = signal<UnitExportContentsDto[] | null | undefined>(undefined);
-  readonly unitsWithVariableIdConflicts = this.unitsWithVariableIdConflictsState.asReadonly();
-  private conflictDialogOpen = false;
+  private readonly unitsWithExportProblemsState = signal<UnitExportContentsDto[] | null | undefined>(undefined);
+  readonly unitsWithExportProblems = this.unitsWithExportProblemsState.asReadonly();
+  private problemsDialogOpen = false;
   private ngUnsubscribe = new Subject<void>();
 
   constructor(
@@ -94,40 +93,44 @@ export class ExportUnitComponent implements OnDestroy {
     Object.assign(this.unitExportSettings, selection);
   }
 
-  setVariableIdConflicts(units: UnitExportContentsDto[] | null): void {
-    this.unitsWithVariableIdConflictsState.set(units);
+  setUnitsWithExportProblems(units: UnitExportContentsDto[] | null): void {
+    this.unitsWithExportProblemsState.set(units);
   }
 
-  // Both formats write an id twice where a derived alias equals an element's internal id: the
-  // Testcenter (from version 19) rejects such a unit XML, and a reader of the JSON that looks
-  // variables up by id mixes the two up. So the chosen units with such an id are named before the
-  // export, with how to resolve it (#2119). Exporting anyway stays possible: the other units are fine.
+  // The chosen units whose export would go wrong are named before it runs, with how to fix them.
+  // - Both formats write an id twice where a derived alias equals an element's internal id: the
+  //   Testcenter (from version 19) rejects such a unit XML, and a reader of the JSON that looks
+  //   variables up by id mixes the two up (#2119).
+  // - A coding the schemer rejects makes coding with the exported scheme fail (#2135).
+  // Exporting anyway stays possible: the other units are fine.
   download(): void {
-    if (this.conflictDialogOpen) return;
-    const conflicts = (this.unitsWithVariableIdConflicts() ?? [])
+    if (this.problemsDialogOpen) return;
+    // the file config passes on only the units with a problem
+    const withProblems = (this.unitsWithExportProblems() ?? [])
       .filter(contents => this.unitExportSettings.unitIdList.includes(contents.unitId));
-    if (!conflicts.length) {
+    if (!withProblems.length) {
       this.dialogRef.close(this.unitExportSettings);
       return;
     }
     const unitsInList = Object.values(this.workspaceService.unitList).flat();
-    const units: UnitVariableIdConflicts[] = conflicts.map(contents => {
+    const units: UnitExportProblems[] = withProblems.map(contents => {
       const unit = unitsInList.find(unitInList => unitInList.id === contents.unitId);
       return {
         key: unit?.key ?? String(contents.unitId),
         name: unit?.name,
-        conflicts: contents.variableIdConflicts
+        conflicts: contents.variableIdConflicts,
+        schemeProblems: contents.schemeProblems.map(schemeProblemFinding)
       };
     });
-    this.conflictDialogOpen = true;
-    this.dialog.open(VariableIdConflictsComponent, {
+    this.problemsDialogOpen = true;
+    this.dialog.open(ExportProblemsComponent, {
       width: '800px',
       data: { units, exportFormat: this.unitExportSettings.exportFormat }
     })
       .afterClosed()
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(result => {
-        this.conflictDialogOpen = false;
+        this.problemsDialogOpen = false;
         if (result === true) this.dialogRef.close(this.unitExportSettings);
       });
   }

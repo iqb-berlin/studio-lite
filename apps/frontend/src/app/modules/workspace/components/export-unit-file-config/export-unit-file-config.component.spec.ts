@@ -36,7 +36,8 @@ const unitWithComments: UnitExportContentsDto = {
   codingScheme: false,
   comments: true,
   richNotes: false,
-  variableIdConflicts: []
+  variableIdConflicts: [],
+  schemeProblems: []
 };
 
 class MockWorkspaceBackendService {
@@ -178,18 +179,35 @@ describe('ExportUnitFileConfigComponent', () => {
     backendService.exportContents = of([unitWithComments, unitWithConflict]);
     fixture = TestBed.createComponent(ExportUnitFileConfigComponent);
     const passedOn: (UnitExportContentsDto[] | null)[] = [];
-    fixture.componentInstance.variableIdConflictsChange.subscribe(units => passedOn.push(units));
+    fixture.componentInstance.exportProblemsChange.subscribe(units => passedOn.push(units));
 
     fixture.detectChanges();
 
     expect(passedOn).toEqual([[unitWithConflict]]);
   });
 
+  // without it, the export dialog never heard of a unit whose only problem is in its coding
+  it('should pass on the units whose coding the schemer rejects (#2135)', () => {
+    const unitWithSchemeProblem: UnitExportContentsDto = {
+      ...unitWithComments,
+      unitId: 3,
+      schemeProblems: [{ type: 'NAME_TWICE', variable: 'text_1' }]
+    };
+    backendService.exportContents = of([unitWithComments, unitWithSchemeProblem]);
+    fixture = TestBed.createComponent(ExportUnitFileConfigComponent);
+    const passedOn: (UnitExportContentsDto[] | null)[] = [];
+    fixture.componentInstance.exportProblemsChange.subscribe(units => passedOn.push(units));
+
+    fixture.detectChanges();
+
+    expect(passedOn).toEqual([[unitWithSchemeProblem]]);
+  });
+
   it('should pass on that the ids could not be checked when the contents cannot be read', () => {
     backendService.exportContents = of(null);
     fixture = TestBed.createComponent(ExportUnitFileConfigComponent);
     const passedOn: (UnitExportContentsDto[] | null)[] = [];
-    fixture.componentInstance.variableIdConflictsChange.subscribe(units => passedOn.push(units));
+    fixture.componentInstance.exportProblemsChange.subscribe(units => passedOn.push(units));
 
     fixture.detectChanges();
 

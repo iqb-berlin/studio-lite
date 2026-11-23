@@ -1,13 +1,14 @@
-import { CodingSchemeFactory, CodingSchemeProblem, VariableInfoInput } from '@iqb/responses';
-import { CodingSchemeData, CodingSchemeProblemType } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { CodingSchemeFactory, VariableInfoInput } from '@iqb/responses';
+import { findSchemeProblems, SchemeProblem, SchemeProblemType } from '@studio-lite/shared-code';
 import type { UnitCheckFinding } from './unit-check.utils';
 
 /**
- * A text for every problem the validation knows, saying what is wrong and how to fix it. A type added
- * by a later version of the validation fails the build here instead of showing a bare key.
+ * A text for every problem, saying what is wrong and how to fix it. A type added by a later version
+ * of the validation fails the build here instead of showing a bare key.
  */
-const PROBLEM_KEYS: Record<CodingSchemeProblemType | 'NAME_TWICE', string> = {
+const PROBLEM_KEYS: Record<SchemeProblemType, string> = {
   NAME_TWICE: 'unit-check.scheme-problem.NAME_TWICE',
+  UNREADABLE: 'unit-check.scheme-unreadable',
   INVALID_SOURCE: 'unit-check.scheme-problem.INVALID_SOURCE',
   SOURCE_MISSING: 'unit-check.scheme-problem.SOURCE_MISSING',
   VACANT: 'unit-check.scheme-problem.VACANT',
@@ -21,61 +22,18 @@ const PROBLEM_KEYS: Record<CodingSchemeProblemType | 'NAME_TWICE', string> = {
   RULESET_VALUE_ARRAY_POS_INVALID: 'unit-check.scheme-problem.RULESET_VALUE_ARRAY_POS_INVALID'
 };
 
-const UNREADABLE: UnitCheckFinding = { key: 'unit-check.scheme-unreadable' };
-
-function parseScheme(scheme: string): Partial<CodingSchemeData> | undefined {
-  try {
-    const parsed: unknown = JSON.parse(scheme);
-    return parsed && typeof parsed === 'object' ? parsed as Partial<CodingSchemeData> : undefined;
-  } catch {
-    return undefined;
-  }
+/** A problem the schemer finds, as the unit check and the export dialog name it (#2135). */
+export function schemeProblemFinding(problem: Pick<SchemeProblem, 'type' | 'variable'>): UnitCheckFinding {
+  return {
+    key: PROBLEM_KEYS[problem.type],
+    ...(problem.variable !== undefined && { params: { variable: problem.variable } })
+  };
 }
 
-/**
- * What the schemer finds wrong with a coding scheme, as the unit check names it (#2135): each problem
- * of {@link CodingSchemeFactory.validate} -- the check the schemer runs -- once per variable, the ones
- * that break the coding first. An invalid source has several causes in the validation; the one an
- * author meets most, two variables of the same name, gets a text of its own that says which.
- *
- * Only a scheme of the current format is asked: the schemer converts an older one when it opens it,
- * and the validation would hold the old format against it. A scheme the validation cannot read at all
- * is named as such rather than taken for one without problems.
- */
+/** What the schemer finds wrong with a coding scheme, as the unit check names it (#2135). */
 export function schemeProblemFindings(
   variables: readonly VariableInfoInput[] | null | undefined,
   scheme: string
 ): UnitCheckFinding[] {
-  const codingScheme = parseScheme(scheme);
-  if (!codingScheme) return [UNREADABLE];
-  if (!String(codingScheme.version ?? '').startsWith('3.')) return [];
-  const codings = codingScheme.variableCodings ?? [];
-  let problems: CodingSchemeProblem[];
-  try {
-    problems = CodingSchemeFactory.validate(variables ?? [], codings);
-  } catch {
-    // a coding that is not one -- not an object, or a rule set without rules -- stops the validation
-    return [UNREADABLE];
-  }
-  const nameCounts = new Map<string, number>();
-  codings.forEach(coding => {
-    if (coding.alias) nameCounts.set(coding.alias, (nameCounts.get(coding.alias) ?? 0) + 1);
-  });
-  const seen = new Set<string>();
-  return problems
-    .filter(problem => {
-      const key = `${problem.type} ${problem.variableId}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
-    // a stable sort: the breaking ones first, each kind in the order the validation found them
-    .sort((a, b) => Number(b.breaking) - Number(a.breaking))
-    .map(problem => {
-      const nameTwice = problem.type === 'INVALID_SOURCE' && (nameCounts.get(problem.variableId) ?? 0) > 1;
-      return {
-        key: PROBLEM_KEYS[nameTwice ? 'NAME_TWICE' : problem.type],
-        params: { variable: problem.variableId }
-      };
-    });
+  return findSchemeProblems(variables, scheme, CodingSchemeFactory.validate).map(schemeProblemFinding);
 }

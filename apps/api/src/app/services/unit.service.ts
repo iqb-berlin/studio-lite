@@ -12,6 +12,7 @@ import {
   UnitPropertiesDto
 } from '@studio-lite-lib/api-dto';
 import { byText } from '@studio-lite/shared-code';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import Workspace from '../entities/workspace.entity';
 import Unit, {
   UNIT_GROUP_NAME_MAX_LENGTH, UNIT_KEY_MAX_LENGTH, UNIT_NAME_MAX_LENGTH
@@ -469,7 +470,7 @@ export class UnitService {
   async findAllExportSources(
     workspaceId: number
   ): Promise<{
-    id: number; metadata: UnitMetadataValues; scheme: string; variables: { id: string; alias?: string }[]
+    id: number; metadata: UnitMetadataValues; scheme: string; variables: VariableInfo[]
   }[]> {
     const units = await this.unitsRepository.find({
       where: { workspaceId: workspaceId },

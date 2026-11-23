@@ -1,4 +1,5 @@
 import { createMock } from '@golevelup/ts-jest';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { MetadataValuesEntry, UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import {
   entryHasContent, findUnitExportContents, hasItems, hasMetadataContent
@@ -8,6 +9,10 @@ import { UnitCommentService } from '../services/unit-comment.service';
 import { UnitRichNoteService } from '../services/unit-rich-note.service';
 
 const entry = (value: unknown): MetadataValuesEntry => ({ id: 'e1', value } as unknown as MetadataValuesEntry);
+
+const variable = (id: string, alias: string, type: VariableInfo['type']): VariableInfo => ({
+  id, alias, type, format: '', multiple: false, nullable: false, values: [], valuePositionLabels: []
+});
 
 describe('unit export contents', () => {
   describe('entryHasContent', () => {
@@ -87,7 +92,8 @@ describe('unit export contents', () => {
         codingScheme: false,
         comments: true,
         richNotes: false,
-        variableIdConflicts: []
+        variableIdConflicts: [],
+        schemeProblems: []
       }]);
       expect(unitService.findAllExportSources).toHaveBeenCalledWith(5);
     });
@@ -100,7 +106,7 @@ describe('unit export contents', () => {
         id: 3,
         metadata: null,
         scheme: JSON.stringify({ variableCodings: [{ id: 'd_1', alias: '05', sourceType: 'MANUAL' }] }),
-        variables: [{ id: '05', alias: '_00a' }]
+        variables: [variable('05', '_00a', 'string')]
       }]);
       unitCommentService.findUnitIdsWithComments.mockResolvedValue(new Set());
       unitRichNoteService.findUnitIdsWithNotes.mockResolvedValue(new Set());
@@ -108,6 +114,39 @@ describe('unit export contents', () => {
       const [contents] = await findUnitExportContents(5, unitService, unitCommentService, unitRichNoteService);
 
       expect(contents.variableIdConflicts.map(conflict => conflict.id)).toEqual(['05']);
+    });
+
+    // the export dialog warns about what makes the coding fail, not about what leaves it incomplete
+    it('names what the schemer finds that makes the coding fail, and only that (#2135)', async () => {
+      const unitService = createMock<UnitService>();
+      const unitCommentService = createMock<UnitCommentService>();
+      const unitRichNoteService = createMock<UnitRichNoteService>();
+      unitService.findAllExportSources.mockResolvedValue([{
+        id: 3,
+        metadata: null,
+        scheme: JSON.stringify({
+          version: '3.0',
+          variableCodings: [
+            { id: 'text_a', alias: 'text_1', sourceType: 'BASE_NO_VALUE' },
+            { id: 'text_b', alias: 'text_1', sourceType: 'BASE_NO_VALUE' },
+            {
+              id: 'drop_1', alias: '_01a', sourceType: 'BASE', codes: []
+            }
+          ]
+        }),
+        variables: [
+          variable('text_a', 'text_1', 'no-value'),
+          variable('text_b', 'text_1', 'no-value'),
+          variable('drop_1', '_01a', 'string')
+        ]
+      }]);
+      unitCommentService.findUnitIdsWithComments.mockResolvedValue(new Set());
+      unitRichNoteService.findUnitIdsWithNotes.mockResolvedValue(new Set());
+
+      const [contents] = await findUnitExportContents(5, unitService, unitCommentService, unitRichNoteService);
+
+      // _01a without codes leaves the coding incomplete, but it runs
+      expect(contents.schemeProblems).toEqual([{ type: 'NAME_TWICE', variable: 'text_1' }]);
     });
   });
 });

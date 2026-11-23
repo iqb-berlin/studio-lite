@@ -77,12 +77,15 @@
       "import": "Export",
       "import-tooltip": "Unit-Dateien (*.xml, *.voud usw.) herunterladen"
     },
+    "export-problems": {
+      "title": "Probleme vor dem Export",
+      "intro-scheme": "Mit dem Kodierschema dieser Aufgaben schlägt die Kodierung fehl: Der Schemer weist es zurück, oder es ließ sich nicht lesen. Die übrigen Aufgaben sind davon nicht betroffen."
+    },
     "variable-id-conflicts": {
-      "title": "Doppelte Variablen-IDs",
       "intro-xml": "Im XML dieser Aufgaben stünde dieselbe ID für zwei Variablen. Das Testcenter nimmt solche Aufgaben ab Version 19 nicht an. Die übrigen Aufgaben sind davon nicht betroffen.",
       "intro-json": "Im JSON dieser Aufgaben stünde dieselbe ID für zwei Variablen. Programme, die Variablen über ihre ID zuordnen, können die beiden verwechseln. Die übrigen Aufgaben sind davon nicht betroffen.",
       "export-anyway": "Trotzdem exportieren",
-      "check-failed": "Ob eine Variablen-ID im Export doppelt stünde, konnte nicht geprüft werden."
+      "check-failed": "Ob der Export Variablen-IDs doppelt schreibt oder der Schemer eine Kodierung zurückweist, konnte nicht geprüft werden."
     },
     "dialog": {
       "title": "Aufgabe(n) als Datei herunterladen",

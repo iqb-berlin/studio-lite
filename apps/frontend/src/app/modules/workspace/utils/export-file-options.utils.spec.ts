@@ -11,6 +11,7 @@ const unit = (unitId: number, contents: Partial<UnitExportContentsDto> = {}): Un
   comments: false,
   richNotes: false,
   variableIdConflicts: [],
+  schemeProblems: [],
   ...contents
 });
 

@@ -1,7 +1,8 @@
 import {
   MetadataValuesEntry, UnitExportContentsDto, UnitMetadataValues
 } from '@studio-lite-lib/api-dto';
-import { findVariableIdConflicts, hasCodingScheme } from '@studio-lite/shared-code';
+import { findSchemeProblems, findVariableIdConflicts, hasCodingScheme } from '@studio-lite/shared-code';
+import { CodingSchemeFactory } from '@iqb/responses';
 import type { UnitService } from '../services/unit.service';
 import type { UnitCommentService } from '../services/unit-comment.service';
 import type { UnitRichNoteService } from '../services/unit-rich-note.service';
@@ -50,7 +51,8 @@ export function hasItems(metadata?: UnitMetadataValues | null): boolean {
 /**
  * For every unit of the workspace, which optional export files it would fill. Metadata, items and
  * the coding scheme are read from the unit itself; comments and rich notes are asked for all units
- * at once. With them come the ids the export would write twice, which the dialog warns about.
+ * at once. With them come the ids the export would write twice and what the schemer finds that makes
+ * the coding fail, which the dialog warns about (#2119, #2135).
  */
 export async function findUnitExportContents(
   workspaceId: number,
@@ -71,6 +73,9 @@ export async function findUnitExportContents(
     codingScheme: hasCodingScheme(unit.scheme),
     comments: unitsWithComments.has(unit.id),
     richNotes: unitsWithRichNotes.has(unit.id),
-    variableIdConflicts: findVariableIdConflicts(unit.variables, unit.scheme)
+    variableIdConflicts: findVariableIdConflicts(unit.variables, unit.scheme),
+    schemeProblems: findSchemeProblems(unit.variables, unit.scheme, CodingSchemeFactory.validate)
+      .filter(problem => problem.breaking)
+      .map(({ type, variable }) => ({ type, ...(variable !== undefined && { variable }) }))
   }));
 }
