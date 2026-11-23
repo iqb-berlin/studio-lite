@@ -303,4 +303,15 @@ describe('UnitDefinitionStore', () => {
     store.setData([buildVariable('v1', 'a1')], 'def-b');
     expect(store.data()).toEqual(store.getData());
   });
+
+  // the save renames codings with the variables; the unit check asks whether it will (#2135)
+  it('tells whether the variables are changed, apart from the definition', () => {
+    const store = new UnitDefinitionStore(1, { definition: 'd', variables: [{ id: 'a', alias: 'a' } as VariableInfo] });
+
+    store.setData([{ id: 'a', alias: 'a' } as VariableInfo], 'changed');
+    expect([store.isChanged(), store.variablesChanged()]).toEqual([true, false]);
+
+    store.setData([{ id: 'a', alias: 'b' } as VariableInfo], 'changed');
+    expect(store.variablesChanged()).toBe(true);
+  });
 });

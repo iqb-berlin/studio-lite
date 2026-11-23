@@ -122,4 +122,39 @@ describe('UnitSchemeStore', () => {
     store.setData('s2', 't2');
     expect(store.data()).toEqual(store.getData());
   });
+
+  describe('applyVariables (#2135)', () => {
+    const schemeOf = (alias: string): string => JSON.stringify({
+      version: '3.0', variableCodings: [{ id: 'text_b', alias, sourceType: 'BASE_NO_VALUE' }]
+    });
+
+    it('takes the scheme with the codings renamed as the server renamed them', () => {
+      const store = new UnitSchemeStore(1, { scheme: schemeOf('text_1'), schemeType: 't1' });
+
+      store.applyVariables([{ id: 'text_b', alias: 'text_2' }]);
+
+      expect(store.getData().scheme).toBe(schemeOf('text_2'));
+      expect(store.isChanged()).toBe(false);
+    });
+
+    // measured against the renamed scheme, it would be sent back with the old name
+    it('drops a report of the scheme as it was', () => {
+      const store = new UnitSchemeStore(1, { scheme: schemeOf('text_1'), schemeType: 't1' });
+      store.setData(schemeOf('text_1'), 't1');
+
+      store.applyVariables([{ id: 'text_b', alias: 'text_2' }]);
+
+      expect(store.isChanged()).toBe(false);
+      expect(store.getData().scheme).toBe(schemeOf('text_2'));
+    });
+
+    it('keeps a scheme edited in the schemer a change, as reported', () => {
+      const store = new UnitSchemeStore(1, { scheme: schemeOf('text_1'), schemeType: 't1' });
+      store.setData(schemeOf('edited'), 't1');
+
+      store.applyVariables([{ id: 'text_b', alias: 'text_2' }]);
+
+      expect(store.getChangedData()).toEqual({ scheme: schemeOf('edited'), schemeType: 't1' });
+    });
+  });
 });

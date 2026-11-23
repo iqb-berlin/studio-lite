@@ -10,6 +10,7 @@ import {
   AuthDataDto
 } from '@studio-lite-lib/api-dto';
 import { AbstractControl } from '@angular/forms';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { WorkspaceService } from './workspace.service';
 import { WorkspaceBackendService } from './workspace-backend.service';
 import { AppService } from '../../../services/app.service';
@@ -455,6 +456,27 @@ describe('WorkspaceService', () => {
       expect(backendService.setUnitScheme).not.toHaveBeenCalled();
     });
 
+    // the server renames the codings with the variables; the scheme kept here named the old names (#2135)
+    it('should take the scheme as the server stored it with the variables, and not send it back', async () => {
+      const schemeOf = (alias: string): string => JSON.stringify({
+        version: '3.0', variableCodings: [{ id: 'text_b', alias, sourceType: 'BASE_NO_VALUE' }]
+      });
+      const definitionStore = new UnitDefinitionStore(1, {
+        definition: 'd', variables: [{ id: 'text_b', alias: 'text_1' } as VariableInfo]
+      });
+      definitionStore.setData([{ id: 'text_b', alias: 'text_2' } as VariableInfo], 'd');
+      const schemeStore = new UnitSchemeStore(1, { scheme: schemeOf('text_1'), schemeType: 'type' });
+      schemeStore.setData(schemeOf('text_1'), 'type');
+      unitStores.definitionStore.set(definitionStore);
+      unitStores.schemeStore.set(schemeStore);
+      backendService.setUnitDefinition.mockReturnValue(of(true));
+
+      await service.saveUnitData();
+
+      expect(schemeStore.getData().scheme).toBe(schemeOf('text_2'));
+      expect(backendService.setUnitScheme).not.toHaveBeenCalled();
+    });
+
     it('should keep a scheme the backend refuses unsaved', async () => {
       const schemeStore = new UnitSchemeStore(1, { scheme: 'old', schemeType: 'type' });
       schemeStore.setData('new', 'newType');
@@ -687,6 +709,26 @@ describe('WorkspaceService', () => {
 
         expect(backendService.setUnitProperties).not.toHaveBeenCalled();
         expect(backendService.setUnitDefinition).toHaveBeenCalled();
+      });
+
+      // saved from the editor tab, before the coding was ever opened (#2135)
+      it('should rename the codings of a scheme that is loaded only by the save', async () => {
+        const schemeOf = (alias: string): string => JSON.stringify({
+          version: '3.0', variableCodings: [{ id: 'text_1', alias, sourceType: 'BASE_NO_VALUE' }]
+        });
+        const definitionStore = new UnitDefinitionStore(1, { definition: 'd', variables: [] });
+        definitionStore.setData([{ id: 'text_1', alias: 'Antwort' } as VariableInfo], 'd');
+        unitStores.definitionStore.set(definitionStore);
+        unitStores.schemeStore.set(undefined);
+        const loaded = new UnitSchemeStore(1, { scheme: schemeOf('old alias'), schemeType: 'iqb@3.4' });
+        unitStores.loadSchemeStore.mockImplementation(() => {
+          unitStores.schemeStore.set(loaded);
+          return of(loaded);
+        });
+
+        await service.saveUnitData();
+
+        expect(loaded.getData().scheme).toBe(schemeOf('Antwort'));
       });
 
       it('should leave the items alone when another unit is opened while the scheme loads', async () => {

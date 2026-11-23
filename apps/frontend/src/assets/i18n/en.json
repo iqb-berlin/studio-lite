@@ -680,6 +680,10 @@
       "RULE_NUMERIC_RANGE_INVALID": "In the coding of \"{{variable}}\", a rule has a lower limit above its upper limit. Correct the limits in the rule.",
       "RULESET_VALUE_ARRAY_POS_INVALID": "In the coding of \"{{variable}}\", a rule set names a position in the value that does not exist. Correct the position in the rule set."
     },
+    "element-problem": {
+      "NAME_TWICE": "Two elements are named \"{{variable}}\". Give one of them another ID in the editor.",
+      "INVALID_SOURCE": "The element \"{{variable}}\" does not match its coding: its ID appears twice, or it has a value but is coded as a variable without a value, or the other way round. Give the element a unique ID in the editor; if it already has one, check the variable in coding."
+    },
     "comments-present": "Comments present",
     "comments-absent": "No comments",
     "notes-present": "Supplementary material present",

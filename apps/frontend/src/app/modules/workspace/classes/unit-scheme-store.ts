@@ -2,6 +2,7 @@ import { UnitSchemeDto } from '@studio-lite-lib/api-dto';
 import {
   EventEmitter, Signal, signal, WritableSignal
 } from '@angular/core';
+import { schemeWithVariables } from '@studio-lite/shared-code';
 
 /**
  * The unit's coding scheme while it is being edited. The schemer reports the whole scheme, type
@@ -65,6 +66,21 @@ export class UnitSchemeStore {
    */
   applyChanges(sent: UnitSchemeDto) {
     this.originalData = { ...this.originalData, ...sent };
+    this.notifyChange();
+  }
+
+  /**
+   * Takes the scheme as the server stored it once the variables were saved, which renames and drops
+   * codings with them (#2135): kept as it was loaded, it named an element by its old name. A report of
+   * the scheme as it was is dropped -- measured against the new one, it would count as a change and be
+   * sent back with the old names. A scheme really edited stays a change, and is saved as reported.
+   */
+  applyVariables(variables: readonly { id: string; alias?: string }[]) {
+    if (!this.isChanged()) this.reported = undefined;
+    this.originalData = {
+      ...this.originalData,
+      scheme: schemeWithVariables(this.originalData.scheme, variables)
+    };
     this.notifyChange();
   }
 

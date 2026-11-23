@@ -98,8 +98,8 @@ describe('Workspace Unit Check', () => {
       .should('be.visible');
   });
 
-  // elements copied with their names: the schemer rejects the coding, the export does not (#2135)
-  it('names two elements of the same name under the coding, with how to fix it', () => {
+  // elements copied with their names: the schemer rejects the coding, and they are renamed in the editor (#2135)
+  it('names two elements of the same name under the editor, with how to fix it', () => {
     const nameTwiceUnit = { shortname: 'CHECK_NAME', name: 'Doppelter Name', group: '' };
     const element = (id: string) => ({
       id, alias: 'text_1', type: 'no-value', format: '', multiple: false, nullable: false, values: []
@@ -121,9 +121,9 @@ describe('Workspace Unit Check', () => {
     selectUnit(nameTwiceUnit.shortname);
     clickIndexTabWorkspace('properties');
 
-    cy.get('[data-cy="unit-check-schemer"]').within(() => {
-      cy.get('[data-cy="unit-check-ok"]').should('not.exist');
-      cy.contains('[data-cy="unit-check-finding"]', 'text_1').should('be.visible');
-    });
+    cy.get('[data-cy="unit-check-editor"]')
+      .contains('[data-cy="unit-check-finding"]', 'Zwei Elemente heißen „text_1“')
+      .should('be.visible');
+    cy.get('[data-cy="unit-check-schemer"] [data-cy="unit-check-ok"]').should('be.visible');
   });
 });

@@ -38,6 +38,9 @@ export class UnitDefinitionStore {
   dataChange: EventEmitter<void> = new EventEmitter<void>();
   private readonly changedState = signal(false);
   readonly changed: Signal<boolean> = this.changedState.asReadonly();
+  private readonly variablesChangedState = signal(false);
+  /** Whether the variables the editor reported differ from those saved; the save renames codings with them. */
+  readonly variablesChanged: Signal<boolean> = this.variablesChangedState.asReadonly();
   private readonly dataState: WritableSignal<UnitDefinitionDto>;
   /** What {@link getData} answers, as a signal for whoever derives from it (#1361). */
   readonly data: Signal<UnitDefinitionDto>;
@@ -145,6 +148,7 @@ export class UnitDefinitionStore {
   private notifyChange(): void {
     this.changedData = this.computeChangedData();
     this.changedState.set(this.isChanged());
+    this.variablesChangedState.set(this.changedData.variables !== undefined);
     this.dataState.set(this.getData());
     this.dataChange.emit();
   }

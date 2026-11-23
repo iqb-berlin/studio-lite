@@ -29,10 +29,42 @@ export function schemeProblemFinding(problem: Pick<SchemeProblem, 'type' | 'vari
   };
 }
 
-/** What the schemer finds wrong with a coding scheme, as the unit check names it (#2135). */
+/**
+ * The problems of a base variable whose cause is its element, with what to do in the editor. A rule of
+ * its coding stays with the coding, where the rule is written, and so does a coding whose element is
+ * gone: an element created again gets another internal id, so only deleting the coding resolves it.
+ */
+const ELEMENT_PROBLEM_KEYS: Partial<Record<SchemeProblemType, string>> = {
+  NAME_TWICE: 'unit-check.element-problem.NAME_TWICE',
+  INVALID_SOURCE: 'unit-check.element-problem.INVALID_SOURCE'
+};
+
+/** A problem fixed in the editor, as the unit check names it there; none for one fixed in the coding. */
+function elementProblemFinding(problem: SchemeProblem): UnitCheckFinding | undefined {
+  const key = problem.baseVariable ? ELEMENT_PROBLEM_KEYS[problem.type] : undefined;
+  return key && problem.variable !== undefined ? { key, params: { variable: problem.variable } } : undefined;
+}
+
+/** What the schemer finds wrong, by the tab it is fixed in. */
+export interface SchemeProblemFindings {
+  editor: UnitCheckFinding[];
+  schemer: UnitCheckFinding[];
+}
+
+/**
+ * What the schemer finds wrong with a coding scheme, as the unit check names it (#2135): under the
+ * editor where the cause is an element, if the workspace shows the editor; under the coding otherwise.
+ */
 export function schemeProblemFindings(
   variables: readonly VariableInfoInput[] | null | undefined,
-  scheme: string
-): UnitCheckFinding[] {
-  return findSchemeProblems(variables, scheme, CodingSchemeFactory.validate).map(schemeProblemFinding);
+  scheme: string,
+  editorShown: boolean
+): SchemeProblemFindings {
+  return findSchemeProblems(variables, scheme, CodingSchemeFactory.validate)
+    .reduce<SchemeProblemFindings>((found, problem) => {
+      const inEditor = editorShown ? elementProblemFinding(problem) : undefined;
+      return inEditor ?
+        { ...found, editor: [...found.editor, inEditor] } :
+        { ...found, schemer: [...found.schemer, schemeProblemFinding(problem)] };
+    }, { editor: [], schemer: [] });
 }

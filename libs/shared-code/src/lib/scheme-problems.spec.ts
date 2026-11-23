@@ -46,7 +46,9 @@ describe('findSchemeProblems', () => {
     expect(findSchemeProblems(variables, scheme([
       { id: 'text_1749756922777_1', alias: 'text_1', sourceType: 'BASE_NO_VALUE' },
       { id: 'text_1749757116310_1', alias: 'text_1', sourceType: 'BASE_NO_VALUE' }
-    ]))).toEqual([{ type: 'NAME_TWICE', variable: 'text_1', breaking: true }]);
+    ]))).toEqual([{
+      type: 'NAME_TWICE', variable: 'text_1', breaking: true, baseVariable: true
+    }]);
   });
 
   // as the storage area of a drag-and-drop task, which is not meant to be coded (#2135)
@@ -74,9 +76,82 @@ describe('findSchemeProblems', () => {
         id: 'sum_1', alias: 'sum', sourceType: 'SUM_SCORE', deriveSources: ['drop_1', 'gone'], ...coded
       }
     ]))).toEqual([
-      { type: 'SOURCE_MISSING', variable: 'sum', breaking: true },
-      { type: 'MORE_THAN_ONE_SOURCE', variable: 'copy', breaking: false }
+      {
+        type: 'SOURCE_MISSING', variable: 'sum', breaking: true, baseVariable: false
+      },
+      {
+        type: 'MORE_THAN_ONE_SOURCE', variable: 'copy', breaking: false, baseVariable: false
+      }
     ]);
+  });
+
+  // an element deleted in the editor, whose coding stayed behind: it is deleted in the coding (#2135)
+  it('names a coding whose element is gone, as no base variable', () => {
+    expect(findSchemeProblems([], scheme([
+      {
+        id: 'drop_1', alias: '01', sourceType: 'BASE', ...coded
+      }
+    ]))).toEqual([{
+      type: 'SOURCE_MISSING', variable: '01', breaking: true, baseVariable: false
+    }]);
+  });
+
+  // a video replaced in the editor: its old coding has no codes, and deleting it loses nothing (#2135)
+  it('leaves out a coding whose element is gone when it codes nothing', () => {
+    const variables: VariableInfoInput[] = [{ id: 'video_new', alias: 'video_1', type: 'number' }];
+
+    expect(findSchemeProblems(variables, scheme([
+      { id: 'video_old', sourceType: 'BASE', codes: [] },
+      { id: 'text_old', alias: 'text_1', sourceType: 'BASE_NO_VALUE' }
+    ]))).toEqual([]);
+  });
+
+  it('names a coding whose element is gone and that codes, beside an empty one of its name', () => {
+    expect(findSchemeProblems([], scheme([
+      { id: 'old_a', alias: '01', sourceType: 'BASE' },
+      {
+        id: 'old_b', alias: '01', sourceType: 'BASE', ...coded
+      }
+    ])).map(problem => problem.type)).toContain('SOURCE_MISSING');
+  });
+
+  // an element deleted and another added under its name: the editor shows only one of them (#2135)
+  it('does not take a name that an orphaned coding shares for a base variable', () => {
+    const variables: VariableInfoInput[] = [{ id: 'text_new', alias: 'text_1', type: 'no-value' }];
+
+    expect(findSchemeProblems(variables, scheme([
+      { id: 'text_old', alias: 'text_1', sourceType: 'BASE_NO_VALUE' },
+      { id: 'text_new', alias: 'text_1', sourceType: 'BASE_NO_VALUE' }
+    ])).filter(problem => problem.baseVariable)).toEqual([]);
+  });
+
+  // the editor shows them by their aliases, not by the internal id they share (#2135)
+  it('takes two elements of the same internal id for base variables by their names only', () => {
+    const variables: VariableInfoInput[] = [
+      { id: 'text_x', alias: 'text_1', type: 'no-value' },
+      { id: 'text_x', alias: 'text_2', type: 'no-value' }
+    ];
+
+    expect(findSchemeProblems(variables, scheme([
+      { id: 'text_x', alias: 'text_1', sourceType: 'BASE_NO_VALUE' },
+      { id: 'text_x', alias: 'text_2', sourceType: 'BASE_NO_VALUE' }
+    ])).map(problem => [problem.variable, problem.baseVariable]).sort()).toEqual([
+      ['text_1', true], ['text_2', true], ['text_x', false]
+    ]);
+  });
+
+  // renaming the derived variable in the coding resolves it, not the element
+  it('does not take a name that a base and a derived variable share for a base variable', () => {
+    const variables: VariableInfoInput[] = [{ id: 'drop_1', alias: '01', type: 'string' }];
+
+    expect(findSchemeProblems(variables, scheme([
+      {
+        id: 'drop_1', alias: '01', sourceType: 'BASE', ...coded
+      },
+      {
+        id: 'copy_1', alias: '01', sourceType: 'COPY_VALUE', deriveSources: ['drop_1'], ...coded
+      }
+    ])).map(problem => [problem.variable, problem.baseVariable])).toEqual([['01', false]]);
   });
 
   // the schemer converts an older scheme when it opens it; held against the current format, it would fail
@@ -107,7 +182,7 @@ describe('findSchemeProblems', () => {
   });
 
   it('names a scheme it cannot read rather than finding nothing wrong with it', () => {
-    const unreadable = [{ type: 'UNREADABLE', breaking: true }];
+    const unreadable = [{ type: 'UNREADABLE', breaking: true, baseVariable: false }];
 
     expect(findSchemeProblems([], '{"version": "3.0", "variableCodings": [')).toEqual(unreadable);
     // the validation itself stops at a coding that is not one

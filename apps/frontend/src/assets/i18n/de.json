@@ -682,6 +682,10 @@
       "RULE_NUMERIC_RANGE_INVALID": "In der Kodierung von „{{variable}}“ liegt in einer Regel die untere Grenze über der oberen. Die Grenzen in der Regel korrigieren.",
       "RULESET_VALUE_ARRAY_POS_INVALID": "In der Kodierung von „{{variable}}“ nennt ein Regelsatz eine Position im Wert, die es nicht gibt. Die Position im Regelsatz korrigieren."
     },
+    "element-problem": {
+      "NAME_TWICE": "Zwei Elemente heißen „{{variable}}“. Im Editor einem von ihnen eine andere ID geben.",
+      "INVALID_SOURCE": "Das Element „{{variable}}“ passt nicht zu seiner Kodierung: Seine ID kommt doppelt vor, oder es hat einen Wert, ist aber als Variable ohne Wert kodiert, oder umgekehrt. Im Editor dem Element eine eindeutige ID geben; ist sie es schon, in der Kodierung die Variable prüfen."
+    },
     "comments-present": "Kommentare vorhanden",
     "comments-absent": "Keine Kommentare",
     "notes-present": "Begleitmaterial vorhanden",

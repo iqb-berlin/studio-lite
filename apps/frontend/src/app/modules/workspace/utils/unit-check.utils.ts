@@ -1,6 +1,6 @@
 import { UnitDefinitionDto, UnitSchemeDto } from '@studio-lite-lib/api-dto';
 import {
-  findVariableIdConflicts, hasCodingScheme, VariableIdConflict, VeronaModuleFactory
+  findVariableIdConflicts, hasCodingScheme, schemeWithVariables, VariableIdConflict, VeronaModuleFactory
 } from '@studio-lite/shared-code';
 import { playerRejectsDefinitionType } from './definition-type-match.utils';
 import { schemeProblemFindings } from './scheme-problems.utils';
@@ -20,6 +20,11 @@ export interface UnitCheckInput {
   /** undefined: not loaded (yet). */
   definition: UnitDefinitionDto | undefined;
   scheme: UnitSchemeDto | undefined;
+  /**
+   * What is not saved yet. The save of changed variables renames and drops codings with them, unless a
+   * changed scheme is saved after them as the schemer reported it.
+   */
+  unsaved: { variables: boolean; scheme: boolean };
   /** undefined: not known (yet). */
   hasComments: boolean | undefined;
   hasRichNotes: boolean | undefined;
@@ -108,18 +113,35 @@ function checkIdConflicts(input: UnitCheckInput): Checked {
   };
 }
 
-function checkScheme(input: UnitCheckInput): Checked {
-  if (!input.scheme) return { findings: [{ key: 'unit-check.scheme-not-loaded' }], variableIdConflicts: [] };
-  if (!hasCodingScheme(input.scheme.scheme)) {
-    return { findings: [{ key: 'unit-check.no-scheme' }], variableIdConflicts: [] };
-  }
+/** The coding's section, and what the schemer finds that is fixed in the editor. */
+interface CheckedScheme {
+  schemer: Checked;
+  editor: UnitCheckFinding[];
+}
+
+function checkScheme(input: UnitCheckInput, editorShown: boolean): CheckedScheme {
+  const only = (key: string): CheckedScheme => ({
+    schemer: { findings: [{ key }], variableIdConflicts: [] }, editor: []
+  });
+  if (!input.scheme) return only('unit-check.scheme-not-loaded');
+  if (!hasCodingScheme(input.scheme.scheme)) return only('unit-check.no-scheme');
   const idConflicts = checkIdConflicts(input);
   // what the schemer finds wrong (#2135), against the variables the schemer is given: the definition's,
   // or the scheme's where it has none. Without the definition, every base coding would lack its source.
   const problems = input.definition ?
-    schemeProblemFindings(input.definition.variables || input.scheme.variables, input.scheme.scheme) :
-    [];
-  return { ...idConflicts, findings: [...problems, ...idConflicts.findings] };
+    schemeProblemFindings(
+      input.definition.variables || input.scheme.variables,
+      // as the next save will store it: an element renamed or deleted in the editor is so in the coding
+      input.definition.variables && input.unsaved.variables && !input.unsaved.scheme ?
+        schemeWithVariables(input.scheme.scheme, input.definition.variables) :
+        input.scheme.scheme,
+      editorShown
+    ) :
+    { editor: [], schemer: [] };
+  return {
+    schemer: { ...idConflicts, findings: [...problems.schemer, ...idConflicts.findings] },
+    editor: problems.editor
+  };
 }
 
 /**
@@ -127,7 +149,8 @@ function checkScheme(input: UnitCheckInput): Checked {
  * it has content in a format its player reads, whether it has a coding scheme, what the schemer finds
  * wrong with it, and whether the export can write its variables without writing an id twice, and
  * whether it has comments and rich notes. What the schemer finds is asked only where the coding is
- * shown: it is fixed there, and unlike a doubled id it does not stop the export.
+ * shown: it is fixed there, and unlike a doubled id it does not stop the export. Where its cause is an
+ * element -- two of the same name -- it is named under the editor instead, if shown.
  *
  * A tab the workspace hides gets no section, and its module is not asked for. What the preview and
  * the export need all the same is asked under the properties instead: whether there is content and
@@ -151,6 +174,7 @@ export function checkUnit(input: UnitCheckInput): UnitCheckSection[] {
   const shown = (tab: UnitCheckSection['tab']) => isTabShown(input.hiddenRoutes, tab);
   const editorFindings = checkEditor(input);
   const idConflicts = shown('schemer') ? undefined : checkIdConflicts(input);
+  const scheme = shown('schemer') ? checkScheme(input, shown('editor')) : undefined;
   const sections: UnitCheckSection[] = [
     section('properties', {
       findings: [
@@ -161,8 +185,12 @@ export function checkUnit(input: UnitCheckInput): UnitCheckSection[] {
       variableIdConflicts: idConflicts?.variableIdConflicts ?? []
     })
   ];
-  if (shown('editor')) sections.push(section('editor', { findings: editorFindings, variableIdConflicts: [] }));
-  if (shown('schemer')) sections.push(section('schemer', checkScheme(input)));
+  if (shown('editor')) {
+    sections.push(section('editor', {
+      findings: [...editorFindings, ...(scheme?.editor ?? [])], variableIdConflicts: []
+    }));
+  }
+  if (scheme) sections.push(section('schemer', scheme.schemer));
   if (shown('comments')) sections.push(infoSection('comments', input.hasComments));
   if (shown('notes')) sections.push(infoSection('notes', input.hasRichNotes));
   return sections;

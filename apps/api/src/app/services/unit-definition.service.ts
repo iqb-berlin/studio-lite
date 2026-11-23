@@ -6,7 +6,9 @@ import {
   UnitDefinitionFullDto,
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
-import { toUnitDependencies, toVariableInfoListV1, UnitDependency } from '@studio-lite/shared-code';
+import {
+  schemeWithVariables, toUnitDependencies, toVariableInfoListV1, UnitDependency
+} from '@studio-lite/shared-code';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
 import { isCodingScheme } from '../utils/coding-scheme';
@@ -125,48 +127,18 @@ export class UnitDefinitionService {
       // Readers that still need 1.x get it where the list leaves the studio (findOnesScheme, the
       // unit export). Saving from the editor and importing both come through this method.
       unitToUpdate.variables = unitDefinitionDto.variables;
-      const aliasIds = unitDefinitionDto.variables.map(item => ({
-        id: item.id,
-        alias: item.alias || item.id
-      }));
       if (unitToUpdate.scheme) {
-        unitToUpdate.scheme = UnitDefinitionService.getUpdatedScheme(unitToUpdate.scheme, aliasIds);
+        unitToUpdate.scheme = schemeWithVariables(unitToUpdate.scheme, unitDefinitionDto.variables);
       }
     }
     await this.unitsRepository.save(unitToUpdate);
-  }
-
-  private static getUpdatedScheme(scheme: string, variableAliasId: { id: string; alias: string }[]): string {
-    // A scheme stored before 9.3.0 may have no list of codings or be no JSON at all, and stays as it is:
-    // parsing it failed the save after the definition, and the variables were lost (#2057)
-    if (!isCodingScheme(scheme)) return scheme;
-    const schemeObject = JSON.parse(scheme);
-    schemeObject.variableCodings = schemeObject.variableCodings.reduce((acc, item) => {
-      if (item.sourceType === 'BASE_NO_VALUE') {
-        const found = variableAliasId.find(v => v.id === item.id);
-        if (found) {
-          item.alias = found.alias;
-          acc.push(item);
-        }
-      } else if (item.sourceType === 'BASE') {
-        const found = variableAliasId.find(v => v.id === item.id);
-        if (found) {
-          item.alias = found.alias;
-        }
-        acc.push(item);
-      } else {
-        acc.push(item);
-      }
-      return acc;
-    }, []);
-    return JSON.stringify(schemeObject);
   }
 
   async patchScheme(unitId: number,
                     unitSchemeDto: UnitSchemeDto,
                     userName: string | null,
                     schemeDate: Date | null): Promise<void> {
-    // Only a scheme with its list of variable codings is stored: getUpdatedScheme parses it on every
+    // Only a scheme with its list of variable codings is stored: schemeWithVariables parses it on every
     // later save of the definition, and the coding check in the preview reads the list.
     if (!isCodingScheme(unitSchemeDto.scheme)) {
       throw new BadRequestException('The coding scheme has no list of variable codings');

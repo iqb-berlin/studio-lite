@@ -37,6 +37,7 @@ const okInput = (): UnitCheckInput => ({
     scheme: scheme([{ id: 'text_1', sourceType: 'BASE', codes: [code] }]),
     schemeType: 'iqb-standard@3.0'
   },
+  unsaved: { variables: false, scheme: false },
   hasComments: false,
   hasRichNotes: true,
   hiddenRoutes: []
@@ -166,12 +167,82 @@ describe('checkUnit', () => {
     });
 
     it('names what the schemer finds wrong with the coding, with how to fix it (#2135)', () => {
-      const schemer = section(checkUnit(nameTwiceInput()), 'schemer');
+      const input = okInput();
+      input.scheme = {
+        scheme: scheme([
+          { id: 'text_1', sourceType: 'BASE', codes: [code] },
+          {
+            id: 'sum', sourceType: 'SUM_SCORE', deriveSources: ['text_1', 'gone'], codes: [code]
+          }
+        ]),
+        schemeType: 'iqb-standard@3.0'
+      };
 
+      const schemer = section(checkUnit(input), 'schemer');
       expect(schemer?.ok).toBe(false);
       expect(schemer?.findings).toEqual([
-        { key: 'unit-check.scheme-problem.NAME_TWICE', params: { variable: 'text_1' } }
+        { key: 'unit-check.scheme-problem.SOURCE_MISSING', params: { variable: 'sum' } }
       ]);
+    });
+
+    // where it is fixed: elements copied with their names are renamed in the editor (#2135)
+    it('names what the schemer finds wrong with an element under the editor, and the coding in order', () => {
+      const sections = checkUnit(nameTwiceInput());
+
+      expect(section(sections, 'editor')).toEqual(expect.objectContaining({
+        ok: false,
+        findings: [{ key: 'unit-check.element-problem.NAME_TWICE', params: { variable: 'text_1' } }]
+      }));
+      expect(section(sections, 'schemer')).toEqual(expect.objectContaining({ ok: true, findings: [] }));
+    });
+
+    // one of two elements of the same name renamed in the editor; the scheme holds the old name
+    const renamedInput = (): UnitCheckInput => {
+      const input = nameTwiceInput();
+      input.definition = {
+        ...input.definition,
+        variables: [
+          { id: 'text_1749756922777_1', alias: 'text_1', type: 'no-value' } as VariableInfo,
+          { id: 'text_1749757116310_1', alias: 'text_2', type: 'no-value' } as VariableInfo
+        ]
+      };
+      return input;
+    };
+    const nameTwice = [{ key: 'unit-check.element-problem.NAME_TWICE', params: { variable: 'text_1' } }];
+
+    // the save renames the coding with the element (#2135)
+    it('finds nothing wrong once one of two elements of the same name is renamed, before the save', () => {
+      const input = renamedInput();
+      input.unsaved = { variables: true, scheme: false };
+
+      expect(section(checkUnit(input), 'editor')).toEqual(expect.objectContaining({ ok: true, findings: [] }));
+    });
+
+    // the save drops the coding of an element without value with it (#2135)
+    it('finds nothing wrong once an element without value is deleted, before the save', () => {
+      const input = nameTwiceInput();
+      input.definition = {
+        ...input.definition,
+        variables: [{ id: 'text_1749756922777_1', alias: 'text_1', type: 'no-value' } as VariableInfo]
+      };
+      input.unsaved = { variables: true, scheme: false };
+      const sections = checkUnit(input);
+
+      expect(section(sections, 'editor')).toEqual(expect.objectContaining({ ok: true, findings: [] }));
+      expect(section(sections, 'schemer')).toEqual(expect.objectContaining({ ok: true, findings: [] }));
+    });
+
+    // the scheme the schemer reported is saved after the variables, as reported, old name and all
+    it('checks the coding as the schemer reported it when that is not saved either', () => {
+      const input = renamedInput();
+      input.unsaved = { variables: true, scheme: true };
+
+      expect(section(checkUnit(input), 'editor')?.findings).toEqual(nameTwice);
+    });
+
+    // as an import stores it: the definition before the scheme, which keeps its names until a save
+    it('checks the coding as it is stored when the variables are saved', () => {
+      expect(section(checkUnit(renamedInput()), 'editor')?.findings).toEqual(nameTwice);
     });
 
     // as the schemer is given them: an editor that never reported variables leaves them to the scheme
@@ -180,8 +251,8 @@ describe('checkUnit', () => {
       input.scheme = { ...input.scheme!, variables: input.definition!.variables };
       input.definition = { ...input.definition, variables: undefined };
 
-      expect(section(checkUnit(input), 'schemer')?.findings).toEqual([
-        { key: 'unit-check.scheme-problem.NAME_TWICE', params: { variable: 'text_1' } }
+      expect(section(checkUnit(input), 'editor')?.findings).toEqual([
+        { key: 'unit-check.element-problem.NAME_TWICE', params: { variable: 'text_1' } }
       ]);
     });
 
@@ -270,8 +341,19 @@ describe('checkUnit', () => {
     it('leaves what the schemer finds wrong to the coding when the coding is hidden', () => {
       const input = nameTwiceInput();
       input.hiddenRoutes = ['schemer'];
+      const sections = checkUnit(input);
 
-      expect(section(checkUnit(input), 'properties')).toEqual(expect.objectContaining({ ok: true, findings: [] }));
+      expect(section(sections, 'properties')).toEqual(expect.objectContaining({ ok: true, findings: [] }));
+      expect(section(sections, 'editor')).toEqual(expect.objectContaining({ ok: true, findings: [] }));
+    });
+
+    it('names what the schemer finds wrong with an element under the coding when the editor is hidden', () => {
+      const input = nameTwiceInput();
+      input.hiddenRoutes = ['editor'];
+
+      expect(section(checkUnit(input), 'schemer')?.findings).toEqual([
+        { key: 'unit-check.scheme-problem.NAME_TWICE', params: { variable: 'text_1' } }
+      ]);
     });
 
     it('names a scheme that could not be loaded, not the variables, when the coding is hidden', () => {

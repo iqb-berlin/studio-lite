@@ -83,6 +83,8 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
   private readonly checked = computed((): UnitCheckSection[] | undefined => {
     const sources = this.sources();
     if (!sources) return undefined;
+    const definitionStore = this.unitStores.definitionStore();
+    const schemeStore = this.unitStores.schemeStore();
     return checkUnit({
       modules: this.modules(),
       installed: {
@@ -90,8 +92,12 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
         player: this.moduleService.players,
         schemer: this.moduleService.schemers
       },
-      definition: this.unitStores.definitionStore()?.data(),
-      scheme: this.unitStores.schemeStore()?.data(),
+      definition: definitionStore?.data(),
+      scheme: schemeStore?.data(),
+      unsaved: {
+        variables: definitionStore?.variablesChanged() ?? false,
+        scheme: schemeStore?.changed() ?? false
+      },
       ...sources
     });
   });

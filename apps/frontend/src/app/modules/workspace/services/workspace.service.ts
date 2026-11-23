@@ -16,6 +16,7 @@ import {
 import { HttpParams } from '@angular/common/http';
 import { WorkspaceBackendService } from './workspace-backend.service';
 import { UnitMetadataStore } from '../classes/unit-metadata-store';
+import { UnitSchemeStore } from '../classes/unit-scheme-store';
 import { AppService } from '../../../services/app.service';
 import { RichNoteTagsService } from './rich-note-tags.service';
 import { UnitStoresService } from './unit-stores.service';
@@ -251,9 +252,10 @@ export class WorkspaceService {
     const unitId = this.selectedUnit$.getValue();
     const unitMetadataStore = this.unitStores.metadataStore();
     const unitDefinitionStore = this.unitStores.definitionStore();
-    const unitSchemeStore = this.unitStores.schemeStore();
+    let unitSchemeStore = this.unitStores.schemeStore();
     if (unitMetadataStore && (unitDefinitionStore?.isChanged() || unitSchemeStore?.isChanged())) {
-      await this.reconcileItemVariables(unitMetadataStore, unitId);
+      // loads the scheme where no tab has yet; the save of the variables renames its codings, too (#2135)
+      unitSchemeStore = await this.reconcileItemVariables(unitMetadataStore, unitId);
     }
     if (unitMetadataStore && unitMetadataStore.isChanged()) {
       const changedData = unitMetadataStore.getChangedData();
@@ -288,6 +290,8 @@ export class WorkspaceService {
       );
       if (saveOk) {
         unitDefinitionStore.applyChanges(sentDefinition);
+        // the server renamed and dropped codings with the variables; the scheme here has to follow (#2135)
+        if (sentDefinition.variables) unitSchemeStore?.applyVariables(sentDefinition.variables);
         this.lastChangedDefinition = new Date();
         this.lastChangedDefinitionUser = this.getDisplayUserName();
       }
@@ -331,18 +335,24 @@ export class WorkspaceService {
    * and the stored metadata kept an alias renamed or a variable removed elsewhere (#1361). It is done
    * only with the whole list -- the scheme loaded, the list not empty, the stores still this unit's --
    * since an incomplete list would remove assignments to variables that do exist.
+   *
+   * Answers the scheme store it loaded for this, if there is one.
    */
-  private async reconcileItemVariables(unitMetadataStore: UnitMetadataStore, unitId: number): Promise<void> {
+  private async reconcileItemVariables(
+    unitMetadataStore: UnitMetadataStore,
+    unitId: number
+  ): Promise<UnitSchemeStore | undefined> {
     const unitSchemeStore = await lastValueFrom(
       this.unitStores.loadSchemeStore(this.selectedWorkspaceId, unitId),
       { defaultValue: undefined }
     );
     const variables = this.unitStores.variables();
     const metadata = unitMetadataStore.getData().metadata;
-    if (!unitSchemeStore || !variables.length || !metadata) return;
-    if (this.unitStores.metadataStore() !== unitMetadataStore) return;
+    if (!unitSchemeStore || !variables.length || !metadata) return unitSchemeStore;
+    if (this.unitStores.metadataStore() !== unitMetadataStore) return unitSchemeStore;
     const reconciled = reconcileItemVariables(metadata, variables);
     if (reconciled) unitMetadataStore.setMetadata(reconciled);
+    return unitSchemeStore;
   }
 
   /**
