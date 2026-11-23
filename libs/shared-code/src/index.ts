@@ -45,6 +45,22 @@ export {
   toUnitDependencies,
   sameDependencyLists
 } from './lib/unit-dependencies';
+export {
+  ResourcePackageChoice,
+  InstalledResourcePackage,
+  ResourcePackageGroup,
+  ResourcePackageSource,
+  ResolvedResourcePackage,
+  GroupResolution,
+  ResourcePackageUse,
+  resourcePackageNameOf,
+  suggestPackageName,
+  resourcePackagesFor,
+  resolveResourcePackage,
+  resolveResourcePackageForGroups,
+  resourcePackageInUse,
+  withChosenResourcePackage
+} from './lib/resource-package-versions';
 export { UiLanguage, UI_LANGUAGES, DEFAULT_UI_LANGUAGE } from './lib/ui-languages';
 export {
   LocalizedText, LOCALIZED_CONFIG_TEXTS, LOCALIZED_EMAIL_TEMPLATE_TEXTS, toLocalizedText, textIn

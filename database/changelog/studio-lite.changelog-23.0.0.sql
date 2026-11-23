@@ -39,3 +39,13 @@ ALTER TABLE "public"."unit_definition"
   ADD COLUMN "dependencies_to_play" JSONB NOT NULL DEFAULT '[]'::jsonb,
   ADD COLUMN "dependencies_to_edit" JSONB NOT NULL DEFAULT '[]'::jsonb;
 -- rollback ALTER TABLE "public"."unit_definition" DROP COLUMN "dependencies_to_play", DROP COLUMN "dependencies_to_edit";
+
+-- changeset jojohoch:4
+-- Several versions of a resource package side by side (#1358): every package now carries the name it
+-- stands in for, the one units give (`GeoGebra`), beside the name it is installed under
+-- (`GeoGebra-5.0.791`). Until now a package stood in for its own name only, so every package keeps
+-- doing so.
+ALTER TABLE "public"."resource_package" ADD COLUMN "package_name" VARCHAR(100);
+UPDATE "public"."resource_package" SET "package_name" = COALESCE("name", '');
+ALTER TABLE "public"."resource_package" ALTER COLUMN "package_name" SET NOT NULL;
+-- rollback ALTER TABLE "public"."resource_package" DROP COLUMN "package_name";

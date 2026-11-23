@@ -27,6 +27,7 @@ export { RequestReportDto } from './lib/dtos/request-report.dto';
 export { UnitSchemeDto } from './lib/dtos/unit/unit-scheme.dto';
 export { AppLogoDto } from './lib/dtos/setting/app-logo.dto';
 export { ResourcePackageDto } from './lib/dtos/resource-package/resource-package.dto';
+export { UpdateResourcePackageDto } from './lib/dtos/resource-package/update-resource-package.dto';
 export { ConfigDto } from './lib/dtos/setting/config.dto';
 export { VeronaModuleFileDto } from './lib/dtos/verona-module/verona-module-file.dto';
 export { UnitDefinitionDto } from './lib/dtos/unit/unit-definition.dto';

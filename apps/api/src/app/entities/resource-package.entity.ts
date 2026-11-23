@@ -10,8 +10,13 @@ class ResourcePackage {
   @PrimaryGeneratedColumn()
   id: number;
 
+  /** The name it is installed under, without the ending -- also the folder it is unpacked in. */
   @Column()
   name: string;
+
+  /** The name it stands in for, the one units give (#1358): `GeoGebra` for `GeoGebra-5.0.791`. */
+  @Column({ name: 'package_name' })
+  packageName: string;
 
   @Column('text', { array: true })
   elements;
