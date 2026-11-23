@@ -49,14 +49,15 @@ describe('findSchemeProblems', () => {
     ]))).toEqual([{ type: 'NAME_TWICE', variable: 'text_1', breaking: true }]);
   });
 
-  it('names a variable without codes, which does not break the coding', () => {
-    const variables: VariableInfoInput[] = [{ id: 'drop_1', alias: '_01a', type: 'string' }];
+  // as the storage area of a drag-and-drop task, which is not meant to be coded (#2135)
+  it('leaves out a variable without codes', () => {
+    const variables: VariableInfoInput[] = [{ id: 'drop_1', alias: '_ablage', type: 'string' }];
 
     expect(findSchemeProblems(variables, scheme([
       {
-        id: 'drop_1', alias: '_01a', sourceType: 'BASE', codes: []
+        id: 'drop_1', alias: '_ablage', sourceType: 'BASE', codes: []
       }
-    ]))).toEqual([{ type: 'VACANT', variable: '_01a', breaking: false }]);
+    ]))).toEqual([]);
   });
 
   it('names what breaks the coding before what does not', () => {
@@ -67,11 +68,14 @@ describe('findSchemeProblems', () => {
         id: 'drop_1', alias: '01', sourceType: 'BASE', ...coded
       },
       {
-        id: 'sum_1', alias: 'sum', sourceType: 'SUM_SCORE', deriveSources: ['drop_1', 'gone'], codes: []
+        id: 'copy_1', alias: 'copy', sourceType: 'COPY_VALUE', deriveSources: ['drop_1', 'drop_1'], codes: []
+      },
+      {
+        id: 'sum_1', alias: 'sum', sourceType: 'SUM_SCORE', deriveSources: ['drop_1', 'gone'], ...coded
       }
     ]))).toEqual([
       { type: 'SOURCE_MISSING', variable: 'sum', breaking: true },
-      { type: 'VACANT', variable: 'sum', breaking: false }
+      { type: 'MORE_THAN_ONE_SOURCE', variable: 'copy', breaking: false }
     ]);
   });
 
@@ -81,23 +85,25 @@ describe('findSchemeProblems', () => {
 
     expect(findSchemeProblems(variables, JSON.stringify({
       variableCodings: [{
-        id: 'drop_1', alias: '_01a', sourceType: 'BASE', codes: []
+        id: 'sum_1', alias: 'sum', sourceType: 'SUM_SCORE', deriveSources: ['drop_1', 'gone'], ...coded
       }]
     }))).toEqual([]);
   });
 
   it('asks a scheme of any version from 3 on, however it is written', () => {
     const variables: VariableInfoInput[] = [{ id: 'drop_1', alias: '_01a', type: 'string' }];
-    const uncoded = (version: string) => JSON.stringify({
+    const faulty = (version: string) => JSON.stringify({
       version,
       variableCodings: [{
-        id: 'drop_1', alias: '_01a', sourceType: 'BASE', codes: []
+        id: 'drop_1', alias: '_01a', sourceType: 'BASE', ...coded
+      }, {
+        id: 'sum_1', alias: 'sum', sourceType: 'SUM_SCORE', deriveSources: ['drop_1', 'gone'], ...coded
       }]
     });
 
-    expect(['3', '3.5', '4.0'].map(version => findSchemeProblems(variables, uncoded(version)).length))
+    expect(['3', '3.5', '4.0'].map(version => findSchemeProblems(variables, faulty(version)).length))
       .toEqual([1, 1, 1]);
-    expect(findSchemeProblems(variables, uncoded('2.1'))).toEqual([]);
+    expect(findSchemeProblems(variables, faulty('2.1'))).toEqual([]);
   });
 
   it('names a scheme it cannot read rather than finding nothing wrong with it', () => {

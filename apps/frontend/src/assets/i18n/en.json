@@ -671,7 +671,6 @@
       "NAME_TWICE": "Two variables are named \"{{variable}}\". Rename one of them: an element in the editor by its ID, a derived variable in coding.",
       "INVALID_SOURCE": "\"{{variable}}\" has an invalid source: its ID appears twice, its name equals the ID of another variable, or it is set up as a variable without a value although it has one. Check the variable in coding and give it a unique name if needed.",
       "SOURCE_MISSING": "A source of \"{{variable}}\" is missing: the base variable is no longer in the unit, or a source of the derivation does not exist. Select its sources again in coding, or delete the variable.",
-      "VACANT": "\"{{variable}}\" has no codes, and its value is not copied. Create codes in coding or, if it is not coded, deactivate the variable there.",
       "MORE_THAN_ONE_SOURCE": "\"{{variable}}\" copies a value but has more than one source. Keep only one source in coding.",
       "ONLY_ONE_SOURCE": "\"{{variable}}\" is derived from only one source. Add more sources in coding, or copy the value instead.",
       "VALUE_COPY_NOT_FROM_BASE": "\"{{variable}}\" copies the value of a derived variable. Select a base variable as its source in coding.",

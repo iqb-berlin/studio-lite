@@ -11,7 +11,6 @@ const PROBLEM_KEYS: Record<SchemeProblemType, string> = {
   UNREADABLE: 'unit-check.scheme-unreadable',
   INVALID_SOURCE: 'unit-check.scheme-problem.INVALID_SOURCE',
   SOURCE_MISSING: 'unit-check.scheme-problem.SOURCE_MISSING',
-  VACANT: 'unit-check.scheme-problem.VACANT',
   MORE_THAN_ONE_SOURCE: 'unit-check.scheme-problem.MORE_THAN_ONE_SOURCE',
   ONLY_ONE_SOURCE: 'unit-check.scheme-problem.ONLY_ONE_SOURCE',
   VALUE_COPY_NOT_FROM_BASE: 'unit-check.scheme-problem.VALUE_COPY_NOT_FROM_BASE',

@@ -673,7 +673,6 @@
       "NAME_TWICE": "Zwei Variablen heißen „{{variable}}“. Eine von ihnen umbenennen: ein Element im Editor über seine ID, eine abgeleitete Variable in der Kodierung.",
       "INVALID_SOURCE": "„{{variable}}“ hat eine ungültige Quelle: Ihre ID kommt doppelt vor, ihr Name gleicht der ID einer anderen Variable, oder sie ist als Variable ohne Wert eingestellt, obwohl sie einen Wert hat. In der Kodierung die Variable prüfen und ihr wenn nötig einen eindeutigen Namen geben.",
       "SOURCE_MISSING": "Für „{{variable}}“ fehlt eine Quelle: Die Basisvariable steht nicht mehr in der Aufgabe, oder eine Quelle der Ableitung gibt es nicht. In der Kodierung die Quellen neu wählen oder die Variable löschen.",
-      "VACANT": "„{{variable}}“ hat keine Codes, und ihr Wert wird nicht kopiert. In der Kodierung Codes anlegen oder, wenn sie nicht kodiert wird, „Variable deaktivieren“ wählen.",
       "MORE_THAN_ONE_SOURCE": "„{{variable}}“ kopiert einen Wert, hat aber mehr als eine Quelle. In der Kodierung nur eine Quelle stehen lassen.",
       "ONLY_ONE_SOURCE": "„{{variable}}“ wird aus nur einer Quelle abgeleitet. In der Kodierung weitere Quellen hinzufügen oder den Wert stattdessen kopieren.",
       "VALUE_COPY_NOT_FROM_BASE": "„{{variable}}“ kopiert den Wert einer abgeleiteten Variable. In der Kodierung eine Basisvariable als Quelle wählen.",

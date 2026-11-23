@@ -6,9 +6,12 @@ import type {
 /**
  * A problem of a coding scheme as the schemer sees it, or one of two the studio tells apart:
  * NAME_TWICE, the most common cause of an invalid source, and UNREADABLE, a scheme the validation
- * cannot read at all.
+ * cannot read at all. VACANT, a variable without codes, is left out: such a variable is mostly not
+ * meant to be coded -- the storage area of a drag-and-drop task, say -- and is not worth a warning.
  */
-export type SchemeProblemType = CodingSchemeProblemType | 'NAME_TWICE' | 'UNREADABLE';
+export type SchemeProblemType = Exclude<CodingSchemeProblemType, 'VACANT'> | 'NAME_TWICE' | 'UNREADABLE';
+
+type NamedProblem = CodingSchemeProblem & { type: Exclude<CodingSchemeProblemType, 'VACANT'> };
 
 export interface SchemeProblem {
   type: SchemeProblemType;
@@ -73,6 +76,7 @@ export function findSchemeProblems(
   });
   const seen = new Set<string>();
   return problems
+    .filter((problem): problem is NamedProblem => problem.type !== 'VACANT')
     .filter(problem => {
       const key = `${problem.type} ${problem.variableId}`;
       if (seen.has(key)) return false;

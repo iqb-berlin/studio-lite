@@ -129,8 +129,9 @@ describe('unit export contents', () => {
           variableCodings: [
             { id: 'text_a', alias: 'text_1', sourceType: 'BASE_NO_VALUE' },
             { id: 'text_b', alias: 'text_1', sourceType: 'BASE_NO_VALUE' },
+            { id: 'drop_1', alias: '_01a', sourceType: 'BASE' },
             {
-              id: 'drop_1', alias: '_01a', sourceType: 'BASE', codes: []
+              id: 'copy_1', alias: 'copy', sourceType: 'COPY_VALUE', deriveSources: ['drop_1', 'text_a']
             }
           ]
         }),
@@ -145,7 +146,7 @@ describe('unit export contents', () => {
 
       const [contents] = await findUnitExportContents(5, unitService, unitCommentService, unitRichNoteService);
 
-      // _01a without codes leaves the coding incomplete, but it runs
+      // a copy from more than one source leaves the coding incomplete, but it runs
       expect(contents.schemeProblems).toEqual([{ type: 'NAME_TWICE', variable: 'text_1' }]);
     });
   });
