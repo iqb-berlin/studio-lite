@@ -24,7 +24,7 @@
           </div>
           @if (section.findings.length) {
             <ul class="findings">
-              @for (finding of section.findings; track finding.key) {
+              @for (finding of section.findings; track $index) {
                 <li data-cy="unit-check-finding">{{ finding.key | translate: finding.params }}</li>
               }
             </ul>

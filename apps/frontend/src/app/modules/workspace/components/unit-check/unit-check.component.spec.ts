@@ -12,6 +12,17 @@ import { BackendService as CommentsBackendService } from '../../../comments/serv
 
 const scheme = (variableCodings: unknown[]): string => JSON.stringify({ version: '3.0', variableCodings });
 
+// a code, so that the schemer finds nothing missing in a coding
+const code = {
+  id: 1,
+  type: 'FULL_CREDIT',
+  label: '',
+  score: 1,
+  ruleSetOperatorAnd: false,
+  manualInstruction: '',
+  ruleSets: [{ ruleOperatorAnd: false, rules: [{ method: 'IS_EMPTY' }] }]
+};
+
 describe('UnitCheckComponent', () => {
   let fixture: ComponentFixture<UnitCheckComponent>;
   let unitStores: UnitStoresService;
@@ -141,7 +152,9 @@ describe('UnitCheckComponent', () => {
     expect(sectionOf('schemer')?.querySelector('[data-cy="unit-check-variable-id-conflicts"]')).toBeTruthy();
 
     unitStores.schemeStore()?.setData(
-      scheme([{ id: 'd_1', alias: 'sum', sourceType: 'MANUAL' }]),
+      scheme([{
+        id: 'd_1', alias: 'sum', sourceType: 'COPY_VALUE', deriveSources: ['05'], codes: [code]
+      }]),
       'iqb-standard@3.0'
     );
     fixture.detectChanges();

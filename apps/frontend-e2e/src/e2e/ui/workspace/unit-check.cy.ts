@@ -13,12 +13,25 @@ describe('Workspace Unit Check', () => {
   let base: TestBase;
   let unitId = '';
 
+  // a code, so that the schemer finds nothing missing in a coding
+  const code = {
+    id: 1,
+    type: 'FULL_CREDIT',
+    label: '',
+    score: 1,
+    ruleSetOperatorAnd: false,
+    manualInstruction: '',
+    ruleSets: [{ ruleOperatorAnd: false, rules: [{ method: 'IS_EMPTY' }] }]
+  };
+
   const schemeWithDerivedAlias = (alias: string): string => JSON.stringify({
     version: '3.0',
     variableCodings: [
-      { id: '05', alias: '_00a', sourceType: 'BASE_NO_VALUE' },
       {
-        id: 'd_1790938214783', alias, sourceType: 'MANUAL', deriveSources: []
+        id: '05', alias: '_00a', sourceType: 'BASE', codes: [code]
+      },
+      {
+        id: 'd_1790938214783', alias, sourceType: 'COPY_VALUE', deriveSources: ['05'], codes: [code]
       }
     ]
   });
@@ -83,5 +96,34 @@ describe('Workspace Unit Check', () => {
     cy.get('[data-cy="unit-check-properties"]')
       .contains('[data-cy="unit-check-finding"]', invalidKeyUnit.shortname)
       .should('be.visible');
+  });
+
+  // elements copied with their names: the schemer rejects the coding, the export does not (#2135)
+  it('names two elements of the same name under the coding, with how to fix it', () => {
+    const nameTwiceUnit = { shortname: 'CHECK_NAME', name: 'Doppelter Name', group: '' };
+    const element = (id: string) => ({
+      id, alias: 'text_1', type: 'no-value', format: '', multiple: false, nullable: false, values: []
+    });
+    cy.then(() => cy.createUnitAPI(base.wsId, nameTwiceUnit, base.token).then(response => {
+      expect(response.status, nameTwiceUnit.shortname).to.equal(201);
+      const nameTwiceId = String(response.body);
+      cy.updateUnitVariablesAPI(nameTwiceId, base.wsId, [element('text_a'), element('text_b')], base.token)
+        .its('status').should('equal', 200);
+      cy.updateUnitSchemeAPI(nameTwiceId, base.wsId, base.token, JSON.stringify({
+        version: '3.0',
+        variableCodings: [
+          { id: 'text_a', alias: 'text_1', sourceType: 'BASE_NO_VALUE' },
+          { id: 'text_b', alias: 'text_1', sourceType: 'BASE_NO_VALUE' }
+        ]
+      })).its('status').should('equal', 200);
+    }));
+    cy.visitWs(primaryWorkspace);
+    selectUnit(nameTwiceUnit.shortname);
+    clickIndexTabWorkspace('properties');
+
+    cy.get('[data-cy="unit-check-schemer"]').within(() => {
+      cy.get('[data-cy="unit-check-ok"]').should('not.exist');
+      cy.contains('[data-cy="unit-check-finding"]', 'text_1').should('be.visible');
+    });
   });
 });

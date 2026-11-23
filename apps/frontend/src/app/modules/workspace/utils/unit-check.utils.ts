@@ -3,6 +3,7 @@ import {
   findVariableIdConflicts, hasCodingScheme, VariableIdConflict, VeronaModuleFactory
 } from '@studio-lite/shared-code';
 import { playerRejectsDefinitionType } from './definition-type-match.utils';
+import { schemeProblemFindings } from './scheme-problems.utils';
 
 export type ModuleType = 'editor' | 'player' | 'schemer';
 
@@ -112,13 +113,21 @@ function checkScheme(input: UnitCheckInput): Checked {
   if (!hasCodingScheme(input.scheme.scheme)) {
     return { findings: [{ key: 'unit-check.no-scheme' }], variableIdConflicts: [] };
   }
-  return checkIdConflicts(input);
+  const idConflicts = checkIdConflicts(input);
+  // what the schemer finds wrong (#2135), against the variables the schemer is given: the definition's,
+  // or the scheme's where it has none. Without the definition, every base coding would lack its source.
+  const problems = input.definition ?
+    schemeProblemFindings(input.definition.variables || input.scheme.variables, input.scheme.scheme) :
+    [];
+  return { ...idConflicts, findings: [...problems, ...idConflicts.findings] };
 }
 
 /**
  * The state of the unit, tab by tab (#2135): whether its modules are assigned and installed, whether
- * it has content in a format its player reads, whether it has a coding scheme and one whose variables
- * the export can write without writing an id twice, and whether it has comments and rich notes.
+ * it has content in a format its player reads, whether it has a coding scheme, what the schemer finds
+ * wrong with it, and whether the export can write its variables without writing an id twice, and
+ * whether it has comments and rich notes. What the schemer finds is asked only where the coding is
+ * shown: it is fixed there, and unlike a doubled id it does not stop the export.
  *
  * A tab the workspace hides gets no section, and its module is not asked for. What the preview and
  * the export need all the same is asked under the properties instead: whether there is content and

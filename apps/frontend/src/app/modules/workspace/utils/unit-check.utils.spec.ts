@@ -5,6 +5,17 @@ import {
 
 const scheme = (variableCodings: unknown[]): string => JSON.stringify({ version: '3.0', variableCodings });
 
+// a code, so that the schemer finds nothing missing in a coding
+const code = {
+  id: 1,
+  type: 'FULL_CREDIT',
+  label: '',
+  score: 1,
+  ruleSetOperatorAnd: false,
+  manualInstruction: '',
+  ruleSets: [{ ruleOperatorAnd: false, rules: [{ method: 'IS_EMPTY' }] }]
+};
+
 const okInput = (): UnitCheckInput => ({
   modules: { editor: 'iqb-editor-aspect@2.9', player: 'iqb-player-aspect@2.9', schemer: 'iqb-schemer@2.5' },
   installed: {
@@ -22,11 +33,34 @@ const okInput = (): UnitCheckInput => ({
     definitionType: 'aspect-unit-definition@4.10.0',
     variables: [{ id: 'text_1', alias: 'text_1' } as VariableInfo]
   },
-  scheme: { scheme: scheme([{ id: 'text_1', sourceType: 'BASE' }]), schemeType: 'iqb-standard@3.0' },
+  scheme: {
+    scheme: scheme([{ id: 'text_1', sourceType: 'BASE', codes: [code] }]),
+    schemeType: 'iqb-standard@3.0'
+  },
   hasComments: false,
   hasRichNotes: true,
   hiddenRoutes: []
 });
+
+// two elements of the same name, as when they were copied from another page with it (#2135)
+const nameTwiceInput = (): UnitCheckInput => {
+  const input = okInput();
+  input.definition = {
+    ...input.definition,
+    variables: [
+      { id: 'text_1749756922777_1', alias: 'text_1', type: 'no-value' } as VariableInfo,
+      { id: 'text_1749757116310_1', alias: 'text_1', type: 'no-value' } as VariableInfo
+    ]
+  };
+  input.scheme = {
+    scheme: scheme([
+      { id: 'text_1749756922777_1', alias: 'text_1', sourceType: 'BASE_NO_VALUE' },
+      { id: 'text_1749757116310_1', alias: 'text_1', sourceType: 'BASE_NO_VALUE' }
+    ]),
+    schemeType: 'iqb-standard@3.0'
+  };
+  return input;
+};
 
 const section = (sections: UnitCheckSection[], tab: UnitCheckSection['tab']): UnitCheckSection | undefined => sections
   .find(entry => entry.tab === tab);
@@ -131,6 +165,26 @@ describe('checkUnit', () => {
       }]);
     });
 
+    it('names what the schemer finds wrong with the coding, with how to fix it (#2135)', () => {
+      const schemer = section(checkUnit(nameTwiceInput()), 'schemer');
+
+      expect(schemer?.ok).toBe(false);
+      expect(schemer?.findings).toEqual([
+        { key: 'unit-check.scheme-problem.NAME_TWICE', params: { variable: 'text_1' } }
+      ]);
+    });
+
+    // as the schemer is given them: an editor that never reported variables leaves them to the scheme
+    it('checks the coding against the scheme\'s variables where the definition has none', () => {
+      const input = nameTwiceInput();
+      input.scheme = { ...input.scheme!, variables: input.definition!.variables };
+      input.definition = { ...input.definition, variables: undefined };
+
+      expect(section(checkUnit(input), 'schemer')?.findings).toEqual([
+        { key: 'unit-check.scheme-problem.NAME_TWICE', params: { variable: 'text_1' } }
+      ]);
+    });
+
     // a conflict with an element needs its variables, and the check must not pass without them
     it('does not report the coding in order when the variables could not be loaded', () => {
       const input = okInput();
@@ -210,6 +264,14 @@ describe('checkUnit', () => {
       const properties = section(checkUnit(input), 'properties');
       expect(properties?.ok).toBe(false);
       expect(properties?.variableIdConflicts.map(conflict => conflict.id)).toEqual(['05']);
+    });
+
+    // it is fixed in the coding, and unlike a doubled id it does not stop the export
+    it('leaves what the schemer finds wrong to the coding when the coding is hidden', () => {
+      const input = nameTwiceInput();
+      input.hiddenRoutes = ['schemer'];
+
+      expect(section(checkUnit(input), 'properties')).toEqual(expect.objectContaining({ ok: true, findings: [] }));
     });
 
     it('names a scheme that could not be loaded, not the variables, when the coding is hidden', () => {
