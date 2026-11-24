@@ -11,6 +11,8 @@ import { UnitCheckFinding } from '../../utils/unit-check.utils';
 
 /** A chosen unit with what is wrong with it before the export. */
 export interface UnitExportProblems {
+  /** Tells the units apart: two can have the same key, one imported beside the other (#2135). */
+  id: number;
   key: string;
   name?: string;
   conflicts: VariableIdConflict[];

@@ -83,15 +83,19 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
   private readonly checked = computed((): UnitCheckSection[] | undefined => {
     const sources = this.sources();
     if (!sources) return undefined;
+    // the maps of installed modules are no signals: checked again when a reload replaces them
+    this.moduleService.listVersion();
     const definitionStore = this.unitStores.definitionStore();
     const schemeStore = this.unitStores.schemeStore();
     return checkUnit({
       modules: this.modules(),
-      installed: {
-        editor: this.moduleService.editors,
-        player: this.moduleService.players,
-        schemer: this.moduleService.schemers
-      },
+      installed: this.moduleService.listLoaded() ?
+        {
+          editor: this.moduleService.editors,
+          player: this.moduleService.players,
+          schemer: this.moduleService.schemers
+        } :
+        undefined,
       definition: definitionStore?.data(),
       scheme: schemeStore?.data(),
       unsaved: {
@@ -131,7 +135,8 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
   private load(unitId: number): Observable<UnitCheckSources> {
     const workspaceId = this.workspaceService.selectedWorkspaceId;
     const hiddenRoutes = this.workspaceService.workspaceSettings?.hiddenRoutes || [];
-    const modulesLoaded = Object.keys(this.moduleService.editors).length > 0 ?
+    // loaded once; asked again on the next unit only when the last load failed
+    const modulesLoaded = this.moduleService.listLoaded() ?
       of(undefined) :
       from(this.moduleService.loadList());
     // comments and notes the workspace hides are not checked, and so not asked for. Definition and

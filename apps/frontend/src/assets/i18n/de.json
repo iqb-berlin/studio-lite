@@ -651,6 +651,7 @@
     "hint": "Geprüft wird die Aufgabe, wie sie gerade bearbeitet wird, auch was noch nicht gespeichert ist.",
     "ok": "in Ordnung",
     "not-loaded": "Konnte nicht geladen werden.",
+    "modules-not-loaded": "Die Liste der installierten Module konnte nicht geladen werden; ob die zugewiesenen installiert sind, ist nicht geprüft.",
     "no-editor": "Kein Editor zugewiesen.",
     "no-player": "Kein Player zugewiesen.",
     "no-schemer": "Kein Editor für das Antwortschema zugewiesen.",
@@ -663,6 +664,7 @@
     "key-taken": "Den Kurznamen „{{key}}“ hat schon eine andere Aufgabe dieses Arbeitsbereichs.",
     "no-definition": "Die Aufgabe hat noch keinen Inhalt.",
     "definition-not-loaded": "Der Inhalt der Aufgabe konnte nicht geladen werden.",
+    "definition-type-not-checked": "Ob der Player das Format dieser Aufgabe liest, ist nicht geprüft: Die Liste der installierten Module konnte nicht geladen werden.",
     "no-scheme": "Die Aufgabe hat noch kein Kodierschema.",
     "variables-not-loaded": "Die Variablen konnten nicht geladen werden; doppelte IDs sind nicht geprüft.",
     "scheme-not-loaded": "Das Kodierschema konnte nicht geladen werden; doppelte IDs sind nicht geprüft.",
@@ -679,7 +681,7 @@
       "RULE_PARAMETER_COUNT_MISMATCH": "In der Kodierung von „{{variable}}“ hat eine Regel zu viele oder zu wenige Parameter. Die Parameter der Regel ergänzen oder entfernen.",
       "RULE_REGEX_INVALID": "In der Kodierung von „{{variable}}“ ist der reguläre Ausdruck einer Regel ungültig. Den Ausdruck in der Regel korrigieren.",
       "RULE_PARAMETER_INVALID": "In der Kodierung von „{{variable}}“ passt eine Regel nicht zum Wert der Variable oder hat einen ungültigen Parameter. Die Regel korrigieren.",
-      "RULE_NUMERIC_RANGE_INVALID": "In der Kodierung von „{{variable}}“ liegt in einer Regel die untere Grenze über der oberen. Die Grenzen in der Regel korrigieren.",
+      "RULE_NUMERIC_RANGE_INVALID": "In der Kodierung von „{{variable}}“ hat eine Bereichsregel ungültige Grenzen: Eine Grenze fehlt oder ist keine Zahl, oder die untere liegt über der oberen. Die Grenzen in der Regel korrigieren.",
       "RULESET_VALUE_ARRAY_POS_INVALID": "In der Kodierung von „{{variable}}“ nennt ein Regelsatz eine Position im Wert, die es nicht gibt. Die Position im Regelsatz korrigieren."
     },
     "element-problem": {

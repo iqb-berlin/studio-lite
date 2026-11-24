@@ -649,6 +649,7 @@
     "hint": "The unit is checked as it is being edited, including what has not been saved yet.",
     "ok": "OK",
     "not-loaded": "Could not be loaded.",
+    "modules-not-loaded": "Could not load the list of installed modules; whether the assigned ones are installed has not been checked.",
     "no-editor": "No editor assigned.",
     "no-player": "No player assigned.",
     "no-schemer": "No schemer assigned.",
@@ -661,6 +662,7 @@
     "key-taken": "Another unit in this workspace already has the key \"{{key}}\".",
     "no-definition": "The unit has no content yet.",
     "definition-not-loaded": "Could not load the content of the unit.",
+    "definition-type-not-checked": "Whether the player reads the format of this unit has not been checked: the list of installed modules could not be loaded.",
     "no-scheme": "The unit has no coding scheme yet.",
     "variables-not-loaded": "Could not load the variables; duplicate IDs have not been checked.",
     "scheme-not-loaded": "Could not load the coding scheme; duplicate IDs have not been checked.",
@@ -677,7 +679,7 @@
       "RULE_PARAMETER_COUNT_MISMATCH": "In the coding of \"{{variable}}\", a rule has too many or too few parameters. Add or remove parameters of the rule.",
       "RULE_REGEX_INVALID": "In the coding of \"{{variable}}\", the regular expression of a rule is invalid. Correct the expression in the rule.",
       "RULE_PARAMETER_INVALID": "In the coding of \"{{variable}}\", a rule does not fit the value of the variable or has an invalid parameter. Correct the rule.",
-      "RULE_NUMERIC_RANGE_INVALID": "In the coding of \"{{variable}}\", a rule has a lower limit above its upper limit. Correct the limits in the rule.",
+      "RULE_NUMERIC_RANGE_INVALID": "In the coding of \"{{variable}}\", a range rule has invalid limits: a limit is missing or not a number, or the lower one is above the upper one. Correct the limits in the rule.",
       "RULESET_VALUE_ARRAY_POS_INVALID": "In the coding of \"{{variable}}\", a rule set names a position in the value that does not exist. Correct the position in the rule set."
     },
     "element-problem": {

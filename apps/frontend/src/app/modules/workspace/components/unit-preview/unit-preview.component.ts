@@ -189,7 +189,7 @@ export class UnitPreviewComponent extends PreviewDirective {
    */
   private getDefinitionTypeWarning(definitionType: string | undefined): string {
     const player = this.moduleService.players[this.playerName];
-    if (!playerRejectsDefinitionType(definitionType, player)) return '';
+    if (!player || !playerRejectsDefinitionType(definitionType, player)) return '';
     const alternatives = Object.values(this.moduleService.players)
       .filter(module => matchDefinitionType(definitionType, module.metadata?.model) === 'compatible')
       .map(module => module.nameAndVersion);

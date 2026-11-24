@@ -1,4 +1,6 @@
-import { ComponentFixture, fakeAsync, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, fakeAsync, TestBed, tick
+} from '@angular/core/testing';
 import { signal, WritableSignal } from '@angular/core';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { BehaviorSubject, of } from 'rxjs';
@@ -32,6 +34,10 @@ describe('UnitCheckComponent', () => {
   let getUnitScheme: jest.Mock;
   let hasComments: jest.Mock;
   let units: WritableSignal<{ [group: string]: UnitInListDto[] }>;
+  let listLoaded: WritableSignal<boolean>;
+  let listVersion: WritableSignal<number>;
+  let editors: Record<string, { nameAndVersion: string }>;
+  let loadList: jest.Mock;
 
   const element = (): HTMLElement => fixture.nativeElement as HTMLElement;
   const tabs = () => Array.from(
@@ -71,10 +77,12 @@ describe('UnitCheckComponent', () => {
         {
           provide: ModuleService,
           useValue: {
-            editors: { 'iqb-editor-aspect@2.9': { nameAndVersion: 'Editor' } },
+            editors,
             players: { 'iqb-player-aspect@2.9': { nameAndVersion: 'Player' } },
             schemers: { 'iqb-schemer@2.5': { nameAndVersion: 'Schemer' } },
-            loadList: jest.fn()
+            listLoaded: listLoaded.asReadonly(),
+            listVersion: listVersion.asReadonly(),
+            loadList
           }
         }
       ]
@@ -93,6 +101,10 @@ describe('UnitCheckComponent', () => {
 
   beforeEach(() => {
     hiddenRoutes = [];
+    listLoaded = signal(true);
+    listVersion = signal(1);
+    editors = { 'iqb-editor-aspect@2.9': { nameAndVersion: 'Editor' } };
+    loadList = jest.fn().mockResolvedValue(undefined);
     units = signal({ '': [{ id: 4, key: 'UNIT_04' }] });
     hasComments = jest.fn(() => of(true));
     getUnitRichNotes = jest.fn(() => of({ tags: [], notes: [] }));
@@ -200,5 +212,42 @@ describe('UnitCheckComponent', () => {
       sectionOf('properties')?.querySelectorAll('[data-cy="unit-check-finding"]') ?? [],
       finding => finding.textContent
     )).toEqual(['unit-check.key-taken']);
+  }));
+
+  const propertyFindings = () => Array.from(
+    sectionOf('properties')?.querySelectorAll('[data-cy="unit-check-finding"]') ?? [],
+    finding => finding.textContent
+  );
+
+  // the request for the lists failed: that is no proof that the modules are missing (#2135)
+  it('says the modules were not checked when their lists could not be loaded, not that they are missing',
+    fakeAsync(() => {
+      listLoaded.set(false);
+      create();
+      tick();
+      fixture.detectChanges();
+
+      expect(loadList).toHaveBeenCalled();
+      expect(propertyFindings()).toEqual(['unit-check.modules-not-loaded']);
+    }));
+
+  // a reload, from the workspace, can bring a player installed since; the maps themselves are no signals
+  it('checks the modules again when a reload of their lists replaces them', fakeAsync(() => {
+    create();
+    expect(propertyFindings()).toEqual([]);
+
+    TestBed.inject(ModuleService).players = {};
+    listVersion.set(2);
+    fixture.detectChanges();
+
+    expect(propertyFindings()).toEqual(['unit-check.not-installed-player']);
+  }));
+
+  // an installation without modules has empty lists, and they need not be fetched again
+  it('loads lists that were loaded once, empty or not, no second time', fakeAsync(() => {
+    editors = {};
+    create();
+
+    expect(loadList).not.toHaveBeenCalled();
   }));
 });

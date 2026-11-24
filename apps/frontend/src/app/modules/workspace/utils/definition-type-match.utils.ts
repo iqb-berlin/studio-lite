@@ -103,10 +103,11 @@ export function matchDefinitionType(
  * Whether the player says of itself that it does not read the format a unit is written in. The
  * preview warns of it and the unit check names it (#2135); both ask here. A missing player, or a
  * side that says nothing, is no such statement: the player still runs (#1368).
+ * A plain boolean, no type guard: false does not mean that there is no player.
  */
-export function playerRejectsDefinitionType<T extends { metadata?: { model?: string } }>(
+export function playerRejectsDefinitionType(
   definitionType: string | undefined | null,
-  player: T | undefined
-): player is T {
+  player: { metadata?: { model?: string } } | undefined
+): boolean {
   return !!player && matchDefinitionType(definitionType, player.metadata?.model) === 'incompatible';
 }

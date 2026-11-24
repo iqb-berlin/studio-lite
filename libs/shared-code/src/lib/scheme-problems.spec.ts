@@ -154,6 +154,71 @@ describe('findSchemeProblems', () => {
     ])).map(problem => [problem.variable, problem.baseVariable])).toEqual([['01', false]]);
   });
 
+  // the derived variable took the name the element goes by, its id (#2135)
+  it('names an alias that equals the id of a coding without one as a name used twice', () => {
+    const variables: VariableInfoInput[] = [{ id: 'x', type: 'string' }];
+
+    expect(findSchemeProblems(variables, scheme([
+      { id: 'x', sourceType: 'BASE', ...coded },
+      {
+        id: 'd_1', alias: 'x', sourceType: 'MANUAL', ...coded
+      }
+    ])).map(problem => problem.type)).toEqual(['NAME_TWICE', 'SOURCE_MISSING']);
+  });
+
+  // the schemer allows the pair; what it finds wrong under the name lies elsewhere
+  it('does not take a derived variable that has the name of its own source for a name used twice', () => {
+    const variables: VariableInfoInput[] = [{ id: 'x', type: 'string' }, { id: 'x', type: 'string' }];
+
+    expect(findSchemeProblems(variables, scheme([
+      { id: 'x', sourceType: 'BASE', ...coded },
+      {
+        id: 'd_1', alias: 'x', sourceType: 'COPY_VALUE', deriveSources: ['x'], ...coded
+      }
+    ])).map(problem => problem.type)).toEqual(['INVALID_SOURCE']);
+  });
+
+  // the schemer allows the pair only as a pair
+  it('names a name that two derived variables take from their source as a name used twice', () => {
+    const variables: VariableInfoInput[] = [{ id: 'x', type: 'string' }];
+
+    expect(findSchemeProblems(variables, scheme([
+      { id: 'x', sourceType: 'BASE', ...coded },
+      {
+        id: 'd_1', alias: 'x', sourceType: 'COPY_VALUE', deriveSources: ['x'], ...coded
+      },
+      {
+        id: 'd_2', alias: 'x', sourceType: 'COPY_VALUE', deriveSources: ['x'], ...coded
+      }
+    ])).map(problem => problem.type)).toContain('NAME_TWICE');
+  });
+
+  // as from an import: one element, its coding twice -- renaming in the editor would not resolve it
+  it('names a coding that occurs twice as such, in the coding', () => {
+    const variables: VariableInfoInput[] = [{ id: 'x', alias: 'x', type: 'string' }];
+    const twice = {
+      id: 'x', alias: 'x', sourceType: 'BASE', ...coded
+    };
+
+    expect(findSchemeProblems(variables, scheme([twice, twice]))).toEqual([{
+      type: 'INVALID_SOURCE', variable: 'x', breaking: true, baseVariable: false
+    }]);
+  });
+
+  // as elements copied with their id: the id is made unique in the editor
+  it('takes a coding that occurs as often as its element for a base variable', () => {
+    const variables: VariableInfoInput[] = [
+      { id: 'x', alias: 'x', type: 'string' }, { id: 'x', alias: 'x', type: 'string' }
+    ];
+    const twice = {
+      id: 'x', alias: 'x', sourceType: 'BASE', ...coded
+    };
+
+    expect(findSchemeProblems(variables, scheme([twice, twice]))).toEqual([{
+      type: 'INVALID_SOURCE', variable: 'x', breaking: true, baseVariable: true
+    }]);
+  });
+
   // the schemer converts an older scheme when it opens it; held against the current format, it would fail
   it('leaves a scheme of an older format unasked', () => {
     const variables: VariableInfoInput[] = [{ id: 'drop_1', alias: '_01a', type: 'string' }];
@@ -179,6 +244,18 @@ describe('findSchemeProblems', () => {
     expect(['3', '3.5', '4.0'].map(version => findSchemeProblems(variables, faulty(version)).length))
       .toEqual([1, 1, 1]);
     expect(findSchemeProblems(variables, faulty('2.1'))).toEqual([]);
+  });
+
+  // the export check asks every unit of a workspace from its saved list as it is (#2135)
+  it('reads past variables that are not a list, and past entries that are no variable', () => {
+    const codings = scheme([{
+      id: 'drop_1', alias: '01', sourceType: 'BASE', ...coded
+    }]);
+    const notAList = JSON.parse('{}');
+    const withNull = JSON.parse('[null, {"id": "drop_1", "alias": "01", "type": "string"}]');
+
+    expect(findSchemeProblems(withNull, codings)).toEqual([]);
+    expect(findSchemeProblems(notAList, codings).map(problem => problem.type)).toEqual(['SOURCE_MISSING']);
   });
 
   it('names a scheme it cannot read rather than finding nothing wrong with it', () => {

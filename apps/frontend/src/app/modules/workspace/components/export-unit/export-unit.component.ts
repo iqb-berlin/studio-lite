@@ -101,27 +101,31 @@ export class ExportUnitComponent implements OnDestroy {
   // - Both formats write an id twice where a derived alias equals an element's internal id: the
   //   Testcenter (from version 19) rejects such a unit XML, and a reader of the JSON that looks
   //   variables up by id mixes the two up (#2119).
-  // - A coding the schemer rejects makes coding with the exported scheme fail (#2135).
+  // - A coding the schemer rejects makes coding with the exported scheme fail (#2135) -- only when the
+  //   scheme is exported. The ids are written either way: both formats carry the derived variables.
   // Exporting anyway stays possible: the other units are fine.
   download(): void {
     if (this.problemsDialogOpen) return;
+    const schemeExported = this.unitExportSettings.addCodingScheme !== false;
+    const unitsInList = Object.values(this.workspaceService.unitList).flat();
     // the file config passes on only the units with a problem
-    const withProblems = (this.unitsWithExportProblems() ?? [])
-      .filter(contents => this.unitExportSettings.unitIdList.includes(contents.unitId));
-    if (!withProblems.length) {
+    const units: UnitExportProblems[] = (this.unitsWithExportProblems() ?? [])
+      .filter(contents => this.unitExportSettings.unitIdList.includes(contents.unitId))
+      .map(contents => {
+        const unit = unitsInList.find(unitInList => unitInList.id === contents.unitId);
+        return {
+          id: contents.unitId,
+          key: unit?.key ?? String(contents.unitId),
+          name: unit?.name,
+          conflicts: contents.variableIdConflicts,
+          schemeProblems: schemeExported ? contents.schemeProblems.map(schemeProblemFinding) : []
+        };
+      })
+      .filter(unit => unit.conflicts.length || unit.schemeProblems.length);
+    if (!units.length) {
       this.dialogRef.close(this.unitExportSettings);
       return;
     }
-    const unitsInList = Object.values(this.workspaceService.unitList).flat();
-    const units: UnitExportProblems[] = withProblems.map(contents => {
-      const unit = unitsInList.find(unitInList => unitInList.id === contents.unitId);
-      return {
-        key: unit?.key ?? String(contents.unitId),
-        name: unit?.name,
-        conflicts: contents.variableIdConflicts,
-        schemeProblems: contents.schemeProblems.map(schemeProblemFinding)
-      };
-    });
     this.problemsDialogOpen = true;
     this.dialog.open(ExportProblemsComponent, {
       width: '800px',

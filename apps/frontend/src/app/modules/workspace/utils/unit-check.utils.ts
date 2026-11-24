@@ -16,7 +16,8 @@ export interface InstalledModule {
 export interface UnitCheckInput {
   /** The modules the unit names, as entered, saved or not; undefined: not loaded. */
   modules: Partial<Record<ModuleType, string>> | undefined;
-  installed: Record<ModuleType, Record<string, InstalledModule>>;
+  /** undefined: the lists of installed modules could not be loaded. */
+  installed: Record<ModuleType, Record<string, InstalledModule>> | undefined;
   /** undefined: not loaded (yet). */
   definition: UnitDefinitionDto | undefined;
   scheme: UnitSchemeDto | undefined;
@@ -59,16 +60,17 @@ export function isTabShown(hiddenRoutes: string[], tab: string): boolean {
 /** The installed module a unit's module key opens with: the key itself, or a later minor version. */
 function installedModule(
   key: string | undefined,
-  installed: Record<string, InstalledModule>
+  installed: Record<string, InstalledModule> | undefined
 ): InstalledModule | undefined {
-  if (!key) return undefined;
+  if (!key || !installed) return undefined;
   return installed[VeronaModuleFactory.getBestMatch(key, Object.keys(installed))];
 }
 
 function checkProperties(input: UnitCheckInput): UnitCheckFinding[] {
   const modules = input.modules;
   if (!modules) return [{ key: 'unit-check.not-loaded' }];
-  return MODULE_TYPES
+  const installed = input.installed;
+  const findings = MODULE_TYPES
     // the editor and the schemer are opened in their tabs; one the workspace hides is not needed.
     // The player stays: the export names it, whether the preview is shown or not.
     .filter(moduleType => moduleType === 'player' || isTabShown(input.hiddenRoutes, moduleType))
@@ -76,19 +78,26 @@ function checkProperties(input: UnitCheckInput): UnitCheckFinding[] {
       const key = modules[moduleType];
       // unit-check.no-editor, unit-check.no-player, unit-check.no-schemer
       if (!key) return { key: `unit-check.no-${moduleType}` };
-      if (installedModule(key, input.installed[moduleType])) return undefined;
+      // without the lists, whether a module is installed is not known
+      if (!installed || installedModule(key, installed[moduleType])) return undefined;
       // unit-check.not-installed-editor, unit-check.not-installed-player, unit-check.not-installed-schemer
       return { key: `unit-check.not-installed-${moduleType}`, params: { module: key } };
     })
     .filter((finding): finding is UnitCheckFinding => !!finding);
+  return installed ? findings : [{ key: 'unit-check.modules-not-loaded' }, ...findings];
 }
 
 function checkEditor(input: UnitCheckInput): UnitCheckFinding[] {
   if (!input.definition) return [{ key: 'unit-check.definition-not-loaded' }];
   if (!input.definition.definition) return [{ key: 'unit-check.no-definition' }];
-  const player = installedModule(input.modules?.player, input.installed.player);
   const definitionType = input.definition.definitionType;
-  if (playerRejectsDefinitionType(definitionType, player)) {
+  // without the lists, what the player says it reads is not known: no finding would pass for a pass.
+  // A unit that names no format is not asked, lists or not.
+  if (!input.installed && input.modules?.player && definitionType) {
+    return [{ key: 'unit-check.definition-type-not-checked' }];
+  }
+  const player = installedModule(input.modules?.player, input.installed?.player);
+  if (player && playerRejectsDefinitionType(definitionType, player)) {
     return [{
       key: 'workspace.definition-type-incompatible',
       params: { player: player.nameAndVersion, definitionType: definitionType || '' }

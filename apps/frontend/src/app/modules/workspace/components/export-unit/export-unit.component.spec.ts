@@ -361,7 +361,11 @@ describe('ExportUnitComponent', () => {
       expect(openDialog).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
         data: {
           units: [{
-            key: 'GL_NC08', name: 'Markieren', conflicts: conflictIn(3).variableIdConflicts, schemeProblems: []
+            id: 3,
+            key: 'GL_NC08',
+            name: 'Markieren',
+            conflicts: conflictIn(3).variableIdConflicts,
+            schemeProblems: []
           }],
           exportFormat: 'xml'
         }
@@ -422,6 +426,7 @@ describe('ExportUnitComponent', () => {
       expect(openDialog).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
         data: {
           units: [{
+            id: 3,
             key: 'GL_NC08',
             name: 'Markieren',
             conflicts: [],
@@ -430,6 +435,47 @@ describe('ExportUnitComponent', () => {
           exportFormat: 'xml'
         }
       }));
+    });
+
+    // without the scheme in the export, nothing codes with it
+    it('leaves the rejected coding out when the scheme is not exported, but not the ids', () => {
+      answerProblemsDialog(false);
+      const schemeProblems: UnitExportContentsDto['schemeProblems'] = [{ type: 'NAME_TWICE', variable: 'text_1' }];
+      reportProblems([
+        { ...conflictIn(3), variableIdConflicts: [], schemeProblems },
+        { ...conflictIn(4), schemeProblems }
+      ]);
+      component.unitExportSettings.unitIdList = [3, 4];
+      component.workspaceService.unitList = { '': [{ id: 3, key: 'A' }, { id: 4, key: 'B' }] };
+      component.setFileSelection({ addCodingScheme: false });
+
+      component.download();
+
+      expect(openDialog).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+        data: {
+          units: [{
+            id: 4,
+            key: 'B',
+            name: undefined,
+            conflicts: conflictIn(4).variableIdConflicts,
+            schemeProblems: []
+          }],
+          exportFormat: 'xml'
+        }
+      }));
+    });
+
+    it('exports at once when the scheme is not exported and its rejection is the only problem', () => {
+      answerProblemsDialog(false);
+      reportProblems([{
+        ...conflictIn(3), variableIdConflicts: [], schemeProblems: [{ type: 'NAME_TWICE', variable: 'text_1' }]
+      }]);
+      component.setFileSelection({ addCodingScheme: false });
+
+      component.download();
+
+      expect(openDialog).not.toHaveBeenCalled();
+      expect(dialogRef.close).toHaveBeenCalledWith(component.unitExportSettings);
     });
 
     it('opens no second conflict dialog while the first is open', () => {

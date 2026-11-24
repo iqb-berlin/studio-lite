@@ -98,6 +98,17 @@ describe('checkUnit', () => {
       }]);
     });
 
+    // a failed request for the lists is no proof that a module is missing (#2135)
+    it('says the modules were not checked when their lists could not be loaded', () => {
+      const input = okInput();
+      input.installed = undefined;
+      input.modules = { ...input.modules, schemer: undefined };
+
+      expect(section(checkUnit(input), 'properties')?.findings).toEqual([
+        { key: 'unit-check.modules-not-loaded' }, { key: 'unit-check.no-schemer' }
+      ]);
+    });
+
     it('takes a later minor version as installed, as the module is opened with it', () => {
       const input = okInput();
       input.modules = { ...input.modules, editor: 'iqb-editor-aspect@2.7' };
@@ -107,6 +118,23 @@ describe('checkUnit', () => {
   });
 
   describe('editor', () => {
+    // the request for the lists failed: no finding would pass for a format the player reads (#2135)
+    it('says the format was not checked when the lists of modules could not be loaded', () => {
+      const input = okInput();
+      input.installed = undefined;
+
+      expect(section(checkUnit(input), 'editor')?.findings)
+        .toEqual([{ key: 'unit-check.definition-type-not-checked' }]);
+    });
+
+    it('does not say so for a unit that names no format, as there would be nothing to check', () => {
+      const input = okInput();
+      input.installed = undefined;
+      input.definition = { ...input.definition, definitionType: undefined };
+
+      expect(section(checkUnit(input), 'editor')?.findings).toEqual([]);
+    });
+
     it('names a unit without content', () => {
       const input = okInput();
       input.definition = { definition: '', variables: [] };

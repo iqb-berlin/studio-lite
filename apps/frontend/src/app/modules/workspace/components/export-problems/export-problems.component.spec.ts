@@ -23,11 +23,14 @@ describe('ExportProblemsComponent', () => {
   };
   const units: UnitExportProblems[] = [
     {
-      key: 'GL_NC08', name: 'Markieren', conflicts: [elementConflict], schemeProblems: []
+      id: 3, key: 'GL_NC08', name: 'Markieren', conflicts: [elementConflict], schemeProblems: []
     },
-    { key: 'U2', conflicts: [derivedConflict], schemeProblems: [] }
+    {
+      id: 4, key: 'U2', conflicts: [derivedConflict], schemeProblems: []
+    }
   ];
   const nameTwice: UnitExportProblems = {
+    id: 5,
     key: 'AA_editor',
     conflicts: [],
     schemeProblems: [{ key: 'unit-check.scheme-problem.NAME_TWICE', params: { variable: 'text_1' } }]
@@ -53,6 +56,16 @@ describe('ExportProblemsComponent', () => {
     expect(unitElements[0].nativeElement.textContent).toContain('Markieren');
     expect(unitElements.map(unit => unit.query(By.directive(VariableIdConflictListComponent))
       .componentInstance.conflicts())).toEqual([[elementConflict], [derivedConflict]]);
+  });
+
+  // a key can be taken twice: the unit check names keys an import brought in beside another unit's (#2135)
+  it('lists two units of the same key apart', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    await create({ units: [units[0], { ...units[1], key: 'GL_NC08' }], exportFormat: 'xml' });
+
+    expect(fixture.debugElement.queryAll(By.css('[data-cy="export-problems-unit"]')).length).toBe(2);
+    expect(warn).not.toHaveBeenCalledWith(expect.stringContaining('NG0955'));
+    warn.mockRestore();
   });
 
   it('describes the manual fix once, for the conflicts of all units', async () => {

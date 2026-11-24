@@ -12,7 +12,7 @@
   @if (hasSchemeProblems) {
     <p data-cy="export-scheme-problems-intro">{{ 'unit-download.export-problems.intro-scheme' | translate }}</p>
   }
-  @for (unit of data.units; track unit.key) {
+  @for (unit of data.units; track unit.id) {
     <div data-cy="export-problems-unit">
       <h3 class="unit-title">
         {{ unit.key }}

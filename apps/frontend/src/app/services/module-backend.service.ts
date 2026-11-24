@@ -20,11 +20,12 @@ export class ModuleBackendService {
     private http: HttpClient
   ) { }
 
-  getModuleList(type?: string): Observable<VeronaModuleInListDto[]> {
+  /** null when the list could not be loaded: an installation without modules has an empty one. */
+  getModuleList(type?: string): Observable<VeronaModuleInListDto[] | null> {
     return this.http
       .get<VeronaModuleInListDto[]>(`${this.serverUrl}verona-modules${type ? `?type=${type}` : ''}`)
       .pipe(
-        catchError(() => of(<VeronaModuleInListDto[]>[]))
+        catchError(() => of(null))
       );
   }
 
