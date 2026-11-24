@@ -16,7 +16,6 @@ import {
 } from '@angular/material/table';
 import { ItemsMetadataValues, MetadataValuesEntry, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { isCurrentFromOrder } from '@studio-lite/shared-code';
-import { MetadataResolver } from '@iqb/metadata-resolver';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatSort, MatSortModule } from '@angular/material/sort';
@@ -26,6 +25,8 @@ import { WorkspaceService } from '../../../workspace/services/workspace.service'
 import { I18nService } from '../../../../services/i18n.service';
 import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 import { buildXlsxFile } from '../../../../utils/xlsx-file.utils';
+import { LanguageService } from '../../../../services/language.service';
+import { textIn, valueTextsIn } from '../../../../utils/metadata-language.utils';
 
 type Tab = 'units' | 'items';
 
@@ -79,8 +80,11 @@ export class TableViewComponent implements OnInit {
     private translateService: TranslateService,
     @Inject(MAT_DIALOG_DATA)
     public data: { units: UnitPropertiesDto[]; warning: string },
-    private i18nService: I18nService
+    private i18nService: I18nService,
+    private languageService: LanguageService
   ) {}
+
+  private readonly language = this.languageService.active.code;
 
   @ViewChild('tabGroup') tabGroup!: MatTabGroup;
   // Material builds the content of both tabs when the dialog opens: each table has its sorter from the start.
@@ -95,8 +99,11 @@ export class TableViewComponent implements OnInit {
    */
   unitRows!: MatTableDataSource<ColumnValues>;
   itemRows!: MatTableDataSource<ColumnValues>;
+  /** The columns by id: the fixed ones and the id of each profile field. */
   unitColumns: string[] = [];
   itemColumns: string[] = [];
+  /** The name a profile field's column shows, by field id, in the language of the interface (#2207). */
+  fieldNames: Record<string, string> = {};
   /** The key of the unit a row belongs to; the row itself holds it as a link, which is no text to sort by. */
   private readonly unitKeys = new WeakMap<ColumnValues, string>();
   displayedColumns: string[] = [
@@ -139,7 +146,7 @@ export class TableViewComponent implements OnInit {
             let values: ColumnValues = {};
             activeProfile.entries.forEach(entry => {
               values = this.setItemColumnValues(
-                TableViewComponent.setColumnValues(values, entry),
+                this.setColumnValues(values, entry),
                 item,
                 unit,
                 i === 0
@@ -176,26 +183,14 @@ export class TableViewComponent implements OnInit {
     return values;
   }
 
-  private static setColumnValues(
+  // A cell belongs to the column of its field id: a name differs by language and need not be unique.
+  private setColumnValues(
     values: ColumnValues,
     entry: MetadataValuesEntry
   ): ColumnValues {
-    // Key the value under the same resolved label used for the column header
-    // (getTableUnitsColumnsDefinitions), otherwise the cell never maps to a column.
-    const columnKey = MetadataResolver.extractLabelText(entry.label);
-    if (Array.isArray(entry.valueAsText)) {
-      if (entry.valueAsText.length > 1) {
-        const textValues: string[] = [];
-        entry.valueAsText.forEach(textValue => {
-          textValues.push(`${textValue.value || ''}`);
-        });
-        values[columnKey] = textValues.join('<br>');
-      } else {
-        values[columnKey] = entry.valueAsText[0]?.value || '';
-      }
-    } else {
-      values[columnKey] = entry.valueAsText?.value || '';
-    }
+    values[entry.id] = valueTextsIn(entry, this.language)
+      .map(text => text.value || '')
+      .join('<br>');
     return values;
   }
 
@@ -209,7 +204,7 @@ export class TableViewComponent implements OnInit {
         let values: ColumnValues = {};
         if (activeProfile.entries) {
           activeProfile.entries.forEach(entry => {
-            values = TableViewComponent.setColumnValues(values, entry);
+            values = this.setColumnValues(values, entry);
           });
         }
         totalValues.push(this.withUnitKey(values, unit));
@@ -279,20 +274,20 @@ export class TableViewComponent implements OnInit {
 
   private getTableItemsColumnsDefinitions(): string[] {
     if (!this.metadataService.itemProfileColumns) return [];
-    const columnsDefinitions: string[] =
-      this.metadataService.itemProfileColumns.entries?.map(
-        entry => MetadataResolver.extractLabelText(entry.label)
-      ) || [];
-    return [...this.displayedColumns, ...columnsDefinitions];
+    return [...this.displayedColumns, ...this.fieldColumns(this.metadataService.itemProfileColumns.entries ?? [])];
   }
 
   private getTableUnitsColumnsDefinitions(): string[] {
-    const columnsDefinitions: string[][] = [];
     if (!this.metadataService.unitProfileColumns) return [];
-    this.metadataService.unitProfileColumns.forEach(group => {
-      columnsDefinitions.push(group.entries.map(entry => MetadataResolver.extractLabelText(entry.label)));
+    return ['key', ...this.fieldColumns(this.metadataService.unitProfileColumns.flatMap(group => group.entries))];
+  }
+
+  // The ids of the profile fields as columns, each with its name in the language of the interface.
+  private fieldColumns(entries: { id: string; label: { lang: string; value: string }[] }[]): string[] {
+    return entries.map(entry => {
+      this.fieldNames[entry.id] = textIn(entry.label, this.language);
+      return entry.id;
     });
-    return ['key', ...columnsDefinitions.flat()];
   }
 
   /**
@@ -312,7 +307,7 @@ export class TableViewComponent implements OnInit {
       columns.map(column => ({
         header: this.displayedColumns.includes(column) ?
           this.translateService.instant(`metadata.${column}`) :
-          column,
+          this.fieldNames[column],
         key: column,
         width: 30
       })),

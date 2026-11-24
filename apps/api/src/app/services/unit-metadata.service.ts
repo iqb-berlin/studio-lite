@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common';
 import {
   ProfileValues,
+  TopConcept,
   UnitFullMetadataDto,
   UnitItemWithMetadataDto,
   UnitMetadataDto,
@@ -20,11 +21,36 @@ import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
 import { UnitNotFoundException } from '../exceptions/unit-not-found.exception';
 import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
 import { ensureValueAsText } from '../utils/metadata-value-as-text';
+import {
+  StoredProfile, fieldTextsOf, profilesOf, vocabularyUrlsInUse, withTermLabels
+} from '../utils/metadata-field-texts';
+import { MetadataVocabularyService } from './metadata-vocabulary.service';
 
 // Dedupes profile lookups within a single request (a units list shares the same
 // profiles across units). Caches the pending promise so parallel unit reads
 // under Promise.all reuse one DB fetch instead of each firing its own.
 export type ProfileFetchCache = Map<string, ReturnType<MetadataProfileService['getStoredMetadataProfileFromDb']>>;
+type VocabularyFetchCache =
+  Map<string, ReturnType<MetadataVocabularyService['getStoredMetadataVocabularyFromDb']>>;
+
+/** The stored profiles and vocabularies one request reads, shared by every unit it reads. */
+export interface MetadataReadCache {
+  profiles: ProfileFetchCache;
+  vocabularies: VocabularyFetchCache;
+}
+
+export function newMetadataReadCache(): MetadataReadCache {
+  return { profiles: new Map(), vocabularies: new Map() };
+}
+
+function cached<T>(cache: Map<string, Promise<T>>, key: string, read: () => Promise<T>): Promise<T> {
+  let pending = cache.get(key);
+  if (!pending) {
+    pending = read();
+    cache.set(key, pending);
+  }
+  return pending;
+}
 
 /**
  * The metadata of units: the rows of {@link UnitMetadata}, one per unit and profile, and above them
@@ -50,7 +76,8 @@ export class UnitMetadataService {
     private workspaceRepository: Repository<Workspace>,
     private unitItemService: UnitItemService,
     private unitMetadataToDeleteService: UnitMetadataToDeleteService,
-    private metadataProfileService: MetadataProfileService
+    private metadataProfileService: MetadataProfileService,
+    private metadataVocabularyService: MetadataVocabularyService
   ) {}
 
   // When a transactional manager is passed the write joins that transaction;
@@ -104,12 +131,12 @@ export class UnitMetadataService {
   async getModifiedMetadataForUnit(
     unit: Unit,
     workspace: Workspace,
-    profileCache?: ProfileFetchCache
+    cache: MetadataReadCache = newMetadataReadCache()
   ): Promise<Unit> {
     const unitMetadataToDelete = await this.unitMetadataToDeleteService.getOneByUnit(unit.id);
     if (unitMetadataToDelete) {
       // findOnesMetadata already backfills valueAsText.
-      unit.metadata = await this.findOnesMetadata(unit.id);
+      unit.metadata = await this.findOnesMetadata(unit.id, cache);
     } else {
       unit.metadata = await this.resolveValueAsText(
         UnitMetadataService.setCurrentProfiles(
@@ -117,7 +144,7 @@ export class UnitMetadataService {
           workspace.settings?.itemMDProfile,
           unit.metadata
         ),
-        profileCache
+        cache
       );
     }
     return unit;
@@ -163,12 +190,16 @@ export class UnitMetadataService {
   // Applies valueAsText (incl. hideNumbering) for display. The hideNumbering
   // flags come from the stored profile definitions, so vocabulary numbering is
   // suppressed consistently in every read-only view that consumes valueAsText.
+  // The names, terms and yes/no texts in every language the stored profiles and
+  // vocabularies have replace the copy stored with the values (#2207).
   private async resolveValueAsText(
     metadata: UnitMetadataValues,
-    profileCache?: ProfileFetchCache
+    cache: MetadataReadCache = newMetadataReadCache()
   ): Promise<UnitMetadataValues> {
-    const hideNumbering = await this.buildHideNumberingMap(metadata, profileCache);
-    return ensureValueAsText(metadata, hideNumbering);
+    const profiles = await this.readStoredProfiles(metadata, cache.profiles);
+    const texts = fieldTextsOf(profiles);
+    const concepts = await this.readStoredVocabularies(vocabularyUrlsInUse(metadata, texts), cache.vocabularies);
+    return ensureValueAsText(metadata, UnitMetadataService.hideNumberingOf(profiles), withTermLabels(texts, concepts));
   }
 
   /**
@@ -181,30 +212,60 @@ export class UnitMetadataService {
     metadata: UnitMetadataValues | undefined,
     profileCache: ProfileFetchCache = new Map()
   ): Promise<Record<string, Record<string, boolean>>> {
+    return UnitMetadataService.hideNumberingOf(await this.readStoredProfiles(metadata, profileCache));
+  }
+
+  // The stored definition of every profile the metadata refers to (unit and item profiles), by id.
+  private async readStoredProfiles(
+    metadata: UnitMetadataValues | undefined,
+    profileCache: ProfileFetchCache
+  ): Promise<Record<string, StoredProfile>> {
     if (!metadata) return {};
     const profileIds = new Set<string>();
-    (metadata.profiles ?? []).forEach(profile => {
+    profilesOf(metadata).forEach(profile => {
       if (profile.profileId) profileIds.add(profile.profileId);
     });
-    (metadata.items ?? []).forEach(item => (item.profiles ?? []).forEach(profile => {
-      if (profile.profileId) profileIds.add(profile.profileId);
-    }));
-    const map: Record<string, Record<string, boolean>> = {};
+    const profiles: Record<string, StoredProfile> = {};
     await Promise.all([...profileIds].map(async profileId => {
-      let pending = profileCache.get(profileId);
-      if (!pending) {
-        pending = this.metadataProfileService.getStoredMetadataProfileFromDb(profileId);
-        profileCache.set(profileId, pending);
-      }
-      const profile = await pending;
-      if (!profile?.groups) return;
+      const profile = await cached(
+        profileCache,
+        profileId,
+        () => this.metadataProfileService.getStoredMetadataProfileFromDb(profileId)
+      );
+      if (profile?.groups) profiles[profileId] = profile;
+    }));
+    return profiles;
+  }
+
+  // The stored concept tree of every vocabulary named, by its URL; a vocabulary not stored is left out.
+  private async readStoredVocabularies(
+    urls: string[],
+    vocabularyCache: VocabularyFetchCache
+  ): Promise<Record<string, TopConcept[] | null>> {
+    const concepts: Record<string, TopConcept[] | null> = {};
+    await Promise.all(urls.map(async url => {
+      const vocabulary = await cached(
+        vocabularyCache,
+        url,
+        () => this.metadataVocabularyService.getStoredMetadataVocabularyFromDb(url)
+      );
+      if (vocabulary) concepts[url] = vocabulary.hasTopConcept;
+    }));
+    return concepts;
+  }
+
+  private static hideNumberingOf(
+    profiles: Record<string, StoredProfile>
+  ): Record<string, Record<string, boolean>> {
+    const map: Record<string, Record<string, boolean>> = {};
+    Object.entries(profiles).forEach(([profileId, profile]) => {
       const entryMap: Record<string, boolean> = {};
       profile.groups.forEach(group => (group.entries ?? []).forEach(entry => {
         const parameters = entry.parameters as { hideNumbering?: boolean } | null;
         if (parameters?.hideNumbering) entryMap[entry.id] = true;
       }));
       map[profileId] = entryMap;
-    }));
+    });
     return map;
   }
 
@@ -317,12 +378,15 @@ export class UnitMetadataService {
     return this.resolveValueAsText(unit.metadata as UnitMetadataValues);
   }
 
-  async findOnesMetadata(unitId: number): Promise<UnitFullMetadataDto> {
+  async findOnesMetadata(
+    unitId: number,
+    cache: MetadataReadCache = newMetadataReadCache()
+  ): Promise<UnitFullMetadataDto> {
     const metadata: UnitMetadataValues = {
       profiles: await this.getAllByUnitId(unitId),
       items: await this.unitItemService
         .getAllByUnitIdWithMetadata(unitId) as unknown as UnitMetadataValues['items']
     };
-    return await this.resolveValueAsText(metadata) as unknown as UnitFullMetadataDto;
+    return await this.resolveValueAsText(metadata, cache) as unknown as UnitFullMetadataDto;
   }
 }

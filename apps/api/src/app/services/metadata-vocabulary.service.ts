@@ -48,6 +48,14 @@ export class MetadataVocabularyService {
     return this.getMetadataVocabulary(id);
   }
 
+  /**
+   * DB-only read, without the refresh in the background: for read paths that only need the stored
+   * vocabulary -- the term labels of every unit of a units list -- so they do not fetch it per unit.
+   */
+  getStoredMetadataVocabularyFromDb(id: string): Promise<MetadataVocabulary | null> {
+    return this.metadataVocabularyRepository.findOneBy({ id: id });
+  }
+
   private async getMetadataVocabulary(id: string): Promise<MetadataVocabularyDto | null> {
     const url = id.endsWith('.json') || id.endsWith('.jsonld') ? id : `${id}index.jsonld`;
     const vocabulary = await firstValueFrom(

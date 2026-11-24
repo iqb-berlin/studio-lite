@@ -212,4 +212,78 @@ describe('ensureValueAsText', () => {
     // input untouched
     expect(metadata.items[0].profiles[0].entries[0].valueAsText).toEqual([]);
   });
+
+  // Metadata saved in one language reads in every language its profile and vocabulary have (#2207).
+  describe('with the texts of the stored profile and vocabulary', () => {
+    const de = (value: string) => ({ lang: 'de', value });
+    const en = (value: string) => ({ lang: 'en', value });
+
+    it('puts the field name and the term labels of every language in place of the stored copy', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1',
+            label: [de('Art der Daten')],
+            value: [
+              { id: 'dt/1', label: [de('Kompetenzdaten')], annotation: [de('1')] },
+              { id: 'dt/9', label: [de('Gelöschter Begriff')] }
+            ],
+            valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = ensureValueAsText(metadata, {}, {
+        p1: {
+          e1: {
+            label: [de('Art der Daten'), en('Type of data')],
+            terms: { 'dt/1': [de('Kompetenzdaten'), en('Skills data')] }
+          }
+        }
+      });
+
+      const entry = result.profiles[0].entries[0];
+      expect(entry.label).toEqual([de('Art der Daten'), en('Type of data')]);
+      // numbering per language; a term the vocabulary no longer has keeps its stored label
+      expect(entry.valueAsText).toEqual([de('1 Kompetenzdaten'), en('1 Skills data'), de('Gelöschter Begriff')]);
+    });
+
+    it('keeps the stored copy where the profile brings nothing', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1', label: [de('Titel')], value: [de('Studie')], valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = ensureValueAsText(metadata, {}, { p1: { e1: { label: [] } } });
+
+      expect(result.profiles[0].entries[0].label).toEqual([de('Titel')]);
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([de('Studie')]);
+    });
+
+    it.each([
+      ['yes from the form', { raw: 'true', asText: [de('ja')] }, [de('ja'), en('yes')]],
+      ['no from the form', { raw: 'false', asText: [de('nein')] }, [de('nein'), en('no')]],
+      ['yes from the legacy form, a plain string', 'true', [de('ja'), en('yes')]]
+    ])('takes the text for %s from the profile', (_, value, expected) => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1', label: [de('Mehrfachantwort')], value, valueAsText: [de('stored')]
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = ensureValueAsText(metadata, {}, {
+        p1: { e1: { trueLabel: [de('ja'), en('yes')], falseLabel: [de('nein'), en('no')] } }
+      });
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual(expected);
+    });
+  });
 });

@@ -3,13 +3,15 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { EntityManager, In, Repository } from 'typeorm';
 import { UnitItemWithMetadataDto, UnitMetadataDto, UnitMetadataValues } from '@studio-lite-lib/api-dto';
-import { UnitMetadataService } from './unit-metadata.service';
+import { UnitMetadataService, newMetadataReadCache } from './unit-metadata.service';
 import UnitMetadata from '../entities/unit-metadata.entity';
 import Unit from '../entities/unit.entity';
 import Workspace from '../entities/workspace.entity';
 import { UnitItemService } from './unit-item.service';
 import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
 import { MetadataProfileService } from './metadata-profile.service';
+import { MetadataVocabularyService } from './metadata-vocabulary.service';
+import MetadataVocabulary from '../entities/metadata-vocabulary.entity';
 import { UnitNotFoundException } from '../exceptions/unit-not-found.exception';
 import MetadataProfile from '../entities/metadata-profile.entity';
 import UnitMetadataToDelete from '../entities/unit-metadata-to-delete.entity';
@@ -22,6 +24,7 @@ describe('UnitMetadataService', () => {
   let unitItemService: DeepMocked<UnitItemService>;
   let unitMetadataToDeleteService: DeepMocked<UnitMetadataToDeleteService>;
   let metadataProfileService: DeepMocked<MetadataProfileService>;
+  let metadataVocabularyService: DeepMocked<MetadataVocabularyService>;
 
   const mockRepository = {
     find: jest.fn(),
@@ -59,6 +62,10 @@ describe('UnitMetadataService', () => {
         {
           provide: MetadataProfileService,
           useValue: createMock<MetadataProfileService>()
+        },
+        {
+          provide: MetadataVocabularyService,
+          useValue: createMock<MetadataVocabularyService>()
         }
       ]
     }).compile();
@@ -70,6 +77,7 @@ describe('UnitMetadataService', () => {
     unitItemService = module.get(UnitItemService);
     unitMetadataToDeleteService = module.get(UnitMetadataToDeleteService);
     metadataProfileService = module.get(MetadataProfileService);
+    metadataVocabularyService = module.get(MetadataVocabularyService);
   });
 
   afterEach(() => {
@@ -431,6 +439,41 @@ describe('UnitMetadataService', () => {
       expect(unitItemService.getAllByUnitIdWithMetadata).toHaveBeenCalledWith(5);
       expect(result.profiles?.[0].entries?.[0].valueAsText).toEqual(text);
       expect(result.items?.[0].profiles[0].entries?.[0].valueAsText).toEqual(text);
+    });
+  });
+
+  // The units list reads the stored profile and vocabulary once for all units, from the database only,
+  // and every unit reads its terms in every language the vocabulary has (#2207).
+  describe('the texts of profile and vocabulary', () => {
+    it('should read a vocabulary once per request and put its labels in place of the stored ones', async () => {
+      const url = 'https://w3id.org/iqb/v85/dt/';
+      metadataProfileService.getStoredMetadataProfileFromDb.mockResolvedValue({
+        id: 'p1',
+        groups: [{
+          entries: [{
+            id: 'data', label: [], type: 'VOCABULARY', parameters: { url }
+          }]
+        }]
+      } as never);
+      metadataVocabularyService.getStoredMetadataVocabularyFromDb.mockResolvedValue(createMock<MetadataVocabulary>({
+        hasTopConcept: [{ id: `${url}3`, prefLabel: { de: 'Umfragedaten', en: 'Survey data' } as never, narrower: [] }]
+      }));
+      unitMetadataToDeleteService.getOneByUnit.mockResolvedValue(createMock<UnitMetadataToDelete>({ unitId: 1 }));
+      mockRepository.findBy.mockResolvedValue([{
+        profileId: 'p1',
+        entries: [{ id: 'data', value: [{ id: `${url}3`, label: [{ lang: 'de', value: 'Umfragedaten' }] }] }]
+      } as UnitMetadataDto]);
+      unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
+      const cache = newMetadataReadCache();
+
+      const units = await Promise.all([1, 2].map(id => service
+        .getModifiedMetadataForUnit({ id } as Unit, {} as Workspace, cache)));
+
+      expect(metadataVocabularyService.getStoredMetadataVocabularyFromDb).toHaveBeenCalledTimes(1);
+      expect(metadataVocabularyService.getStoredMetadataVocabularyFromDb).toHaveBeenCalledWith(url);
+      expect(metadataVocabularyService.getStoredMetadataVocabularyById).not.toHaveBeenCalled();
+      units.forEach(unit => expect((unit.metadata as UnitMetadataValues).profiles[0].entries[0].valueAsText)
+        .toEqual([{ lang: 'de', value: 'Umfragedaten' }, { lang: 'en', value: 'Survey data' }]));
     });
   });
 
