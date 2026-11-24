@@ -65,7 +65,39 @@ describe('EditWorkspaceSettingsComponent', () => {
     }
   };
 
-  beforeEach(async () => {
+  // the dialog opened with the given data; synchronous, so a fakeAsync test can open it again
+  const createDialog = (data: typeof mockDialogData = mockDialogData) => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [
+        MatFormFieldModule,
+        MatInputModule,
+        MatCheckboxModule,
+        MatDialogModule,
+        MatSelectModule,
+        TranslateModule.forRoot(),
+        EditWorkspaceSettingsComponent
+      ],
+      providers: [
+        { provide: BackendService, useValue: mockBackendService },
+        { provide: AppService, useValue: mockAppService },
+        { provide: WorkspaceService, useValue: mockWorkspaceService },
+        { provide: ModuleService, useValue: mockModuleService },
+        { provide: MAT_DIALOG_DATA, useValue: data },
+        { provide: MatDialogRef, useValue: mockDialogRef },
+        { provide: MetadataBackendService, useValue: mockMetadataBackendService }
+      ]
+    }).overrideComponent(EditWorkspaceSettingsComponent, {
+      remove: { imports: [SelectModuleComponent] },
+      add: { imports: [MockSelectModuleComponent] }
+    });
+
+    fixture = TestBed.createComponent(EditWorkspaceSettingsComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  };
+
+  beforeEach(() => {
     mockBackendService = {
       getWorkspaceGroupById: jest.fn().mockReturnValue(of({
         settings: {
@@ -97,33 +129,7 @@ describe('EditWorkspaceSettingsComponent', () => {
       } : false))
     };
 
-    await TestBed.configureTestingModule({
-      imports: [
-        MatFormFieldModule,
-        MatInputModule,
-        MatCheckboxModule,
-        MatDialogModule,
-        MatSelectModule,
-        TranslateModule.forRoot(),
-        EditWorkspaceSettingsComponent
-      ],
-      providers: [
-        { provide: BackendService, useValue: mockBackendService },
-        { provide: AppService, useValue: mockAppService },
-        { provide: WorkspaceService, useValue: mockWorkspaceService },
-        { provide: ModuleService, useValue: mockModuleService },
-        { provide: MAT_DIALOG_DATA, useValue: mockDialogData },
-        { provide: MatDialogRef, useValue: mockDialogRef },
-        { provide: MetadataBackendService, useValue: mockMetadataBackendService }
-      ]
-    }).overrideComponent(EditWorkspaceSettingsComponent, {
-      remove: { imports: [SelectModuleComponent] },
-      add: { imports: [MockSelectModuleComponent] }
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(EditWorkspaceSettingsComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+    createDialog();
   });
 
   it('should initialize profiles in ngOnInit', () => {
@@ -133,9 +139,10 @@ describe('EditWorkspaceSettingsComponent', () => {
   });
 
   describe('the metadata profiles shown and saved (#2138)', () => {
+    // the text of the select, its white space collapsed as the browser shows it
     const shown = (select: 'unit' | 'item') => (fixture.debugElement
       .query(By.css(`[data-cy="edit-workspace-settings-select-${select}-profile"]`))
-      .nativeElement as HTMLElement).textContent?.trim();
+      .nativeElement as HTMLElement).textContent?.replace(/\s+/g, ' ').trim();
 
     // the stored profiles came with a request of the dialog's own; until it answered, none was shown
     it('shows the stored profiles as soon as the dialog opens', fakeAsync(() => {
@@ -167,6 +174,41 @@ describe('EditWorkspaceSettingsComponent', () => {
         itemMDProfile: 'profile2/item.json'
       }));
     }));
+
+    // a group admin removed the profile from the group: shown, as it is what is saved -- clearing it
+    // unasked would reclassify the metadata of every unit on the next save
+    it('shows a stored profile the group no longer offers, marked, and saves it unchanged', fakeAsync(() => {
+      createDialog({
+        ...mockDialogData,
+        settings: { ...mockDialogData.settings, unitMDProfile: 'profile9/unit.json' }
+      });
+      flush();
+      fixture.detectChanges();
+
+      expect(shown('unit')).toBe('profile9/unit.json metadata.profile-not-in-group');
+      (fixture.debugElement.query(By.css('[data-cy="edit-workspace-settings-submit-button"]'))
+        .nativeElement as HTMLElement).click();
+      expect(mockDialogRef.close)
+        .toHaveBeenCalledWith(expect.objectContaining({ unitMDProfile: 'profile9/unit.json' }));
+    }));
+
+    // the same profile in its other spelling (#1570)
+    it('shows a stored profile the group lists in its other spelling as that one', fakeAsync(() => {
+      mockBackendService.getWorkspaceGroupById = jest.fn().mockReturnValue(of({
+        settings: { profiles: [{ id: 'https://w3id.org/iqb/p100/unit', label: 'Unit Profile 100' }] }
+      } as WorkspaceGroupFullDto));
+      createDialog({
+        ...mockDialogData,
+        settings: {
+          ...mockDialogData.settings,
+          unitMDProfile: 'https://raw.githubusercontent.com/iqb-vocabs/p100/master/unit.json'
+        }
+      });
+      flush();
+      fixture.detectChanges();
+
+      expect(shown('unit')).toBe('Unit Profile 100');
+    }));
   });
 
   // Read from each profile of the group, so it follows a profile translated after it was chosen (#2212).
@@ -188,41 +230,10 @@ describe('EditWorkspaceSettingsComponent', () => {
     expect(component.dialogData.defaultPlayer).toBe('new-player');
   });
 
-  it('should fall back to workspaceService.groupId if groupId is missing in selectedRow', async () => {
-    TestBed.resetTestingModule();
-    const dataWithMissingGroupId = {
-      ...mockDialogData,
-      selectedRow: { ...mockDialogData.selectedRow, groupId: 0 }
-    };
+  it('should fall back to workspaceService.groupId if groupId is missing in selectedRow', () => {
     mockWorkspaceService.groupId = 99;
 
-    await TestBed.configureTestingModule({
-      imports: [
-        MatFormFieldModule,
-        MatInputModule,
-        MatCheckboxModule,
-        MatDialogModule,
-        MatSelectModule,
-        TranslateModule.forRoot(),
-        EditWorkspaceSettingsComponent
-      ],
-      providers: [
-        { provide: BackendService, useValue: mockBackendService },
-        { provide: AppService, useValue: mockAppService },
-        { provide: WorkspaceService, useValue: mockWorkspaceService },
-        { provide: ModuleService, useValue: mockModuleService },
-        { provide: MAT_DIALOG_DATA, useValue: dataWithMissingGroupId },
-        { provide: MatDialogRef, useValue: mockDialogRef },
-        { provide: MetadataBackendService, useValue: mockMetadataBackendService }
-      ]
-    }).overrideComponent(EditWorkspaceSettingsComponent, {
-      remove: { imports: [SelectModuleComponent] },
-      add: { imports: [MockSelectModuleComponent] }
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(EditWorkspaceSettingsComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+    createDialog({ ...mockDialogData, selectedRow: { ...mockDialogData.selectedRow, groupId: 0 } });
 
     expect(mockBackendService.getWorkspaceGroupById).toHaveBeenCalledWith(99);
   });

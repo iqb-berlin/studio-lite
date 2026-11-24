@@ -68,8 +68,19 @@
                          placeholder="{{'metadata.select-profile' | translate }}"
                          [(value)]="dialogData.unitMDProfile"
                          (click)="$event.stopPropagation()"
+                         [compareWith]="sameProfile"
                          data-cy="edit-workspace-settings-select-unit-profile">
               <mat-option [value]="undefined"></mat-option>
+              <!-- stored, but not among the group's profiles: shown, as it is what is saved (#2138) -->
+              @if (dialogData.unitMDProfile && !(dialogData.unitMDProfile | isProfileSelected: unitMDProfiles)) {
+                <mat-option [value]="dialogData.unitMDProfile"
+                            data-cy="edit-workspace-settings-unit-profile-not-in-group">
+                  {{ dialogData.unitMDProfile }}
+                  @if (profilesLoaded()) {
+                    {{ 'metadata.profile-not-in-group' | translate }}
+                  }
+                </mat-option>
+              }
               @for (unitMDProfile of unitMDProfiles; track unitMDProfile) {
                 <mat-option [value]="unitMDProfile.id"
                             data-cy="edit-workspace-settings-unit-profile">
@@ -93,8 +104,19 @@
                         placeholder="{{'metadata.select-profile' | translate }}"
                         [(value)]="dialogData.itemMDProfile"
                         (click)="$event.stopPropagation()"
+                        [compareWith]="sameProfile"
                         data-cy="edit-workspace-settings-select-item-profile">
               <mat-option [value]="undefined"></mat-option>
+              <!-- stored, but not among the group's profiles: shown, as it is what is saved (#2138) -->
+              @if (dialogData.itemMDProfile && !(dialogData.itemMDProfile | isProfileSelected: itemMDProfiles)) {
+                <mat-option [value]="dialogData.itemMDProfile"
+                            data-cy="edit-workspace-settings-item-profile-not-in-group">
+                  {{ dialogData.itemMDProfile }}
+                  @if (profilesLoaded()) {
+                    {{ 'metadata.profile-not-in-group' | translate }}
+                  }
+                </mat-option>
+              }
               @for (itemMDProfile of itemMDProfiles; track itemMDProfile) {
                 <mat-option [value]="itemMDProfile.id"
                             data-cy="edit-workspace-settings-item-profile">

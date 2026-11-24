@@ -6,7 +6,7 @@ import {
   MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
 } from '@angular/material/dialog';
 import { State, WorkspaceGroupFullDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
-import { isItemProfileId } from '@studio-lite/shared-code';
+import { isItemProfileId, profileIdsMatch } from '@studio-lite/shared-code';
 import { MatCheckboxChange, MatCheckbox } from '@angular/material/checkbox';
 import { MatSelect } from '@angular/material/select';
 import { TranslateModule } from '@ngx-translate/core';
@@ -15,6 +15,7 @@ import { MatOption } from '@angular/material/core';
 import { MatLabel, MatError } from '@angular/material/form-field';
 import { MatTooltip } from '@angular/material/tooltip';
 import { IncludePipe } from '../../pipes/include.pipe';
+import { IsProfileSelectedPipe } from '../../pipes/is-profile-selected.pipe';
 import { ModuleService } from '../../services/module.service';
 import { AppService } from '../../services/app.service';
 import { WorkspaceService } from '../../modules/workspace/services/workspace.service';
@@ -37,6 +38,16 @@ type SelectedRow = {
 };
 
 /**
+ * Whether two profile ids name the same profile, in either spelling (#1570) -- for the selects as for
+ * the group's list, so that a stored profile the group lists is shown as that one. No profile, empty or
+ * undefined, is the empty option.
+ */
+const sameProfile = (a: string | undefined, b: string | undefined): boolean => profileIdsMatch(
+  a || undefined,
+  b || undefined
+);
+
+/**
  * The settings dialog of a workspace: the default modules its units are opened with, the metadata
  * profiles they are described under, and which views the workspace offers. What is decided here
  * applies to every unit in it.
@@ -48,7 +59,8 @@ type SelectedRow = {
 
   imports: [
     MatDialogTitle, MatDialogContent, MatLabel, SelectModuleComponent, MatCheckbox, MatError, MatSelect, MatOption,
-    MatDialogActions, MatButton, MatDialogClose, MatTooltip, TranslateModule, IncludePipe, LanguageCodesPipe
+    MatDialogActions, MatButton, MatDialogClose, MatTooltip, TranslateModule, IncludePipe, IsProfileSelectedPipe,
+    LanguageCodesPipe
   ]
 })
 export class EditWorkspaceSettingsComponent implements OnInit, OnDestroy {
@@ -77,6 +89,12 @@ export class EditWorkspaceSettingsComponent implements OnInit, OnDestroy {
   selectionChanged!: State[];
   itemMDProfiles: Profile[] = [];
   unitMDProfiles: Profile[] = [];
+  // whether the group's profiles are in: only then can a stored profile be known to be missing from them
+  private readonly profilesLoadedState = signal(false);
+  readonly profilesLoaded = this.profilesLoadedState.asReadonly();
+
+  readonly sameProfile = sameProfile;
+
   profiles: Array<string> = [];
   settings = { ...this.workspaceService.workspaceSettings, profile: '' };
 
@@ -95,6 +113,7 @@ export class EditWorkspaceSettingsComponent implements OnInit, OnDestroy {
             res && (res as WorkspaceGroupFullDto).settings && (res as WorkspaceGroupFullDto).settings?.profiles
               ?.filter((profile: Profile) => isItemProfileId(profile.id))
           ) || [];
+          this.profilesLoadedState.set(!!res);
           this.loadProfileLanguages([...this.unitMDProfiles, ...this.itemMDProfiles]);
         }));
     }

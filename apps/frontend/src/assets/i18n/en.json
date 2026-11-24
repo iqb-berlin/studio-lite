@@ -334,6 +334,7 @@
     "assign-metadata-profiles": "Assign metadata profiles",
     "vocab-loading-error": "Vocabulary could not be loaded.",
     "no-unit-profiles-hint": "The workspace group has no unit profiles.",
+    "profile-not-in-group": "(no longer in the workspace group)",
     "no-item-profiles-hint": "The workspace group has no item profiles.",
     "error-fetching-metadata-profiles": "Metadata profiles could not be loaded.",
     "error-states": "Status list could not be loaded.",
