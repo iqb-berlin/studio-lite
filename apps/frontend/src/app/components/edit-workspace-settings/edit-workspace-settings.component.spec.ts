@@ -119,14 +119,9 @@ describe('EditWorkspaceSettingsComponent', () => {
     mockDialogRef = {
       close: jest.fn()
     };
-    const de = (value: string) => ({ lang: 'de', value });
-    const en = (value: string) => ({ lang: 'en', value });
+    // no profile loads, so that no languages stand behind the names shown (#2212)
     mockMetadataBackendService = {
-      // the item profile could not be loaded
-      getMetadataProfile: jest.fn().mockImplementation((url: string) => of(url === 'profile1/unit.json' ? {
-        label: [de('Aufgabe'), en('Unit')],
-        groups: [{ label: [], entries: [{ label: [de('Titel'), en('Title')] }] }]
-      } : false))
+      getMetadataProfile: jest.fn().mockReturnValue(of(false))
     };
 
     createDialog();
@@ -263,6 +258,16 @@ describe('EditWorkspaceSettingsComponent', () => {
 
   // Read from each profile of the group, so it follows a profile translated after it was chosen (#2212).
   it('reads the languages of every profile of the group from the profile itself', () => {
+    const de = (value: string) => ({ lang: 'de', value });
+    const en = (value: string) => ({ lang: 'en', value });
+    // the other profiles could not be loaded
+    (mockMetadataBackendService.getMetadataProfile as jest.Mock)
+      .mockImplementation((url: string) => of(url === 'profile1/unit.json' ? {
+        label: [de('Aufgabe'), en('Unit')],
+        groups: [{ label: [], entries: [{ label: [de('Titel'), en('Title')] }] }]
+      } : false));
+    createDialog();
+
     expect(mockMetadataBackendService.getMetadataProfile).toHaveBeenCalledWith('profile1/unit.json');
     expect(mockMetadataBackendService.getMetadataProfile).toHaveBeenCalledWith('profile2/item.json');
     // a profile that could not be loaded gets no languages, rather than an empty pair of brackets
