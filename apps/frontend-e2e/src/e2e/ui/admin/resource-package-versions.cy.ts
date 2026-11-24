@@ -102,7 +102,9 @@ describe('Versions of a resource package in the administration (#1358)', () => {
     clickIndexTabWsgAdmin('settings');
     cy.get('[data-cy="wsg-settings-resource-package-TestPackage"]').click();
     cy.contains('mat-option', 'TestPackage-1.0').click();
+    cy.intercept('PATCH', `/api/workspace-groups/${groupId}`).as('saveSettings');
     cy.get('[data-cy="wsg-admin-settings-save-button"]').click();
+    cy.wait('@saveSettings');
 
     cy.getGroupPropertiesAPI(groupId, token).then(resp => {
       expect((resp.body as WorkspaceGroupFullDto).settings?.chosenResourcePackages)
