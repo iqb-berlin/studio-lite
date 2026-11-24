@@ -647,7 +647,7 @@
     }
   },
   "unit-check": {
-    "title": "Aufgabenprüfung",
+    "title": "Technische Prüfung",
     "hint": "Geprüft wird die Aufgabe, wie sie gerade bearbeitet wird, auch was noch nicht gespeichert ist.",
     "ok": "in Ordnung",
     "not-loaded": "Konnte nicht geladen werden.",

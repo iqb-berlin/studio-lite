@@ -3,7 +3,7 @@ import { clickIndexTabWorkspace, selectUnit } from '../../../support/helpers';
 import { createTestBaseAPI, deleteTestBaseAPI, TestBase } from '../../../support/helpers/test-base';
 
 /**
- * The card „Aufgabenprüfung“ under „Eigenschaften“ tells, tab by tab, whether the unit is in order
+ * The card „Technische Prüfung“ under „Eigenschaften“ tells, tab by tab, whether the unit is in order
  * (#2135). Its questions are answered in unit-check.utils.spec.ts; what only the running studio
  * shows is that the card asks them of the unit the server delivers -- here an id the export would
  * write twice (#2119), and the same unit once the derived variable has been renamed.
