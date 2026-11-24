@@ -65,6 +65,7 @@ class MockWorkspaceService {
   resetUnitList = jest.fn();
   setWorkspaceGroupStates = jest.fn();
   loadRichNoteTags = jest.fn();
+  setSettingsLoaded = jest.fn();
 }
 
 describe('WorkspaceComponent', () => {
@@ -155,6 +156,20 @@ describe('WorkspaceComponent', () => {
     await configure('/a/5/7/editor', { workspace: { ...loadedWorkspace, settings } });
 
     expect(TestBed.inject(WorkspaceService).workspaceSettings).toEqual({ ...settings, unitGroups: [] });
+  });
+
+  // what derives from the hidden tabs waits until the settings are the workspace's own (#2135)
+  it('should mark the settings as loaded once the workspace is in, with stored settings or without', async () => {
+    await configure('/a/5/7/editor', { workspace: { ...loadedWorkspace, settings: undefined } });
+
+    expect(jest.mocked(TestBed.inject(WorkspaceService).setSettingsLoaded).mock.calls).toEqual([[false], [true]]);
+  });
+
+  // the technical check waits for the settings; without a workspace the defaults are all there is
+  it('should mark the defaults as the settings when the workspace could not be loaded', async () => {
+    await configure('/a/5/7/editor', { workspace: null });
+
+    expect(jest.mocked(TestBed.inject(WorkspaceService).setSettingsLoaded).mock.calls).toEqual([[false], [true]]);
   });
 
   // The unit list asks for the groups itself. Its answer was lost when the settings came after it,

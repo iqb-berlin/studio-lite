@@ -30,6 +30,8 @@ describe('UnitCheckComponent', () => {
   let unitStores: UnitStoresService;
   let hiddenRoutes: string[];
   let hiddenRoutesState: WritableSignal<string[]>;
+  let settingsLoaded: boolean;
+  let settingsLoadedState: WritableSignal<boolean>;
   let getUnitRichNotes: jest.Mock;
   let getUnitDefinition: jest.Mock;
   let getUnitDefinitionSummary: jest.Mock;
@@ -50,6 +52,7 @@ describe('UnitCheckComponent', () => {
 
   const create = () => {
     hiddenRoutesState = signal(hiddenRoutes);
+    settingsLoadedState = signal(settingsLoaded);
     TestBed.configureTestingModule({
       imports: [UnitCheckComponent, TranslateModule.forRoot()],
       providers: [
@@ -59,7 +62,8 @@ describe('UnitCheckComponent', () => {
             selectedUnit$: new BehaviorSubject(3),
             selectedWorkspaceId: 1,
             units: units.asReadonly(),
-            hiddenRoutes: hiddenRoutesState.asReadonly()
+            hiddenRoutes: hiddenRoutesState.asReadonly(),
+            settingsLoaded: settingsLoadedState.asReadonly()
           }
         },
         {
@@ -105,6 +109,7 @@ describe('UnitCheckComponent', () => {
 
   beforeEach(() => {
     hiddenRoutes = [];
+    settingsLoaded = true;
     listLoaded = signal(true);
     listVersion = signal(1);
     editors = { 'iqb-editor-aspect@2.9': { nameAndVersion: 'Editor' } };
@@ -143,16 +148,34 @@ describe('UnitCheckComponent', () => {
   }));
 
   // after a reload of the page and on entering a workspace, its settings arrive after the unit (#2135)
-  it('leaves out the tabs the workspace hides once its settings arrive', fakeAsync(() => {
+  it('waits for the settings of the workspace, and asks for no tab they hide', fakeAsync(() => {
+    settingsLoaded = false;
     create();
-    expect(tabs()).toContain('unit-check-comments');
+    expect(tabs()).toEqual([]);
 
     hiddenRoutesState.set(['comments', 'notes']);
+    settingsLoadedState.set(true);
     fixture.detectChanges();
     flush();
     fixture.detectChanges();
 
     expect(tabs()).toEqual(['unit-check-properties', 'unit-check-editor', 'unit-check-schemer']);
+    expect(hasComments).not.toHaveBeenCalled();
+    expect(getUnitRichNotes).not.toHaveBeenCalled();
+  }));
+
+  // a change in the settings dialog: what is known of the other tab still holds
+  it('asks nothing again, and keeps the card, when a tab is only hidden', fakeAsync(() => {
+    create();
+
+    hiddenRoutesState.set(['notes']);
+    fixture.detectChanges();
+
+    expect(tabs()).toEqual([
+      'unit-check-properties', 'unit-check-editor', 'unit-check-schemer', 'unit-check-comments'
+    ]);
+    expect(hasComments).toHaveBeenCalledTimes(1);
+    expect(getUnitRichNotes).toHaveBeenCalledTimes(1);
   }));
 
   it('asks whether there are comments once the settings show their tab', fakeAsync(() => {

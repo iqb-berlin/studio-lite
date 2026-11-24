@@ -3,7 +3,8 @@ import {
 } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
-  combineLatest, forkJoin, from, map, Observable, of, Subject, switchMap, takeUntil
+  combineLatest, distinctUntilChanged, filter, forkJoin, from, map, Observable, of, pairwise, startWith, Subject,
+  switchMap, takeUntil
 } from 'rxjs';
 import {
   MatCard, MatCardContent, MatCardHeader, MatCardTitle
@@ -39,6 +40,16 @@ interface Presence {
   hasRichNotes: boolean | undefined;
 }
 
+/** What is asked for the presence: the unit, and which of the two tabs the workspace shows. */
+interface PresenceQuery {
+  unitId: number;
+  comments: boolean;
+  notes: boolean;
+}
+
+const sameQuery = (a: PresenceQuery, b: PresenceQuery): boolean => a.unitId === b.unitId &&
+  a.comments === b.comments && a.notes === b.notes;
+
 type Modules = Partial<Record<ModuleType, string>>;
 type UnitKey = { id: number; key: string | undefined };
 
@@ -68,6 +79,7 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
   // undefined until asked for the unit shown and the tabs the workspace hides
   private readonly presence = signal<Presence | undefined>(undefined);
   private readonly hiddenRoutes$: Observable<string[]>;
+  private readonly settingsLoaded$: Observable<boolean>;
 
   // only the modules of the properties: the check, which parses the scheme, must not run again on
   // every keystroke in the name or the description
@@ -137,6 +149,7 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
     private commentsBackendService: CommentsBackendService
   ) {
     this.hiddenRoutes$ = toObservable(this.workspaceService.hiddenRoutes);
+    this.settingsLoaded$ = toObservable(this.workspaceService.settingsLoaded);
   }
 
   ngOnInit(): void {
@@ -149,11 +162,23 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
         takeUntil(this.ngUnsubscribe)
       )
       .subscribe(sources => this.sources.set(sources));
-    combineLatest([this.workspaceService.selectedUnit$, this.hiddenRoutes$])
+    combineLatest([this.workspaceService.selectedUnit$, this.hiddenRoutes$, this.settingsLoaded$])
       .pipe(
-        switchMap(([unitId, hiddenRoutes]) => {
+        // the defaults a workspace is entered with would ask for tabs it hides (#2135)
+        filter(([, , settingsLoaded]) => settingsLoaded),
+        map(([unitId, hiddenRoutes]): PresenceQuery => ({
+          unitId, comments: isTabShown(hiddenRoutes, 'comments'), notes: isTabShown(hiddenRoutes, 'notes')
+        })),
+        distinctUntilChanged(sameQuery),
+        startWith(undefined),
+        pairwise(),
+        switchMap(([last, query]) => {
+          const known = this.presence();
+          // a tab only hidden needs nothing new: what is known of the others still holds
+          if (query && last && known && last.unitId === query.unitId &&
+            (last.comments || !query.comments) && (last.notes || !query.notes)) return of(known);
           this.presence.set(undefined);
-          return this.loadPresence(unitId, hiddenRoutes);
+          return query ? this.loadPresence(query) : of(undefined);
         }),
         takeUntil(this.ngUnsubscribe)
       )
@@ -184,17 +209,17 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
   }
 
   /** Whether there are comments and notes; those the workspace hides are not checked, and not asked for. */
-  private loadPresence(unitId: number, hiddenRoutes: string[]): Observable<Presence> {
+  private loadPresence({ unitId, comments, notes }: PresenceQuery): Observable<Presence> {
     const workspaceId = this.workspaceService.selectedWorkspaceId;
-    const hasComments = isTabShown(hiddenRoutes, 'comments') ?
+    const hasComments = comments ?
       this.commentsBackendService.hasComments(workspaceId, unitId) :
       of(undefined);
-    const hasRichNotes = isTabShown(hiddenRoutes, 'notes') ?
+    const hasRichNotes = notes ?
       this.backendService.getUnitRichNotes(workspaceId, unitId)
         .pipe(map(richNotes => (richNotes ? richNotes.notes.length > 0 : undefined))) :
       of(undefined);
     return forkJoin([hasComments, hasRichNotes])
-      .pipe(map(([comments, richNotes]) => ({ hasComments: comments, hasRichNotes: richNotes })));
+      .pipe(map(([commentsPresent, notesPresent]) => ({ hasComments: commentsPresent, hasRichNotes: notesPresent })));
   }
 
   ngOnDestroy(): void {

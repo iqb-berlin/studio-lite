@@ -73,6 +73,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       unitGroups: [],
       stableModulesOnly: true
     };
+    this.workspaceService.setSettingsLoaded(false);
   }
 
   ngOnInit(): void {
@@ -115,6 +116,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         if (wResponse) {
           this.initWorkspace(wResponse);
         } else {
+          // the defaults are all the settings there are: what waits for them must not wait forever
+          this.workspaceService.setSettingsLoaded(true);
           this.snackBar.open(
             this.translateService.instant('workspace.workspace-not-loaded'),
             this.translateService.instant('error'),
@@ -148,6 +151,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           [...workspace.settings.unitGroups || []].sort(compareText)
       };
     }
+    // stored or not, the settings are now the workspace's own, not the defaults it was entered with
+    this.workspaceService.setSettingsLoaded(true);
     this.workspaceService.setWorkspaceGroupStates();
     this.workspaceService.loadRichNoteTags();
 

@@ -42,11 +42,15 @@ export class WorkspaceService {
   private workspaceSettingsValue!: WorkspaceSettingsDto;
   // The tabs the workspace hides, for whoever derives from them: the settings arrive from the server
   // after the workspace is entered, and a unit may be shown before that (#2135).
+  // the same tabs in another order are no change: the settings dialog appends what it hides
   private readonly hiddenRoutesState = signal<string[]>([], {
-    equal: (a, b) => a.length === b.length && a.every((route, index) => route === b[index])
+    equal: (a, b) => a.every(route => b.includes(route)) && b.every(route => a.includes(route))
   });
 
   readonly hiddenRoutes = this.hiddenRoutesState.asReadonly();
+  // whether the settings are the workspace's stored ones, not the defaults it is entered with (#2135)
+  private readonly settingsLoadedState = signal(false);
+  readonly settingsLoaded = this.settingsLoadedState.asReadonly();
   unitList: { [key: string]: UnitInListDto[] } = {};
   // the list again, for whoever derives from it: a computed cannot see the field replaced
   private readonly unitListState = signal<{ [key: string]: UnitInListDto[] }>({});
@@ -119,6 +123,11 @@ export class WorkspaceService {
   set workspaceSettings(settings: WorkspaceSettingsDto) {
     this.workspaceSettingsValue = settings;
     this.hiddenRoutesState.set(settings?.hiddenRoutes ?? []);
+  }
+
+  /** Marks the settings as the workspace's stored ones, or as the defaults it is entered with. */
+  setSettingsLoaded(loaded: boolean): void {
+    this.settingsLoadedState.set(loaded);
   }
 
   /** Changes the settings in place -- whoever holds them sees the change -- and what follows from them. */

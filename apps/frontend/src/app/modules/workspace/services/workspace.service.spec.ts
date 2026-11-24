@@ -168,6 +168,24 @@ describe('WorkspaceService', () => {
       // in place: whoever holds the settings sees the change
       expect(settings.hiddenRoutes).toEqual(['comments', 'notes']);
     });
+
+    // the settings dialog appends what it hides; the same tabs are no change to whoever follows them
+    it('takes the same tabs in another order for no change', () => {
+      service.workspaceSettings = { ...service.workspaceSettings, hiddenRoutes: ['comments', 'notes'] };
+      const before = service.hiddenRoutes();
+
+      service.updateWorkspaceSettings({ hiddenRoutes: ['notes', 'comments'] });
+
+      expect(service.hiddenRoutes()).toBe(before);
+    });
+
+    it('takes another tab hidden for a change, whatever the lists hold twice', () => {
+      service.workspaceSettings = { ...service.workspaceSettings, hiddenRoutes: ['comments', 'comments'] };
+
+      service.updateWorkspaceSettings({ hiddenRoutes: ['comments', 'notes'] });
+
+      expect(service.hiddenRoutes()).toEqual(['comments', 'notes']);
+    });
   });
 
   describe('resetUnitData', () => {
