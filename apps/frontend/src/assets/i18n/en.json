@@ -330,6 +330,7 @@
     "item-profile": "Item profile",
     "add-item": "Add item",
     "select-profile": "Select profile...",
+    "profile-languages": "Languages the profile is complete in",
     "assign-metadata-profiles": "Assign metadata profiles",
     "vocab-loading-error": "Vocabulary could not be loaded.",
     "no-unit-profiles-hint": "The workspace group has no unit profiles.",
