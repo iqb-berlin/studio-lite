@@ -2,6 +2,7 @@ import {
   Component, OnInit, Output, EventEmitter, Input, OnDestroy, ChangeDetectorRef
 } from '@angular/core';
 import { MatCheckboxChange, MatCheckbox } from '@angular/material/checkbox';
+import { MatTooltip } from '@angular/material/tooltip';
 import { MDProfile } from '@iqbspecs/metadata-profile';
 import { MDProfileStore } from '@iqbspecs/metadata-store/metadata-store.interface';
 import { toW3idProfileId } from '@studio-lite/shared-code';
@@ -16,6 +17,8 @@ import { ProfileStoreWithProfiles, WsgAdminService } from '../../modules/wsg-adm
 import { Profile } from '../../models/profile.type';
 import { MetadataBackendService } from '../../modules/metadata/services/metadata-backend.service';
 import { ProfileLabelPipe } from '../../pipes/profile-label.pipe';
+import { ProfileLanguagesPipe } from '../../pipes/profile-languages.pipe';
+import { LanguageCodesPipe } from '../../pipes/language-codes.pipe';
 import { IsProfileSelectedPipe } from '../../pipes/is-profile-selected.pipe';
 
 export type CoreProfile = Profile;
@@ -30,8 +33,8 @@ export type CoreProfile = Profile;
   selector: 'studio-lite-profiles',
   templateUrl: './profiles.component.html',
   styleUrls: ['./profiles.component.scss'],
-  imports: [MatProgressSpinner, FormsModule, MatCheckbox, MatError, TranslateModule, ProfileLabelPipe,
-    IsProfileSelectedPipe]
+  imports: [MatProgressSpinner, FormsModule, MatCheckbox, MatError, MatTooltip, TranslateModule, ProfileLabelPipe,
+    IsProfileSelectedPipe, ProfileLanguagesPipe, LanguageCodesPipe]
 })
 export class ProfilesComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();

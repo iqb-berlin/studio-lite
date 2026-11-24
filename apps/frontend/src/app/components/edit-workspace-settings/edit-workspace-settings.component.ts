@@ -1,5 +1,5 @@
 import {
-  Component, Inject, OnInit, OnDestroy
+  Component, Inject, inject, OnInit, OnDestroy, signal
 } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import {
@@ -15,12 +15,16 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { MatOption } from '@angular/material/core';
 import { MatLabel, MatError } from '@angular/material/form-field';
+import { MatTooltip } from '@angular/material/tooltip';
 import { IncludePipe } from '../../pipes/include.pipe';
 import { ModuleService } from '../../services/module.service';
 import { AppService } from '../../services/app.service';
 import { WorkspaceService } from '../../modules/workspace/services/workspace.service';
 import { BackendService } from '../../modules/admin/services/backend.service';
 import { SelectModuleComponent } from '../select-module/select-module.component';
+import { MetadataBackendService } from '../../modules/metadata/services/metadata-backend.service';
+import { LanguageCodesPipe } from '../../pipes/language-codes.pipe';
+import { profileLanguages } from '../../utils/profile-languages.utils';
 
 type Profile = {
   id: string,
@@ -46,11 +50,18 @@ type SelectedRow = {
 
   imports: [
     MatDialogTitle, MatDialogContent, MatLabel, SelectModuleComponent, MatCheckbox, MatError, MatSelect, MatOption,
-    MatDialogActions, MatButton, MatDialogClose, TranslateModule, IncludePipe
+    MatDialogActions, MatButton, MatDialogClose, MatTooltip, TranslateModule, IncludePipe, LanguageCodesPipe
   ]
 })
 export class EditWorkspaceSettingsComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();
+  private readonly metadataBackendService = inject(MetadataBackendService);
+  /**
+   * The languages each profile of the group is complete in, by its id. Read from the profile itself
+   * rather than kept with the group's choice, so it follows a profile that is translated later (#2212).
+   */
+  private readonly profileLanguagesState = signal<Record<string, string[]>>({});
+  readonly profileLanguages = this.profileLanguagesState.asReadonly();
   constructor(
     public appService: AppService,
     public backendService: BackendService,
@@ -86,6 +97,7 @@ export class EditWorkspaceSettingsComponent implements OnInit, OnDestroy {
             res && (res as WorkspaceGroupFullDto).settings && (res as WorkspaceGroupFullDto).settings?.profiles
               ?.filter((profile: Profile) => isItemProfileId(profile.id))
           ) || [];
+          this.loadProfileLanguages([...this.unitMDProfiles, ...this.itemMDProfiles]);
         }));
       this.backendService.getWorkspaceById(this.data.selectedRow.id)
         .pipe(takeUntil(this.ngUnsubscribe))
@@ -100,6 +112,17 @@ export class EditWorkspaceSettingsComponent implements OnInit, OnDestroy {
           if (unitMDProfile) this.selectedUnitMDProfile = unitMDProfile;
         });
     }
+  }
+
+  private loadProfileLanguages(profiles: Profile[]): void {
+    profiles.forEach(profile => {
+      this.metadataBackendService.getMetadataProfile(profile.id)
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(loaded => {
+          if (!loaded || loaded === true) return;
+          this.profileLanguagesState.update(languages => ({ ...languages, [profile.id]: profileLanguages(loaded) }));
+        });
+    });
   }
 
   setStableChecked($event: MatCheckboxChange) {

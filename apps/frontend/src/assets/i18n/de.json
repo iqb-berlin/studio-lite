@@ -330,6 +330,7 @@
     "item-profile": "Item Profil",
     "add-item": "Item hinzufügen",
     "select-profile": "Profil auswählen...",
+    "profile-languages": "Sprachen, in denen das Profil vollständig vorliegt",
     "assign-metadata-profiles": "Metadaten Profile zuweisen",
     "vocab-loading-error": "Vokabular konnte nicht geladen werden!",
     "no-unit-profiles-hint": "Bereichsgruppe enthält keine Aufgaben Profile!",

@@ -15,6 +15,12 @@
               [name]="profile | profileLabel"
               data-cy="shared-profiles-select-profile">
               {{profile | profileLabel}}
+              @let languages = profile | profileLanguages;
+              @if (languages.length) {
+                <span class="profile-languages"
+                      [matTooltip]="'metadata.profile-languages' | translate"
+                      data-cy="shared-profiles-profile-languages">({{ languages | languageCodes }})</span>
+              }
             </mat-checkbox>
           </div>
         }

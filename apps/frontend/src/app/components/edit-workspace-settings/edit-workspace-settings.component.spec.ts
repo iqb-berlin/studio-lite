@@ -21,6 +21,7 @@ import { WorkspaceService } from '../../modules/workspace/services/workspace.ser
 import { ModuleService } from '../../services/module.service';
 import { SelectModuleComponent } from '../select-module/select-module.component';
 import { VeronaModuleClass } from '../../models/verona-module.class';
+import { MetadataBackendService } from '../../modules/metadata/services/metadata-backend.service';
 
 @Component({
   selector: 'studio-lite-select-module',
@@ -43,6 +44,7 @@ describe('EditWorkspaceSettingsComponent', () => {
   let mockWorkspaceService: Partial<WorkspaceService>;
   let mockModuleService: Partial<ModuleService>;
   let mockDialogRef: Partial<MatDialogRef<EditWorkspaceSettingsComponent>>;
+  let mockMetadataBackendService: Partial<MetadataBackendService>;
 
   const mockDialogData = {
     settings: {
@@ -87,6 +89,15 @@ describe('EditWorkspaceSettingsComponent', () => {
     mockDialogRef = {
       close: jest.fn()
     };
+    const de = (value: string) => ({ lang: 'de', value });
+    const en = (value: string) => ({ lang: 'en', value });
+    mockMetadataBackendService = {
+      // the item profile could not be loaded
+      getMetadataProfile: jest.fn().mockImplementation((url: string) => of(url === 'profile1/unit.json' ? {
+        label: [de('Aufgabe'), en('Unit')],
+        groups: [{ label: [], entries: [{ label: [de('Titel'), en('Title')] }] }]
+      } : false))
+    };
 
     await TestBed.configureTestingModule({
       imports: [
@@ -104,7 +115,8 @@ describe('EditWorkspaceSettingsComponent', () => {
         { provide: WorkspaceService, useValue: mockWorkspaceService },
         { provide: ModuleService, useValue: mockModuleService },
         { provide: MAT_DIALOG_DATA, useValue: mockDialogData },
-        { provide: MatDialogRef, useValue: mockDialogRef }
+        { provide: MatDialogRef, useValue: mockDialogRef },
+        { provide: MetadataBackendService, useValue: mockMetadataBackendService }
       ]
     }).overrideComponent(EditWorkspaceSettingsComponent, {
       remove: { imports: [SelectModuleComponent] },
@@ -125,6 +137,14 @@ describe('EditWorkspaceSettingsComponent', () => {
     expect(component.itemMDProfiles[0].id).toBe('profile2/item.json');
     expect(component.selectedItemMDProfile).toBe('profile2/item.json');
     expect(component.selectedUnitMDProfile).toBe('profile1/unit.json');
+  });
+
+  // Read from each profile of the group, so it follows a profile translated after it was chosen (#2212).
+  it('reads the languages of every profile of the group from the profile itself', () => {
+    expect(mockMetadataBackendService.getMetadataProfile).toHaveBeenCalledWith('profile1/unit.json');
+    expect(mockMetadataBackendService.getMetadataProfile).toHaveBeenCalledWith('profile2/item.json');
+    // a profile that could not be loaded gets no languages, rather than an empty pair of brackets
+    expect(component.profileLanguages()).toEqual({ 'profile1/unit.json': ['de', 'en'] });
   });
 
   it('should update modules in selectModule', () => {
@@ -162,7 +182,8 @@ describe('EditWorkspaceSettingsComponent', () => {
         { provide: WorkspaceService, useValue: mockWorkspaceService },
         { provide: ModuleService, useValue: mockModuleService },
         { provide: MAT_DIALOG_DATA, useValue: dataWithMissingGroupId },
-        { provide: MatDialogRef, useValue: mockDialogRef }
+        { provide: MatDialogRef, useValue: mockDialogRef },
+        { provide: MetadataBackendService, useValue: mockMetadataBackendService }
       ]
     }).overrideComponent(EditWorkspaceSettingsComponent, {
       remove: { imports: [SelectModuleComponent] },

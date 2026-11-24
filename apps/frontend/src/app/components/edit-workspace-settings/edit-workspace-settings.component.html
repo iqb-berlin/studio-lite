@@ -74,6 +74,12 @@
                 <mat-option [value]="unitMDProfile.id"
                             data-cy="edit-workspace-settings-unit-profile">
                   {{unitMDProfile.label }}
+                  @if (profileLanguages()[unitMDProfile.id]?.length) {
+                    <span class="profile-languages"
+                          [matTooltip]="'metadata.profile-languages' | translate"
+                          data-cy="edit-workspace-settings-profile-languages">({{
+                      profileLanguages()[unitMDProfile.id] | languageCodes }})</span>
+                  }
                 </mat-option>
               }
             </mat-select>
@@ -94,6 +100,12 @@
                 <mat-option [value]="itemMDProfile.id"
                             data-cy="edit-workspace-settings-item-profile">
                   {{itemMDProfile.label}}
+                  @if (profileLanguages()[itemMDProfile.id]?.length) {
+                    <span class="profile-languages"
+                          [matTooltip]="'metadata.profile-languages' | translate"
+                          data-cy="edit-workspace-settings-profile-languages">({{
+                      profileLanguages()[itemMDProfile.id] | languageCodes }})</span>
+                  }
                 </mat-option>
               }
             </mat-select>

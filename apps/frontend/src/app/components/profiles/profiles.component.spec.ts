@@ -302,5 +302,21 @@ describe('ProfilesComponent', () => {
       expect(fixture.debugElement.query(By.css('[data-cy="shared-profiles-select-profile-title"]'))).toBeNull();
       expect(fixture.debugElement.queryAll(By.css('mat-checkbox')).length).toBe(1);
     });
+
+    // Behind each profile the languages it is complete in; the name it is saved under stays its own (#2212).
+    it('shows the languages of a profile behind its name', async () => {
+      (mockMetadataBackendService.getMetadataProfile as jest.Mock).mockReturnValue(of({
+        ...mockProfileData,
+        label: [{ lang: 'de', value: 'Test Profile' }, { lang: 'en', value: 'Test profile' }]
+      }));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      await new Promise<void>(resolve => { setTimeout(() => resolve(), 10); });
+      fixture.detectChanges();
+
+      const languages = fixture.debugElement.query(By.css('[data-cy="shared-profiles-profile-languages"]'));
+      expect(languages.nativeElement.textContent.trim()).toBe('(de, en)');
+      expect(fixture.debugElement.query(By.css('mat-checkbox input')).nativeElement.name).toBe('Test Profile');
+    });
   });
 });
