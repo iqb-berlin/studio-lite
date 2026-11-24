@@ -211,8 +211,8 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
 
   /**
    * Whether there are comments and notes; those the workspace hides are not checked, and not asked
-   * for. What is known already is not asked again. Comments are asked again whenever they change:
-   * a comment written beside the properties, in a pinned tab, shows here (#2135).
+   * for. What is known already is not asked again. Both are asked again whenever they change: a
+   * comment written or a note added beside the properties, in a pinned tab, shows here (#2135).
    */
   private loadPresence({ unitId, comments, notes }: PresenceQuery, known?: Presence): Observable<Presence> {
     const workspaceId = this.workspaceService.selectedWorkspaceId;
@@ -223,10 +223,13 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
       .pipe(switchMap(() => this.commentsBackendService.hasComments(workspaceId, unitId)));
     let hasComments: Observable<boolean | undefined> = of(undefined);
     if (comments) hasComments = known ? askedComments.pipe(startWith(known.hasComments)) : askedComments;
-    const askRichNotes = () => this.backendService.getUnitRichNotes(workspaceId, unitId)
-      .pipe(map(richNotes => (richNotes ? richNotes.notes.length > 0 : undefined)));
+    // the same for rich notes, added or deleted in a pinned tab
+    const notesChanged: Observable<unknown> = this.workspaceService.richNotesChanged$;
+    const askedRichNotes = (known ? notesChanged : notesChanged.pipe(startWith(undefined)))
+      .pipe(switchMap(() => this.backendService.getUnitRichNotes(workspaceId, unitId)
+        .pipe(map(richNotes => (richNotes ? richNotes.notes.length > 0 : undefined)))));
     let hasRichNotes: Observable<boolean | undefined> = of(undefined);
-    if (notes) hasRichNotes = known ? of(known.hasRichNotes) : askRichNotes();
+    if (notes) hasRichNotes = known ? askedRichNotes.pipe(startWith(known.hasRichNotes)) : askedRichNotes;
     return combineLatest([hasComments, hasRichNotes])
       .pipe(map(([commentsPresent, notesPresent]) => ({ hasComments: commentsPresent, hasRichNotes: notesPresent })));
   }

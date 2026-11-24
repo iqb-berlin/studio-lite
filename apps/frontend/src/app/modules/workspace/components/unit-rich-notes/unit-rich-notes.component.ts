@@ -218,6 +218,7 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
           this.workspaceBackendService.addUnitRichNote(writtenFor.workspaceId, writtenFor.unitId, newNote)
             .subscribe(id => {
               if (id) {
+                this.workspaceService.notifyRichNotesChanged();
                 this.workspaceBackendService.getUnitRichNotes(writtenFor.workspaceId, writtenFor.unitId)
                   .pipe(takeUntil(this.ngUnsubscribe))
                   .subscribe(data => {
@@ -291,6 +292,7 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
         this.workspaceBackendService.deleteUnitRichNote(this.workspaceId, this.unitId, noteId)
           .subscribe(success => {
             if (success) {
+              this.workspaceService.notifyRichNotesChanged();
               this.notes = this.notes.filter(n => n.id !== noteId);
               this.rebuildDisplayNodes();
             } else {

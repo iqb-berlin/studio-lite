@@ -226,6 +226,8 @@ describe('UnitRichNotesComponent', () => {
       unitId: 10, tagId: 't1', content: 'new', links: [], itemReferences: ['i1']
     }));
     expect(shapeOf(component.displayNodes)).toEqual([{ tagId: 't1', notes: [7], children: [] }]);
+    // the technical check beside it tells whether the unit has notes (#2135)
+    expect(workspaceServiceMock.notifyRichNotesChanged).toHaveBeenCalled();
   });
 
   it('should delete a note once the delete button confirms', () => {
@@ -237,6 +239,7 @@ describe('UnitRichNotesComponent', () => {
 
     expect(workspaceBackendServiceMock.deleteUnitRichNote).toHaveBeenCalledWith(1, 10, 1);
     expect(shapeOf(component.displayNodes)).toEqual([{ tagId: 't1', notes: [2], children: [] }]);
+    expect(workspaceServiceMock.notifyRichNotesChanged).toHaveBeenCalled();
   });
 
   // The dialog is closed by the time the answer comes: the text was gone, and only the general error
@@ -276,6 +279,7 @@ describe('UnitRichNotesComponent', () => {
 
       expect(snackBarMock.open).toHaveBeenCalledWith('workspace.rich-note-not-saved', 'error', { duration: 3000 });
       expect(dialogNote(1)).toEqual(written);
+      expect(workspaceServiceMock.notifyRichNotesChanged).not.toHaveBeenCalled();
     });
 
     // Stored, but not shown, a note invites a second save that stores it twice
@@ -342,6 +346,7 @@ describe('UnitRichNotesComponent', () => {
 
       expect(snackBarMock.open).toHaveBeenCalledWith('workspace.rich-note-not-deleted', 'error', { duration: 3000 });
       expect(shapeOf(component.displayNodes)).toEqual([{ tagId: 't1', notes: [1], children: [] }]);
+      expect(workspaceServiceMock.notifyRichNotesChanged).not.toHaveBeenCalled();
     });
   });
 

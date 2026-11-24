@@ -33,6 +33,7 @@ describe('UnitCheckComponent', () => {
   let settingsLoaded: boolean;
   let settingsLoadedState: WritableSignal<boolean>;
   let commentsUpdated: Subject<void>;
+  let richNotesChanged: Subject<void>;
   let getUnitRichNotes: jest.Mock;
   let getUnitDefinition: jest.Mock;
   let getUnitDefinitionSummary: jest.Mock;
@@ -55,6 +56,7 @@ describe('UnitCheckComponent', () => {
     hiddenRoutesState = signal(hiddenRoutes);
     settingsLoadedState = signal(settingsLoaded);
     commentsUpdated = new Subject<void>();
+    richNotesChanged = new Subject<void>();
     TestBed.configureTestingModule({
       imports: [UnitCheckComponent, TranslateModule.forRoot()],
       providers: [
@@ -66,7 +68,8 @@ describe('UnitCheckComponent', () => {
             units: units.asReadonly(),
             hiddenRoutes: hiddenRoutesState.asReadonly(),
             settingsLoaded: settingsLoadedState.asReadonly(),
-            onCommentsUpdated: commentsUpdated
+            onCommentsUpdated: commentsUpdated,
+            richNotesChanged$: richNotesChanged
           }
         },
         {
@@ -214,6 +217,20 @@ describe('UnitCheckComponent', () => {
     commentsUpdated.next();
     fixture.detectChanges();
     expect(commentsInfo()).toBe('unit-check.comments-absent');
+  }));
+
+  // a note added in the tab pinned beside the properties (#2135)
+  it('asks again whether there are notes when they change', fakeAsync(() => {
+    create();
+    expect(sectionOf('notes')?.querySelector('[data-cy="unit-check-info"]')?.textContent)
+      .toBe('unit-check.notes-absent');
+
+    getUnitRichNotes.mockReturnValue(of({ tags: [], notes: [{ id: 1 }] }));
+    richNotesChanged.next();
+    fixture.detectChanges();
+
+    expect(sectionOf('notes')?.querySelector('[data-cy="unit-check-info"]')?.textContent)
+      .toBe('unit-check.notes-present');
   }));
 
   // the first answer is slow and was sent before the comment was written: it must not have the last word

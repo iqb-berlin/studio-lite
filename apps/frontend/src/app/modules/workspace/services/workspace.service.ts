@@ -1,5 +1,5 @@
 import {
-  BehaviorSubject, lastValueFrom, Observable
+  BehaviorSubject, lastValueFrom, Observable, Subject
 } from 'rxjs';
 import {
   EventEmitter, Injectable, Output, signal
@@ -114,6 +114,9 @@ export class WorkspaceService {
   }
 
   @Output() onCommentsUpdated = new EventEmitter<void>();
+  // a rich note added or deleted, for whoever tells whether the unit has any (#2135)
+  private readonly richNotesChangedSubject = new Subject<void>();
+  readonly richNotesChanged$ = this.richNotesChangedSubject.asObservable();
   @Output() unitMetadataReloaded = new EventEmitter<void>();
 
   get workspaceSettings(): WorkspaceSettingsDto {
@@ -123,6 +126,11 @@ export class WorkspaceService {
   set workspaceSettings(settings: WorkspaceSettingsDto) {
     this.workspaceSettingsValue = settings;
     this.hiddenRoutesState.set(settings?.hiddenRoutes ?? []);
+  }
+
+  /** Tells that a rich note of the unit was added or deleted. */
+  notifyRichNotesChanged(): void {
+    this.richNotesChangedSubject.next();
   }
 
   /** Marks the settings as the workspace's stored ones, or as the defaults it is entered with. */
