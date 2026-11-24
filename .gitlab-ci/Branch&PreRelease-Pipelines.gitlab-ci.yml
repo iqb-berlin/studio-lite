@@ -4,6 +4,8 @@
 
 # https://gitlab.com/gitlab-org/gitlab/-/issues/206960
 # https://docs.gitlab.com/ee/ci/jobs/job_control.html#cicd-variable-expressions
+# The branch rules here reach merge queue branches and pipelines started by hand only: the
+# workflow rules in .gitlab-ci.yml start no pipeline for a push to any other branch.
 .default_rules:
   rules:
     - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
@@ -226,8 +228,10 @@ install-dependencies:
 build-cicd-base-image:
   stage: build
   rules:
+    # .gitlab-ci.yml sets BASE_IMAGE, and with it the tag the build jobs pull
     - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == "develop"
       changes:
+        - .gitlab-ci.yml
         - .gitlab-ci/CICD.Dockerfile
     - if: $CI_COMMIT_BRANCH &&
           $CI_COMMIT_BRANCH != "main" &&
@@ -325,8 +329,8 @@ build-e2e-base-image:
 # few commits of the source branch only; the largest depth fetches the target branch and the
 # history down to where the two part, and leaves a full clone as it is. The branch rather than
 # CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA: the mirror pulls GitHub on a timer and may not hold
-# that commit yet, and an older target only makes nx test more. A push without a pull request,
-# a merge queue branch among them, compares with the commit before.
+# that commit yet, and an older target only makes nx test more. A pipeline without a pull
+# request -- a merge queue branch, or one started by hand -- compares with the commit before.
 .affected_base:
   script:
     - if [ -n "${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME}" ]; then

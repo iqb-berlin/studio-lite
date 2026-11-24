@@ -288,13 +288,18 @@ A branch name carries the issue it belongs to: `fix/1629-group-admin-guard`.
 4. **Open a pull request against `develop`.**
 5. **The pipeline runs on GitLab**, mirrored from GitHub. The only workflow in `.github/workflows`
    builds the documentation; besides it GitHub runs CodeQL and Dependabot from their default
-   setups, and nothing of that gates a merge. A push to a branch runs `build-app`, `test-app`,
-   `lint-app`, `typecheck-app`, `verify-api-runtime-deps` and `audit-app`. On a pull request the
-   database jobs come along; on a plain branch push they wait for a change to `database/*`, and
-   that glob does not reach into `database/changelog/`, so a new changeset alone does not bring
-   them out. **The e2e suite runs only on a pull request against `develop`**, and there only the
-   API specs and Chrome automatically — Firefox, Edge and the mobile viewports are manual jobs on
-   the pipeline page.
+   setups, and nothing of that gates a merge. A push to a branch with a pull request against
+   `develop` runs that pull request's pipeline: `build-app`, `test-app`, `lint-app`,
+   `typecheck-app`, `verify-api-runtime-deps`, `audit-app`, the database jobs and **the e2e
+   suite** — the API specs and Chrome automatically, Firefox, Edge and the mobile viewports as
+   manual jobs on the pipeline page. The merge queue branch of step 8 runs the same jobs without
+   e2e. **A push to any other branch runs no pipeline** (#2218), and changing the base of a pull
+   request does not start one either. A pull request stacked on another branch gets its pipeline
+   with the first push after it targets `develop`; until then it has no status and cannot go into
+   the merge queue. The same push — an empty commit will do — helps when GitLab misses a pull
+   request and GitHub keeps waiting for its status. "Run pipeline" on GitLab starts the jobs
+   without e2e by hand on any branch but `develop` and `main`; it does not replace the pull
+   request's pipeline.
 6. **Read the jobs, not the badge.** The badge at the top of this file is `main`'s last pipeline,
    not yours. In the pipeline, every job gates a merge except `audit-app`, the `check-*` rule
    jobs, the image scans and the manual browser jobs (Firefox, Edge and the mobile viewports),
@@ -307,14 +312,14 @@ A branch name carries the issue it belongs to: `fix/1629-group-admin-guard`.
    matches what the api build generates or the root's overrides; running
    `node scripts/update-api-runtime-deps.mjs` brings it up to date (#1878). `build-app` runs
    `nx affected --base=HEAD~1` and covers what the last commit touched. `test-app` and `lint-app`
-   do the same on a plain branch push; in a pull request they compare with the branch it goes
+   do the same on a merge queue branch; in a pull request they compare with the branch it goes
    into and cover all of its commits (#1659).
 7. **Rebase only on a conflict.** `develop` does not require a pull request to be up to date with
    it; when `develop` has moved on, the merge queue tests the combination. Only a pull request that
    conflicts with `develop` needs a rebase, force-pushed with `--force-with-lease`.
 8. **Add the pull request to the merge queue** once its pipeline is green, the e2e jobs included.
-   The queue merges it into `develop` on a `gh-readonly-queue/develop/…` branch, runs the branch
-   pipeline of step 5 there — without e2e — and merges with a merge commit when that is green.
+   The queue merges it into `develop` on a `gh-readonly-queue/develop/…` branch, runs the jobs
+   of step 5 there — without e2e — and merges with a merge commit when that is green.
    Merging directly or pushing to `develop` is not possible.
 
 Tickets live on [project board 18](https://github.com/orgs/iqb-berlin/projects/18). When a card moves

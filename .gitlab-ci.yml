@@ -21,6 +21,24 @@ stages:
 
 image: ${DOCKER_HUB_PROXY}${BASE_IMAGE}
 
+# A push to a branch other than develop, main or a merge queue branch starts no pipeline
+# (#2218). A pull request against develop has a pipeline of its own (external_pull_request_event)
+# that tests the same commit, e2e included, and it is the one GitHub requires. The push pipeline
+# beside it ran the fast jobs a second time and held up the merge queue: GitLab starts a
+# project's jobs in the order they were created, and the one runner is shared. Without it, a pull
+# request whose own pipeline was not created gets no status at all instead of a green one without
+# e2e. A merge queue branch (gh-readonly-queue/develop/…) keeps its push pipeline, it has no
+# other. "Run pipeline" on GitLab still starts a branch pipeline by hand.
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" &&
+          $CI_COMMIT_BRANCH &&
+          $CI_COMMIT_BRANCH != "develop" &&
+          $CI_COMMIT_BRANCH != "main" &&
+          $CI_COMMIT_BRANCH !~ /^gh-readonly-queue\//
+      when: never
+    - when: always
+
 # A job that dies as runner_system_failure on its image pull, with an HTTP 404
 # from the HU dependency proxy and before any of our code has run, is not flaky
 # infrastructure: the proxy rejects every pull made as the project's bot account
