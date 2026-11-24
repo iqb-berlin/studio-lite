@@ -324,5 +324,10 @@ describe('findSchemeProblems', () => {
     expect(findSchemeProblems([], '{"version": "3.0", "variableCodings": [')).toEqual(unreadable);
     // the validation itself stops at a coding that is not one
     expect(findSchemeProblems([], JSON.stringify({ version: '3.0', variableCodings: [null] }))).toEqual(unreadable);
+    // and passes over a number or a text, naming a source missing for no variable
+    expect(findSchemeProblems([], JSON.stringify({
+      version: '3.0', variableCodings: [{ id: 'a', sourceType: 'BASE', ...coded }, 5]
+    }))).toEqual(unreadable);
+    expect(findSchemeProblems([], JSON.stringify({ version: '3.0', variableCodings: {} }))).toEqual(unreadable);
   });
 });

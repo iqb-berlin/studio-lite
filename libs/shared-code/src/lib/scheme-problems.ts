@@ -111,6 +111,11 @@ export function findSchemeProblems(
   // from version 3 on: a scheme without a version is of the oldest format
   if (!(Number.parseInt(String(codingScheme.version ?? ''), 10) >= 3)) return [];
   const codings = codingScheme.variableCodings ?? [];
+  // A coding that is no object is not read as one: the validation passes over a number or a text
+  // and names a source missing for no variable. Coding with such a scheme fails.
+  if (!Array.isArray(codings) || codings.some(coding => !coding || typeof coding !== 'object')) {
+    return [UNREADABLE];
+  }
   // the saved list as it is, read as findVariableIdConflicts reads it: an entry that is no variable
   // stops the validation, and the scheme would be taken for unreadable (#2135)
   const elements = (Array.isArray(variables) ? variables : [])
@@ -120,8 +125,7 @@ export function findSchemeProblems(
     // validated as the coding reads them, where the validation is stricter than the coding
     problems = validate(withDeactivatedAsNoValue(elements, codings), withoutNoPosition(codings));
   } catch {
-    // codings that are not a list, or a coding that is not one -- not an object, or a rule set without
-    // rules -- stop the validation and the adjustments before it
+    // a coding the validation cannot read -- a rule set without rules, say -- stops it
     return [UNREADABLE];
   }
   const count = (ids: string[]) => ids.reduce(
