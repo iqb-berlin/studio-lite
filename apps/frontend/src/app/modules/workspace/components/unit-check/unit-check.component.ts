@@ -1,8 +1,9 @@
 import {
   Component, computed, OnDestroy, OnInit, signal
 } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import {
-  forkJoin, from, map, Observable, of, Subject, switchMap, takeUntil
+  combineLatest, forkJoin, from, map, Observable, of, Subject, switchMap, takeUntil
 } from 'rxjs';
 import {
   MatCard, MatCardContent, MatCardHeader, MatCardTitle
@@ -23,13 +24,19 @@ import { checkUnitKey } from '../../utils/unit-key.utils';
 import { VariableIdConflictListComponent } from '../variable-id-conflict-list/variable-id-conflict-list.component';
 import { VariableIdConflictFixComponent } from '../variable-id-conflict-fix/variable-id-conflict-fix.component';
 
-/** What the check reads from the server, apart from the stores. */
+/** What the check reads from the server for the unit, apart from the stores. */
 interface UnitCheckSources {
   /** The server's summary of the stored definition; not asked for where the editor holds it. */
   definitionSummary: UnitDefinitionSummaryDto | undefined;
+}
+
+/**
+ * Whether the unit has comments and rich notes. Asked again when the tabs the workspace hides
+ * change: its settings may arrive after the unit (#2135). undefined: hidden, or not known.
+ */
+interface Presence {
   hasComments: boolean | undefined;
   hasRichNotes: boolean | undefined;
-  hiddenRoutes: string[];
 }
 
 type Modules = Partial<Record<ModuleType, string>>;
@@ -58,6 +65,9 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();
   // undefined until the stores, the modules and the sources of the unit shown are loaded
   private readonly sources = signal<UnitCheckSources | undefined>(undefined);
+  // undefined until asked for the unit shown and the tabs the workspace hides
+  private readonly presence = signal<Presence | undefined>(undefined);
+  private readonly hiddenRoutes$: Observable<string[]>;
 
   // only the modules of the properties: the check, which parses the scheme, must not run again on
   // every keystroke in the name or the description
@@ -85,7 +95,8 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
 
   private readonly checked = computed((): UnitCheckSection[] | undefined => {
     const sources = this.sources();
-    if (!sources) return undefined;
+    const presence = this.presence();
+    if (!sources || !presence) return undefined;
     // the maps of installed modules are no signals: checked again when a reload replaces them
     this.moduleService.listVersion();
     const definitionStore = this.unitStores.definitionStore();
@@ -108,7 +119,8 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
         variables: definitionStore?.variablesChanged() ?? false,
         scheme: schemeStore?.changed() ?? false
       },
-      ...sources
+      ...presence,
+      hiddenRoutes: this.workspaceService.hiddenRoutes()
     });
   });
 
@@ -123,7 +135,9 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
     private moduleService: ModuleService,
     private backendService: WorkspaceBackendService,
     private commentsBackendService: CommentsBackendService
-  ) {}
+  ) {
+    this.hiddenRoutes$ = toObservable(this.workspaceService.hiddenRoutes);
+  }
 
   ngOnInit(): void {
     this.workspaceService.selectedUnit$
@@ -135,25 +149,43 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
         takeUntil(this.ngUnsubscribe)
       )
       .subscribe(sources => this.sources.set(sources));
+    combineLatest([this.workspaceService.selectedUnit$, this.hiddenRoutes$])
+      .pipe(
+        switchMap(([unitId, hiddenRoutes]) => {
+          this.presence.set(undefined);
+          return this.loadPresence(unitId, hiddenRoutes);
+        }),
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe(presence => this.presence.set(presence));
   }
 
   /** Loads all that is checked; the stores are shared with the tabs, so none is requested twice. */
   private load(unitId: number): Observable<UnitCheckSources> {
     const workspaceId = this.workspaceService.selectedWorkspaceId;
-    const hiddenRoutes = this.workspaceService.workspaceSettings?.hiddenRoutes || [];
     // loaded once; asked again on the next unit only when the last load failed
     const modulesLoaded = this.moduleService.listLoaded() ?
       of(undefined) :
       from(this.moduleService.loadList());
-    // comments and notes the workspace hides are not checked, and so not asked for. Definition and
-    // scheme are, hidden tabs or not: whether there is content the player can play, and whether the
-    // export would write an id twice, is asked under the properties where those tabs are hidden.
-    // The definition itself is not loaded: it embeds the unit's media and runs to megabytes, and the
+    // Definition and scheme are asked for, hidden tabs or not: whether there is content the player can
+    // play, and whether the export would write an id twice, is asked under the properties where those
+    // tabs are hidden. The definition itself is not loaded: it embeds the unit's media and runs to megabytes, and the
     // check needs only whether there is one and its format (#2135). Where the editor already holds
     // it, the check reads that instead.
     const storedDefinition = this.unitStores.definitionStore() ?
       of(undefined) :
       this.backendService.getUnitDefinitionSummary(workspaceId, unitId).pipe(map(summary => summary ?? undefined));
+    return forkJoin([
+      modulesLoaded,
+      this.unitStores.loadMetadataStore(workspaceId, unitId),
+      storedDefinition,
+      this.unitStores.loadSchemeStore(workspaceId, unitId)
+    ]).pipe(map(([, , summary]) => ({ definitionSummary: summary })));
+  }
+
+  /** Whether there are comments and notes; those the workspace hides are not checked, and not asked for. */
+  private loadPresence(unitId: number, hiddenRoutes: string[]): Observable<Presence> {
+    const workspaceId = this.workspaceService.selectedWorkspaceId;
     const hasComments = isTabShown(hiddenRoutes, 'comments') ?
       this.commentsBackendService.hasComments(workspaceId, unitId) :
       of(undefined);
@@ -161,18 +193,8 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
       this.backendService.getUnitRichNotes(workspaceId, unitId)
         .pipe(map(richNotes => (richNotes ? richNotes.notes.length > 0 : undefined))) :
       of(undefined);
-    return forkJoin([
-      modulesLoaded,
-      this.unitStores.loadMetadataStore(workspaceId, unitId),
-      storedDefinition,
-      this.unitStores.loadSchemeStore(workspaceId, unitId),
-      hasComments,
-      hasRichNotes
-    ]).pipe(
-      map(([, , summary, , comments, richNotes]) => ({
-        definitionSummary: summary, hasComments: comments, hasRichNotes: richNotes, hiddenRoutes
-      }))
-    );
+    return forkJoin([hasComments, hasRichNotes])
+      .pipe(map(([comments, richNotes]) => ({ hasComments: comments, hasRichNotes: richNotes })));
   }
 
   ngOnDestroy(): void {

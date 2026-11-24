@@ -153,6 +153,23 @@ describe('WorkspaceService', () => {
     });
   });
 
+  // the settings arrive from the server after the workspace is entered; what derives from the hidden
+  // tabs follows them (#2135)
+  describe('hiddenRoutes', () => {
+    it('follows the settings, set or changed in place', () => {
+      expect(service.hiddenRoutes()).toEqual([]);
+
+      service.workspaceSettings = { ...service.workspaceSettings, hiddenRoutes: ['notes'] };
+      expect(service.hiddenRoutes()).toEqual(['notes']);
+
+      const settings = service.workspaceSettings;
+      service.updateWorkspaceSettings({ hiddenRoutes: ['comments', 'notes'] });
+      expect(service.hiddenRoutes()).toEqual(['comments', 'notes']);
+      // in place: whoever holds the settings sees the change
+      expect(settings.hiddenRoutes).toEqual(['comments', 'notes']);
+    });
+  });
+
   describe('resetUnitData', () => {
     it('should reset the timestamps and let go of the stores', () => {
       service.lastChangedMetadata = new Date();

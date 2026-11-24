@@ -1,5 +1,5 @@
 import {
-  ComponentFixture, fakeAsync, TestBed, tick
+  ComponentFixture, fakeAsync, flush, TestBed, tick
 } from '@angular/core/testing';
 import { signal, WritableSignal } from '@angular/core';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
@@ -29,6 +29,7 @@ describe('UnitCheckComponent', () => {
   let fixture: ComponentFixture<UnitCheckComponent>;
   let unitStores: UnitStoresService;
   let hiddenRoutes: string[];
+  let hiddenRoutesState: WritableSignal<string[]>;
   let getUnitRichNotes: jest.Mock;
   let getUnitDefinition: jest.Mock;
   let getUnitDefinitionSummary: jest.Mock;
@@ -48,6 +49,7 @@ describe('UnitCheckComponent', () => {
   const sectionOf = (tab: string) => element().querySelector(`[data-cy="unit-check-${tab}"]`);
 
   const create = () => {
+    hiddenRoutesState = signal(hiddenRoutes);
     TestBed.configureTestingModule({
       imports: [UnitCheckComponent, TranslateModule.forRoot()],
       providers: [
@@ -57,7 +59,7 @@ describe('UnitCheckComponent', () => {
             selectedUnit$: new BehaviorSubject(3),
             selectedWorkspaceId: 1,
             units: units.asReadonly(),
-            workspaceSettings: { hiddenRoutes }
+            hiddenRoutes: hiddenRoutesState.asReadonly()
           }
         },
         {
@@ -138,6 +140,34 @@ describe('UnitCheckComponent', () => {
     expect(tabs()).toEqual(['unit-check-properties', 'unit-check-editor', 'unit-check-schemer']);
     expect(hasComments).not.toHaveBeenCalled();
     expect(getUnitRichNotes).not.toHaveBeenCalled();
+  }));
+
+  // after a reload of the page and on entering a workspace, its settings arrive after the unit (#2135)
+  it('leaves out the tabs the workspace hides once its settings arrive', fakeAsync(() => {
+    create();
+    expect(tabs()).toContain('unit-check-comments');
+
+    hiddenRoutesState.set(['comments', 'notes']);
+    fixture.detectChanges();
+    flush();
+    fixture.detectChanges();
+
+    expect(tabs()).toEqual(['unit-check-properties', 'unit-check-editor', 'unit-check-schemer']);
+  }));
+
+  it('asks whether there are comments once the settings show their tab', fakeAsync(() => {
+    hiddenRoutes = ['comments'];
+    create();
+    expect(hasComments).not.toHaveBeenCalled();
+
+    hiddenRoutesState.set([]);
+    fixture.detectChanges();
+    flush();
+    fixture.detectChanges();
+
+    expect(hasComments).toHaveBeenCalledWith(1, 3);
+    expect(sectionOf('comments')?.querySelector('[data-cy="unit-check-info"]')?.textContent)
+      .toBe('unit-check.comments-present');
   }));
 
   // the export writes the ids of a scheme whether the coding is shown or not (#2119)

@@ -68,6 +68,10 @@ describe('EditUnitButtonComponent', () => {
       selectedUnit$: new BehaviorSubject<number>(0),
       unitList: {}
     });
+    // the settings change in place, as the service changes them
+    mockWorkspaceService.updateWorkspaceSettings = jest.fn(changes => {
+      Object.assign(mockWorkspaceService.workspaceSettings, changes);
+    });
     mockWorkspaceBackendService = createMock<WorkspaceBackendService>();
     mockAppService = createMock<AppService>({
       dataLoading: false

@@ -39,7 +39,14 @@ export class WorkspaceService {
   selectedWorkspaceId = 0;
   selectedWorkspaceName = '';
   selectedUnit$ = new BehaviorSubject<number>(0);
-  workspaceSettings: WorkspaceSettingsDto;
+  private workspaceSettingsValue!: WorkspaceSettingsDto;
+  // The tabs the workspace hides, for whoever derives from them: the settings arrive from the server
+  // after the workspace is entered, and a unit may be shown before that (#2135).
+  private readonly hiddenRoutesState = signal<string[]>([], {
+    equal: (a, b) => a.length === b.length && a.every((route, index) => route === b[index])
+  });
+
+  readonly hiddenRoutes = this.hiddenRoutesState.asReadonly();
   unitList: { [key: string]: UnitInListDto[] } = {};
   // the list again, for whoever derives from it: a computed cannot see the field replaced
   private readonly unitListState = signal<{ [key: string]: UnitInListDto[] }>({});
@@ -104,6 +111,21 @@ export class WorkspaceService {
 
   @Output() onCommentsUpdated = new EventEmitter<void>();
   @Output() unitMetadataReloaded = new EventEmitter<void>();
+
+  get workspaceSettings(): WorkspaceSettingsDto {
+    return this.workspaceSettingsValue;
+  }
+
+  set workspaceSettings(settings: WorkspaceSettingsDto) {
+    this.workspaceSettingsValue = settings;
+    this.hiddenRoutesState.set(settings?.hiddenRoutes ?? []);
+  }
+
+  /** Changes the settings in place -- whoever holds them sees the change -- and what follows from them. */
+  updateWorkspaceSettings(changes: Partial<WorkspaceSettingsDto>): void {
+    Object.assign(this.workspaceSettingsValue, changes);
+    this.hiddenRoutesState.set(this.workspaceSettingsValue.hiddenRoutes ?? []);
+  }
 
   constructor(
     private backendService: WorkspaceBackendService,
