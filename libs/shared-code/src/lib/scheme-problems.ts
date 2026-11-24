@@ -75,9 +75,23 @@ export function findSchemeProblems(
     .filter(variable => !!variable && typeof variable === 'object');
   let problems: CodingSchemeProblem[];
   try {
-    problems = validate(elements, codings);
+    // Elements the schemer deactivated: every coding of theirs says "no value" while the element has
+    // one. The schemer's "Deaktivieren" does that on purpose and the coding then skips the element,
+    // but the validation takes it for an invalid source. It is handed such an element as one without
+    // value; its other checks -- an id or a name used twice -- still see it (#2135).
+    const deactivated = new Set(codings
+      .filter(coding => coding?.sourceType === 'BASE_NO_VALUE')
+      .map(coding => coding.id));
+    codings
+      .filter(coding => coding?.sourceType !== 'BASE_NO_VALUE')
+      .forEach(coding => deactivated.delete(coding?.id));
+    const validated = elements.map(variable => (
+      deactivated.has(variable.id) ? { ...variable, type: 'no-value' as const } : variable
+    ));
+    problems = validate(validated, codings);
   } catch {
-    // a coding that is not one -- not an object, or a rule set without rules -- stops the validation
+    // codings that are not a list, or a coding that is not one -- not an object, or a rule set without
+    // rules -- stop the validation
     return [UNREADABLE];
   }
   const count = (ids: string[]) => ids.reduce(

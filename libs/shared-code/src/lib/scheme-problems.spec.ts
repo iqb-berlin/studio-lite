@@ -219,6 +219,36 @@ describe('findSchemeProblems', () => {
     }]);
   });
 
+  // as the source lists of a drag-and-drop the schemer deactivated: its "Deaktivieren" codes an element
+  // that has a value as one without, and the coding skips it (#2135)
+  it('finds nothing wrong with an element the schemer deactivated', () => {
+    const variables: VariableInfoInput[] = [
+      { id: 'drop-list_1', alias: '_03a', type: 'string' },
+      { id: 'drop-list_2', alias: '03', type: 'string' }
+    ];
+
+    expect(findSchemeProblems(variables, scheme([
+      { id: 'drop-list_1', alias: '_03a', sourceType: 'BASE_NO_VALUE' },
+      {
+        id: 'drop-list_2', alias: '03', sourceType: 'BASE', ...coded
+      }
+    ]))).toEqual([]);
+  });
+
+  it('still names an element the schemer deactivated when its id is used twice', () => {
+    const variables: VariableInfoInput[] = [
+      { id: 'text_x', alias: '_00a', type: 'string' },
+      { id: 'text_x', alias: '_00a', type: 'string' }
+    ];
+
+    expect(findSchemeProblems(variables, scheme([
+      { id: 'text_x', alias: '_00a', sourceType: 'BASE_NO_VALUE' },
+      { id: 'text_x', alias: '_00a', sourceType: 'BASE_NO_VALUE' }
+    ])).map(problem => [problem.type, problem.variable]).sort()).toEqual([
+      ['INVALID_SOURCE', '_00a'], ['INVALID_SOURCE', 'text_x']
+    ]);
+  });
+
   // the schemer converts an older scheme when it opens it; held against the current format, it would fail
   it('leaves a scheme of an older format unasked', () => {
     const variables: VariableInfoInput[] = [{ id: 'drop_1', alias: '_01a', type: 'string' }];
