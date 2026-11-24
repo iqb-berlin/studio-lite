@@ -3,7 +3,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class TopConcept {
   notation!: string[];
-  prefLabel!: { de: string };
+  /** The term by language, e.g. `{ de: 'Längsschnitt', en: 'Longitudinal' }`. */
+  prefLabel!: Record<string, string>;
   narrower!: TopConcept[];
   id!: string;
 }

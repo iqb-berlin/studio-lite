@@ -281,7 +281,7 @@
                 <iqb-profile-form
                   [metadataValues]="iqbMetadataValues"
                   [profileData]="unitProfile"
-                  [language]="'de'"
+                  [language]="language"
                   [formlyWrapper]="'panel'"
                   [panelExpanded]="true"
                   [vocabularyProvider]="metadataService"
@@ -309,7 +309,7 @@
                   class="fx-flex-row-50"
                   [profile]="itemProfile"
                   [metadata]="metadata"
-                  [language]="'de'"
+                  [language]="language"
                   [variablesLoader]="variablesLoader"
                   (metadataChange)="onItemsMetadataChange($event)">
                 </studio-lite-items>

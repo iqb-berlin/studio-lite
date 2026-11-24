@@ -53,7 +53,8 @@ export class VocabNodeChangeService {
     }
     const node = new VocabNode();
     node.id = notationNode.id;
-    node.label = notationNode.prefLabel?.de || '';
+    const { de } = notationNode.prefLabel ?? {};
+    node.label = de || '';
     node.notation = notationNode.notation || [];
     node.description = notationNode.description || '';
     node.children = notationNode.narrower &&
