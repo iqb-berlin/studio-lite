@@ -620,12 +620,9 @@
     "VALUE_CHANGED": "Value changed"
   },
   "variable-id-conflicts": {
-    "id": "The ID",
-    "stands-for": "would stand for:",
-    "base": "the element",
-    "base-hint": "in the editor – the ID is its internal ID, which the editor does not show",
-    "derived": "the derived variable",
-    "derived-hint": "in coding",
+    "stands-for": "The ID \"{{id}}\" would stand for:",
+    "base": "the element \"{{name}}\" in the editor – the ID is its internal ID, which the editor does not show",
+    "derived": "the derived variable \"{{name}}\" in coding",
     "manual-fix": "Fix manually",
     "manual-fix-intro": "One of the two variables needs a different name. You decide which – the studio renames nothing by itself.",
     "keep-derived": {

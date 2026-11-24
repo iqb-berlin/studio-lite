@@ -66,9 +66,10 @@ describe('Workspace Unit Check', () => {
 
     cy.get('[data-cy="unit-check-schemer"]').within(() => {
       cy.get('[data-cy="unit-check-ok"]').should('not.exist');
-      cy.get('[data-cy="variable-id-conflict"] .name').then($names => {
-        expect([...$names].map(name => name.textContent?.trim())).to.deep.equal(['05', '_00a', '05']);
-      });
+      cy.get('[data-cy="variable-id-conflict"]').should('contain.text', '05');
+      cy.get('[data-cy="variable-id-conflict-variable"]').should('have.length', 2);
+      cy.get('[data-cy="variable-id-conflict-variable"]').eq(0).should('contain.text', '_00a');
+      cy.get('[data-cy="variable-id-conflict-variable"]').eq(1).should('contain.text', '05');
       cy.get('[data-cy="variable-id-conflicts-manual-fix"]').should('exist');
     });
   });

@@ -72,9 +72,11 @@ describe('Workspace Unit Export: ids written twice', () => {
     cy.get('[data-cy="workspace-export-unit-button"]').click();
     cy.get('[data-cy="export-problems-unit"]')
       .should('contain.text', conflictUnit.shortname)
-      .find('[data-cy="variable-id-conflict"] .name')
-      .then($names => {
-        expect([...$names].map(name => name.textContent?.trim())).to.deep.equal(['05', '_00a', '05']);
+      .within(() => {
+        cy.get('[data-cy="variable-id-conflict"]').should('contain.text', '05');
+        cy.get('[data-cy="variable-id-conflict-variable"]').should('have.length', 2);
+        cy.get('[data-cy="variable-id-conflict-variable"]').eq(0).should('contain.text', '_00a');
+        cy.get('[data-cy="variable-id-conflict-variable"]').eq(1).should('contain.text', '05');
       });
     cy.get('[data-cy="export-problems-cancel"]').click();
     cy.get('[data-cy="export-problems-unit"]').should('not.exist');
