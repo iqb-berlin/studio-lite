@@ -20,7 +20,7 @@
               @for (column of unitColumns; track column) {
                 <ng-container [matColumnDef]="column">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>
-                    {{ (displayedColumns | include: column) ? ('metadata.' + column | translate) : column }}
+                    {{ (displayedColumns | include: column) ? ('metadata.' + column | translate) : fieldNames[column] }}
                   </th>
                   <td mat-cell *matCellDef="let element">
                     <div class="cell-content" [innerHTML]="element[column]"></div>
@@ -44,7 +44,7 @@
               @for (column of itemColumns; track column) {
                 <ng-container [matColumnDef]="column">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>
-                    {{ (displayedColumns | include: column) ? ('metadata.' + column | translate) : column }}
+                    {{ (displayedColumns | include: column) ? ('metadata.' + column | translate) : fieldNames[column] }}
                   </th>
                   <td mat-cell *matCellDef="let element">
                     <div class="cell-content" [innerHTML]="element[column]"></div>

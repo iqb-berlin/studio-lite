@@ -21,7 +21,7 @@ import { UnitUserService } from './unit-user.service';
 import { UnitCommentService } from './unit-comment.service';
 import User from '../entities/user.entity';
 import UnitDropBoxHistory from '../entities/unit-drop-box-history.entity';
-import { ProfileFetchCache, UnitMetadataService } from './unit-metadata.service';
+import { UnitMetadataService, newMetadataReadCache } from './unit-metadata.service';
 import { UnitDefinitionService } from './unit-definition.service';
 import { UnitItemService } from './unit-item.service';
 import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
@@ -451,9 +451,9 @@ export class UnitService {
       }
     });
     units.sort(byText(unit => unit.key));
-    const profileCache: ProfileFetchCache = new Map();
+    const cache = newMetadataReadCache();
     return Promise.all(units.map(async unit => this.unitMetadataService
-      .getModifiedMetadataForUnit(unit, workspace, profileCache)));
+      .getModifiedMetadataForUnit(unit, workspace, cache)));
   }
 
   /**

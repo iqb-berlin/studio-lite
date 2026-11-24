@@ -1,10 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ProfileValues } from '@studio-lite-lib/api-dto';
 import { MetadataProfileEntriesComponent } from './metadata-profile-entries.component';
-import { IsArrayPipe } from '../../pipes/is-array.pipe';
-import { CastPipe } from '../../pipes/cast.pipe';
-import { IsCurrentProfilePipe } from '../../pipes/is-current-profile.pipe';
-import { FilledEntriesPipe } from '../../pipes/filled-entries.pipe';
+import { LanguageService } from '../../services/language.service';
 
 describe('MetadataProfileEntriesComponent', () => {
   let component: MetadataProfileEntriesComponent;
@@ -66,13 +64,7 @@ describe('MetadataProfileEntriesComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        MetadataProfileEntriesComponent,
-        IsArrayPipe,
-        CastPipe,
-        IsCurrentProfilePipe,
-        FilledEntriesPipe
-      ]
+      imports: [MetadataProfileEntriesComponent, TranslateModule.forRoot()]
     }).compileComponents();
 
     fixture = TestBed.createComponent(MetadataProfileEntriesComponent);
@@ -122,5 +114,35 @@ describe('MetadataProfileEntriesComponent', () => {
     ).map(element => (element as HTMLElement).textContent?.trim());
     expect(keys).not.toContain('Eintrag 4');
     expect(keys).not.toContain('Eintrag 5');
+  });
+
+  // A profile and vocabulary that bring English read in English in the English interface (#2207).
+  it('should show field names and terms in the language of the interface', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [MetadataProfileEntriesComponent, TranslateModule.forRoot()],
+      providers: [{ provide: LanguageService, useValue: { active: { code: 'en' } } }]
+    });
+    TestBed.inject(TranslateService).use('en');
+    const englishFixture = TestBed.createComponent(MetadataProfileEntriesComponent);
+    englishFixture.componentInstance.profiles = [{
+      profileId: 'p80',
+      order: 0,
+      entries: [{
+        id: 'data',
+        label: [{ lang: 'de', value: 'Art der Daten' }, { lang: 'en', value: 'Type of data' }],
+        value: [{ id: 'dt/1' }, { id: 'dt/3' }],
+        valueAsText: [
+          { lang: 'de', value: 'Kompetenzdaten' }, { lang: 'en', value: 'Skills data' },
+          { lang: 'de', value: 'Umfragedaten' }, { lang: 'en', value: 'Survey data' }
+        ]
+      }]
+    }];
+    englishFixture.detectChanges();
+
+    const element: HTMLElement = englishFixture.nativeElement;
+    expect(element.querySelector('.item-key')?.textContent?.trim()).toBe('Type of data');
+    expect(Array.from(element.querySelectorAll('li.item-list-value')).map(item => item.textContent?.trim()))
+      .toEqual(['Skills data', 'Survey data']);
   });
 });

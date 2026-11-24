@@ -2,33 +2,23 @@
   <div class="profiles">
     @if (profile.order | isCurrentProfile) {
       @for (entry of profile.entries | filledEntries; track entry) {
+        @let texts = entry | metadataValueTexts;
         <div class="fx-row-space-between-start">
-          <span class="item-key">{{ entry.label[0].value }}</span>
-          @if (entry.valueAsText) {
-            @if (entry.valueAsText | isArray) {
-              @if ((entry.valueAsText | cast: TextWithLanguageArray).length > 1) {
-                <div>
-                  @for (value of (entry.valueAsText | cast: TextWithLanguageArray); track value) {
-                    <ul>
-                      <li class="item-list-value">{{ value.value }}</li>
-                    </ul>
-                  }
-                </div>
+          <span class="item-key">{{ entry.label | getLocalizedValue }}</span>
+          @if (texts.length > 1) {
+            <div>
+              @for (value of texts; track value) {
+                <ul>
+                  <li class="item-list-value">{{ value.value }}</li>
+                </ul>
               }
-              @if ((entry.valueAsText | cast: TextWithLanguageArray).length === 1) {
-                <span
-                  class="item-value">
-                    {{ (entry.valueAsText | cast: TextWithLanguageArray)[0].value }}
-                  </span>
-              }
-              @if ((entry.valueAsText | cast: TextWithLanguageArray).length === 0) {
-                <span>-</span>
-              }
-            } @else {
-              <span class="item-value">
-                {{ (entry.valueAsText | cast: TextWithLanguage).value }}
-              </span>
-            }
+            </div>
+          }
+          @if (texts.length === 1) {
+            <span class="item-value">{{ texts[0].value }}</span>
+          }
+          @if (texts.length === 0) {
+            <span>-</span>
           }
         </div>
       }

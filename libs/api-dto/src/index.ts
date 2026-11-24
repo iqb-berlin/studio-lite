@@ -69,6 +69,7 @@ export { ProfileMetadataValues } from './lib/dtos/unit/profile-metadata-values.c
 export { ProfileValues } from './lib/dtos/unit/profile-metadata-values.class';
 export { ItemsMetadataValues } from './lib/dtos/unit/profile-metadata-values.class';
 export { MetadataValuesEntry } from './lib/dtos/unit/profile-metadata-values.class';
+export { VocabularyValueEntry } from './lib/dtos/unit/profile-metadata-values.class';
 export { CodebookUnitDto, CodeBookVariable } from './lib/dtos/coding/coding.dto';
 export { CodeBookContentSetting } from './lib/dtos/coding/coding.dto';
 export { UnitMetadataValues } from './lib/dtos/unit/profile-metadata-values.class';

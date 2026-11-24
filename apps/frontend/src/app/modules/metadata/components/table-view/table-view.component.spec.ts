@@ -18,6 +18,7 @@ import { MetadataService } from '../../services/metadata.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { I18nService } from '../../../../services/i18n.service';
 import { buildXlsxFile } from '../../../../utils/xlsx-file.utils';
+import { LanguageService } from '../../../../services/language.service';
 
 jest.mock('file-saver-es', () => ({ saveAs: jest.fn() }));
 jest.mock('../../../../utils/xlsx-file.utils', () => ({ buildXlsxFile: jest.fn() }));
@@ -36,6 +37,7 @@ describe('TableViewComponent', () => {
   let mockMetadataService: Partial<MetadataService>;
   let mockWorkspaceService: Partial<WorkspaceService>;
   let mockI18nService: Partial<I18nService>;
+  let mockLanguageService: { active: { code: string } };
 
   beforeEach(async () => {
     mockMetadataService = {
@@ -49,6 +51,7 @@ describe('TableViewComponent', () => {
       fullLocale: 'de-DE',
       fileDateFormat: 'yyyy-MM-dd'
     };
+    mockLanguageService = { active: { code: 'de' } };
 
     await TestBed.configureTestingModule({
       imports: [
@@ -64,6 +67,7 @@ describe('TableViewComponent', () => {
         { provide: MetadataService, useValue: mockMetadataService },
         { provide: WorkspaceService, useValue: mockWorkspaceService },
         { provide: I18nService, useValue: mockI18nService },
+        { provide: LanguageService, useValue: mockLanguageService },
         {
           provide: MAT_DIALOG_DATA,
           useValue: { units: [], warning: '' }
@@ -146,33 +150,56 @@ describe('TableViewComponent', () => {
     expect(shownIds()).toEqual(['I2', 'I1']);
   }));
 
-  it('keys cell values under the same resolved label as the column header', () => {
-    // 'de' deliberately NOT at index 0 to expose the label[0] vs extractLabelText mismatch
-    const label = [
-      { lang: 'en', value: 'Task time' },
-      { lang: 'de', value: 'Aufgabenzeit' }
-    ];
-    mockMetadataService.unitProfileColumns = [
-      {
-        label,
-        entries: [{
-          id: 'e1', label, type: 'text', parameters: null
-        }]
-      }
-    ] as unknown as MDProfileGroup[];
+  // A cell belongs to its field by id; the column shows the field's name in the language of the interface.
+  // Keyed by name, a value stored under another name than the profile's landed in no column (#2207).
+  it('keys cell values by field id and names the column in the language of the interface', () => {
+    const label = [{ lang: 'de', value: 'Aufgabenzeit' }, { lang: 'en', value: 'Task time' }];
+    mockMetadataService.unitProfileColumns = [{
+      label,
+      entries: [{
+        id: 'e1', label, type: 'TEXT', parameters: null
+      }]
+    }] as unknown as MDProfileGroup[];
     const unit = {
       id: 1,
       key: 'K1',
       metadata: {
-        profiles: [{ order: 0, entries: [{ label, valueAsText: { value: '42' } }] }]
+        profiles: [{
+          order: 0,
+          entries: [{
+            id: 'e1', label: [{ lang: 'de', value: 'Zeit (alt)' }], value: '42', valueAsText: { value: '42' }
+          }]
+        }]
       }
     } as unknown as UnitPropertiesDto;
+    mockLanguageService.active.code = 'en';
+    const english = TestBed.createComponent(TableViewComponent).componentInstance;
 
-    component.data = { units: [unit], warning: '' };
-    component.ngOnInit();
+    english.data = { units: [unit], warning: '' };
+    english.ngOnInit();
 
-    expect(component.unitColumns).toContain('Aufgabenzeit');
-    expect(component.unitRows.data[0]).toMatchObject({ Aufgabenzeit: '42' });
+    expect(english.unitColumns).toEqual(['key', 'e1']);
+    expect(english.fieldNames).toEqual({ e1: 'Task time' });
+    expect(english.unitRows.data[0]).toMatchObject({ e1: '42' });
+  });
+
+  it('shows every term of a field once, in the language of the interface (#2207)', () => {
+    const entries = [{
+      id: 'data',
+      label: [],
+      value: [{ id: 'dt/1' }, { id: 'dt/3' }],
+      valueAsText: [
+        { lang: 'de', value: 'Kompetenzdaten' }, { lang: 'en', value: 'Skills data' },
+        { lang: 'de', value: 'Umfragedaten' }, { lang: 'en', value: 'Survey data' }
+      ]
+    }] as unknown as MetadataValuesEntry[];
+    mockLanguageService.active.code = 'en';
+    const english = TestBed.createComponent(TableViewComponent).componentInstance;
+
+    english.data = { units: [{ id: 1, key: 'K1', metadata: { profiles: [{ order: 0, entries }] } }], warning: '' };
+    english.ngOnInit();
+
+    expect(english.unitRows.data[0]).toMatchObject({ data: 'Skills data<br>Survey data' });
   });
 
   describe('rows and report', () => {
