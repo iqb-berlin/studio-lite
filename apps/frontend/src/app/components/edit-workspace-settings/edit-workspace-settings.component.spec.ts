@@ -192,6 +192,56 @@ describe('EditWorkspaceSettingsComponent', () => {
         .toHaveBeenCalledWith(expect.objectContaining({ unitMDProfile: 'profile9/unit.json' }));
     }));
 
+    // a click on another profile must not lose it: saving that one would reclassify every unit
+    it('keeps a stored profile the group does not list to be chosen again', fakeAsync(() => {
+      const choose = (selector: string, text: string) => {
+        (fixture.debugElement
+          .query(By.css('[data-cy="edit-workspace-settings-select-unit-profile"] .mat-mdc-select-trigger'))
+          .nativeElement as HTMLElement).click();
+        fixture.detectChanges();
+        const option = Array.from(document.querySelectorAll<HTMLElement>(selector))
+          .find(element => element.textContent?.includes(text));
+        expect(option).toBeDefined();
+        option?.click();
+        fixture.detectChanges();
+        flush();
+        fixture.detectChanges();
+      };
+      createDialog({
+        ...mockDialogData,
+        settings: { ...mockDialogData.settings, unitMDProfile: 'profile9/unit.json' }
+      });
+      flush();
+
+      choose('[data-cy="edit-workspace-settings-unit-profile"]', 'Unit Profile 2');
+      choose('[data-cy="edit-workspace-settings-unit-profile-not-in-group"]', 'profile9/unit.json');
+
+      expect(shown('unit')).toBe('profile9/unit.json metadata.profile-not-in-group');
+      (fixture.debugElement.query(By.css('[data-cy="edit-workspace-settings-submit-button"]'))
+        .nativeElement as HTMLElement).click();
+      expect(mockDialogRef.close)
+        .toHaveBeenCalledWith(expect.objectContaining({ unitMDProfile: 'profile9/unit.json' }));
+    }));
+
+    // an undefined key is dropped from the request, and the server keeps the stored profile
+    it('removes a profile with the empty option', fakeAsync(() => {
+      (fixture.debugElement
+        .query(By.css('[data-cy="edit-workspace-settings-select-unit-profile"] .mat-mdc-select-trigger'))
+        .nativeElement as HTMLElement).click();
+      fixture.detectChanges();
+      (document.querySelector('.mat-mdc-select-panel mat-option') as HTMLElement).click();
+      fixture.detectChanges();
+      flush();
+      fixture.detectChanges();
+      expect(shown('unit')).toBe('metadata.select-profile');
+
+      (fixture.debugElement.query(By.css('[data-cy="edit-workspace-settings-submit-button"]'))
+        .nativeElement as HTMLElement).click();
+
+      const saved = (mockDialogRef.close as jest.Mock).mock.calls[0][0] as WorkspaceSettingsDto;
+      expect(JSON.parse(JSON.stringify(saved))).toEqual(expect.objectContaining({ unitMDProfile: null }));
+    }));
+
     // the same profile in its other spelling (#1570)
     it('shows a stored profile the group lists in its other spelling as that one', fakeAsync(() => {
       mockBackendService.getWorkspaceGroupById = jest.fn().mockReturnValue(of({

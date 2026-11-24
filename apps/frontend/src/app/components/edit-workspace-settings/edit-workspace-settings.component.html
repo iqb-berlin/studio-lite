@@ -70,12 +70,16 @@
                          (click)="$event.stopPropagation()"
                          [compareWith]="sameProfile"
                          data-cy="edit-workspace-settings-select-unit-profile">
-              <mat-option [value]="undefined"></mat-option>
-              <!-- stored, but not among the group's profiles: shown, as it is what is saved (#2138) -->
-              @if (dialogData.unitMDProfile && !(dialogData.unitMDProfile | isProfileSelected: unitMDProfiles)) {
-                <mat-option [value]="dialogData.unitMDProfile"
+              <!-- null, not undefined: JSON drops an undefined key, and the server keeps the stored profile -->
+              <mat-option [value]="null"></mat-option>
+              <!-- Stored, but not among the group's profiles: shown, as it is what is saved (#2138). Read off
+                   the profile the dialog opened with, so that it stays to be chosen again after a click on
+                   another. Until the group's profiles are in, every stored profile is shown here by its id:
+                   that is what would be saved, and hiding it would show none. -->
+              @if (data.settings.unitMDProfile && !(data.settings.unitMDProfile | isProfileSelected: unitMDProfiles)) {
+                <mat-option [value]="data.settings.unitMDProfile"
                             data-cy="edit-workspace-settings-unit-profile-not-in-group">
-                  {{ dialogData.unitMDProfile }}
+                  {{ data.settings.unitMDProfile }}
                   @if (profilesLoaded()) {
                     {{ 'metadata.profile-not-in-group' | translate }}
                   }
@@ -106,12 +110,16 @@
                         (click)="$event.stopPropagation()"
                         [compareWith]="sameProfile"
                         data-cy="edit-workspace-settings-select-item-profile">
-              <mat-option [value]="undefined"></mat-option>
-              <!-- stored, but not among the group's profiles: shown, as it is what is saved (#2138) -->
-              @if (dialogData.itemMDProfile && !(dialogData.itemMDProfile | isProfileSelected: itemMDProfiles)) {
-                <mat-option [value]="dialogData.itemMDProfile"
+              <!-- null, not undefined: JSON drops an undefined key, and the server keeps the stored profile -->
+              <mat-option [value]="null"></mat-option>
+              <!-- Stored, but not among the group's profiles: shown, as it is what is saved (#2138). Read off
+                   the profile the dialog opened with, so that it stays to be chosen again after a click on
+                   another. Until the group's profiles are in, every stored profile is shown here by its id:
+                   that is what would be saved, and hiding it would show none. -->
+              @if (data.settings.itemMDProfile && !(data.settings.itemMDProfile | isProfileSelected: itemMDProfiles)) {
+                <mat-option [value]="data.settings.itemMDProfile"
                             data-cy="edit-workspace-settings-item-profile-not-in-group">
-                  {{ dialogData.itemMDProfile }}
+                  {{ data.settings.itemMDProfile }}
                   @if (profilesLoaded()) {
                     {{ 'metadata.profile-not-in-group' | translate }}
                   }

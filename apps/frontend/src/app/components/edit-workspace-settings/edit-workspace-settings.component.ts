@@ -6,7 +6,7 @@ import {
   MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
 } from '@angular/material/dialog';
 import { State, WorkspaceGroupFullDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
-import { isItemProfileId, profileIdsMatch } from '@studio-lite/shared-code';
+import { isItemProfileId, toW3idProfileId } from '@studio-lite/shared-code';
 import { MatCheckboxChange, MatCheckbox } from '@angular/material/checkbox';
 import { MatSelect } from '@angular/material/select';
 import { TranslateModule } from '@ngx-translate/core';
@@ -38,13 +38,13 @@ type SelectedRow = {
 };
 
 /**
- * Whether two profile ids name the same profile, in either spelling (#1570) -- for the selects as for
- * the group's list, so that a stored profile the group lists is shown as that one. No profile, empty or
- * undefined, is the empty option.
+ * Whether two profile ids name the same profile, in either spelling (#1570). Compared as
+ * `IsProfileSelectedPipe` compares them, which decides whether a stored profile is among the group's:
+ * what the select shows and what counts as listed cannot disagree. No profile, empty or undefined, is
+ * the empty option.
  */
-const sameProfile = (a: string | undefined, b: string | undefined): boolean => profileIdsMatch(
-  a || undefined,
-  b || undefined
+const sameProfile = (a: string | undefined, b: string | undefined): boolean => (
+  (a ? toW3idProfileId(a) : '') === (b ? toW3idProfileId(b) : '')
 );
 
 /**
