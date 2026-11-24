@@ -173,12 +173,13 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
         startWith(undefined),
         pairwise(),
         switchMap(([last, query]) => {
+          if (!query) return of(undefined);
           const known = this.presence();
           // a tab only hidden needs nothing new: what is known of the others still holds
-          if (query && last && known && last.unitId === query.unitId &&
-            (last.comments || !query.comments) && (last.notes || !query.notes)) return of(known);
+          if (last && known && last.unitId === query.unitId &&
+            (last.comments || !query.comments) && (last.notes || !query.notes)) return this.loadPresence(query, known);
           this.presence.set(undefined);
-          return query ? this.loadPresence(query) : of(undefined);
+          return this.loadPresence(query);
         }),
         takeUntil(this.ngUnsubscribe)
       )
@@ -208,17 +209,25 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
     ]).pipe(map(([, , summary]) => ({ definitionSummary: summary })));
   }
 
-  /** Whether there are comments and notes; those the workspace hides are not checked, and not asked for. */
-  private loadPresence({ unitId, comments, notes }: PresenceQuery): Observable<Presence> {
+  /**
+   * Whether there are comments and notes; those the workspace hides are not checked, and not asked
+   * for. What is known already is not asked again. Comments are asked again whenever they change:
+   * a comment written beside the properties, in a pinned tab, shows here (#2135).
+   */
+  private loadPresence({ unitId, comments, notes }: PresenceQuery, known?: Presence): Observable<Presence> {
     const workspaceId = this.workspaceService.selectedWorkspaceId;
-    const hasComments = comments ?
-      this.commentsBackendService.hasComments(workspaceId, unitId) :
-      of(undefined);
-    const hasRichNotes = notes ?
-      this.backendService.getUnitRichNotes(workspaceId, unitId)
-        .pipe(map(richNotes => (richNotes ? richNotes.notes.length > 0 : undefined))) :
-      of(undefined);
-    return forkJoin([hasComments, hasRichNotes])
+    // every question through one switchMap: a newer one cancels an answer still on its way, which
+    // would tell of the comments before the change
+    const commentsChanged: Observable<unknown> = this.workspaceService.onCommentsUpdated;
+    const askedComments = (known ? commentsChanged : commentsChanged.pipe(startWith(undefined)))
+      .pipe(switchMap(() => this.commentsBackendService.hasComments(workspaceId, unitId)));
+    let hasComments: Observable<boolean | undefined> = of(undefined);
+    if (comments) hasComments = known ? askedComments.pipe(startWith(known.hasComments)) : askedComments;
+    const askRichNotes = () => this.backendService.getUnitRichNotes(workspaceId, unitId)
+      .pipe(map(richNotes => (richNotes ? richNotes.notes.length > 0 : undefined)));
+    let hasRichNotes: Observable<boolean | undefined> = of(undefined);
+    if (notes) hasRichNotes = known ? of(known.hasRichNotes) : askRichNotes();
+    return combineLatest([hasComments, hasRichNotes])
       .pipe(map(([commentsPresent, notesPresent]) => ({ hasComments: commentsPresent, hasRichNotes: notesPresent })));
   }
 

@@ -3,7 +3,7 @@ import {
 } from '@angular/core/testing';
 import { signal, WritableSignal } from '@angular/core';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { UnitCheckComponent } from './unit-check.component';
 import { WorkspaceService } from '../../services/workspace.service';
@@ -32,6 +32,7 @@ describe('UnitCheckComponent', () => {
   let hiddenRoutesState: WritableSignal<string[]>;
   let settingsLoaded: boolean;
   let settingsLoadedState: WritableSignal<boolean>;
+  let commentsUpdated: Subject<void>;
   let getUnitRichNotes: jest.Mock;
   let getUnitDefinition: jest.Mock;
   let getUnitDefinitionSummary: jest.Mock;
@@ -53,6 +54,7 @@ describe('UnitCheckComponent', () => {
   const create = () => {
     hiddenRoutesState = signal(hiddenRoutes);
     settingsLoadedState = signal(settingsLoaded);
+    commentsUpdated = new Subject<void>();
     TestBed.configureTestingModule({
       imports: [UnitCheckComponent, TranslateModule.forRoot()],
       providers: [
@@ -63,7 +65,8 @@ describe('UnitCheckComponent', () => {
             selectedWorkspaceId: 1,
             units: units.asReadonly(),
             hiddenRoutes: hiddenRoutesState.asReadonly(),
-            settingsLoaded: settingsLoadedState.asReadonly()
+            settingsLoaded: settingsLoadedState.asReadonly(),
+            onCommentsUpdated: commentsUpdated
           }
         },
         {
@@ -191,6 +194,42 @@ describe('UnitCheckComponent', () => {
     expect(hasComments).toHaveBeenCalledWith(1, 3);
     expect(sectionOf('comments')?.querySelector('[data-cy="unit-check-info"]')?.textContent)
       .toBe('unit-check.comments-present');
+  }));
+
+  // a comment written in the comments tab pinned beside the properties (#2135)
+  it('asks again whether there are comments when they change, also after another tab was hidden', fakeAsync(() => {
+    const commentsInfo = () => sectionOf('comments')?.querySelector('[data-cy="unit-check-info"]')?.textContent;
+    hasComments.mockReturnValue(of(false));
+    create();
+    expect(commentsInfo()).toBe('unit-check.comments-absent');
+
+    hasComments.mockReturnValue(of(true));
+    commentsUpdated.next();
+    fixture.detectChanges();
+    expect(commentsInfo()).toBe('unit-check.comments-present');
+
+    hiddenRoutesState.set(['notes']);
+    fixture.detectChanges();
+    hasComments.mockReturnValue(of(false));
+    commentsUpdated.next();
+    fixture.detectChanges();
+    expect(commentsInfo()).toBe('unit-check.comments-absent');
+  }));
+
+  // the first answer is slow and was sent before the comment was written: it must not have the last word
+  it('takes the answer to the newest question about comments', fakeAsync(() => {
+    const commentsInfo = () => sectionOf('comments')?.querySelector('[data-cy="unit-check-info"]')?.textContent;
+    const slowFirstAnswer = new Subject<boolean>();
+    hasComments.mockReturnValue(slowFirstAnswer);
+    create();
+
+    hasComments.mockReturnValue(of(true));
+    commentsUpdated.next();
+    slowFirstAnswer.next(false);
+    slowFirstAnswer.complete();
+    fixture.detectChanges();
+
+    expect(commentsInfo()).toBe('unit-check.comments-present');
   }));
 
   // the export writes the ids of a scheme whether the coding is shown or not (#2119)
