@@ -320,9 +320,11 @@ export class WorkspaceService {
         )
       );
       if (saveOk) {
-        unitDefinitionStore.applyChanges(sentDefinition);
-        // the server renamed and dropped codings with the variables; the scheme here has to follow (#2135)
+        // The server renamed and dropped codings with the variables; the scheme here has to follow (#2135).
+        // First: a schemer open beside the editor sends the scheme again when the definition is applied,
+        // and has to get it renamed -- else it reports the old names, and the next save writes them back.
         if (sentDefinition.variables) unitSchemeStore?.applyVariables(sentDefinition.variables);
+        unitDefinitionStore.applyChanges(sentDefinition);
         this.lastChangedDefinition = new Date();
         this.lastChangedDefinitionUser = this.getDisplayUserName();
       }

@@ -512,6 +512,27 @@ describe('WorkspaceService', () => {
       expect(backendService.setUnitScheme).not.toHaveBeenCalled();
     });
 
+    // a schemer beside the editor sends the scheme again when the definition is applied
+    it('should rename the scheme before the definition is applied, for whoever follows the definition', async () => {
+      const schemeOf = (alias: string): string => JSON.stringify({
+        version: '3.0', variableCodings: [{ id: 'text_b', alias, sourceType: 'BASE_NO_VALUE' }]
+      });
+      const definitionStore = new UnitDefinitionStore(1, {
+        definition: 'd', variables: [{ id: 'text_b', alias: 'text_1' } as VariableInfo]
+      });
+      definitionStore.setData([{ id: 'text_b', alias: 'text_2' } as VariableInfo], 'd');
+      const schemeStore = new UnitSchemeStore(1, { scheme: schemeOf('text_1'), schemeType: 'type' });
+      unitStores.definitionStore.set(definitionStore);
+      unitStores.schemeStore.set(schemeStore);
+      backendService.setUnitDefinition.mockReturnValue(of(true));
+      const schemesSentWithTheDefinition: string[] = [];
+      definitionStore.dataChange.subscribe(() => schemesSentWithTheDefinition.push(schemeStore.getData().scheme));
+
+      await service.saveUnitData();
+
+      expect(schemesSentWithTheDefinition).toEqual([schemeOf('text_2')]);
+    });
+
     it('should keep a scheme the backend refuses unsaved', async () => {
       const schemeStore = new UnitSchemeStore(1, { scheme: 'old', schemeType: 'type' });
       schemeStore.setData('new', 'newType');
