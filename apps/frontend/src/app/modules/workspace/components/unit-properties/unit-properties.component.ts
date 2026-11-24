@@ -1,5 +1,5 @@
 import {
-  Component, OnDestroy, signal, ViewChild
+  Component, inject, OnDestroy, signal, ViewChild
 } from '@angular/core';
 import {
   FormGroup,
@@ -58,6 +58,7 @@ import { AliasId } from '../../../metadata/models/alias-id.interface';
 import { MetadataBackendService } from '../../../metadata/services/metadata-backend.service';
 import { MetadataService } from '../../../metadata/services/metadata.service';
 import { I18nService } from '../../../../services/i18n.service';
+import { LanguageService } from '../../../../services/language.service';
 
 /**
  * Everything about a unit that is not its content: name and key, the modules it is opened with, its
@@ -134,6 +135,11 @@ export class UnitPropertiesComponent
   itemProfile!: MDProfile;
   variablesLoaded: boolean = false;
   metadataLoaded: boolean = false;
+  /**
+   * The language of the interface, handed to the metadata forms: they show profiles and vocabularies
+   * in it where these bring it. The studio translates no metadata (#2204).
+   */
+  readonly language = inject(LanguageService).active.code;
   private readonly propertiesNotLoadedState = signal(false);
   readonly propertiesNotLoaded = this.propertiesNotLoadedState.asReadonly();
 

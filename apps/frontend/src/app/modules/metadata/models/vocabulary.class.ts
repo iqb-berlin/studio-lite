@@ -12,9 +12,7 @@ export type NotationNode = {
   name?: string,
   indeterminate?: boolean,
   children?: NotationNode[] | [],
-  prefLabel?: {
-    de: string
-  },
+  prefLabel?: Record<string, string>,
   parent?: NotationNode,
   selected?: boolean,
   narrower?: NotationNode[]
@@ -32,7 +30,7 @@ export class NestedTreeParameters {
 export class Vocabulary {
   id!: string;
   type!: string;
-  title!: { de: string };
+  title!: Record<string, string>;
   hasTopConcept!: Array<NotationNode>;
 }
 

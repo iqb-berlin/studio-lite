@@ -11,6 +11,10 @@ import { MetadataService } from './metadata.service';
 import { MetadataBackendService } from './metadata-backend.service';
 import { WorkspaceService } from '../../workspace/services/workspace.service';
 
+const topConcept = (id: string, label: string, narrower: TopConcept[] = []): TopConcept => ({
+  id, prefLabel: { de: label }, notation: [], narrower
+});
+
 describe('MetadataService', () => {
   let service: MetadataService;
   let httpMock: HttpTestingController;
@@ -62,13 +66,7 @@ describe('MetadataService', () => {
         {
           id: 'v1',
           hasTopConcept: [
-            {
-              id: 'c1',
-              prefLabel: { de: 'Label 1' },
-              narrower: [
-                { id: 'c1.1', prefLabel: { de: 'Label 1.1' } } as TopConcept
-              ]
-            } as TopConcept
+            topConcept('c1', 'Label 1', [topConcept('c1.1', 'Label 1.1')])
           ]
         } as MetadataVocabularyDto
       ];
@@ -110,7 +108,7 @@ describe('MetadataService', () => {
         {
           id: 'v2',
           hasTopConcept: [
-            { id: 'c2', prefLabel: { de: 'Label 2' } } as TopConcept
+            topConcept('c2', 'Label 2')
           ]
         } as MetadataVocabularyDto,
         null
@@ -150,7 +148,7 @@ describe('MetadataService', () => {
         {
           id: 'v1',
           hasTopConcept: [
-            { id: 'c1', prefLabel: { de: 'Label 1' } } as TopConcept
+            topConcept('c1', 'Label 1')
           ]
         } as MetadataVocabularyDto
       ];
