@@ -1,7 +1,10 @@
 import {
   Component, Input
 } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, fakeAsync, flush, TestBed
+} from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { TranslateModule } from '@ngx-translate/core';
 import {
   MAT_DIALOG_DATA, MatDialogModule, MatDialogRef
@@ -11,9 +14,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
 import { of } from 'rxjs';
-import {
-  WorkspaceGroupFullDto, WorkspaceFullDto, WorkspaceSettingsDto
-} from '@studio-lite-lib/api-dto';
+import { WorkspaceGroupFullDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { EditWorkspaceSettingsComponent } from './edit-workspace-settings.component';
 import { BackendService } from '../../modules/admin/services/backend.service';
 import { AppService } from '../../services/app.service';
@@ -52,7 +53,9 @@ describe('EditWorkspaceSettingsComponent', () => {
       defaultSchemer: 'schemer1',
       defaultPlayer: 'player1',
       stableModulesOnly: false,
-      states: []
+      states: [],
+      unitMDProfile: 'profile1/unit.json',
+      itemMDProfile: 'profile2/item.json'
     } as WorkspaceSettingsDto,
     selectedRow: {
       id: 1,
@@ -62,44 +65,10 @@ describe('EditWorkspaceSettingsComponent', () => {
     }
   };
 
-  beforeEach(async () => {
-    mockBackendService = {
-      getWorkspaceGroupById: jest.fn().mockReturnValue(of({
-        settings: {
-          profiles: [
-            { id: 'profile1/unit.json', label: 'Unit Profile 1' },
-            { id: 'profile2/item.json', label: 'Item Profile 1' }
-          ]
-        }
-      } as WorkspaceGroupFullDto)),
-      getWorkspaceById: jest.fn().mockReturnValue(of({
-        settings: {
-          itemMDProfile: 'profile2/item.json',
-          unitMDProfile: 'profile1/unit.json'
-        }
-      } as WorkspaceFullDto))
-    };
-
-    mockAppService = {};
-    mockWorkspaceService = {
-      workspaceSettings: {} as WorkspaceSettingsDto,
-      groupId: 0
-    };
-    mockModuleService = {};
-    mockDialogRef = {
-      close: jest.fn()
-    };
-    const de = (value: string) => ({ lang: 'de', value });
-    const en = (value: string) => ({ lang: 'en', value });
-    mockMetadataBackendService = {
-      // the item profile could not be loaded
-      getMetadataProfile: jest.fn().mockImplementation((url: string) => of(url === 'profile1/unit.json' ? {
-        label: [de('Aufgabe'), en('Unit')],
-        groups: [{ label: [], entries: [{ label: [de('Titel'), en('Title')] }] }]
-      } : false))
-    };
-
-    await TestBed.configureTestingModule({
+  // the dialog opened with the given data; synchronous, so a fakeAsync test can open it again
+  const createDialog = (data: typeof mockDialogData = mockDialogData) => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
       imports: [
         MatFormFieldModule,
         MatInputModule,
@@ -114,33 +83,191 @@ describe('EditWorkspaceSettingsComponent', () => {
         { provide: AppService, useValue: mockAppService },
         { provide: WorkspaceService, useValue: mockWorkspaceService },
         { provide: ModuleService, useValue: mockModuleService },
-        { provide: MAT_DIALOG_DATA, useValue: mockDialogData },
+        { provide: MAT_DIALOG_DATA, useValue: data },
         { provide: MatDialogRef, useValue: mockDialogRef },
         { provide: MetadataBackendService, useValue: mockMetadataBackendService }
       ]
     }).overrideComponent(EditWorkspaceSettingsComponent, {
       remove: { imports: [SelectModuleComponent] },
       add: { imports: [MockSelectModuleComponent] }
-    }).compileComponents();
+    });
 
     fixture = TestBed.createComponent(EditWorkspaceSettingsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  };
+
+  beforeEach(() => {
+    mockBackendService = {
+      getWorkspaceGroupById: jest.fn().mockReturnValue(of({
+        settings: {
+          profiles: [
+            { id: 'profile1/unit.json', label: 'Unit Profile 1' },
+            { id: 'profile2/item.json', label: 'Item Profile 1' },
+            { id: 'profile3/unit.json', label: 'Unit Profile 2' }
+          ]
+        }
+      } as WorkspaceGroupFullDto))
+    };
+
+    mockAppService = {};
+    mockWorkspaceService = {
+      workspaceSettings: {} as WorkspaceSettingsDto,
+      groupId: 0
+    };
+    mockModuleService = {};
+    mockDialogRef = {
+      close: jest.fn()
+    };
+    // no profile loads, so that no languages stand behind the names shown (#2212)
+    mockMetadataBackendService = {
+      getMetadataProfile: jest.fn().mockReturnValue(of(false))
+    };
+
+    createDialog();
   });
 
   it('should initialize profiles in ngOnInit', () => {
     expect(mockBackendService.getWorkspaceGroupById).toHaveBeenCalledWith(10);
-    expect(mockBackendService.getWorkspaceById).toHaveBeenCalledWith(1);
-    expect(component.unitMDProfiles.length).toBe(1);
-    expect(component.unitMDProfiles[0].id).toBe('profile1/unit.json');
-    expect(component.itemMDProfiles.length).toBe(1);
-    expect(component.itemMDProfiles[0].id).toBe('profile2/item.json');
-    expect(component.selectedItemMDProfile).toBe('profile2/item.json');
-    expect(component.selectedUnitMDProfile).toBe('profile1/unit.json');
+    expect(component.unitMDProfiles.map(profile => profile.id)).toEqual(['profile1/unit.json', 'profile3/unit.json']);
+    expect(component.itemMDProfiles.map(profile => profile.id)).toEqual(['profile2/item.json']);
+  });
+
+  describe('the metadata profiles shown and saved (#2138)', () => {
+    // the text of the select, its white space collapsed as the browser shows it
+    const shown = (select: 'unit' | 'item') => (fixture.debugElement
+      .query(By.css(`[data-cy="edit-workspace-settings-select-${select}-profile"]`))
+      .nativeElement as HTMLElement).textContent?.replace(/\s+/g, ' ').trim();
+
+    // the stored profiles came with a request of the dialog's own; until it answered, none was shown
+    it('shows the stored profiles as soon as the dialog opens', fakeAsync(() => {
+      flush();
+      fixture.detectChanges();
+
+      expect(shown('unit')).toBe('Unit Profile 1');
+      expect(shown('item')).toBe('Item Profile 1');
+    }));
+
+    // the select writes into the settings the dialog saves; there is no second value to drift apart
+    it('saves the profile it shows', fakeAsync(() => {
+      (fixture.debugElement
+        .query(By.css('[data-cy="edit-workspace-settings-select-unit-profile"] .mat-mdc-select-trigger'))
+        .nativeElement as HTMLElement).click();
+      fixture.detectChanges();
+      (Array.from(document.querySelectorAll('[data-cy="edit-workspace-settings-unit-profile"]'))
+        .find(option => option.textContent?.includes('Unit Profile 2')) as HTMLElement).click();
+      fixture.detectChanges();
+      flush();
+      fixture.detectChanges();
+      expect(shown('unit')).toBe('Unit Profile 2');
+
+      (fixture.debugElement.query(By.css('[data-cy="edit-workspace-settings-submit-button"]'))
+        .nativeElement as HTMLElement).click();
+
+      expect(mockDialogRef.close).toHaveBeenCalledWith(expect.objectContaining({
+        unitMDProfile: 'profile3/unit.json',
+        itemMDProfile: 'profile2/item.json'
+      }));
+    }));
+
+    // a group admin removed the profile from the group: shown, as it is what is saved -- clearing it
+    // unasked would reclassify the metadata of every unit on the next save
+    it('shows a stored profile the group no longer offers, marked, and saves it unchanged', fakeAsync(() => {
+      createDialog({
+        ...mockDialogData,
+        settings: { ...mockDialogData.settings, unitMDProfile: 'profile9/unit.json' }
+      });
+      flush();
+      fixture.detectChanges();
+
+      expect(shown('unit')).toBe('profile9/unit.json metadata.profile-not-in-group');
+      (fixture.debugElement.query(By.css('[data-cy="edit-workspace-settings-submit-button"]'))
+        .nativeElement as HTMLElement).click();
+      expect(mockDialogRef.close)
+        .toHaveBeenCalledWith(expect.objectContaining({ unitMDProfile: 'profile9/unit.json' }));
+    }));
+
+    // a click on another profile must not lose it: saving that one would reclassify every unit
+    it('keeps a stored profile the group does not list to be chosen again', fakeAsync(() => {
+      const choose = (selector: string, text: string) => {
+        (fixture.debugElement
+          .query(By.css('[data-cy="edit-workspace-settings-select-unit-profile"] .mat-mdc-select-trigger'))
+          .nativeElement as HTMLElement).click();
+        fixture.detectChanges();
+        const option = Array.from(document.querySelectorAll<HTMLElement>(selector))
+          .find(element => element.textContent?.includes(text));
+        expect(option).toBeDefined();
+        option?.click();
+        fixture.detectChanges();
+        flush();
+        fixture.detectChanges();
+      };
+      createDialog({
+        ...mockDialogData,
+        settings: { ...mockDialogData.settings, unitMDProfile: 'profile9/unit.json' }
+      });
+      flush();
+
+      choose('[data-cy="edit-workspace-settings-unit-profile"]', 'Unit Profile 2');
+      choose('[data-cy="edit-workspace-settings-unit-profile-not-in-group"]', 'profile9/unit.json');
+
+      expect(shown('unit')).toBe('profile9/unit.json metadata.profile-not-in-group');
+      (fixture.debugElement.query(By.css('[data-cy="edit-workspace-settings-submit-button"]'))
+        .nativeElement as HTMLElement).click();
+      expect(mockDialogRef.close)
+        .toHaveBeenCalledWith(expect.objectContaining({ unitMDProfile: 'profile9/unit.json' }));
+    }));
+
+    // an undefined key is dropped from the request, and the server keeps the stored profile
+    it('removes a profile with the empty option', fakeAsync(() => {
+      (fixture.debugElement
+        .query(By.css('[data-cy="edit-workspace-settings-select-unit-profile"] .mat-mdc-select-trigger'))
+        .nativeElement as HTMLElement).click();
+      fixture.detectChanges();
+      (document.querySelector('.mat-mdc-select-panel mat-option') as HTMLElement).click();
+      fixture.detectChanges();
+      flush();
+      fixture.detectChanges();
+      expect(shown('unit')).toBe('metadata.select-profile');
+
+      (fixture.debugElement.query(By.css('[data-cy="edit-workspace-settings-submit-button"]'))
+        .nativeElement as HTMLElement).click();
+
+      const saved = (mockDialogRef.close as jest.Mock).mock.calls[0][0] as WorkspaceSettingsDto;
+      expect(JSON.parse(JSON.stringify(saved))).toEqual(expect.objectContaining({ unitMDProfile: null }));
+    }));
+
+    // the same profile in its other spelling (#1570)
+    it('shows a stored profile the group lists in its other spelling as that one', fakeAsync(() => {
+      mockBackendService.getWorkspaceGroupById = jest.fn().mockReturnValue(of({
+        settings: { profiles: [{ id: 'https://w3id.org/iqb/p100/unit', label: 'Unit Profile 100' }] }
+      } as WorkspaceGroupFullDto));
+      createDialog({
+        ...mockDialogData,
+        settings: {
+          ...mockDialogData.settings,
+          unitMDProfile: 'https://raw.githubusercontent.com/iqb-vocabs/p100/master/unit.json'
+        }
+      });
+      flush();
+      fixture.detectChanges();
+
+      expect(shown('unit')).toBe('Unit Profile 100');
+    }));
   });
 
   // Read from each profile of the group, so it follows a profile translated after it was chosen (#2212).
   it('reads the languages of every profile of the group from the profile itself', () => {
+    const de = (value: string) => ({ lang: 'de', value });
+    const en = (value: string) => ({ lang: 'en', value });
+    // the other profiles could not be loaded
+    (mockMetadataBackendService.getMetadataProfile as jest.Mock)
+      .mockImplementation((url: string) => of(url === 'profile1/unit.json' ? {
+        label: [de('Aufgabe'), en('Unit')],
+        groups: [{ label: [], entries: [{ label: [de('Titel'), en('Title')] }] }]
+      } : false));
+    createDialog();
+
     expect(mockMetadataBackendService.getMetadataProfile).toHaveBeenCalledWith('profile1/unit.json');
     expect(mockMetadataBackendService.getMetadataProfile).toHaveBeenCalledWith('profile2/item.json');
     // a profile that could not be loaded gets no languages, rather than an empty pair of brackets
@@ -158,41 +285,10 @@ describe('EditWorkspaceSettingsComponent', () => {
     expect(component.dialogData.defaultPlayer).toBe('new-player');
   });
 
-  it('should fall back to workspaceService.groupId if groupId is missing in selectedRow', async () => {
-    TestBed.resetTestingModule();
-    const dataWithMissingGroupId = {
-      ...mockDialogData,
-      selectedRow: { ...mockDialogData.selectedRow, groupId: 0 }
-    };
+  it('should fall back to workspaceService.groupId if groupId is missing in selectedRow', () => {
     mockWorkspaceService.groupId = 99;
 
-    await TestBed.configureTestingModule({
-      imports: [
-        MatFormFieldModule,
-        MatInputModule,
-        MatCheckboxModule,
-        MatDialogModule,
-        MatSelectModule,
-        TranslateModule.forRoot(),
-        EditWorkspaceSettingsComponent
-      ],
-      providers: [
-        { provide: BackendService, useValue: mockBackendService },
-        { provide: AppService, useValue: mockAppService },
-        { provide: WorkspaceService, useValue: mockWorkspaceService },
-        { provide: ModuleService, useValue: mockModuleService },
-        { provide: MAT_DIALOG_DATA, useValue: dataWithMissingGroupId },
-        { provide: MatDialogRef, useValue: mockDialogRef },
-        { provide: MetadataBackendService, useValue: mockMetadataBackendService }
-      ]
-    }).overrideComponent(EditWorkspaceSettingsComponent, {
-      remove: { imports: [SelectModuleComponent] },
-      add: { imports: [MockSelectModuleComponent] }
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(EditWorkspaceSettingsComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+    createDialog({ ...mockDialogData, selectedRow: { ...mockDialogData.selectedRow, groupId: 0 } });
 
     expect(mockBackendService.getWorkspaceGroupById).toHaveBeenCalledWith(99);
   });

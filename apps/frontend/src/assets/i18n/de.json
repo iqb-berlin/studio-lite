@@ -334,6 +334,7 @@
     "assign-metadata-profiles": "Metadaten Profile zuweisen",
     "vocab-loading-error": "Vokabular konnte nicht geladen werden!",
     "no-unit-profiles-hint": "Bereichsgruppe enthält keine Aufgaben Profile!",
+    "profile-not-in-group": "(nicht in der Bereichsgruppe)",
     "no-item-profiles-hint": "Bereichsgruppe enthält keine Item Profile!",
     "error-fetching-metadata-profiles": "Metadaten Profile konnten nicht geladen werden!",
     "error-states": "Status Liste konnte nicht geladen werden!",

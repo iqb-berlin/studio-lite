@@ -5,18 +5,17 @@ import { Subject, takeUntil } from 'rxjs';
 import {
   MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
 } from '@angular/material/dialog';
-import {
-  State, WorkspaceFullDto, WorkspaceGroupFullDto, WorkspaceSettingsDto
-} from '@studio-lite-lib/api-dto';
-import { isItemProfileId } from '@studio-lite/shared-code';
+import { State, WorkspaceGroupFullDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import { isItemProfileId, toW3idProfileId } from '@studio-lite/shared-code';
 import { MatCheckboxChange, MatCheckbox } from '@angular/material/checkbox';
-import { MatSelectChange, MatSelect } from '@angular/material/select';
+import { MatSelect } from '@angular/material/select';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { MatOption } from '@angular/material/core';
 import { MatLabel, MatError } from '@angular/material/form-field';
 import { MatTooltip } from '@angular/material/tooltip';
 import { IncludePipe } from '../../pipes/include.pipe';
+import { IsProfileSelectedPipe } from '../../pipes/is-profile-selected.pipe';
 import { ModuleService } from '../../services/module.service';
 import { AppService } from '../../services/app.service';
 import { WorkspaceService } from '../../modules/workspace/services/workspace.service';
@@ -39,6 +38,16 @@ type SelectedRow = {
 };
 
 /**
+ * Whether two profile ids name the same profile, in either spelling (#1570). Compared as
+ * `IsProfileSelectedPipe` compares them, which decides whether a stored profile is among the group's:
+ * what the select shows and what counts as listed cannot disagree. No profile, empty or undefined, is
+ * the empty option.
+ */
+const sameProfile = (a: string | undefined, b: string | undefined): boolean => (
+  (a ? toW3idProfileId(a) : '') === (b ? toW3idProfileId(b) : '')
+);
+
+/**
  * The settings dialog of a workspace: the default modules its units are opened with, the metadata
  * profiles they are described under, and which views the workspace offers. What is decided here
  * applies to every unit in it.
@@ -50,7 +59,8 @@ type SelectedRow = {
 
   imports: [
     MatDialogTitle, MatDialogContent, MatLabel, SelectModuleComponent, MatCheckbox, MatError, MatSelect, MatOption,
-    MatDialogActions, MatButton, MatDialogClose, MatTooltip, TranslateModule, IncludePipe, LanguageCodesPipe
+    MatDialogActions, MatButton, MatDialogClose, MatTooltip, TranslateModule, IncludePipe, IsProfileSelectedPipe,
+    LanguageCodesPipe
   ]
 })
 export class EditWorkspaceSettingsComponent implements OnInit, OnDestroy {
@@ -73,12 +83,18 @@ export class EditWorkspaceSettingsComponent implements OnInit, OnDestroy {
     this.dialogData = { ...this.data.settings as WorkspaceSettingsDto };
   }
 
+  // What the dialog saves. The profile selects show and change it directly: a value of their own,
+  // loaded apart, showed one profile while another was saved (#2138).
   dialogData: WorkspaceSettingsDto;
   selectionChanged!: State[];
   itemMDProfiles: Profile[] = [];
   unitMDProfiles: Profile[] = [];
-  selectedItemMDProfile: string = '';
-  selectedUnitMDProfile: string = '';
+  // whether the group's profiles are in: only then can a stored profile be known to be missing from them
+  private readonly profilesLoadedState = signal(false);
+  readonly profilesLoaded = this.profilesLoadedState.asReadonly();
+
+  readonly sameProfile = sameProfile;
+
   profiles: Array<string> = [];
   settings = { ...this.workspaceService.workspaceSettings, profile: '' };
 
@@ -97,20 +113,9 @@ export class EditWorkspaceSettingsComponent implements OnInit, OnDestroy {
             res && (res as WorkspaceGroupFullDto).settings && (res as WorkspaceGroupFullDto).settings?.profiles
               ?.filter((profile: Profile) => isItemProfileId(profile.id))
           ) || [];
+          this.profilesLoadedState.set(!!res);
           this.loadProfileLanguages([...this.unitMDProfiles, ...this.itemMDProfiles]);
         }));
-      this.backendService.getWorkspaceById(this.data.selectedRow.id)
-        .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(res => {
-          const itemMDProfile = (
-            res && (res as WorkspaceFullDto).settings && (res as WorkspaceFullDto).settings?.itemMDProfile
-          ) || '';
-          if (itemMDProfile) this.selectedItemMDProfile = itemMDProfile;
-          const unitMDProfile = (
-            res && (res as WorkspaceFullDto).settings && (res as WorkspaceFullDto).settings?.unitMDProfile
-          ) || '';
-          if (unitMDProfile) this.selectedUnitMDProfile = unitMDProfile;
-        });
     }
   }
 
@@ -137,14 +142,6 @@ export class EditWorkspaceSettingsComponent implements OnInit, OnDestroy {
     } else if (moduleType === 'player') {
       this.dialogData.defaultPlayer = newValue;
     }
-  }
-
-  selectUnitMDProfile(e:MatSelectChange) {
-    this.dialogData.unitMDProfile = e.value;
-  }
-
-  selectItemMDProfile(e:MatSelectChange) {
-    this.dialogData.itemMDProfile = e.value;
   }
 
   addData() {
