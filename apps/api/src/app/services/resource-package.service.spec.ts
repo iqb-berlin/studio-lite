@@ -10,6 +10,7 @@ import { createMock, DeepMocked } from '@golevelup/ts-jest';
 // loosely, and importing over that name would make every `mockReturnValue` a type error.
 import { jest as jestEsm } from '@jest/globals';
 import 'multer';
+import * as path from 'path';
 // The class itself arrives through the dynamic import below; this keeps its name usable as a
 // type, which a `const` from `await import()` cannot be.
 import type { ResourcePackageService } from './resource-package.service';
@@ -289,6 +290,8 @@ describe('ResourcePackageService', () => {
   });
 
   describe('create', () => {
+    const installedFolder = path.resolve('./packages/GeoGebra-5.3');
+
     beforeEach(() => {
       resourcePackageRepository.create.mockImplementation(entity => entity as ResourcePackage);
       resourcePackageRepository.save.mockImplementation(async entity => entity as ResourcePackage);
@@ -306,7 +309,7 @@ describe('ResourcePackageService', () => {
         name: 'GeoGebra-5.3', packageName: 'GeoGebra', elements: ['GeoGebra/deployggb.js']
       }));
       expect(fs.renameSync)
-        .toHaveBeenCalledWith(expect.stringMatching(/^\.\/packages\/\.upload-/), './packages/GeoGebra-5.3');
+        .toHaveBeenCalledWith(expect.stringMatching(/^\.\/packages\/\.upload-/), installedFolder);
       expect(defaults).toEqual({ GeoGebra: 'GeoGebra-5.3' });
     });
 
@@ -344,8 +347,8 @@ describe('ResourcePackageService', () => {
       }));
       // the old folder goes aside, the new one into its place, and the old one away
       const renames = (fs.renameSync as jest.Mock).mock.calls;
-      expect(renames[0]).toEqual(['./packages/GeoGebra-5.3', expect.stringMatching(/-replaced$/)]);
-      expect(renames[1]).toEqual([expect.stringMatching(/^\.\/packages\/\.upload-/), './packages/GeoGebra-5.3']);
+      expect(renames[0]).toEqual([installedFolder, expect.stringMatching(/-replaced$/)]);
+      expect(renames[1]).toEqual([expect.stringMatching(/^\.\/packages\/\.upload-/), installedFolder]);
     });
 
     it('should put the replaced package back when the new one cannot take its place', async () => {
@@ -359,7 +362,7 @@ describe('ResourcePackageService', () => {
       await expect(service.create(upload('GeoGebra-5.3.itcr.zip'), { overwrite: true }))
         .rejects.toThrow(InternalServerErrorException);
       const renames = (fs.renameSync as jest.Mock).mock.calls;
-      expect(renames[2]).toEqual([expect.stringMatching(/-replaced$/), './packages/GeoGebra-5.3']);
+      expect(renames[2]).toEqual([expect.stringMatching(/-replaced$/), installedFolder]);
       expect(resourcePackageRepository.save).not.toHaveBeenCalled();
     });
 
@@ -372,6 +375,18 @@ describe('ResourcePackageService', () => {
       expect(fs.renameSync).not.toHaveBeenCalled();
       expect(fs.rmSync).toHaveBeenCalledWith(expect.stringMatching(/^\.\/packages\/\.upload-/), expect.anything());
       expect(resourcePackageRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('should refuse a file name that leads out of the packages folder or into an upload folder', async () => {
+      resourcePackageRepository.findOne.mockResolvedValue(null);
+      (fs.existsSync as jest.Mock).mockReturnValue(true);
+      zipOf([]);
+
+      await Promise.all(['...itcr.zip', '..itcr.zip', '.itcr.zip', '.upload-1.itcr.zip'].map(fileName => expect(
+        service.create(upload(fileName), { packageName: 'GeoGebra', overwrite: true })
+      ).rejects.toThrow(BadRequestException)));
+      expect(AdmZipMock).not.toHaveBeenCalled();
+      expect(fs.renameSync).not.toHaveBeenCalled();
     });
 
     it('should throw a bad request if file is not valid resource package', async () => {

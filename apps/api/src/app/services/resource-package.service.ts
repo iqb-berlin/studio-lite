@@ -267,6 +267,7 @@ export class ResourcePackageService {
       );
     }
     const name = packageNameArray[0];
+    const folder = this.packageFolder(name);
     const packageName = ResourcePackageService.checkPackageName(
       options.packageName ?? suggestPackageName(zippedResourcePackage.originalname)
     );
@@ -275,7 +276,7 @@ export class ResourcePackageService {
       throw new ConflictException(`Resource package '${name}' is already installed`);
     }
     const { zip, packageFiles } = this.readZipArchive(zippedResourcePackage);
-    await this.unpack(name, zip, zippedResourcePackage);
+    await this.unpack(name, folder, zip, zippedResourcePackage);
     if (existing) {
       existing.elements = packageFiles;
       existing.createdAt = new Date();
@@ -286,6 +287,23 @@ export class ResourcePackageService {
     const id = await this.saveResourcePackage(name, packageName, packageFiles);
     if (isFirst) await this.setDefault(packageName, name);
     return id;
+  }
+
+  /**
+   * The folder a package installed under `name` is unpacked into. The name comes from the file name
+   * of the upload, so it must not lead out of the packages folder or into one of the folders an
+   * upload is unpacked in first (`.upload-…`). The last check also refuses an empty name, `.` and
+   * `..`; it is the form CodeQL recognizes as keeping a path inside a folder (js/path-injection).
+   */
+  private packageFolder(name: string): string {
+    const root = path.resolve(this.resourcePackagesPath);
+    const folder = path.resolve(root, name);
+    if (name.startsWith('.') || name.includes('/') || !folder.startsWith(`${root}${path.sep}`)) {
+      throw new BadRequestException(
+        `'${name}${RESOURCE_PACKAGE_ENDING}' is no valid file name for a resource package`
+      );
+    }
+    return folder;
   }
 
   private static checkPackageName(packageName: unknown): string {
@@ -381,14 +399,19 @@ export class ResourcePackageService {
    * failed upload leaves an installed package -- one being overwritten, or a folder left over from
    * an earlier one -- as it was.
    */
-  private async unpack(name: string, zip: AdmZip, zippedResourcePackage: Express.Multer.File): Promise<void> {
-    const target = `${this.resourcePackagesPath}/${name}`;
+  private async unpack(
+    name: string,
+    target: string,
+    zip: AdmZip,
+    zippedResourcePackage: Express.Multer.File
+  ): Promise<void> {
     const unpacked = `${this.resourcePackagesPath}/.upload-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const zipExtractAllToAsync = util.promisify(zip.extractAllToAsync);
     try {
       await zipExtractAllToAsync(unpacked, true, true);
+      // named after the checked folder, which is where the export looks for it
       fs.writeFileSync(
-        `${unpacked}/${zippedResourcePackage.originalname}`,
+        path.join(unpacked, `${path.basename(target)}${RESOURCE_PACKAGE_ENDING}`),
         zippedResourcePackage.buffer as unknown as Uint8Array
       );
     } catch {
