@@ -68,10 +68,12 @@ describe('ResourcePackageDialogComponent', () => {
   it('should let a package in use get its package name spelt otherwise only', () => {
     const dialog = open({ resourcePackage: installed[0] });
 
-    expect(dialog.inUse).toBe(true);
+    expect(dialog.useTexts).toEqual([{ key: 'resource-packages.use-default', params: { packageName: 'GeoGebra' } }]);
     expect(dialog.blocked()).toBe(false);
     dialog.packageName.setValue('GeoGebra3D');
     expect(dialog.blocked()).toBe(true);
+    // nothing to promise while the name cannot be saved
+    expect(dialog.becomesDefault()).toBe(false);
     dialog.packageName.setValue('geogebra');
     expect(dialog.blocked()).toBe(false);
     expect(dialog.becomesDefault()).toBe(false);
@@ -80,7 +82,7 @@ describe('ResourcePackageDialogComponent', () => {
   it('should let a package not in use get another name, and say when it becomes a default there', () => {
     const dialog = open({ resourcePackage: installed[1], groups: [] });
 
-    expect(dialog.inUse).toBe(false);
+    expect(dialog.useTexts).toEqual([]);
     expect(dialog.becomesDefault()).toBe(false);
     dialog.packageName.setValue('GeoGebra3D');
 

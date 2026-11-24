@@ -6,13 +6,22 @@ import {
 } from 'rxjs';
 import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
 import {
-  ResourcePackageChoice, ResourcePackageGroup, resolveResourcePackageForGroups, withChosenResourcePackage
+  ResourcePackageChoice,
+  ResourcePackageGroup,
+  resolveResourcePackageForGroups,
+  resourcePackageInUse,
+  withChosenResourcePackage
 } from '@studio-lite/shared-code';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import {
-  ConfirmDialogComponent, ConfirmDialogData, IqbFilesUploadQueueComponent
+  ConfirmDialogComponent,
+  ConfirmDialogData,
+  IqbFilesUploadQueueComponent,
+  MessageDialogComponent,
+  MessageDialogData,
+  MessageType
 } from '@studio-lite-lib/iqb-components';
 import { MatDialog } from '@angular/material/dialog';
 import { BackendService as ReadBackendService } from '../../../../services/backend.service';
@@ -25,6 +34,7 @@ import { ChangeResultService } from '../../../../services/change-result.service'
 import {
   ResourcePackageDialogComponent, ResourcePackageDialogData, ResourcePackageDialogResult
 } from '../resource-package-dialog/resource-package-dialog.component';
+import { resourcePackageUseTexts } from '../../../../utils/resource-package-use.utils';
 
 /**
  * The administration of the resource packages: upload, package names, defaults, deletion. Several
@@ -146,34 +156,68 @@ export class ResourcePackagesComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Deletes the selected packages once confirmed. A package in use is refused by the API (#1358);
+   * the page tells why before anything is asked, and deletes nothing of the selection then.
+   */
   deleteSelected(): void {
-    const unitsToDelete = this.selectedResourcePackages.value;
+    const selected = this.selectedResourcePackages.value;
+    this.withGroups(groups => {
+      const refusals = this.inUseTexts(selected, groups);
+      if (refusals.length) {
+        this.dialog.open(MessageDialogComponent, {
+          width: '480px',
+          data: <MessageDialogData>{
+            type: MessageType.warning,
+            title: this.translateService.instant('resource-packages.delete-in-use-title'),
+            content: refusals.join(' '),
+            closeButtonLabel: this.translateService.instant('close')
+          }
+        });
+      } else {
+        this.confirmDelete(selected);
+      }
+    });
+  }
 
-    const titleKey = unitsToDelete.length === 1 ?
-      'admin.delete-one-package' : 'admin.delete-many-packages';
-    const contentKey = unitsToDelete.length === 1 ?
+  /** Asks before deleting exactly the packages checked for use, whatever is ticked meanwhile. */
+  private confirmDelete(selected: number[]): void {
+    const count = selected.length;
+    const titleKey = count === 1 ? 'admin.delete-one-package' : 'admin.delete-many-packages';
+    const contentKey = count === 1 ?
       'admin.delete-one-package-confirmation' : 'admin.delete-many-packages-confirmation';
 
     this.dialog.open(DeleteDialogComponent, {
       width: '400px',
       data: {
-        title: this.translateService
-          .instant(titleKey, { count: unitsToDelete.length }),
-        content: this.translateService
-          .instant(contentKey, { count: unitsToDelete.length })
+        title: this.translateService.instant(titleKey, { count }),
+        content: this.translateService.instant(contentKey, { count })
       }
     })
       .afterClosed()
       .pipe(
         takeUntil(this.ngUnsubscribe),
         switchMap(confirmed => (confirmed ?
-          this.writeBackendService.deleteResourcePackages(this.selectedResourcePackages.value) :
+          this.writeBackendService.deleteResourcePackages(selected) :
           []))
       )
       .subscribe(ok => {
-        // a package in use is refused (#1358), the others of the selection are deleted all the same
         this.changeResult.show(ok, 'admin.package-deleted', 'admin.package-not-deleted', 'admin.error');
         this.updateFormFields();
+      });
+  }
+
+  /** For each selected package in use, one text: that it cannot be deleted, why, and what frees it. */
+  private inUseTexts(selected: number[], groups: ResourcePackageGroup[]): string[] {
+    return this.packages()
+      .filter(resourcePackage => selected.includes(resourcePackage.id))
+      .flatMap(resourcePackage => {
+        const use = resourcePackageInUse(resourcePackage, this.packages(), groups, this.defaults());
+        return use ? [[
+          this.translateService.instant('resource-packages.delete-in-use', { name: resourcePackage.name }),
+          ...resourcePackageUseTexts(use, resourcePackage.packageName)
+            .map(text => this.translateService.instant(text.key, text.params))
+        ].join(' ')] : [];
       });
   }
 

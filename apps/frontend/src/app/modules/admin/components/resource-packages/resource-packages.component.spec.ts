@@ -4,7 +4,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
-import { ConfirmDialogData } from '@studio-lite-lib/iqb-components';
+import { ConfirmDialogData, MessageDialogData } from '@studio-lite-lib/iqb-components';
 import { BackendService as ReadBackendService } from '../../../../services/backend.service';
 import { BackendService as WriteBackendService } from '../../services/backend.service';
 import { ResourcePackagesComponent } from './resource-packages.component';
@@ -77,9 +77,23 @@ describe('ResourcePackagesComponent', () => {
   it('does not delete when dialog is canceled', () => {
     dialog.open.mockReturnValue(closingWith(false));
 
-    component.selectedResourcePackages.next([1]);
+    component.selectedResourcePackages.next([2]);
     component.deleteSelected();
 
+    expect(writeBackendService.deleteResourcePackages).not.toHaveBeenCalled();
+  });
+
+  it('should say why a package in use cannot be deleted, and delete nothing of the selection (#1358)', () => {
+    component.selectedResourcePackages.next([1, 2]);
+    component.deleteSelected();
+
+    expect(dialog.open).toHaveBeenCalledTimes(1);
+    const { content } = dialog.open.mock.calls[0][1]?.data as MessageDialogData;
+    expect(content).toBe([
+      'resource-packages.delete-in-use{"name":"GeoGebra-5.0.791"}',
+      'resource-packages.use-default{"packageName":"GeoGebra"}',
+      'resource-packages.use-groups{"groups":"Mathe"}'
+    ].join(' '));
     expect(writeBackendService.deleteResourcePackages).not.toHaveBeenCalled();
   });
 

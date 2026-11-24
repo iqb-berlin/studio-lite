@@ -24,6 +24,7 @@ import {
   resourcePackagesFor,
   suggestPackageName
 } from '@studio-lite/shared-code';
+import { ResourcePackageUseText, resourcePackageUseTexts } from '../../../../utils/resource-package-use.utils';
 
 /**
  * What the dialog is opened with: for an upload the file name, for a change the package. Beside it
@@ -65,10 +66,10 @@ export class ResourcePackageDialogComponent {
   /** The groups an overwritten package changes for, as one text. */
   readonly reachedGroups: string;
   /**
-   * Whether the package whose package name is to change is in use, so that the name can only be
-   * spelt otherwise: names are compared regardless of case.
+   * Why the package whose package name is to change is in use, empty when it is not. A package in
+   * use keeps its package name and may only spell it otherwise: names are compared regardless of case.
    */
-  readonly inUse: boolean;
+  readonly useTexts: ResourcePackageUseText[];
   readonly titleKey: string;
   readonly confirmKey: string;
   readonly packageName: FormControl<string>;
@@ -76,14 +77,15 @@ export class ResourcePackageDialogComponent {
   readonly trimmedPackageName = computed(() => this.packageNameValue().trim());
 
   /** Whether the name entered may be saved: a package in use keeps its package name, spelt as it likes. */
-  readonly blocked = computed(() => this.inUse &&
+  readonly blocked = computed(() => !!this.useTexts.length &&
     this.trimmedPackageName().toLowerCase() !== this.data.resourcePackage?.packageName.toLowerCase());
 
   /** Whether the package becomes the default of its package name, there being no package for it yet. */
   readonly becomesDefault = computed(() => {
     const packageName = this.trimmedPackageName();
     const subject = this.data.resourcePackage;
-    if (this.replaced || !packageName || packageName.toLowerCase() === subject?.packageName.toLowerCase()) {
+    if (this.replaced || this.blocked() || !packageName ||
+      packageName.toLowerCase() === subject?.packageName.toLowerCase()) {
       return false;
     }
     const others = this.data.packages.filter(other => other.name !== subject?.name);
@@ -98,8 +100,9 @@ export class ResourcePackageDialogComponent {
     this.replaced = data.packages.find(installed => installed.name === uploadedName);
     this.fileName = data.fileName ?? `${data.resourcePackage?.name}.itcr.zip`;
     this.reachedGroups = this.replaced ? this.groupsReaching(this.replaced).join(', ') : '';
-    this.inUse = !!data.resourcePackage &&
-      !!resourcePackageInUse(data.resourcePackage, data.packages, data.groups, data.defaults);
+    const subject = data.resourcePackage;
+    const use = subject && resourcePackageInUse(subject, data.packages, data.groups, data.defaults);
+    this.useTexts = subject && use ? resourcePackageUseTexts(use, subject.packageName) : [];
     this.titleKey = data.resourcePackage ? 'resource-packages.edit-title' : 'resource-packages.upload-title';
     this.confirmKey = (data.resourcePackage && 'save') ||
       (this.replaced ? 'resource-packages.overwrite' : 'resource-packages.upload');

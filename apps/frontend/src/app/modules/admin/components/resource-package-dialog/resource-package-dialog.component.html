@@ -28,6 +28,9 @@
   @if (blocked()) {
     <p class="notice" data-cy="resource-package-dialog-in-use">
       {{ 'resource-packages.in-use' | translate }}
+      @for (text of useTexts; track text.key) {
+        {{ text.key | translate : text.params }}
+      }
     </p>
   }
   @if (becomesDefault()) {
