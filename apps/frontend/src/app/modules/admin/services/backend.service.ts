@@ -83,14 +83,6 @@ export class BackendService {
       );
   }
 
-  getWorkspaceById(workspaceId: number):Observable<boolean | WorkspaceFullDto> {
-    return this.http
-      .get<WorkspaceFullDto>(`${this.serverUrl}workspaces/${workspaceId}`)
-      .pipe(
-        catchError(() => of(false))
-      );
-  }
-
   getUsers(): Observable<UserInListDto[]> {
     return this.http
       .get<UserInListDto[]>(`${this.serverUrl}users`)

@@ -1,7 +1,10 @@
 import {
   Component, Input
 } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, fakeAsync, flush, TestBed
+} from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { TranslateModule } from '@ngx-translate/core';
 import {
   MAT_DIALOG_DATA, MatDialogModule, MatDialogRef
@@ -11,9 +14,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
 import { of } from 'rxjs';
-import {
-  WorkspaceGroupFullDto, WorkspaceFullDto, WorkspaceSettingsDto
-} from '@studio-lite-lib/api-dto';
+import { WorkspaceGroupFullDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { EditWorkspaceSettingsComponent } from './edit-workspace-settings.component';
 import { BackendService } from '../../modules/admin/services/backend.service';
 import { AppService } from '../../services/app.service';
@@ -52,7 +53,9 @@ describe('EditWorkspaceSettingsComponent', () => {
       defaultSchemer: 'schemer1',
       defaultPlayer: 'player1',
       stableModulesOnly: false,
-      states: []
+      states: [],
+      unitMDProfile: 'profile1/unit.json',
+      itemMDProfile: 'profile2/item.json'
     } as WorkspaceSettingsDto,
     selectedRow: {
       id: 1,
@@ -68,16 +71,11 @@ describe('EditWorkspaceSettingsComponent', () => {
         settings: {
           profiles: [
             { id: 'profile1/unit.json', label: 'Unit Profile 1' },
-            { id: 'profile2/item.json', label: 'Item Profile 1' }
+            { id: 'profile2/item.json', label: 'Item Profile 1' },
+            { id: 'profile3/unit.json', label: 'Unit Profile 2' }
           ]
         }
-      } as WorkspaceGroupFullDto)),
-      getWorkspaceById: jest.fn().mockReturnValue(of({
-        settings: {
-          itemMDProfile: 'profile2/item.json',
-          unitMDProfile: 'profile1/unit.json'
-        }
-      } as WorkspaceFullDto))
+      } as WorkspaceGroupFullDto))
     };
 
     mockAppService = {};
@@ -130,13 +128,45 @@ describe('EditWorkspaceSettingsComponent', () => {
 
   it('should initialize profiles in ngOnInit', () => {
     expect(mockBackendService.getWorkspaceGroupById).toHaveBeenCalledWith(10);
-    expect(mockBackendService.getWorkspaceById).toHaveBeenCalledWith(1);
-    expect(component.unitMDProfiles.length).toBe(1);
-    expect(component.unitMDProfiles[0].id).toBe('profile1/unit.json');
-    expect(component.itemMDProfiles.length).toBe(1);
-    expect(component.itemMDProfiles[0].id).toBe('profile2/item.json');
-    expect(component.selectedItemMDProfile).toBe('profile2/item.json');
-    expect(component.selectedUnitMDProfile).toBe('profile1/unit.json');
+    expect(component.unitMDProfiles.map(profile => profile.id)).toEqual(['profile1/unit.json', 'profile3/unit.json']);
+    expect(component.itemMDProfiles.map(profile => profile.id)).toEqual(['profile2/item.json']);
+  });
+
+  describe('the metadata profiles shown and saved (#2138)', () => {
+    const shown = (select: 'unit' | 'item') => (fixture.debugElement
+      .query(By.css(`[data-cy="edit-workspace-settings-select-${select}-profile"]`))
+      .nativeElement as HTMLElement).textContent?.trim();
+
+    // the stored profiles came with a request of the dialog's own; until it answered, none was shown
+    it('shows the stored profiles as soon as the dialog opens', fakeAsync(() => {
+      flush();
+      fixture.detectChanges();
+
+      expect(shown('unit')).toBe('Unit Profile 1');
+      expect(shown('item')).toBe('Item Profile 1');
+    }));
+
+    // the select writes into the settings the dialog saves; there is no second value to drift apart
+    it('saves the profile it shows', fakeAsync(() => {
+      (fixture.debugElement
+        .query(By.css('[data-cy="edit-workspace-settings-select-unit-profile"] .mat-mdc-select-trigger'))
+        .nativeElement as HTMLElement).click();
+      fixture.detectChanges();
+      (Array.from(document.querySelectorAll('[data-cy="edit-workspace-settings-unit-profile"]'))
+        .find(option => option.textContent?.includes('Unit Profile 2')) as HTMLElement).click();
+      fixture.detectChanges();
+      flush();
+      fixture.detectChanges();
+      expect(shown('unit')).toBe('Unit Profile 2');
+
+      (fixture.debugElement.query(By.css('[data-cy="edit-workspace-settings-submit-button"]'))
+        .nativeElement as HTMLElement).click();
+
+      expect(mockDialogRef.close).toHaveBeenCalledWith(expect.objectContaining({
+        unitMDProfile: 'profile3/unit.json',
+        itemMDProfile: 'profile2/item.json'
+      }));
+    }));
   });
 
   // Read from each profile of the group, so it follows a profile translated after it was chosen (#2212).

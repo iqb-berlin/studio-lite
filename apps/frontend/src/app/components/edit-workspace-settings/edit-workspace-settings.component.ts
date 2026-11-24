@@ -5,12 +5,10 @@ import { Subject, takeUntil } from 'rxjs';
 import {
   MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
 } from '@angular/material/dialog';
-import {
-  State, WorkspaceFullDto, WorkspaceGroupFullDto, WorkspaceSettingsDto
-} from '@studio-lite-lib/api-dto';
+import { State, WorkspaceGroupFullDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { isItemProfileId } from '@studio-lite/shared-code';
 import { MatCheckboxChange, MatCheckbox } from '@angular/material/checkbox';
-import { MatSelectChange, MatSelect } from '@angular/material/select';
+import { MatSelect } from '@angular/material/select';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { MatOption } from '@angular/material/core';
@@ -73,12 +71,12 @@ export class EditWorkspaceSettingsComponent implements OnInit, OnDestroy {
     this.dialogData = { ...this.data.settings as WorkspaceSettingsDto };
   }
 
+  // What the dialog saves. The profile selects show and change it directly: a value of their own,
+  // loaded apart, showed one profile while another was saved (#2138).
   dialogData: WorkspaceSettingsDto;
   selectionChanged!: State[];
   itemMDProfiles: Profile[] = [];
   unitMDProfiles: Profile[] = [];
-  selectedItemMDProfile: string = '';
-  selectedUnitMDProfile: string = '';
   profiles: Array<string> = [];
   settings = { ...this.workspaceService.workspaceSettings, profile: '' };
 
@@ -99,18 +97,6 @@ export class EditWorkspaceSettingsComponent implements OnInit, OnDestroy {
           ) || [];
           this.loadProfileLanguages([...this.unitMDProfiles, ...this.itemMDProfiles]);
         }));
-      this.backendService.getWorkspaceById(this.data.selectedRow.id)
-        .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(res => {
-          const itemMDProfile = (
-            res && (res as WorkspaceFullDto).settings && (res as WorkspaceFullDto).settings?.itemMDProfile
-          ) || '';
-          if (itemMDProfile) this.selectedItemMDProfile = itemMDProfile;
-          const unitMDProfile = (
-            res && (res as WorkspaceFullDto).settings && (res as WorkspaceFullDto).settings?.unitMDProfile
-          ) || '';
-          if (unitMDProfile) this.selectedUnitMDProfile = unitMDProfile;
-        });
     }
   }
 
@@ -137,14 +123,6 @@ export class EditWorkspaceSettingsComponent implements OnInit, OnDestroy {
     } else if (moduleType === 'player') {
       this.dialogData.defaultPlayer = newValue;
     }
-  }
-
-  selectUnitMDProfile(e:MatSelectChange) {
-    this.dialogData.unitMDProfile = e.value;
-  }
-
-  selectItemMDProfile(e:MatSelectChange) {
-    this.dialogData.itemMDProfile = e.value;
   }
 
   addData() {
