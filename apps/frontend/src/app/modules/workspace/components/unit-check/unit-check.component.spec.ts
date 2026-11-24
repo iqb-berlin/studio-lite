@@ -31,6 +31,7 @@ describe('UnitCheckComponent', () => {
   let hiddenRoutes: string[];
   let getUnitRichNotes: jest.Mock;
   let getUnitDefinition: jest.Mock;
+  let getUnitDefinitionSummary: jest.Mock;
   let getUnitScheme: jest.Mock;
   let hasComments: jest.Mock;
   let units: WritableSignal<{ [group: string]: UnitInListDto[] }>;
@@ -70,6 +71,7 @@ describe('UnitCheckComponent', () => {
               schemer: 'iqb-schemer@2.5'
             }),
             getUnitDefinition,
+            getUnitDefinitionSummary,
             getUnitScheme,
             getUnitRichNotes
           }
@@ -109,7 +111,11 @@ describe('UnitCheckComponent', () => {
     hasComments = jest.fn(() => of(true));
     getUnitRichNotes = jest.fn(() => of({ tags: [], notes: [] }));
     getUnitDefinition = jest.fn(() => of({ definition: '{}', variables: [{ id: '05', alias: '_00a' }] }));
-    getUnitScheme = jest.fn(() => of({ scheme: scheme([]), schemeType: 'iqb-standard@3.0' }));
+    getUnitDefinitionSummary = jest.fn(() => of({ hasDefinition: true }));
+    // the variables come with the scheme, as the schemer is given them
+    getUnitScheme = jest.fn(() => of({
+      scheme: scheme([]), schemeType: 'iqb-standard@3.0', variables: [{ id: '05', alias: '_00a' }]
+    }));
   });
 
   it('shows every tab of a complete unit as in order, comments and notes as information', fakeAsync(() => {
@@ -139,7 +145,8 @@ describe('UnitCheckComponent', () => {
     hiddenRoutes = ['editor', 'schemer'];
     getUnitScheme.mockReturnValue(of({
       scheme: scheme([{ id: 'd_1', alias: '05', sourceType: 'MANUAL' }]),
-      schemeType: 'iqb-standard@3.0'
+      schemeType: 'iqb-standard@3.0',
+      variables: [{ id: '05', alias: '_00a' }]
     }));
     create();
 
@@ -150,6 +157,28 @@ describe('UnitCheckComponent', () => {
     // its steps lead into the tabs this workspace hides
     expect(properties?.querySelector('[data-cy="variable-id-conflicts-manual-fix"]')).toBeNull();
     expect(properties?.querySelector('[data-cy="unit-check-fix-elsewhere"]')).toBeTruthy();
+  }));
+
+  // the definition embeds the unit's media; the check needs only whether there is one and its format (#2135)
+  it('asks for a summary of the definition, not for the definition itself', fakeAsync(() => {
+    create();
+
+    expect(getUnitDefinitionSummary).toHaveBeenCalledWith(1, 3);
+    expect(getUnitDefinition).not.toHaveBeenCalled();
+    expect(sectionOf('editor')?.querySelector('[data-cy="unit-check-ok"]')).toBeTruthy();
+  }));
+
+  // the editor beside the properties holds the definition as it is being edited
+  it('follows the definition the editor holds, unsaved changes included', fakeAsync(() => {
+    create();
+    unitStores.loadDefinitionStore(1, 3).subscribe();
+    unitStores.definitionStore()?.setData([], '');
+    fixture.detectChanges();
+
+    expect(Array.from(
+      sectionOf('editor')?.querySelectorAll('[data-cy="unit-check-finding"]') ?? [],
+      finding => finding.textContent
+    )).toEqual(['unit-check.no-definition']);
   }));
 
   // the card reads the unit as it is being edited, so a fix shows before it is saved (#2135)

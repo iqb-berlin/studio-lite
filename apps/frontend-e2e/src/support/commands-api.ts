@@ -1220,6 +1220,20 @@ Cypress.Commands.add('getUnitDefinitionAPI', (unitId: string, wsId: string, toke
   });
 });
 
+// 45a
+// Whether the unit has a definition, and its format -- without the definition (#2135)
+Cypress.Commands.add('getUnitDefinitionSummaryAPI', (unitId: string, wsId: string, token: string) => {
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}/units/${unitId}/definition-summary`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization: `bearer ${token}`
+    },
+    failOnStatusCode: false
+  });
+});
+
 // 46
 // Without a scheme of the spec's own, the fixed scheme1 below
 Cypress.Commands.add('updateUnitSchemeAPI', (unitId: string, wsId: string, token:string, scheme?: string) => {

@@ -10,13 +10,14 @@ import {
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { TranslateModule } from '@ngx-translate/core';
+import { UnitDefinitionSummaryDto } from '@studio-lite-lib/api-dto';
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitStoresService } from '../../services/unit-stores.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { ModuleService } from '../../../../services/module.service';
 import { BackendService as CommentsBackendService } from '../../../comments/services/backend.service';
 import {
-  checkUnit, isTabShown, ModuleType, UnitCheckFinding, UnitCheckSection, withKeyFindings
+  checkUnit, definitionSummary, isTabShown, ModuleType, UnitCheckFinding, UnitCheckSection, withKeyFindings
 } from '../../utils/unit-check.utils';
 import { checkUnitKey } from '../../utils/unit-key.utils';
 import { VariableIdConflictListComponent } from '../variable-id-conflict-list/variable-id-conflict-list.component';
@@ -24,6 +25,8 @@ import { VariableIdConflictFixComponent } from '../variable-id-conflict-fix/vari
 
 /** What the check reads from the server, apart from the stores. */
 interface UnitCheckSources {
+  /** The server's summary of the stored definition; not asked for where the editor holds it. */
+  definitionSummary: UnitDefinitionSummaryDto | undefined;
   hasComments: boolean | undefined;
   hasRichNotes: boolean | undefined;
   hiddenRoutes: string[];
@@ -96,7 +99,10 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
           schemer: this.moduleService.schemers
         } :
         undefined,
-      definition: definitionStore?.data(),
+      // the editor's definition where it is loaded, unsaved changes included; else the server's summary
+      definition: definitionStore ? definitionSummary(definitionStore.data()) : sources.definitionSummary,
+      // as the schemer is given them: an editor that never reported variables leaves them to the scheme
+      variables: definitionStore?.data().variables || schemeStore?.data().variables,
       scheme: schemeStore?.data(),
       unsaved: {
         variables: definitionStore?.variablesChanged() ?? false,
@@ -142,6 +148,12 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
     // comments and notes the workspace hides are not checked, and so not asked for. Definition and
     // scheme are, hidden tabs or not: whether there is content the player can play, and whether the
     // export would write an id twice, is asked under the properties where those tabs are hidden.
+    // The definition itself is not loaded: it embeds the unit's media and runs to megabytes, and the
+    // check needs only whether there is one and its format (#2135). Where the editor already holds
+    // it, the check reads that instead.
+    const storedDefinition = this.unitStores.definitionStore() ?
+      of(undefined) :
+      this.backendService.getUnitDefinitionSummary(workspaceId, unitId).pipe(map(summary => summary ?? undefined));
     const hasComments = isTabShown(hiddenRoutes, 'comments') ?
       this.commentsBackendService.hasComments(workspaceId, unitId) :
       of(undefined);
@@ -152,12 +164,14 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
     return forkJoin([
       modulesLoaded,
       this.unitStores.loadMetadataStore(workspaceId, unitId),
-      this.unitStores.loadDefinitionStore(workspaceId, unitId),
+      storedDefinition,
       this.unitStores.loadSchemeStore(workspaceId, unitId),
       hasComments,
       hasRichNotes
     ]).pipe(
-      map(([, , , , comments, richNotes]) => ({ hasComments: comments, hasRichNotes: richNotes, hiddenRoutes }))
+      map(([, , summary, , comments, richNotes]) => ({
+        definitionSummary: summary, hasComments: comments, hasRichNotes: richNotes, hiddenRoutes
+      }))
     );
   }
 

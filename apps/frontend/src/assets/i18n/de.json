@@ -666,7 +666,6 @@
     "definition-not-loaded": "Der Inhalt der Aufgabe konnte nicht geladen werden.",
     "definition-type-not-checked": "Ob der Player das Format dieser Aufgabe liest, ist nicht geprüft: Die Liste der installierten Module konnte nicht geladen werden.",
     "no-scheme": "Die Aufgabe hat noch kein Kodierschema.",
-    "variables-not-loaded": "Die Variablen konnten nicht geladen werden; doppelte IDs sind nicht geprüft.",
     "scheme-not-loaded": "Das Kodierschema konnte nicht geladen werden; doppelte IDs sind nicht geprüft.",
     "scheme-unreadable": "Das Kodierschema ließ sich nicht prüfen: Es hat nicht das Format, das der Schemer erwartet. In der Kodierung prüfen, ob es sich öffnen lässt.",
     "fix-elsewhere": "Beheben lässt sich das nur mit den Reitern „Editor“ und „Kodierung“, die dieser Arbeitsbereich ausblendet.",

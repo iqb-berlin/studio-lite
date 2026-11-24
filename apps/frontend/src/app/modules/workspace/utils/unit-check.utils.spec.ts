@@ -1,6 +1,6 @@
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import {
-  checkUnit, UnitCheckInput, UnitCheckSection, withKeyFindings
+  checkUnit, definitionSummary, UnitCheckInput, UnitCheckSection, withKeyFindings
 } from './unit-check.utils';
 
 const scheme = (variableCodings: unknown[]): string => JSON.stringify({ version: '3.0', variableCodings });
@@ -28,11 +28,8 @@ const okInput = (): UnitCheckInput => ({
     },
     schemer: { 'iqb-schemer@2.5': { nameAndVersion: 'Schemer 2.5' } }
   },
-  definition: {
-    definition: '{"pages":[]}',
-    definitionType: 'aspect-unit-definition@4.10.0',
-    variables: [{ id: 'text_1', alias: 'text_1' } as VariableInfo]
-  },
+  definition: { hasDefinition: true, definitionType: 'aspect-unit-definition@4.10.0' },
+  variables: [{ id: 'text_1', alias: 'text_1' } as VariableInfo],
   scheme: {
     scheme: scheme([{ id: 'text_1', sourceType: 'BASE', codes: [code] }]),
     schemeType: 'iqb-standard@3.0'
@@ -46,13 +43,10 @@ const okInput = (): UnitCheckInput => ({
 // two elements of the same name, as when they were copied from another page with it (#2135)
 const nameTwiceInput = (): UnitCheckInput => {
   const input = okInput();
-  input.definition = {
-    ...input.definition,
-    variables: [
-      { id: 'text_1749756922777_1', alias: 'text_1', type: 'no-value' } as VariableInfo,
-      { id: 'text_1749757116310_1', alias: 'text_1', type: 'no-value' } as VariableInfo
-    ]
-  };
+  input.variables = [
+    { id: 'text_1749756922777_1', alias: 'text_1', type: 'no-value' } as VariableInfo,
+    { id: 'text_1749757116310_1', alias: 'text_1', type: 'no-value' } as VariableInfo
+  ];
   input.scheme = {
     scheme: scheme([
       { id: 'text_1749756922777_1', alias: 'text_1', sourceType: 'BASE_NO_VALUE' },
@@ -130,21 +124,21 @@ describe('checkUnit', () => {
     it('does not say so for a unit that names no format, as there would be nothing to check', () => {
       const input = okInput();
       input.installed = undefined;
-      input.definition = { ...input.definition, definitionType: undefined };
+      input.definition = { hasDefinition: true, definitionType: undefined };
 
       expect(section(checkUnit(input), 'editor')?.findings).toEqual([]);
     });
 
     it('names a unit without content', () => {
       const input = okInput();
-      input.definition = { definition: '', variables: [] };
+      input.definition = { hasDefinition: false };
 
       expect(section(checkUnit(input), 'editor')?.findings).toEqual([{ key: 'unit-check.no-definition' }]);
     });
 
     it('names a format the player says it does not read', () => {
       const input = okInput();
-      input.definition = { ...input.definition, definitionType: 'aspect-unit-definition@5.0.0' };
+      input.definition = { hasDefinition: true, definitionType: 'aspect-unit-definition@5.0.0' };
 
       expect(section(checkUnit(input), 'editor')?.findings).toEqual([{
         key: 'workspace.definition-type-incompatible',
@@ -154,7 +148,7 @@ describe('checkUnit', () => {
 
     it('finds no fault where the format is unknown', () => {
       const input = okInput();
-      input.definition = { ...input.definition, definitionType: undefined };
+      input.definition = { hasDefinition: true, definitionType: undefined };
 
       expect(section(checkUnit(input), 'editor')?.findings).toEqual([]);
     });
@@ -177,7 +171,7 @@ describe('checkUnit', () => {
 
     it('lists the ids the export would write twice, from the variables as they are edited (#2119)', () => {
       const input = okInput();
-      input.definition = { ...input.definition, variables: [{ id: '05', alias: '_00a' } as VariableInfo] };
+      input.variables = [{ id: '05', alias: '_00a' } as VariableInfo];
       input.scheme = {
         scheme: scheme([{ id: 'd_1790938214783', alias: '05', sourceType: 'MANUAL' }]),
         schemeType: 'iqb-standard@3.0'
@@ -227,13 +221,10 @@ describe('checkUnit', () => {
     // one of two elements of the same name renamed in the editor; the scheme holds the old name
     const renamedInput = (): UnitCheckInput => {
       const input = nameTwiceInput();
-      input.definition = {
-        ...input.definition,
-        variables: [
-          { id: 'text_1749756922777_1', alias: 'text_1', type: 'no-value' } as VariableInfo,
-          { id: 'text_1749757116310_1', alias: 'text_2', type: 'no-value' } as VariableInfo
-        ]
-      };
+      input.variables = [
+        { id: 'text_1749756922777_1', alias: 'text_1', type: 'no-value' } as VariableInfo,
+        { id: 'text_1749757116310_1', alias: 'text_2', type: 'no-value' } as VariableInfo
+      ];
       return input;
     };
     const nameTwice = [{ key: 'unit-check.element-problem.NAME_TWICE', params: { variable: 'text_1' } }];
@@ -249,10 +240,7 @@ describe('checkUnit', () => {
     // the save drops the coding of an element without value with it (#2135)
     it('finds nothing wrong once an element without value is deleted, before the save', () => {
       const input = nameTwiceInput();
-      input.definition = {
-        ...input.definition,
-        variables: [{ id: 'text_1749756922777_1', alias: 'text_1', type: 'no-value' } as VariableInfo]
-      };
+      input.variables = [{ id: 'text_1749756922777_1', alias: 'text_1', type: 'no-value' } as VariableInfo];
       input.unsaved = { variables: true, scheme: false };
       const sections = checkUnit(input);
 
@@ -272,30 +260,14 @@ describe('checkUnit', () => {
     it('checks the coding as it is stored when the variables are saved', () => {
       expect(section(checkUnit(renamedInput()), 'editor')?.findings).toEqual(nameTwice);
     });
+  });
 
-    // as the schemer is given them: an editor that never reported variables leaves them to the scheme
-    it('checks the coding against the scheme\'s variables where the definition has none', () => {
-      const input = nameTwiceInput();
-      input.scheme = { ...input.scheme!, variables: input.definition!.variables };
-      input.definition = { ...input.definition, variables: undefined };
-
-      expect(section(checkUnit(input), 'editor')?.findings).toEqual([
-        { key: 'unit-check.element-problem.NAME_TWICE', params: { variable: 'text_1' } }
-      ]);
-    });
-
-    // a conflict with an element needs its variables, and the check must not pass without them
-    it('does not report the coding in order when the variables could not be loaded', () => {
-      const input = okInput();
-      input.definition = undefined;
-      input.scheme = {
-        scheme: scheme([{ id: 'd_1790938214783', alias: '05', sourceType: 'MANUAL' }]),
-        schemeType: 'iqb-standard@3.0'
-      };
-
-      expect(section(checkUnit(input), 'schemer')).toEqual(expect.objectContaining({
-        ok: false, findings: [{ key: 'unit-check.variables-not-loaded' }]
-      }));
+  // the editor's definition, unsaved changes included, read as the server reads a stored one (#2135)
+  describe('definitionSummary', () => {
+    it('tells whether the editor holds content, and its format', () => {
+      expect(definitionSummary({ definition: '{"pages":[]}', definitionType: 'aspect-unit-definition@4.10.0' }))
+        .toEqual({ hasDefinition: true, definitionType: 'aspect-unit-definition@4.10.0' });
+      expect(definitionSummary({ definition: '', variables: [] })).toEqual({ hasDefinition: false });
     });
   });
 
@@ -342,7 +314,7 @@ describe('checkUnit', () => {
     it('names content the player cannot play under the properties when the editor is hidden', () => {
       const input = okInput();
       input.hiddenRoutes = ['editor'];
-      input.definition = { ...input.definition, definitionType: 'aspect-unit-definition@5.0.0' };
+      input.definition = { hasDefinition: true, definitionType: 'aspect-unit-definition@5.0.0' };
 
       expect(section(checkUnit(input), 'properties')?.findings).toEqual([{
         key: 'workspace.definition-type-incompatible',
@@ -354,7 +326,7 @@ describe('checkUnit', () => {
     it('names an id the export would write twice under the properties when the coding is hidden', () => {
       const input = okInput();
       input.hiddenRoutes = ['schemer'];
-      input.definition = { ...input.definition, variables: [{ id: '05', alias: '_00a' } as VariableInfo] };
+      input.variables = [{ id: '05', alias: '_00a' } as VariableInfo];
       input.scheme = {
         scheme: scheme([{ id: 'd_1790938214783', alias: '05', sourceType: 'MANUAL' }]),
         schemeType: 'iqb-standard@3.0'

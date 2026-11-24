@@ -34,6 +34,7 @@ import {
   MoveToDto,
   NewNameDto,
   UnitDefinitionDto,
+  UnitDefinitionSummaryDto,
   UnitFullMetadataDto,
   UnitInListDto,
   UnitExportContentsDto,
@@ -301,6 +302,21 @@ export class WorkspaceUnitController {
     @Param('unit_id', ParseIntPipe) unitId: number
   ): Promise<UnitDefinitionDto> {
     return this.unitDefinitionService.findOnesDefinition(unitId);
+  }
+
+  /** Whether the unit has a definition, and its format -- without the definition (#2135). */
+  @Get(':unit_id/definition-summary')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WorkspaceAccessGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiOkResponse({ type: UnitDefinitionSummaryDto })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
+  @ApiTags('workspace unit')
+  async findOnesDefinitionSummary(
+    @Param('unit_id', ParseIntPipe) unitId: number
+  ): Promise<UnitDefinitionSummaryDto> {
+    return this.unitDefinitionService.findOnesDefinitionSummary(unitId);
   }
 
   @Get(':unit_id/scheme')

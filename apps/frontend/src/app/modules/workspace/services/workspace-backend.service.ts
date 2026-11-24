@@ -13,7 +13,7 @@ import {
   RequestReportDto,
   ReviewFullDto,
   ReviewInListDto,
-  UnitDefinitionDto,
+  UnitDefinitionDto, UnitDefinitionSummaryDto,
   UnitDownloadSettingsDto,
   UnitExportContentsDto,
   UnitInListDto,
@@ -261,6 +261,18 @@ export class WorkspaceBackendService {
     if (workspaceId > 0 && unitId > 0) {
       return this.http
         .get<UnitDefinitionDto>(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/definition`)
+        .pipe(
+          catchError(() => of(null))
+        );
+    }
+    return of(null);
+  }
+
+  /** Whether the unit has a definition, and its format -- without the definition (#2135). */
+  getUnitDefinitionSummary(workspaceId: number, unitId: number): Observable<UnitDefinitionSummaryDto | null> {
+    if (workspaceId > 0 && unitId > 0) {
+      return this.http
+        .get<UnitDefinitionSummaryDto>(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/definition-summary`)
         .pipe(
           catchError(() => of(null))
         );

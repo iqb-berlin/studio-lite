@@ -1,4 +1,5 @@
-import { UnitDefinitionDto, UnitSchemeDto } from '@studio-lite-lib/api-dto';
+import { UnitDefinitionDto, UnitDefinitionSummaryDto, UnitSchemeDto } from '@studio-lite-lib/api-dto';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import {
   findVariableIdConflicts, hasCodingScheme, schemeWithVariables, VariableIdConflict, VeronaModuleFactory
 } from '@studio-lite/shared-code';
@@ -18,8 +19,16 @@ export interface UnitCheckInput {
   modules: Partial<Record<ModuleType, string>> | undefined;
   /** undefined: the lists of installed modules could not be loaded. */
   installed: Record<ModuleType, Record<string, InstalledModule>> | undefined;
-  /** undefined: not loaded (yet). */
-  definition: UnitDefinitionDto | undefined;
+  /**
+   * Whether there is content, and its format -- of the editor's definition where it is loaded, saved
+   * or not, else as the server summarizes the stored one (#2135). undefined: not loaded (yet).
+   */
+  definition: UnitDefinitionSummaryDto | undefined;
+  /**
+   * The base variables: the editor's list where its definition is loaded, saved or not, else the list
+   * the scheme came with -- the definition itself is not loaded for the check (#2135).
+   */
+  variables: VariableInfo[] | undefined;
   scheme: UnitSchemeDto | undefined;
   /**
    * What is not saved yet. The save of changed variables renames and drops codings with them, unless a
@@ -87,9 +96,17 @@ function checkProperties(input: UnitCheckInput): UnitCheckFinding[] {
   return installed ? findings : [{ key: 'unit-check.modules-not-loaded' }, ...findings];
 }
 
+/** The summary of a definition the editor holds, as the server gives it for a stored one (#2135). */
+export function definitionSummary(definition: UnitDefinitionDto): UnitDefinitionSummaryDto {
+  return {
+    hasDefinition: !!definition.definition,
+    ...(definition.definitionType && { definitionType: definition.definitionType })
+  };
+}
+
 function checkEditor(input: UnitCheckInput): UnitCheckFinding[] {
   if (!input.definition) return [{ key: 'unit-check.definition-not-loaded' }];
-  if (!input.definition.definition) return [{ key: 'unit-check.no-definition' }];
+  if (!input.definition.hasDefinition) return [{ key: 'unit-check.no-definition' }];
   const definitionType = input.definition.definitionType;
   // without the lists, what the player says it reads is not known: no finding would pass for a pass.
   // A unit that names no format is not asked, lists or not.
@@ -110,15 +127,12 @@ type Checked = Pick<UnitCheckSection, 'findings' | 'variableIdConflicts'>;
 
 /** The ids the export would write twice (#2119). */
 function checkIdConflicts(input: UnitCheckInput): Checked {
-  // without the scheme or the base variables a conflict cannot be seen, and none found means nothing
+  // without the scheme a conflict cannot be seen, and none found means nothing; the base variables
+  // come with it, or from the editor
   if (!input.scheme) return { findings: [{ key: 'unit-check.scheme-not-loaded' }], variableIdConflicts: [] };
-  if (!input.definition) {
-    return { findings: [{ key: 'unit-check.variables-not-loaded' }], variableIdConflicts: [] };
-  }
-  // the base variables as the export reads them: from the definition, the editor's unsaved list included
   return {
     findings: [],
-    variableIdConflicts: findVariableIdConflicts(input.definition.variables, input.scheme.scheme)
+    variableIdConflicts: findVariableIdConflicts(input.variables, input.scheme.scheme)
   };
 }
 
@@ -135,18 +149,15 @@ function checkScheme(input: UnitCheckInput, editorShown: boolean): CheckedScheme
   if (!input.scheme) return only('unit-check.scheme-not-loaded');
   if (!hasCodingScheme(input.scheme.scheme)) return only('unit-check.no-scheme');
   const idConflicts = checkIdConflicts(input);
-  // what the schemer finds wrong (#2135), against the variables the schemer is given: the definition's,
-  // or the scheme's where it has none. Without the definition, every base coding would lack its source.
-  const problems = input.definition ?
-    schemeProblemFindings(
-      input.definition.variables || input.scheme.variables,
-      // as the next save will store it: an element renamed or deleted in the editor is so in the coding
-      input.definition.variables && input.unsaved.variables && !input.unsaved.scheme ?
-        schemeWithVariables(input.scheme.scheme, input.definition.variables) :
-        input.scheme.scheme,
-      editorShown
-    ) :
-    { editor: [], schemer: [] };
+  // what the schemer finds wrong (#2135), against the variables the schemer is given
+  const problems = schemeProblemFindings(
+    input.variables,
+    // as the next save will store it: an element renamed or deleted in the editor is so in the coding
+    input.variables && input.unsaved.variables && !input.unsaved.scheme ?
+      schemeWithVariables(input.scheme.scheme, input.variables) :
+      input.scheme.scheme,
+    editorShown
+  );
   return {
     schemer: { ...idConflicts, findings: [...problems.schemer, ...idConflicts.findings] },
     editor: problems.editor

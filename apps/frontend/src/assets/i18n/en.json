@@ -664,7 +664,6 @@
     "definition-not-loaded": "Could not load the content of the unit.",
     "definition-type-not-checked": "Whether the player reads the format of this unit has not been checked: the list of installed modules could not be loaded.",
     "no-scheme": "The unit has no coding scheme yet.",
-    "variables-not-loaded": "Could not load the variables; duplicate IDs have not been checked.",
     "scheme-not-loaded": "Could not load the coding scheme; duplicate IDs have not been checked.",
     "scheme-unreadable": "The coding scheme could not be checked: it is not in the format the schemer expects. Check in coding whether it opens.",
     "fix-elsewhere": "This can only be fixed in the \"Editor\" and \"Coding\" tabs, which this workspace hides.",

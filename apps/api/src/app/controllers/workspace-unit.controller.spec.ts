@@ -125,7 +125,7 @@ describe('WorkspaceUnitController', () => {
   // The access guards ask about the workspace in the path alone; the unit has to be held to it
   // before anything else is asked about the unit (#1775).
   it.each([
-    'findOnesProperties', 'findOnesMetadata', 'findOnesDefinition', 'findOnesScheme',
+    'findOnesProperties', 'findOnesMetadata', 'findOnesDefinition', 'findOnesDefinitionSummary', 'findOnesScheme',
     'patchUnitProperties', 'patchDefinition', 'patchScheme'
   ] as const)('should hold the unit of %s to the workspace in its path', method => {
     expect(Reflect.getMetadata('__guards__', WorkspaceUnitController.prototype[method]).slice(0, 3))

@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import {
   UnitDefinitionDto,
   UnitDefinitionFullDto,
+  UnitDefinitionSummaryDto,
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import {
@@ -53,6 +54,24 @@ export class UnitDefinitionService {
       returnUnit.dependenciesToEdit = unitDefinition.dependenciesToEdit ?? [];
     }
     return returnUnit;
+  }
+
+  /**
+   * Whether the unit has a definition, and its format -- without the definition, which embeds the
+   * unit's media (#2135). Its length is read from the stored value's header, so the definition is
+   * never unpacked.
+   */
+  async findOnesDefinitionSummary(unitId: number): Promise<UnitDefinitionSummaryDto> {
+    const definition = await this.unitDefinitionsRepository
+      .createQueryBuilder('definition')
+      .select('definition.type', 'type')
+      .addSelect('octet_length(definition.data) > 0', 'hasDefinition')
+      .where('definition.unitId = :unitId', { unitId })
+      .getRawOne<{ type: string | null; hasDefinition: boolean }>();
+    return {
+      hasDefinition: !!definition?.hasDefinition,
+      ...(definition?.type && { definitionType: definition.type })
+    };
   }
 
   /** Only the dependency lists, without the definition they belong to -- for the export's packages (#1602). */

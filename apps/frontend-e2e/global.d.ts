@@ -83,6 +83,7 @@ declare namespace Cypress {
     uploadUnitFilesAPI(wsId: string, fixtures: string[], token: string): Chainable<Response>;
     updateUnitDefinitionAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 44
     getUnitDefinitionAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 45
+    getUnitDefinitionSummaryAPI(unitId: string, wsId: string, token: string): Chainable<Response>; // 45a
     updateUnitSchemeAPI(unitId: string, wsId: string, token: string, scheme?: string): Chainable<Response>; // 46
     generateMetadataReportAPI(wsId: string, token:string): Chainable<Response>; // 47
     getWsSchemeAPI(wsId: string, token:string): Chainable<Response>; // 48

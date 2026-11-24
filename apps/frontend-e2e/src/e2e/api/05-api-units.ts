@@ -664,6 +664,7 @@ describe('Unit API tests', () => {
       { method: 'GET', route: unit => `units/${unit}/properties` },
       { method: 'GET', route: unit => `units/${unit}/metadata` },
       { method: 'GET', route: unit => `units/${unit}/definition` },
+      { method: 'GET', route: unit => `units/${unit}/definition-summary` },
       { method: 'GET', route: unit => `units/${unit}/scheme` },
       { method: 'PATCH', route: unit => `units/${unit}/properties`, body: () => ({}) },
       { method: 'PATCH', route: unit => `units/${unit}/definition`, body: () => ({}) },
@@ -1620,6 +1621,43 @@ describe('Unit API tests', () => {
         Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
+      });
+    });
+  });
+
+  // the unit check under the properties reads this instead of the definition, which embeds the
+  // unit's media (#2135)
+  describe('45a. GET /api/workspaces/{workspace_id}/units/{id}/definition-summary', () => {
+    it('200 positive test: should say that a unit has a definition, without handing it out', () => {
+      cy.getUnitDefinitionSummaryAPI(
+        Cypress.expose(unit4.shortname),
+        Cypress.expose(ws1.id),
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(resp.body.hasDefinition).to.equal(true);
+        expect(resp.body).not.to.have.property('definition');
+      });
+    });
+
+    it('200 positive test: should say that a unit has no definition', () => {
+      cy.getUnitDefinitionSummaryAPI(
+        Cypress.expose(unit3.shortname),
+        Cypress.expose(ws1.id),
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(resp.body).to.deep.equal({ hasDefinition: false });
+      });
+    });
+
+    it('403 negative test: should deny the summary to a user without sufficient privileges', () => {
+      cy.getUnitDefinitionSummaryAPI(
+        Cypress.expose(unit4.shortname),
+        Cypress.expose(ws1.id),
+        Cypress.expose(`token_${user3.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(403);
       });
     });
   });
