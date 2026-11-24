@@ -49,6 +49,48 @@ function parseScheme(scheme: string): Partial<CodingSchemeData> | undefined {
 }
 
 /**
+ * Elements the schemer deactivated, as elements without value: every coding of theirs says "no value"
+ * while the element has one. The schemer's "Deaktivieren" does that on purpose and the coding then
+ * skips the element, but the validation takes it for an invalid source. Its other checks -- an id or a
+ * name used twice -- still see the element (#2135).
+ */
+function withDeactivatedAsNoValue(
+  elements: readonly VariableInfoInput[],
+  codings: VariableCodingData[]
+): VariableInfoInput[] {
+  const deactivated = new Set(codings
+    .filter(coding => coding?.sourceType === 'BASE_NO_VALUE')
+    .map(coding => coding.id));
+  codings
+    .filter(coding => coding?.sourceType !== 'BASE_NO_VALUE')
+    .forEach(coding => deactivated.delete(coding?.id));
+  return elements.map(variable => (
+    deactivated.has(variable.id) ? { ...variable, type: 'no-value' as const } : variable
+  ));
+}
+
+/**
+ * The codings without the position -1 in their rule sets. Older schemers wrote it for "no position",
+ * and the coding reads it so: a negative position picks no element, and the rules see the whole value.
+ * The validation takes every negative position for an invalid one; any other it still sees (#2135).
+ */
+function withoutNoPosition(codings: VariableCodingData[]): VariableCodingData[] {
+  return codings.map(coding => (Array.isArray(coding?.codes) ?
+    {
+      ...coding,
+      codes: coding.codes.map(code => (Array.isArray(code?.ruleSets) ?
+        {
+          ...code,
+          ruleSets: code.ruleSets.map(ruleSet => (ruleSet?.valueArrayPos === -1 ?
+            { ...ruleSet, valueArrayPos: undefined } :
+            ruleSet))
+        } :
+        code))
+    } :
+    coding));
+}
+
+/**
  * What the schemer finds wrong with a coding scheme (#2135): each problem of the
  * {@link SchemeValidation} -- the check the schemer runs -- once per variable, the ones
  * that break the coding first. The unit check shows all of them, the export dialog warns about the
@@ -75,23 +117,11 @@ export function findSchemeProblems(
     .filter(variable => !!variable && typeof variable === 'object');
   let problems: CodingSchemeProblem[];
   try {
-    // Elements the schemer deactivated: every coding of theirs says "no value" while the element has
-    // one. The schemer's "Deaktivieren" does that on purpose and the coding then skips the element,
-    // but the validation takes it for an invalid source. It is handed such an element as one without
-    // value; its other checks -- an id or a name used twice -- still see it (#2135).
-    const deactivated = new Set(codings
-      .filter(coding => coding?.sourceType === 'BASE_NO_VALUE')
-      .map(coding => coding.id));
-    codings
-      .filter(coding => coding?.sourceType !== 'BASE_NO_VALUE')
-      .forEach(coding => deactivated.delete(coding?.id));
-    const validated = elements.map(variable => (
-      deactivated.has(variable.id) ? { ...variable, type: 'no-value' as const } : variable
-    ));
-    problems = validate(validated, codings);
+    // validated as the coding reads them, where the validation is stricter than the coding
+    problems = validate(withDeactivatedAsNoValue(elements, codings), withoutNoPosition(codings));
   } catch {
     // codings that are not a list, or a coding that is not one -- not an object, or a rule set without
-    // rules -- stop the validation
+    // rules -- stop the validation and the adjustments before it
     return [UNREADABLE];
   }
   const count = (ids: string[]) => ids.reduce(

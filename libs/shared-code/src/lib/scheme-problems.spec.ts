@@ -249,6 +249,36 @@ describe('findSchemeProblems', () => {
     ]);
   });
 
+  describe('the position -1 in a rule set, which older schemers wrote for "no position" (#2135)', () => {
+    // a drop list that takes several items, as in a unit coded with schemer 2.5
+    const dropList: VariableInfoInput = {
+      id: 'drop-list_6', alias: '01', type: 'string', multiple: true
+    };
+    const codedAt = (valueArrayPos: number, variable = dropList) => findSchemeProblems([variable], scheme([{
+      id: variable.id,
+      alias: variable.alias,
+      sourceType: 'BASE',
+      codes: [{
+        ...coded.codes[0],
+        ruleSets: [{ valueArrayPos, ruleOperatorAnd: false, rules: [{ method: 'MATCH', parameters: ['01_5'] }] }]
+      }]
+    }]));
+
+    // the coding reads it so: a negative position picks no item, and the rules see the whole value
+    it('finds nothing wrong with it', () => {
+      expect(codedAt(-1)).toEqual([]);
+    });
+
+    it('still names any other negative position', () => {
+      expect(codedAt(-2).map(problem => problem.type)).toEqual(['RULESET_VALUE_ARRAY_POS_INVALID']);
+    });
+
+    it('still names a position at a variable of a single value', () => {
+      expect(codedAt(0, { ...dropList, multiple: false }).map(problem => problem.type))
+        .toEqual(['RULESET_VALUE_ARRAY_POS_INVALID']);
+    });
+  });
+
   // the schemer converts an older scheme when it opens it; held against the current format, it would fail
   it('leaves a scheme of an older format unasked', () => {
     const variables: VariableInfoInput[] = [{ id: 'drop_1', alias: '_01a', type: 'string' }];
