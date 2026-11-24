@@ -33,4 +33,11 @@ export class WorkspaceGroupSettingsDto {
 
   @ApiProperty()
   richNoteTags?: string[] | UnitRichNoteTagDto[] = [];
+
+  // Not given a value here: a package name left out follows the administrator's default (#1358).
+  @ApiProperty({
+    description: 'The installed resource package the group uses per package name',
+    example: { GeoGebra: 'GeoGebra-5.0.791' }
+  })
+  chosenResourcePackages?: Record<string, string>;
 }

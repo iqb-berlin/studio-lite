@@ -20,13 +20,15 @@ import {
   UnitRichNoteTagsConfigComponent
 } from '../../../admin/components/unit-rich-note-tags-config/unit-rich-note-tags-config.component';
 import { SaveLock } from '../../../../classes/save-lock.class';
+import { ResourcePackageChoiceComponent } from '../resource-package-choice/resource-package-choice.component';
 
 @Component({
   selector: 'studio-lite-settings',
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss'],
   imports: [MatTooltip, ProfilesComponent, StatesComponent, TranslateModule, MatFabButton,
-    MatIcon, MatCard, MatCardHeader, MatCardTitle, MatCardContent, UnitRichNoteTagsConfigComponent]
+    MatIcon, MatCard, MatCardHeader, MatCardTitle, MatCardContent, UnitRichNoteTagsConfigComponent,
+    ResourcePackageChoiceComponent]
 })
 export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
   settings!: WorkspaceGroupSettingsDto;
@@ -116,5 +118,11 @@ export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
   richNoteTagsSettingsChange(tags: string[]) {
     this.settingsChangedState.set(true);
     this.settings.richNoteTags = tags;
+  }
+
+  // the whole choice: the API replaces it as a whole, so a package name left out follows the default (#1358)
+  resourcePackageChoiceChange(choice: Record<string, string>) {
+    this.settingsChangedState.set(true);
+    this.settings.chosenResourcePackages = choice;
   }
 }

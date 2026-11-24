@@ -14,10 +14,10 @@ describe('ResourcePackagesTableComponent', () => {
 
   const resourcePackages = (): ResourcePackageDto[] => [
     {
-      id: 1, name: 'One', elements: ['one.png'], createdAt: new Date('2024-01-01')
+      id: 1, name: 'One', packageName: 'One', elements: ['one.png'], createdAt: new Date('2024-01-01')
     },
     {
-      id: 2, name: 'Two', elements: ['two.png'], createdAt: new Date('2024-01-02')
+      id: 2, name: 'Two', packageName: 'Two', elements: ['two.png'], createdAt: new Date('2024-01-02')
     }
   ];
   const element = (selector: string): HTMLInputElement => fixture.nativeElement.querySelector(selector);

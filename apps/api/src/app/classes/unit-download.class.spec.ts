@@ -240,7 +240,8 @@ describe('UnitDownloadClass', () => {
         .find((call: [string, Buffer]) => call[0] === name)?.[1]?.toString();
       return {
         files: mockZip.addFile.mock.calls.map((call: [string, Buffer]) => call[0]) as string[],
-        fileNamed
+        fileNamed,
+        findZipped: resourcePackageServiceMock.findZippedResourcePackage
       };
     };
 
@@ -277,13 +278,15 @@ describe('UnitDownloadClass', () => {
     });
 
     it('should lay a package two units name once beside them, however they spell it', async () => {
-      const { files, fileNamed } = await exportUnits('xml', {
+      const { files, fileNamed, findZipped } = await exportUnits('xml', {
         U1: { definition: '{}', dependenciesToPlay: [geogebra] },
         U2: { definition: '{}', dependenciesToEdit: [{ id: 'geogebra.ITCR.zip', type: 'FILE_TO_UNPACK' }] }
       }, ['GeoGebra.itcr.zip']);
 
       expect(files.filter(name => name.toLowerCase() === 'geogebra.itcr.zip')).toEqual(['GeoGebra.itcr.zip']);
       expect(fileNamed('GeoGebra.itcr.zip')).toBe('zip of GeoGebra.itcr.zip');
+      // the package that serves the name in the exported workspace's group (#1358)
+      expect(findZipped).toHaveBeenCalledWith('GeoGebra.itcr.zip', 1);
     });
 
     it('should lay no widget, service or other file beside the units', async () => {

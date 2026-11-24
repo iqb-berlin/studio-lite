@@ -42,7 +42,12 @@ export class UnitPreviewComponent extends PreviewDirective {
   definitionTypeWarning = '';
   /** What the unit needs to be played that the studio does not have (#1602); empty when nothing. */
   readonly dependencyWarning = signal('');
-  private installedDependencies$?: Observable<{ packages: string[]; widgets: string[] } | null>;
+  // per workspace: which package serves a name depends on the workspace's group (#1358)
+  private installedDependencies?: {
+    workspaceId: number;
+    installed$: Observable<{ packages: string[]; widgets: string[] } | null>;
+  };
+
   private dataParts!: Record<string, string> | null;
   private unitStateDataType: string | null = null;
 
@@ -163,7 +168,7 @@ export class UnitPreviewComponent extends PreviewDirective {
             playerConfig: {
               ...this.legacyStateReportPolicy(),
               pagingMode: this.toPlayerValue(this.previewService.pagingMode.value),
-              directDownloadUrl: this.backendService.getDirectDownloadLink(),
+              directDownloadUrl: this.backendService.getDirectDownloadLink(this.workspaceService.selectedWorkspaceId),
               sharedParameters: this.sharedParameters
             },
             // a unit without a definition sends none, as the testcenter does, not an empty one (#719)
@@ -231,26 +236,33 @@ export class UnitPreviewComponent extends PreviewDirective {
   }
 
   /**
-   * The installed packages and widget types, read once for the preview. A failed read is not kept:
-   * the next unit asks again rather than going without a warning for the rest of the session.
+   * The package names served in the workspace and the installed widget types, read once per
+   * workspace for the preview. A failed read is not kept: the next unit asks again rather than
+   * going without a warning for the rest of the session.
    */
   private loadInstalledDependencies(): Observable<{ packages: string[]; widgets: string[] } | null> {
-    this.installedDependencies$ ??= forkJoin([
-      this.backendService.getResourcePackages(),
-      Object.keys(this.moduleService.widgets).length === 0 ? from(this.moduleService.loadWidgets()) : of(undefined)
-    ]).pipe(
-      map(([packages]) => (packages ?
-        {
-          packages: packages.map(resourcePackage => resourcePackage.name),
-          widgets: Object.values(this.moduleService.widgets).map(widget => widget.metadata?.model ?? '')
-        } :
-        null)),
-      tap(installed => {
-        if (!installed) this.installedDependencies$ = undefined;
-      }),
-      shareReplay(1)
-    );
-    return this.installedDependencies$;
+    const workspaceId = this.workspaceService.selectedWorkspaceId;
+    if (this.installedDependencies?.workspaceId !== workspaceId) {
+      const installed$ = forkJoin([
+        this.backendService.getResourcePackageNames(workspaceId),
+        Object.keys(this.moduleService.widgets).length === 0 ? from(this.moduleService.loadWidgets()) : of(undefined)
+      ]).pipe(
+        map(([packages]) => (packages ?
+          {
+            packages,
+            widgets: Object.values(this.moduleService.widgets).map(widget => widget.metadata?.model ?? '')
+          } :
+          null)),
+        tap(installed => {
+          if (!installed && this.installedDependencies?.installed$ === installed$) {
+            this.installedDependencies = undefined;
+          }
+        }),
+        shareReplay(1)
+      );
+      this.installedDependencies = { workspaceId, installed$ };
+    }
+    return this.installedDependencies.installed$;
   }
 
   gotoUnit(target: string): void {

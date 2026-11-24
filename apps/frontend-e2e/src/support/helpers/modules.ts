@@ -62,6 +62,8 @@ export function addResourcePackage(resource: string): void {
       action: 'select',
       force: true
     });
+  // the package name the file name suggests (#1358)
+  cy.get('[data-cy="resource-package-dialog-confirm"]').click();
   cy.contains('mat-row', name)
     .should('exist');
 }

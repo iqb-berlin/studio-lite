@@ -1,0 +1,56 @@
+<h2 mat-dialog-title>{{ titleKey | translate }}</h2>
+
+<mat-dialog-content class="content">
+  <p data-cy="resource-package-dialog-file">
+    {{ 'resource-packages.file-label' | translate : { fileName } }}
+  </p>
+
+  <mat-form-field class="package-name">
+    <mat-label>{{ 'resource-packages.packageName' | translate }}</mat-label>
+    <input matInput
+           [formControl]="packageName"
+           data-cy="resource-package-dialog-package-name">
+    <mat-hint>{{ 'resource-packages.package-name-hint' | translate }}</mat-hint>
+    @if (packageName.invalid) {
+      <mat-error>{{ 'resource-packages.package-name-invalid' | translate }}</mat-error>
+    }
+  </mat-form-field>
+
+  @if (replaced) {
+    <p class="notice" data-cy="resource-package-dialog-overwrite">
+      @if (reachedGroups) {
+        {{ 'resource-packages.overwrite-notice' | translate : { name: replaced.name, groups: reachedGroups } }}
+      } @else {
+        {{ 'resource-packages.overwrite-notice-no-groups' | translate : { name: replaced.name } }}
+      }
+    </p>
+  }
+  @if (blocked()) {
+    <p class="notice" data-cy="resource-package-dialog-in-use">
+      {{ 'resource-packages.in-use' | translate }}
+      @for (text of useTexts; track text.key) {
+        {{ text.key | translate : text.params }}
+      }
+    </p>
+  }
+  @if (becomesDefault()) {
+    <p class="notice" data-cy="resource-package-dialog-becomes-default">
+      {{ 'resource-packages.becomes-default' | translate : { packageName: trimmedPackageName() } }}
+    </p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-raised-button
+          color="primary"
+          [disabled]="packageName.invalid || blocked()"
+          data-cy="resource-package-dialog-confirm"
+          (click)="confirm()">
+    {{ confirmKey | translate }}
+  </button>
+  <button mat-raised-button
+          [mat-dialog-close]="undefined"
+          data-cy="resource-package-dialog-cancel">
+    {{ 'cancel' | translate }}
+  </button>
+</mat-dialog-actions>

@@ -77,7 +77,8 @@ export class ReviewBackendService {
       );
   }
 
-  getDirectDownloadLink(): string {
-    return `${this.serverUrl}packages/`;
+  /** Where the modules find the resource packages of the reviewed workspace (#1358). */
+  getDirectDownloadLink(workspaceId: number): string {
+    return `${this.serverUrl}workspaces/${workspaceId}/packages/`;
   }
 }

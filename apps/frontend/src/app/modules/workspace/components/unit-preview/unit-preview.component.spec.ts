@@ -651,7 +651,7 @@ describe('UnitPreviewComponent', () => {
     });
 
     it('should name the packages, widgets and files the studio does not have, each kind in a sentence', () => {
-      backendServiceStub.getResourcePackages = jest.fn().mockReturnValue(of([{ name: 'Videos' }]));
+      backendServiceStub.getResourcePackageNames = jest.fn().mockReturnValue(of(['Videos']));
       const instant = jest.spyOn(TestBed.inject(TranslateService), 'instant');
 
       component.postStore(storeWith([
@@ -675,7 +675,7 @@ describe('UnitPreviewComponent', () => {
     });
 
     it('should leave out the sentence of a kind of which nothing is missing', () => {
-      backendServiceStub.getResourcePackages = jest.fn().mockReturnValue(of([]));
+      backendServiceStub.getResourcePackageNames = jest.fn().mockReturnValue(of([]));
 
       component.postStore(storeWith([{ id: 'PERIODIC_TABLE', type: 'WIDGET' }]));
 
@@ -688,7 +688,7 @@ describe('UnitPreviewComponent', () => {
 
     // other files the studio does not keep, so nobody can install them there (#1602)
     it('should not point to the administration for files alone', () => {
-      backendServiceStub.getResourcePackages = jest.fn().mockReturnValue(of([]));
+      backendServiceStub.getResourcePackageNames = jest.fn().mockReturnValue(of([]));
 
       component.postStore(storeWith([{ id: 'sheet.pdf', type: 'FILE' }]));
 
@@ -697,7 +697,7 @@ describe('UnitPreviewComponent', () => {
     });
 
     it('should say nothing when the studio has everything the unit needs', () => {
-      backendServiceStub.getResourcePackages = jest.fn().mockReturnValue(of([{ name: 'GeoGebra' }]));
+      backendServiceStub.getResourcePackageNames = jest.fn().mockReturnValue(of(['GeoGebra']));
 
       component.postStore(storeWith([
         { id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }, { id: 'CALC', type: 'WIDGET' }
@@ -707,24 +707,41 @@ describe('UnitPreviewComponent', () => {
     });
 
     it('should say nothing when the packages cannot be read, and ask again for the next unit', () => {
-      backendServiceStub.getResourcePackages = jest.fn().mockReturnValue(of(null));
+      backendServiceStub.getResourcePackageNames = jest.fn().mockReturnValue(of(null));
 
       component.postStore(storeWith([{ id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }]));
 
       expect(component.dependencyWarning()).toBe('');
 
-      (backendServiceStub.getResourcePackages as jest.Mock).mockReturnValue(of([]));
+      (backendServiceStub.getResourcePackageNames as jest.Mock).mockReturnValue(of([]));
       component.postStore(storeWith([{ id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }]));
 
       expect(component.dependencyWarning()).toContain('workspace.dependencies-missing-packages');
     });
 
+    // which package serves a name depends on the workspace's group (#1358)
+    it('should ask the workspace shown which package names it finds served, once per workspace', () => {
+      backendServiceStub.getResourcePackageNames = jest.fn().mockReturnValue(of([]));
+      const geogebraUnit = storeWith([{ id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }]);
+
+      component.postStore(geogebraUnit);
+      component.postStore(geogebraUnit);
+      expect(component.dependencyWarning()).toContain('workspace.dependencies-missing-packages');
+
+      (backendServiceStub.getResourcePackageNames as jest.Mock).mockReturnValue(of(['GeoGebra']));
+      workspaceServiceStub.selectedWorkspaceId = 8;
+      component.postStore(geogebraUnit);
+
+      expect(component.dependencyWarning()).toBe('');
+      expect((backendServiceStub.getResourcePackageNames as jest.Mock).mock.calls).toEqual([[7], [8]]);
+    });
+
     it('should not ask for the packages of a unit that needs nothing', () => {
-      backendServiceStub.getResourcePackages = jest.fn().mockReturnValue(of([]));
+      backendServiceStub.getResourcePackageNames = jest.fn().mockReturnValue(of([]));
 
       component.postStore(storeWith([]));
 
-      expect(backendServiceStub.getResourcePackages).not.toHaveBeenCalled();
+      expect(backendServiceStub.getResourcePackageNames).not.toHaveBeenCalled();
       expect(component.dependencyWarning()).toBe('');
     });
   });

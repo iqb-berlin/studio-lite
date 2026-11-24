@@ -12,10 +12,7 @@ import { byText, toW3idProfileId } from '@studio-lite/shared-code';
 import WorkspaceGroup from '../entities/workspace-group.entity';
 import { AdminWorkspaceGroupNotFoundException } from '../exceptions/admin-workspace-group-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
-
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
+import { isPlainObject } from '../utils/is-plain-object';
 
 /** A list whose entries all pass `isEntry`, or null, which every reader takes for none. */
 function isListOf(value: unknown, isEntry: (entry: unknown) => boolean): boolean {
@@ -36,6 +33,11 @@ function isProfile(entry: unknown): boolean {
 function isRichNoteTags(value: unknown): boolean {
   return value == null || typeof value === 'string' || (Array.isArray(value) &&
     (value.every(tag => typeof tag === 'string') || value.every(isPlainObject)));
+}
+
+// The package the group chose per package name (#1358); a package name left out follows the default.
+function isChosenResourcePackages(value: unknown): boolean {
+  return value == null || (isPlainObject(value) && Object.values(value).every(name => typeof name === 'string'));
 }
 
 /**
@@ -125,8 +127,8 @@ export class WorkspaceGroupService {
    * "1", ... there (#2091). Settings left out are fine; `null` is not, though `typeof` calls it an object.
    *
    * Inside, only what the interface trips over is checked (#2092): the states, the profiles, the
-   * highest state id and the rich note tags. Each may be null, which every reader takes for none; the
-   * rest is not read at group level.
+   * highest state id, the rich note tags and the chosen resource packages (#1358). Each may be null,
+   * which every reader takes for none; the rest is not read at group level.
    */
   private static checkSettings(settings: unknown): void {
     if (settings === undefined) return;
@@ -137,7 +139,8 @@ export class WorkspaceGroupService {
       states: isListOf(settings.states, isState),
       profiles: isListOf(settings.profiles, isProfile),
       lastStateId: settings.lastStateId == null || typeof settings.lastStateId === 'number',
-      richNoteTags: isRichNoteTags(settings.richNoteTags)
+      richNoteTags: isRichNoteTags(settings.richNoteTags),
+      chosenResourcePackages: isChosenResourcePackages(settings.chosenResourcePackages)
     }).filter(([, valid]) => !valid).map(([field]) => field);
     if (malformed.length) {
       throw new BadRequestException(`Malformed workspace group settings: ${malformed.join(', ')}.`);

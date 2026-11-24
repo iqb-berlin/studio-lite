@@ -243,7 +243,7 @@ export class WorkspaceImportService {
         await this.importDefinition(newUnitId, unitImportData);
       }
 
-      await this.acknowledgeResourcePackages(unitImportData, notXmlFiles, usedFiles, functionReturn);
+      await this.acknowledgeResourcePackages(unitImportData, workspaceId, notXmlFiles, usedFiles, functionReturn);
 
       if (unitImportData.metadataFileName) {
         if (notXmlFiles[unitImportData.metadataFileName]) {
@@ -339,10 +339,11 @@ export class WorkspaceImportService {
   /**
    * A resource package the export laid beside a unit that names it (#1602). It belongs to the unit
    * and is no "ignored file", but the import does not install it -- only an administrator installs
-   * packages. If the studio does not have it, the report says so.
+   * packages. If no package serves it in the workspace (#1358), the report says so.
    */
   private async acknowledgeResourcePackages(
     unitImportData: UnitImportData | UnitImportJsonData,
+    workspaceId: number,
     notXmlFiles: { [fName: string]: FileIo },
     usedFiles: string[],
     functionReturn: RequestReportDto
@@ -357,7 +358,7 @@ export class WorkspaceImportService {
     await Promise.all(enclosed.map(async fileName => {
       if (usedFiles.includes(fileName)) return;
       usedFiles.push(fileName);
-      if (!await this.resourcePackageService.findByFileName(fileName.substring(folder.length))) {
+      if (!await this.resourcePackageService.isServed(fileName.substring(folder.length), workspaceId)) {
         functionReturn.messages.push({
           objectKey: fileName,
           messageKey: 'unit-upload.api-warning.resource-package-not-installed'

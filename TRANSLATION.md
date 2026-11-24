@@ -52,6 +52,7 @@ and map to one English term.
 | Vorschau | preview | route `preview` | |
 | Status (of a unit) | status | `state` | Users read "status"; "state" stays in code. |
 | Paket | resource package | `resource-package` | The German UI says just "Paket". |
+| Paketname | package name | `packageName` | The name units give for a package; several packages may stand in for one (#1358). |
 | Begleitmaterial | supplementary material | `rich-note` | Not "notes": that word is for Notiz. |
 | Kategorie (of Begleitmaterial) | category | `tag` | |
 | Notiz, Beschreibung | note, description | | |

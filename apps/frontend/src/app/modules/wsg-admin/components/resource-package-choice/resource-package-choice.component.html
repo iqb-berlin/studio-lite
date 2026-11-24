@@ -1,0 +1,29 @@
+@if (entries().length) {
+  <mat-card class="container">
+    <mat-card-header>
+      <mat-card-title>{{ 'wsg-settings.resource-packages' | translate }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="card-content-padding">
+      <p class="hint">{{ 'wsg-settings.resource-packages-hint' | translate }}</p>
+      @for (entry of entries(); track entry.packageName) {
+        <mat-form-field class="package-select">
+          <mat-label>{{ entry.packageName }}</mat-label>
+          <mat-select [value]="entry.chosen"
+                      [attr.data-cy]="'wsg-settings-resource-package-' + entry.packageName"
+                      (selectionChange)="select(entry.packageName, $event.value)">
+            <mat-option value="">
+              @if (entry.defaultName) {
+                {{ 'wsg-settings.resource-package-default' | translate : { name: entry.defaultName } }}
+              } @else {
+                {{ 'wsg-settings.resource-package-default-none' | translate }}
+              }
+            </mat-option>
+            @for (name of entry.names; track name) {
+              <mat-option [value]="name">{{ name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+    </mat-card-content>
+  </mat-card>
+}

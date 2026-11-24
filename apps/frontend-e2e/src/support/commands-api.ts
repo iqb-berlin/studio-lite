@@ -2540,16 +2540,25 @@ Cypress.Commands.add('updateSettingMissingProfilesAPI', (token:string, profile:s
 });
 
 // 108
-Cypress.Commands.add('addPackageAPI', (resource:string, token:string) => {
+// The fixture may be uploaded under another file name, and with the package name it stands in for (#1358).
+Cypress.Commands.add('addPackageAPI', (
+  resource:string,
+  token:string,
+  options: { fileName?: string; packageName?: string; overwrite?: boolean } = {}
+) => {
   const authorization = `bearer ${token}`;
   cy.fixture(resource, 'binary')
     .then(fileContent => {
       const blob = Cypress.Blob.binaryStringToBlob(fileContent, 'application/zip');
       const formData = new FormData();
-      formData.append('resourcePackage', blob, resource);
+      formData.append('resourcePackage', blob, options.fileName ?? resource);
       cy.request({
         method: 'POST',
         url: '/api/resource-packages',
+        qs: {
+          ...(options.packageName === undefined ? {} : { packageName: options.packageName }),
+          ...(options.overwrite ? { overwrite: 'true' } : {})
+        },
         headers: {
           'app-version': Cypress.expose('version'),
           'Content-Type': 'multipart/form-data',
@@ -2585,6 +2594,78 @@ Cypress.Commands.add('deletePackageAPI', (token:string, packageId:string) => {
       'app-version': Cypress.expose('version'),
       authorization
     },
+    failOnStatusCode: false
+  });
+});
+
+// 110a -- versions of a resource package (#1358)
+Cypress.Commands.add('patchPackageNameAPI', (packageId: string, packageName: string, token: string) => {
+  cy.request({
+    method: 'PATCH',
+    url: `/api/resource-packages/${packageId}`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization: `bearer ${token}`
+    },
+    body: { packageName },
+    failOnStatusCode: false
+  });
+});
+
+Cypress.Commands.add('getPackageDefaultsAPI', (token: string) => {
+  cy.request({
+    method: 'GET',
+    url: '/api/resource-packages/defaults',
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization: `bearer ${token}`
+    },
+    failOnStatusCode: false
+  });
+});
+
+Cypress.Commands.add('setPackageDefaultsAPI', (defaults: Record<string, string>, token: string) => {
+  cy.request({
+    method: 'PATCH',
+    url: '/api/resource-packages/defaults',
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization: `bearer ${token}`
+    },
+    body: defaults,
+    failOnStatusCode: false
+  });
+});
+
+Cypress.Commands.add('getPackageGroupsAPI', (token: string) => {
+  cy.request({
+    method: 'GET',
+    url: '/api/resource-packages/groups',
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization: `bearer ${token}`
+    },
+    failOnStatusCode: false
+  });
+});
+
+Cypress.Commands.add('getWsPackageNamesAPI', (wsId: string, token: string) => {
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}/resource-packages`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization: `bearer ${token}`
+    },
+    failOnStatusCode: false
+  });
+});
+
+// a module asks for the files without a token, as from api/packages
+Cypress.Commands.add('getWsPackageFileAPI', (wsId: string, path: string) => {
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}/packages/${path}`,
     failOnStatusCode: false
   });
 });

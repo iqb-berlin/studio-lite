@@ -171,7 +171,7 @@ export class UnitPlayerComponent extends PreviewDirective {
             pagingMode: this.toPlayerValue(this.reviewService.bookletConfig?.pagingMode),
             enabledNavigationTargets: ['next', 'previous', 'first', 'last', 'end']
               .map(target => this.toPlayerValue(target)),
-            directDownloadUrl: this.backendService.getDirectDownloadLink(),
+            directDownloadUrl: this.backendService.getDirectDownloadLink(this.reviewService.workspaceId),
             sharedParameters: this.sharedParameters
           },
           // a unit without a definition sends none, as the testcenter does, not an empty one (#719)

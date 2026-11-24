@@ -14,12 +14,14 @@ describe('TableDataSourcePipe', () => {
       {
         id: 1,
         name: 'Package 1',
+        packageName: 'Package 1',
         elements: ['file1.png', 'file2.jpg'],
         createdAt: new Date('2024-01-01')
       },
       {
         id: 2,
         name: 'Package 2',
+        packageName: 'Package 2',
         elements: ['file3.svg'],
         createdAt: new Date('2024-01-02')
       }

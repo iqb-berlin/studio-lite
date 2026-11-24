@@ -165,6 +165,13 @@ describe('SettingService', () => {
     });
   });
 
+  describe('findResourcePackageDefaults', () => {
+    it('should answer no defaults while none are stored (#1358)', async () => {
+      settingsRepository.findOne.mockResolvedValue(null);
+      expect(await service.findResourcePackageDefaults()).toEqual({});
+    });
+  });
+
   describe('findMissingsProfiles', () => {
     it('should return empty array if not found', async () => {
       settingsRepository.findOne.mockResolvedValue(null);

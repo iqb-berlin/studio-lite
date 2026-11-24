@@ -40,6 +40,11 @@
             </studio-lite-unit-rich-note-tags-config>
           </mat-card-content>
         </mat-card>
+
+        <studio-lite-resource-package-choice
+          [choice]="settings.chosenResourcePackages"
+          (choiceChange)="resourcePackageChoiceChange($event)">
+        </studio-lite-resource-package-choice>
       </div>
     </div>
 

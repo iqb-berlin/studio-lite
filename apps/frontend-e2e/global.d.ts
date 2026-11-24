@@ -163,8 +163,18 @@ declare namespace Cypress {
     updateSettingUnitExportAPI(token:string, unitExport:UnitExport): Chainable<Response>; // 105
     getSettingMissingProfilesAPI(token:string): Chainable<Response>; // 106
     updateSettingMissingProfilesAPI(token:string, profile:string): Chainable<Response>; // 107
-    addPackageAPI(resource:string, token:string): Chainable<Response>; // 108
+    addPackageAPI(
+      resource:string,
+      token:string,
+      options?: { fileName?: string; packageName?: string; overwrite?: boolean }
+    ): Chainable<Response>; // 108
     getPackageAPI(token:string): Chainable<Response>; // 109
     deletePackageAPI(token:string, packageId:string): Chainable<Response>; // 110
+    patchPackageNameAPI(packageId: string, packageName: string, token: string): Chainable<Response>; // 110a
+    getPackageDefaultsAPI(token: string): Chainable<Response>; // 110a
+    setPackageDefaultsAPI(defaults: Record<string, string>, token: string): Chainable<Response>; // 110a
+    getPackageGroupsAPI(token: string): Chainable<Response>; // 110a
+    getWsPackageNamesAPI(wsId: string, token: string): Chainable<Response>; // 110a
+    getWsPackageFileAPI(wsId: string, path: string): Chainable<Response>; // 110a
   }
 }

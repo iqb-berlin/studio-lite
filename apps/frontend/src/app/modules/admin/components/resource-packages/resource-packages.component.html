@@ -1,8 +1,9 @@
 <div>
   <input #hiddenInput
          type="file"
-         [iqbFilesUploadInputFor]="fileUploadQueue"
-         [hidden]="true"/>
+         data-cy="admin-packages-file-input"
+         [hidden]="true"
+         (change)="uploadSelected(hiddenInput)"/>
   <button mat-button
           (click)="hiddenInput.click()"
           [matTooltip]="'admin.upload-resource-package' | translate"
@@ -18,12 +19,15 @@
     <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
   </button>
 </div>
+<p class="naming-hint">{{ 'resource-packages.naming-hint' | translate }}</p>
 <iqb-files-upload-queue #fileUploadQueue
-                        [httpUrl]="serverUrl + 'resource-packages'"
+                        [httpUrl]="uploadUrl()"
                         [fileAlias]="'resourcePackage'"
                         (uploadCompleteEvent)="updateFormFields()">
 </iqb-files-upload-queue>
-<studio-lite-resource-packages-table [dataSource]="(resourcePackages | async) | tableDataSource"
-                                     [selectedResourcePackages]="selectedResourcePackages">
+<studio-lite-resource-packages-table [dataSource]="packages() | tableDataSource"
+                                     [defaults]="defaults()"
+                                     [selectedResourcePackages]="selectedResourcePackages"
+                                     (setDefault)="setDefault($event)"
+                                     (editPackageName)="editPackageName($event)">
 </studio-lite-resource-packages-table>
-

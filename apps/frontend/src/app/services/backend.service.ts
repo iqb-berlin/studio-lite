@@ -14,6 +14,7 @@ import {
   UserWorkspaceFullDto,
   EmailTemplateDto
 } from '@studio-lite-lib/api-dto';
+import { ResourcePackageChoice } from '@studio-lite/shared-code';
 import { AppService, defaultAppConfig } from './app.service';
 import {
   authRequestContext, backgroundRequestContext, logoutContext, tokenRefreshContext
@@ -162,6 +163,15 @@ export class BackendService {
       .get<ResourcePackageDto[]>(`${this.serverUrl}resource-packages`, {})
       .pipe(
         catchError(() => of([]))
+      );
+  }
+
+  /** The default package per package name (#1358); none when they could not be read. */
+  getResourcePackageDefaults(): Observable<ResourcePackageChoice> {
+    return this.http
+      .get<ResourcePackageChoice>(`${this.serverUrl}resource-packages/defaults`)
+      .pipe(
+        catchError(() => of({}))
       );
   }
 

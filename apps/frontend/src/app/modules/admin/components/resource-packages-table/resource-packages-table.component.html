@@ -92,6 +92,7 @@
       [matColumnDef]="column">
       <mat-header-cell *matHeaderCellDef
         [mat-sort-header]="column"
+        [disabled]="column === 'default'"
         [sortActionDescription]="column">
         {{'resource-packages.' + column | translate}}
       </mat-header-cell>
@@ -102,6 +103,33 @@
             [href]="resourcePackagesPath + element[column] + '/' + element[column] + '.itcr.zip' | safeUrl">
             {{element[column]}}
           </a>
+        }
+        @if (column === 'packageName') {
+          <span [attr.data-cy]="'admin-packages-package-name-' + element.name">{{element.packageName}}</span>
+          <button mat-icon-button
+                  class="row-button"
+                  [matTooltip]="'resource-packages.edit-package-name' | translate"
+                  [attr.data-cy]="'admin-packages-edit-' + element.name"
+                  (click)="editPackageName.emit(element)">
+            <mat-icon>edit</mat-icon>
+          </button>
+        }
+        @if (column === 'default') {
+          @if (element | resourcePackageServing : dataSource.data : defaults) {
+            <mat-icon class="default-icon"
+                      [matTooltip]="'resource-packages.is-default' | translate : { packageName: element.packageName }"
+                      [attr.data-cy]="'admin-packages-default-' + element.name">
+              star
+            </mat-icon>
+          } @else {
+            <button mat-icon-button
+                    class="row-button"
+                    [matTooltip]="'resource-packages.set-default' | translate : { packageName: element.packageName }"
+                    [attr.data-cy]="'admin-packages-set-default-' + element.name"
+                    (click)="setDefault.emit(element)">
+              <mat-icon>star_border</mat-icon>
+            </button>
+          }
         }
         @if (column === 'createdAt') {
           <span>

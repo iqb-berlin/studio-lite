@@ -12,11 +12,15 @@ import { BehaviorSubject, of, Subject } from 'rxjs';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { CoreProfile, ProfilesComponent } from '../../../../components/profiles/profiles.component';
 import { SettingsLoad, WsgAdminService } from '../../services/wsg-admin.service';
+import { BackendService } from '../../../../services/backend.service';
 import { StatesComponent } from '../states/states.component';
 import {
   UnitRichNoteTagsConfigComponent
 } from '../../../admin/components/unit-rich-note-tags-config/unit-rich-note-tags-config.component';
 import { WorkspaceSettingsComponent } from './settings.component';
+
+// the card of the package choice reads the packages (#1358); with none it is not shown
+const noResourcePackages = { getResourcePackages: () => of([]), getResourcePackageDefaults: () => of({}) };
 
 @Component({
   selector: 'studio-lite-unit-rich-note-tags-config',
@@ -91,6 +95,7 @@ describe('WorkspaceSettingsComponent', () => {
       imports: [WorkspaceSettingsComponent, TranslateModule.forRoot()],
       providers: [
         { provide: WsgAdminService, useValue: mockWsgAdminService },
+        { provide: BackendService, useValue: noResourcePackages },
         { provide: MatSnackBar, useValue: mockSnackBar },
         { provide: 'SERVER_URL', useValue: 'http://test-url.com' },
         { provide: MatDialogRef, useValue: mockMatDialogRef }
@@ -277,6 +282,7 @@ describe('WorkspaceSettingsComponent with the states', () => {
       imports: [WorkspaceSettingsComponent, TranslateModule.forRoot()],
       providers: [
         { provide: WsgAdminService, useValue: wsgAdminService },
+        { provide: BackendService, useValue: noResourcePackages },
         { provide: MatSnackBar, useValue: { open: jest.fn() } },
         { provide: MatDialog, useValue: { open: jest.fn().mockReturnValue({ afterClosed: () => of(true) }) } }
       ]

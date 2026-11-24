@@ -6,7 +6,7 @@ import {
   ProfilesRegistryDto, EmailTemplateDto, UnitRichNoteTagDto, TopConcept
 } from '@studio-lite-lib/api-dto';
 import {
-  LOCALIZED_CONFIG_TEXTS, LOCALIZED_EMAIL_TEMPLATE_TEXTS, toLocalizedText
+  LOCALIZED_CONFIG_TEXTS, LOCALIZED_EMAIL_TEMPLATE_TEXTS, ResourcePackageChoice, toLocalizedText
 } from '@studio-lite/shared-code';
 
 import Setting from '../entities/setting.entity';
@@ -21,6 +21,9 @@ import { MetadataVocabularyService } from './metadata-vocabulary.service';
  * insert branch. That worked only because `key` is the primary key and `save` upserts.
  */
 const MISSINGS_PROFILES_KEY = 'missings-profile-iqb-standard';
+
+/** The settings key of the default resource package per plain name (#1358). */
+export const RESOURCE_PACKAGE_DEFAULTS_KEY = 'resource-package-defaults';
 
 /**
  * A stored setting with its texts as one per language. Read and written alike: a text stored before
@@ -158,6 +161,22 @@ export class SettingService {
       });
       await this.settingsRepository.save(newSetting);
     }
+  }
+
+  /**
+   * The package an administrator set as default per plain name, `{ GeoGebra: 'GeoGebra-5.0.791' }`
+   * (#1358); none set is an empty object. Whether a default is valid is the business of
+   * `ResourcePackageService`, which alone writes it.
+   */
+  async findResourcePackageDefaults(): Promise<ResourcePackageChoice> {
+    const setting = await this.settingsRepository.findOne({ where: { key: RESOURCE_PACKAGE_DEFAULTS_KEY } });
+    return setting ? JSON.parse(setting.content) : {};
+  }
+
+  async patchResourcePackageDefaults(defaults: ResourcePackageChoice): Promise<void> {
+    this.logger.log('Updating the resource package defaults.');
+    // `key` is the primary key, so `save` inserts the row or updates it
+    await this.settingsRepository.save({ key: RESOURCE_PACKAGE_DEFAULTS_KEY, content: JSON.stringify(defaults) });
   }
 
   async findUnitProfilesRegistry(): Promise<ProfilesRegistryDto> {
