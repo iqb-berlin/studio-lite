@@ -66,7 +66,7 @@ export class ExportUnitComponent implements OnDestroy {
   // null when they could not be read: the export stays possible, with a note that nothing was checked.
   private readonly unitsWithExportProblemsState = signal<UnitExportContentsDto[] | null | undefined>(undefined);
   readonly unitsWithExportProblems = this.unitsWithExportProblemsState.asReadonly();
-  private problemsDialogOpen = false;
+  private readonly problemsDialogOpen = signal(false);
   private ngUnsubscribe = new Subject<void>();
 
   constructor(
@@ -105,7 +105,7 @@ export class ExportUnitComponent implements OnDestroy {
   //   scheme is exported. The ids are written either way: both formats carry the derived variables.
   // Exporting anyway stays possible: the other units are fine.
   download(): void {
-    if (this.problemsDialogOpen) return;
+    if (this.problemsDialogOpen()) return;
     const schemeExported = this.unitExportSettings.addCodingScheme !== false;
     const unitsInList = Object.values(this.workspaceService.unitList).flat();
     // the file config passes on only the units with a problem
@@ -126,7 +126,7 @@ export class ExportUnitComponent implements OnDestroy {
       this.dialogRef.close(this.unitExportSettings);
       return;
     }
-    this.problemsDialogOpen = true;
+    this.problemsDialogOpen.set(true);
     this.dialog.open(ExportProblemsComponent, {
       width: '800px',
       data: { units, exportFormat: this.unitExportSettings.exportFormat }
@@ -134,7 +134,7 @@ export class ExportUnitComponent implements OnDestroy {
       .afterClosed()
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(result => {
-        this.problemsDialogOpen = false;
+        this.problemsDialogOpen.set(false);
         if (result === true) this.dialogRef.close(this.unitExportSettings);
       });
   }
