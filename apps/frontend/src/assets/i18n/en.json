@@ -634,6 +634,9 @@
       "step-items": "Link the items that were linked to the element again under \"Properties\".",
       "note": "Responses already collected for the element are stored under its old internal ID."
     },
+    "new-element-id": {
+      "title": "Give one of the elements a new internal ID"
+    },
     "rename-derived": {
       "title": "Rename the derived variable",
       "step-rename": "In coding, give the derived variable a new name.",

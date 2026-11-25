@@ -39,4 +39,15 @@ describe('VariableIdConflictFixComponent', () => {
       'variable-id-conflicts.rename-derived.title'
     ]);
   });
+
+  // elements copied with their id: there is no derived variable to keep or rename (#2135)
+  it('offers to give one of two elements of one id a new one, and nothing about derived variables', async () => {
+    await create([{
+      id: 'text_x',
+      variables: [{ kind: 'base', id: 'text_x', alias: 'text_1' }, { kind: 'base', id: 'text_x', alias: 'text_2' }]
+    }]);
+
+    expect(ways()).toEqual(['variable-id-conflicts.new-element-id.title']);
+    expect((fixture.nativeElement as HTMLElement).querySelectorAll('ol li')).toHaveLength(5);
+  });
 });

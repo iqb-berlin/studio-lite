@@ -636,6 +636,9 @@
       "step-items": "Items, die mit dem Element verknüpft waren, unter „Eigenschaften“ neu verknüpfen.",
       "note": "Antworten, die zu dem Element schon erhoben wurden, sind unter seiner alten internen ID gespeichert."
     },
+    "new-element-id": {
+      "title": "Einem der Elemente eine neue interne ID geben"
+    },
     "rename-derived": {
       "title": "Die abgeleitete Variable umbenennen",
       "step-rename": "In der Kodierung der abgeleiteten Variable einen neuen Namen geben.",
