@@ -329,6 +329,25 @@ describe('UnitCheckComponent', () => {
     )).toEqual(['unit-check.no-definition']);
   }));
 
+  // the server counts the stored definition; once the editor holds one, the card counts that, as it is typed (#2197)
+  it('shows the size of the stored definition, then of the one in the editor, unsaved changes included',
+    fakeAsync(() => {
+      getUnitDefinitionSummary.mockReturnValue(of({ hasDefinition: true, size: 300 * 1024 }));
+      create();
+      const definitionSize = () => fixture.componentInstance.sections()
+        ?.find(entry => entry.tab === 'editor')?.definitionSize;
+
+      expect(sectionOf('editor')?.querySelector('[data-cy="unit-check-definition-size"]')?.textContent)
+        .toBe('unit-check.definition-size.medium');
+      expect(definitionSize()?.params).toEqual({ size: '300.0 KB' });
+
+      unitStores.loadDefinitionStore(1, 3).subscribe();
+      unitStores.definitionStore()?.setData([], 'Größe');
+      fixture.detectChanges();
+
+      expect(definitionSize()).toEqual({ key: 'unit-check.definition-size.small', params: { size: '7.0 B' } });
+    }));
+
   // the editor reports with every keystroke in a text; the check parses and validates the scheme (#2135)
   it('checks again when the editor changes the variables, not when it changes only the text', fakeAsync(() => {
     create();

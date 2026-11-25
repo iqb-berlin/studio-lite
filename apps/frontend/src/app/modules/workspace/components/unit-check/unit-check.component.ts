@@ -21,8 +21,10 @@ import { WorkspaceBackendService } from '../../services/workspace-backend.servic
 import { ModuleService } from '../../../../services/module.service';
 import { BackendService as CommentsBackendService } from '../../../comments/services/backend.service';
 import {
-  checkUnit, definitionSummary, isTabShown, ModuleType, UnitCheckFinding, UnitCheckSection, withKeyFindings
+  checkUnit, DefinitionContent, definitionSummary, isTabShown, ModuleType, UnitCheckFinding, UnitCheckSection,
+  withDefinitionSize, withKeyFindings
 } from '../../utils/unit-check.utils';
+import { byteLength } from '../../utils/definition-size.utils';
 import { checkUnitKey } from '../../utils/unit-key.utils';
 import { VariableIdConflictListComponent } from '../variable-id-conflict-list/variable-id-conflict-list.component';
 import { VariableIdConflictFixComponent } from '../variable-id-conflict-fix/variable-id-conflict-fix.component';
@@ -54,7 +56,7 @@ const sameQuery = (a: PresenceQuery, b: PresenceQuery): boolean => a.unitId === 
 
 /** What the check reads of the definition the editor holds: not its text. */
 interface EditorDefinition {
-  summary: UnitDefinitionSummaryDto;
+  summary: DefinitionContent;
   variables: VariableInfo[] | undefined;
 }
 
@@ -153,9 +155,16 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
     });
   });
 
+  // apart from the check as well, which it does not change: counted again with every keystroke in the
+  // editor. The editor's definition where it is loaded, unsaved changes included; else the stored one's (#2197).
+  private readonly definitionSize = computed((): number | undefined => {
+    const data = this.unitStores.definitionStore()?.data();
+    return data ? byteLength(data.definition) : this.sources()?.definitionSummary?.size;
+  });
+
   readonly sections = computed((): UnitCheckSection[] | undefined => {
     const checked = this.checked();
-    return checked && withKeyFindings(checked, this.keyFindings());
+    return checked && withDefinitionSize(withKeyFindings(checked, this.keyFindings()), this.definitionSize());
   });
 
   // Conflicts stand under the properties only where the coding is hidden; every way to resolve them

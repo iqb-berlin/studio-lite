@@ -663,6 +663,12 @@
     "key-taken": "The key \"{{key}}\" is already in use in this workspace.",
     "no-definition": "The unit has no content yet.",
     "definition-not-loaded": "Could not load the content of the unit.",
+    "definition-size": {
+      "small": "Size of the unit: {{size}} (small)",
+      "medium": "Size of the unit: {{size}} (medium)",
+      "large": "Size of the unit: {{size}} (large)",
+      "very-large": "Size of the unit: {{size}} (very large)"
+    },
     "definition-type-not-checked": "Whether the player can read the format of this unit has not been checked: the list of installed modules could not be loaded.",
     "no-scheme": "The unit has no coding scheme yet.",
     "nothing-to-code": "Nothing to code – the unit only has elements without a response, such as texts and images.",

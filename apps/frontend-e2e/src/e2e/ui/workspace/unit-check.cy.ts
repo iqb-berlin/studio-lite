@@ -127,4 +127,25 @@ describe('Workspace Unit Check', () => {
       .should('be.visible');
     cy.get('[data-cy="unit-check-schemer"] [data-cy="unit-check-ok"]').should('be.visible');
   });
+
+  // the size the server counts for the stored content, with its level, where the content's findings stand (#2197)
+  it('shows the size of the unit and its level under the editor', () => {
+    const sizedUnit = { shortname: 'CHECK_SIZE', name: 'Größe der Aufgabe', group: '' };
+    let size = 0;
+    cy.then(() => cy.createUnitAPI(base.wsId, sizedUnit, base.token).then(response => {
+      expect(response.status, sizedUnit.shortname).to.equal(201);
+      const sizedId = String(response.body);
+      cy.updateUnitDefinitionAPI(sizedId, base.wsId, base.token).its('status').should('equal', 200);
+      cy.getUnitDefinitionSummaryAPI(sizedId, base.wsId, base.token).then(summary => {
+        size = summary.body.size;
+        expect(size).to.be.within(1024, 200 * 1024);
+      });
+    }));
+    cy.visitWs(primaryWorkspace);
+    selectUnit(sizedUnit.shortname);
+    clickIndexTabWorkspace('properties');
+
+    cy.then(() => cy.get('[data-cy="unit-check-editor"] [data-cy="unit-check-definition-size"]')
+      .should('have.text', `Größe der Aufgabe: ${(size / 1024).toFixed(1)} KB (klein)`));
+  });
 });

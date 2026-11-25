@@ -1,6 +1,6 @@
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import {
-  checkUnit, definitionSummary, UnitCheckInput, UnitCheckSection, withKeyFindings
+  checkUnit, definitionSummary, UnitCheckInput, UnitCheckSection, withDefinitionSize, withKeyFindings
 } from './unit-check.utils';
 
 const scheme = (variableCodings: unknown[]): string => JSON.stringify({ version: '3.0', variableCodings });
@@ -514,5 +514,34 @@ describe('withKeyFindings', () => {
     const sections = checkUnit(okInput());
 
     expect(withKeyFindings(sections, [])).toBe(sections);
+  });
+});
+
+describe('withDefinitionSize', () => {
+  // the size shows where the content's findings stand, and leaves the status alone: a large unit works (#2197)
+  it('shows the size and its level under the editor, which stays in order', () => {
+    const sections = withDefinitionSize(checkUnit(okInput()), 6 * 1024 * 1024);
+
+    expect(section(sections, 'editor')).toEqual(expect.objectContaining({
+      definitionSize: { key: 'unit-check.definition-size.very-large', params: { size: '6.0 MB' } },
+      status: 'ok'
+    }));
+    expect(section(sections, 'properties')?.definitionSize).toBeUndefined();
+  });
+
+  it('shows the size under the properties where the workspace hides the editor', () => {
+    const input = okInput();
+    input.hiddenRoutes = ['editor'];
+    const sections = withDefinitionSize(checkUnit(input), 150 * 1024);
+
+    expect(section(sections, 'properties')?.definitionSize)
+      .toEqual({ key: 'unit-check.definition-size.small', params: { size: '150.0 KB' } });
+  });
+
+  it('shows no size without a definition, or where it is not known', () => {
+    const sections = checkUnit(okInput());
+
+    expect(withDefinitionSize(sections, 0)).toBe(sections);
+    expect(withDefinitionSize(sections, undefined)).toBe(sections);
   });
 });
