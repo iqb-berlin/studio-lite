@@ -147,8 +147,15 @@ function checkScheme(input: UnitCheckInput, editorShown: boolean): CheckedScheme
     schemer: { findings: [{ key }], variableIdConflicts: [] }, editor: []
   });
   if (!input.scheme) return only('unit-check.scheme-not-loaded');
-  if (!hasCodingScheme(input.scheme.scheme)) return only('unit-check.no-scheme');
   const idConflicts = checkIdConflicts(input);
+  // Without a scheme the schemer finds nothing, but the export writes the base variables all the same:
+  // two elements of one internal id are written twice, as the export dialog says (#2119).
+  if (!hasCodingScheme(input.scheme.scheme)) {
+    return {
+      schemer: { findings: [{ key: 'unit-check.no-scheme' }], variableIdConflicts: idConflicts.variableIdConflicts },
+      editor: []
+    };
+  }
   // what the schemer finds wrong (#2135), against the variables the schemer is given
   const problems = schemeProblemFindings(
     input.variables,

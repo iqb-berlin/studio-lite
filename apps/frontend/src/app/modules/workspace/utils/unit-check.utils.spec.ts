@@ -169,6 +169,19 @@ describe('checkUnit', () => {
       expect(section(checkUnit(input), 'schemer')?.findings).toEqual([{ key: 'unit-check.no-scheme' }]);
     });
 
+    // the export dialog warns of them, scheme or not; the card has to say the same
+    it('lists two elements of one internal id in a unit without coding scheme', () => {
+      const input = okInput();
+      input.scheme = { scheme: '', schemeType: '' };
+      input.variables = [
+        { id: 'text_x', alias: 'text_1' } as VariableInfo, { id: 'text_x', alias: 'text_2' } as VariableInfo
+      ];
+
+      const schemer = section(checkUnit(input), 'schemer');
+      expect(schemer?.findings).toEqual([{ key: 'unit-check.no-scheme' }]);
+      expect(schemer?.variableIdConflicts.map(conflict => conflict.id)).toEqual(['text_x']);
+    });
+
     it('lists the ids the export would write twice, from the variables as they are edited (#2119)', () => {
       const input = okInput();
       input.variables = [{ id: '05', alias: '_00a' } as VariableInfo];
