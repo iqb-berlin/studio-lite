@@ -165,7 +165,7 @@ describe('WorkspaceComponent', () => {
     expect(jest.mocked(TestBed.inject(WorkspaceService).setSettingsLoaded).mock.calls).toEqual([[false], [true]]);
   });
 
-  // the technical check waits for the settings; without a workspace the defaults are all there is
+  // the technical validation waits for the settings; without a workspace the defaults are all there is
   it('should mark the defaults as the settings when the workspace could not be loaded', async () => {
     await configure('/a/5/7/editor', { workspace: null });
 

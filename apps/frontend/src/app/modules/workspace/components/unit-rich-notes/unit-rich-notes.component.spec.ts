@@ -226,7 +226,7 @@ describe('UnitRichNotesComponent', () => {
       unitId: 10, tagId: 't1', content: 'new', links: [], itemReferences: ['i1']
     }));
     expect(shapeOf(component.displayNodes)).toEqual([{ tagId: 't1', notes: [7], children: [] }]);
-    // the technical check beside it tells whether the unit has notes (#2135)
+    // the technical validation beside it tells whether the unit has notes (#2135)
     expect(workspaceServiceMock.notifyRichNotesChanged).toHaveBeenCalled();
   });
 

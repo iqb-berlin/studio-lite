@@ -645,7 +645,7 @@
     }
   },
   "unit-check": {
-    "title": "Technical check",
+    "title": "Technical validation",
     "hint": "The unit is checked as it is being edited, including what has not been saved yet.",
     "ok": "OK",
     "not-loaded": "Could not be loaded.",

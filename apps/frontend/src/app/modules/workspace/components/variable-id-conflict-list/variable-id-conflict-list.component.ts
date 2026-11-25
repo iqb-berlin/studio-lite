@@ -18,7 +18,7 @@ interface ConflictLines {
 /**
  * The ids of one unit that the export would write for two variables, each variable named as the
  * authors see it: an element by the alias the editor shows, not by the internal id nobody sees
- * there (#2119). Shown by the export dialog and by the technical check (#2135).
+ * there (#2119). Shown by the export dialog and by the technical validation (#2135).
  *
  * Each line is one whole sentence with the names in it, as the translations require: the word order
  * around a name differs between languages.
