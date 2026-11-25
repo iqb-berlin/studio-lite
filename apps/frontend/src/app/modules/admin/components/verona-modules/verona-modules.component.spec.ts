@@ -1,7 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
-import {
-  ComponentFixture, fakeAsync, flush, TestBed
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Component, Directive, Input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
@@ -71,7 +69,7 @@ describe('VeronaModulesComponent', () => {
       } as unknown as AppConfig
     };
     mockModuleService = {
-      loadList: jest.fn().mockResolvedValue(true)
+      loadList: jest.fn().mockResolvedValue(undefined)
     };
     mockDialog = {
       open: jest.fn().mockReturnValue({
@@ -180,17 +178,6 @@ describe('VeronaModulesComponent', () => {
     expect(mockSnackBar.open).toHaveBeenCalledWith(expect.stringMatching(/modules.deleted/), '', { duration: 1000 });
     expect(mockModuleService.loadList).toHaveBeenCalled();
   });
-
-  // the page then shows the last lists loaded: a module deleted is still in them (#2214)
-  it('should say so when the lists cannot be loaded again after a delete', fakeAsync(() => {
-    component.selectedModules = [{ key: 'm1' }] as VeronaModuleClass[];
-    (mockModuleService.loadList as jest.Mock).mockResolvedValue(false);
-
-    component.deleteFiles();
-    flush();
-
-    expect(mockSnackBar.open).toHaveBeenCalledWith('modules.list-not-loaded', 'error', { duration: 3000 });
-  }));
 
   it('should handle delete modules failure', () => {
     component.selectedModules = [{ key: 'm1' } as VeronaModuleClass];

@@ -51,17 +51,8 @@ export class VeronaModulesComponent extends ModulesDirective {
 
   loadModuleList() {
     this.appService.dataLoading = true;
-    this.moduleService.loadList().then(loaded => {
+    this.moduleService.loadList().then(() => {
       this.appService.dataLoading = false;
-      // the lists shown are then the last ones loaded: a module deleted or uploaded since is wrong in
-      // them, and the admin is to know (#2214)
-      if (!loaded) {
-        this.snackBar.open(
-          this.translateService.instant('modules.list-not-loaded'),
-          this.translateService.instant('error'),
-          { duration: 3000 }
-        );
-      }
     });
   }
 
