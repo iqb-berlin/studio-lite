@@ -330,6 +330,28 @@ describe('UnitPreviewComponent', () => {
       expect(moduleServiceStub.getModuleHtml).toHaveBeenCalledWith(calcWidget);
     }));
 
+    // Listed oldest first, as the API sends them: the old version stayed in use beside the new one (#2225)
+    it('opens the newest version of a widget installed in two', fakeAsync(() => {
+      const calcWidget = (key: string) => ({
+        key,
+        sortKey: key,
+        metadata: { id: 'calc', model: 'CALC', type: 'WIDGET' }
+      }) as VeronaModuleClass;
+      const older = calcWidget('calc@1.0');
+      const newer = calcWidget('calc@1.1');
+      moduleServiceStub.widgets = { 'calc@1.0': older, 'calc@1.1': newer };
+      jest.spyOn(TestBed.inject(Overlay), 'create').mockReturnValue({
+        attach: jest.fn().mockReturnValue({ instance: {} }),
+        dispose: jest.fn()
+      } as never);
+
+      component.handleWidgetCall({ callId: 'c5', widgetType: 'CALC' });
+      tick();
+
+      expect(moduleServiceStub.getModuleHtml).toHaveBeenCalledWith(newer);
+      expect(moduleServiceStub.getModuleHtml).not.toHaveBeenCalledWith(older);
+    }));
+
     it('warns when no matching widget is found', fakeAsync(() => {
       moduleServiceStub.widgets = {};
       (moduleServiceStub.loadWidgets as jest.Mock).mockResolvedValue(undefined);

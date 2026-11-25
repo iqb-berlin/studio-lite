@@ -15,6 +15,7 @@ import { WidgetCallData } from '../modules/workspace/models/widget-call-data.int
 import { ModuleService } from '../services/module.service';
 import { WidgetOverlayComponent } from '../modules/workspace/components/widget-overlay/widget-overlay.component';
 import { readSpecVersion } from '../utils/spec-version.utils';
+import { widgetForType } from '../utils/widget-for-type.utils';
 
 /**
  * Hosting a PLAYER, on top of {@link VeronaModuleDirective}: it speaks the player's half of the
@@ -393,8 +394,10 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
     loadWidgets$
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
-        const matchingWidget = Object.values(this.widgetModuleService.widgets)
-          .find(w => w.metadata.model === data.widgetType);
+        const matchingWidget = widgetForType(
+          Object.values(this.widgetModuleService.widgets),
+          data.widgetType
+        );
 
         if (!matchingWidget) {
           this.snackBar.open(
