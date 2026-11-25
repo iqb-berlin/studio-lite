@@ -5,7 +5,11 @@ export type ExportFormat = 'xml' | 'json';
 /** The settings flag of an optional export file -- the player is not one of them. */
 export type ExportFileFlag = 'addMetadata' | 'addItems' | 'addCodingScheme' | 'addComments' | 'addRichNotes';
 
-type ExportContent = Exclude<keyof UnitExportContentsDto, 'unitId'>;
+// what a unit has or not: a file is available when one of the chosen units has its content. The lists
+// beside them -- ids written twice, what the schemer rejects -- say nothing about a file.
+type ExportContent = {
+  [K in keyof UnitExportContentsDto]: UnitExportContentsDto[K] extends boolean ? K : never
+}[keyof UnitExportContentsDto];
 
 export type ExportFileSelection = Partial<Record<ExportFileFlag, boolean>>;
 

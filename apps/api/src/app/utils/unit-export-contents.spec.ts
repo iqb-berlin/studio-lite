@@ -1,13 +1,18 @@
 import { createMock } from '@golevelup/ts-jest';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { MetadataValuesEntry, UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import {
-  entryHasContent, findUnitExportContents, hasCodingScheme, hasItems, hasMetadataContent
+  entryHasContent, findUnitExportContents, hasItems, hasMetadataContent
 } from './unit-export-contents';
 import { UnitService } from '../services/unit.service';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { UnitRichNoteService } from '../services/unit-rich-note.service';
 
 const entry = (value: unknown): MetadataValuesEntry => ({ id: 'e1', value } as unknown as MetadataValuesEntry);
+
+const variable = (id: string, alias: string, type: VariableInfo['type']): VariableInfo => ({
+  id, alias, type, format: '', multiple: false, nullable: false, values: [], valuePositionLabels: []
+});
 
 describe('unit export contents', () => {
   describe('entryHasContent', () => {
@@ -65,22 +70,15 @@ describe('unit export contents', () => {
     });
   });
 
-  describe('hasCodingScheme', () => {
-    it('is true only for a non-empty scheme', () => {
-      expect(hasCodingScheme('{"variableCodings":[]}')).toBe(true);
-      expect(hasCodingScheme('')).toBe(false);
-      expect(hasCodingScheme(null)).toBe(false);
-      expect(hasCodingScheme(undefined)).toBe(false);
-    });
-  });
-
   describe('findUnitExportContents', () => {
     it('combines the unit sources with the comment and rich note lookups', async () => {
       const unitService = createMock<UnitService>();
       const unitCommentService = createMock<UnitCommentService>();
       const unitRichNoteService = createMock<UnitRichNoteService>();
       unitService.findAllExportSources.mockResolvedValue([
-        { id: 3, metadata: { profiles: [{ profileId: 'p', entries: [entry('x')] }] }, scheme: '' }
+        {
+          id: 3, metadata: { profiles: [{ profileId: 'p', entries: [entry('x')] }] }, scheme: '', variables: []
+        }
       ]);
       unitCommentService.findUnitIdsWithComments.mockResolvedValue(new Set([3]));
       unitRichNoteService.findUnitIdsWithNotes.mockResolvedValue(new Set());
@@ -88,9 +86,98 @@ describe('unit export contents', () => {
       const contents = await findUnitExportContents(5, unitService, unitCommentService, unitRichNoteService);
 
       expect(contents).toEqual([{
-        unitId: 3, metadata: true, items: false, codingScheme: false, comments: true, richNotes: false
+        unitId: 3,
+        metadata: true,
+        items: false,
+        codingScheme: false,
+        comments: true,
+        richNotes: false,
+        variableIdConflicts: [],
+        schemeProblems: []
       }]);
       expect(unitService.findAllExportSources).toHaveBeenCalledWith(5);
+    });
+
+    it('names the ids the export would write twice (#2119)', async () => {
+      const unitService = createMock<UnitService>();
+      const unitCommentService = createMock<UnitCommentService>();
+      const unitRichNoteService = createMock<UnitRichNoteService>();
+      unitService.findAllExportSources.mockResolvedValue([{
+        id: 3,
+        metadata: null,
+        scheme: JSON.stringify({ variableCodings: [{ id: 'd_1', alias: '05', sourceType: 'MANUAL' }] }),
+        variables: [variable('05', '_00a', 'string')]
+      }]);
+      unitCommentService.findUnitIdsWithComments.mockResolvedValue(new Set());
+      unitRichNoteService.findUnitIdsWithNotes.mockResolvedValue(new Set());
+
+      const [contents] = await findUnitExportContents(5, unitService, unitCommentService, unitRichNoteService);
+
+      expect(contents.variableIdConflicts.map(conflict => conflict.id)).toEqual(['05']);
+    });
+
+    // the export dialog warns about what makes the coding fail, not about what leaves it incomplete
+    it('names what the schemer finds that makes the coding fail, and only that (#2135)', async () => {
+      const unitService = createMock<UnitService>();
+      const unitCommentService = createMock<UnitCommentService>();
+      const unitRichNoteService = createMock<UnitRichNoteService>();
+      unitService.findAllExportSources.mockResolvedValue([{
+        id: 3,
+        metadata: null,
+        scheme: JSON.stringify({
+          version: '3.0',
+          variableCodings: [
+            { id: 'text_a', alias: 'text_1', sourceType: 'BASE_NO_VALUE' },
+            { id: 'text_b', alias: 'text_1', sourceType: 'BASE_NO_VALUE' },
+            { id: 'drop_1', alias: '_01a', sourceType: 'BASE' },
+            {
+              id: 'copy_1', alias: 'copy', sourceType: 'COPY_VALUE', deriveSources: ['drop_1', 'text_a']
+            }
+          ]
+        }),
+        variables: [
+          variable('text_a', 'text_1', 'no-value'),
+          variable('text_b', 'text_1', 'no-value'),
+          variable('drop_1', '_01a', 'string')
+        ]
+      }]);
+      unitCommentService.findUnitIdsWithComments.mockResolvedValue(new Set());
+      unitRichNoteService.findUnitIdsWithNotes.mockResolvedValue(new Set());
+
+      const [contents] = await findUnitExportContents(5, unitService, unitCommentService, unitRichNoteService);
+
+      // a copy from more than one source leaves the coding incomplete, but it runs
+      expect(contents.schemeProblems).toEqual([{ type: 'NAME_TWICE', variable: 'text_1' }]);
+    });
+
+    // a TypeError on one such unit failed the check for every unit of the workspace (#2135)
+    it('answers for every unit when the codings or the variables of one are not a list of them', async () => {
+      const unitService = createMock<UnitService>();
+      const unitCommentService = createMock<UnitCommentService>();
+      const unitRichNoteService = createMock<UnitRichNoteService>();
+      unitService.findAllExportSources.mockResolvedValue([
+        {
+          id: 3, metadata: null, scheme: JSON.stringify({ version: '3.0', variableCodings: [null] }), variables: []
+        },
+        {
+          id: 4, metadata: null, scheme: JSON.stringify({ version: '3.0', variableCodings: {} }), variables: []
+        },
+        {
+          id: 5, metadata: null, scheme: '', variables: JSON.parse('[null]')
+        }
+      ]);
+      unitCommentService.findUnitIdsWithComments.mockResolvedValue(new Set());
+      unitRichNoteService.findUnitIdsWithNotes.mockResolvedValue(new Set());
+
+      const contents = await findUnitExportContents(5, unitService, unitCommentService, unitRichNoteService);
+
+      expect(contents.map(({ unitId, variableIdConflicts, schemeProblems }) => (
+        { unitId, variableIdConflicts, schemeProblems }
+      ))).toEqual([
+        { unitId: 3, variableIdConflicts: [], schemeProblems: [{ type: 'UNREADABLE' }] },
+        { unitId: 4, variableIdConflicts: [], schemeProblems: [{ type: 'UNREADABLE' }] },
+        { unitId: 5, variableIdConflicts: [], schemeProblems: [] }
+      ]);
     });
   });
 });

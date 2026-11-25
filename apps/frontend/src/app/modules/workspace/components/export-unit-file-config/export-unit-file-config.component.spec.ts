@@ -30,7 +30,14 @@ class MockModuleService {
 }
 
 const unitWithComments: UnitExportContentsDto = {
-  unitId: 1, metadata: false, items: false, codingScheme: false, comments: true, richNotes: false
+  unitId: 1,
+  metadata: false,
+  items: false,
+  codingScheme: false,
+  comments: true,
+  richNotes: false,
+  variableIdConflicts: [],
+  schemeProblems: []
 };
 
 class MockWorkspaceBackendService {
@@ -162,6 +169,50 @@ describe('ExportUnitFileConfigComponent', () => {
       addMetadata: true, addCodingScheme: true, addComments: false, addRichNotes: false
     });
   }));
+
+  it('should pass on the units whose export would carry an id twice (#2119)', () => {
+    const unitWithConflict: UnitExportContentsDto = {
+      ...unitWithComments,
+      unitId: 2,
+      variableIdConflicts: [{ id: '05', variables: [] }]
+    };
+    backendService.exportContents = of([unitWithComments, unitWithConflict]);
+    fixture = TestBed.createComponent(ExportUnitFileConfigComponent);
+    const passedOn: (UnitExportContentsDto[] | null)[] = [];
+    fixture.componentInstance.exportProblemsChange.subscribe(units => passedOn.push(units));
+
+    fixture.detectChanges();
+
+    expect(passedOn).toEqual([[unitWithConflict]]);
+  });
+
+  // without it, the export dialog never heard of a unit whose only problem is in its coding
+  it('should pass on the units whose coding the schemer rejects (#2135)', () => {
+    const unitWithSchemeProblem: UnitExportContentsDto = {
+      ...unitWithComments,
+      unitId: 3,
+      schemeProblems: [{ type: 'NAME_TWICE', variable: 'text_1' }]
+    };
+    backendService.exportContents = of([unitWithComments, unitWithSchemeProblem]);
+    fixture = TestBed.createComponent(ExportUnitFileConfigComponent);
+    const passedOn: (UnitExportContentsDto[] | null)[] = [];
+    fixture.componentInstance.exportProblemsChange.subscribe(units => passedOn.push(units));
+
+    fixture.detectChanges();
+
+    expect(passedOn).toEqual([[unitWithSchemeProblem]]);
+  });
+
+  it('should pass on that the ids could not be checked when the contents cannot be read', () => {
+    backendService.exportContents = of(null);
+    fixture = TestBed.createComponent(ExportUnitFileConfigComponent);
+    const passedOn: (UnitExportContentsDto[] | null)[] = [];
+    fixture.componentInstance.exportProblemsChange.subscribe(units => passedOn.push(units));
+
+    fixture.detectChanges();
+
+    expect(passedOn).toEqual([null]);
+  });
 
   describe('players', () => {
     const createWithPlayers = async (players: (string | undefined)[]): Promise<void> => {

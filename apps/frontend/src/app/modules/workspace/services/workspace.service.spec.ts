@@ -10,6 +10,7 @@ import {
   AuthDataDto
 } from '@studio-lite-lib/api-dto';
 import { AbstractControl } from '@angular/forms';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { WorkspaceService } from './workspace.service';
 import { WorkspaceBackendService } from './workspace-backend.service';
 import { AppService } from '../../../services/app.service';
@@ -152,6 +153,41 @@ describe('WorkspaceService', () => {
     });
   });
 
+  // the settings arrive from the server after the workspace is entered; what derives from the hidden
+  // tabs follows them (#2135)
+  describe('hiddenRoutes', () => {
+    it('follows the settings, set or changed in place', () => {
+      expect(service.hiddenRoutes()).toEqual([]);
+
+      service.workspaceSettings = { ...service.workspaceSettings, hiddenRoutes: ['notes'] };
+      expect(service.hiddenRoutes()).toEqual(['notes']);
+
+      const settings = service.workspaceSettings;
+      service.updateWorkspaceSettings({ hiddenRoutes: ['comments', 'notes'] });
+      expect(service.hiddenRoutes()).toEqual(['comments', 'notes']);
+      // in place: whoever holds the settings sees the change
+      expect(settings.hiddenRoutes).toEqual(['comments', 'notes']);
+    });
+
+    // the settings dialog appends what it hides; the same tabs are no change to whoever follows them
+    it('takes the same tabs in another order for no change', () => {
+      service.workspaceSettings = { ...service.workspaceSettings, hiddenRoutes: ['comments', 'notes'] };
+      const before = service.hiddenRoutes();
+
+      service.updateWorkspaceSettings({ hiddenRoutes: ['notes', 'comments'] });
+
+      expect(service.hiddenRoutes()).toBe(before);
+    });
+
+    it('takes another tab hidden for a change, whatever the lists hold twice', () => {
+      service.workspaceSettings = { ...service.workspaceSettings, hiddenRoutes: ['comments', 'comments'] };
+
+      service.updateWorkspaceSettings({ hiddenRoutes: ['comments', 'notes'] });
+
+      expect(service.hiddenRoutes()).toEqual(['comments', 'notes']);
+    });
+  });
+
   describe('resetUnitData', () => {
     it('should reset the timestamps and let go of the stores', () => {
       service.lastChangedMetadata = new Date();
@@ -172,6 +208,16 @@ describe('WorkspaceService', () => {
   });
 
   describe('resetUnitList', () => {
+    // a computed that derives from the list sees it only through the signal; the list may come after the unit
+    it('hands the list it builds out as a signal as well (#1842)', () => {
+      service.resetUnitList([{
+        id: 1, key: 'u1', name: 'Unit 1', groupName: 'Group A'
+      }]);
+
+      expect(service.units()).toBe(service.unitList);
+      expect(service.units()['Group A'][0].key).toBe('u1');
+    });
+
     it('should organize units by group', () => {
       const units: UnitInListDto[] = [
         {
@@ -445,6 +491,77 @@ describe('WorkspaceService', () => {
       expect(backendService.setUnitScheme).not.toHaveBeenCalled();
     });
 
+    // the server renames the codings with the variables; the scheme kept here named the old names (#2135)
+    it('should take the scheme as the server stored it with the variables, and not send it back', async () => {
+      const schemeOf = (alias: string): string => JSON.stringify({
+        version: '3.0', variableCodings: [{ id: 'text_b', alias, sourceType: 'BASE_NO_VALUE' }]
+      });
+      const definitionStore = new UnitDefinitionStore(1, {
+        definition: 'd', variables: [{ id: 'text_b', alias: 'text_1' } as VariableInfo]
+      });
+      definitionStore.setData([{ id: 'text_b', alias: 'text_2' } as VariableInfo], 'd');
+      const schemeStore = new UnitSchemeStore(1, { scheme: schemeOf('text_1'), schemeType: 'type' });
+      schemeStore.setData(schemeOf('text_1'), 'type');
+      unitStores.definitionStore.set(definitionStore);
+      unitStores.schemeStore.set(schemeStore);
+      backendService.setUnitDefinition.mockReturnValue(of(true));
+
+      await service.saveUnitData();
+
+      expect(schemeStore.getData().scheme).toBe(schemeOf('text_2'));
+      expect(backendService.setUnitScheme).not.toHaveBeenCalled();
+    });
+
+    // A coding edited, then an element renamed, then one save: the scheme as the schemer reported it
+    // went to the server after the variables, and wrote the element's old name back (#2135).
+    it('should send an edited scheme with the codings renamed as the server renamed the stored one', async () => {
+      const schemeOf = (alias: string, label: string): string => JSON.stringify({
+        version: '3.0',
+        variableCodings: [{
+          id: 'text_b', alias, label, sourceType: 'BASE'
+        }]
+      });
+      const definitionStore = new UnitDefinitionStore(1, {
+        definition: 'd', variables: [{ id: 'text_b', alias: 'text_1' } as VariableInfo]
+      });
+      definitionStore.setData([{ id: 'text_b', alias: 'text_2' } as VariableInfo], 'd');
+      const schemeStore = new UnitSchemeStore(1, { scheme: schemeOf('text_1', ''), schemeType: 'type' });
+      schemeStore.setData(schemeOf('text_1', 'edited'), 'type');
+      unitStores.definitionStore.set(definitionStore);
+      unitStores.schemeStore.set(schemeStore);
+      backendService.setUnitDefinition.mockReturnValue(of(true));
+      backendService.setUnitScheme.mockReturnValue(of(true));
+
+      await service.saveUnitData();
+
+      expect(backendService.setUnitScheme).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ scheme: schemeOf('text_2', 'edited') })
+      );
+    });
+
+    // a schemer beside the editor sends the scheme again when the definition is applied
+    it('should rename the scheme before the definition is applied, for whoever follows the definition', async () => {
+      const schemeOf = (alias: string): string => JSON.stringify({
+        version: '3.0', variableCodings: [{ id: 'text_b', alias, sourceType: 'BASE_NO_VALUE' }]
+      });
+      const definitionStore = new UnitDefinitionStore(1, {
+        definition: 'd', variables: [{ id: 'text_b', alias: 'text_1' } as VariableInfo]
+      });
+      definitionStore.setData([{ id: 'text_b', alias: 'text_2' } as VariableInfo], 'd');
+      const schemeStore = new UnitSchemeStore(1, { scheme: schemeOf('text_1'), schemeType: 'type' });
+      unitStores.definitionStore.set(definitionStore);
+      unitStores.schemeStore.set(schemeStore);
+      backendService.setUnitDefinition.mockReturnValue(of(true));
+      const schemesSentWithTheDefinition: string[] = [];
+      definitionStore.dataChange.subscribe(() => schemesSentWithTheDefinition.push(schemeStore.getData().scheme));
+
+      await service.saveUnitData();
+
+      expect(schemesSentWithTheDefinition).toEqual([schemeOf('text_2')]);
+    });
+
     it('should keep a scheme the backend refuses unsaved', async () => {
       const schemeStore = new UnitSchemeStore(1, { scheme: 'old', schemeType: 'type' });
       schemeStore.setData('new', 'newType');
@@ -677,6 +794,26 @@ describe('WorkspaceService', () => {
 
         expect(backendService.setUnitProperties).not.toHaveBeenCalled();
         expect(backendService.setUnitDefinition).toHaveBeenCalled();
+      });
+
+      // saved from the editor tab, before the coding was ever opened (#2135)
+      it('should rename the codings of a scheme that is loaded only by the save', async () => {
+        const schemeOf = (alias: string): string => JSON.stringify({
+          version: '3.0', variableCodings: [{ id: 'text_1', alias, sourceType: 'BASE_NO_VALUE' }]
+        });
+        const definitionStore = new UnitDefinitionStore(1, { definition: 'd', variables: [] });
+        definitionStore.setData([{ id: 'text_1', alias: 'Antwort' } as VariableInfo], 'd');
+        unitStores.definitionStore.set(definitionStore);
+        unitStores.schemeStore.set(undefined);
+        const loaded = new UnitSchemeStore(1, { scheme: schemeOf('old alias'), schemeType: 'iqb@3.4' });
+        unitStores.loadSchemeStore.mockImplementation(() => {
+          unitStores.schemeStore.set(loaded);
+          return of(loaded);
+        });
+
+        await service.saveUnitData();
+
+        expect(loaded.getData().scheme).toBe(schemeOf('Antwort'));
       });
 
       it('should leave the items alone when another unit is opened while the scheme loads', async () => {

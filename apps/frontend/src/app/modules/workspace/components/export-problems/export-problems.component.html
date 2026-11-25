@@ -1,0 +1,52 @@
+<h1 mat-dialog-title>{{ 'unit-download.export-problems.title' | translate }}</h1>
+<mat-dialog-content>
+  @if (conflicts.length) {
+    <p data-cy="variable-id-conflicts-intro">
+      @if (data.exportFormat === 'xml') {
+        {{ 'unit-download.variable-id-conflicts.intro-xml' | translate }}
+      } @else {
+        {{ 'unit-download.variable-id-conflicts.intro-json' | translate }}
+      }
+    </p>
+  }
+  @if (hasSchemeProblems) {
+    <p data-cy="export-scheme-problems-intro">{{ 'unit-download.export-problems.intro-scheme' | translate }}</p>
+  }
+  @for (unit of data.units; track unit.id) {
+    <div data-cy="export-problems-unit">
+      <h3 class="unit-title">
+        {{ unit.key }}
+        @if (unit.name) {
+          <span>– {{ unit.name }}</span>
+        }
+      </h3>
+      @if (unit.conflicts.length) {
+        <studio-lite-variable-id-conflict-list [conflicts]="unit.conflicts"></studio-lite-variable-id-conflict-list>
+      }
+      @if (unit.schemeProblems.length) {
+        <ul class="scheme-problems">
+          @for (problem of unit.schemeProblems; track $index) {
+            <li data-cy="export-scheme-problem">{{ problem.key | translate: problem.params }}</li>
+          }
+        </ul>
+      }
+    </div>
+  }
+  @if (conflicts.length) {
+    <studio-lite-variable-id-conflict-fix class="manual-fix"
+                                          [conflicts]="conflicts">
+    </studio-lite-variable-id-conflict-fix>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-raised-button color="primary"
+          [mat-dialog-close]="true"
+          data-cy="export-problems-export-anyway">
+    {{ 'unit-download.variable-id-conflicts.export-anyway' | translate }}
+  </button>
+  <button mat-raised-button
+          [mat-dialog-close]="false"
+          data-cy="export-problems-cancel">
+    {{ 'dialogs.cancel' | translate }}
+  </button>
+</mat-dialog-actions>

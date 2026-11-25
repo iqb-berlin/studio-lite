@@ -1,5 +1,5 @@
 import {
-  BehaviorSubject, lastValueFrom, Observable
+  BehaviorSubject, lastValueFrom, Observable, Subject
 } from 'rxjs';
 import {
   EventEmitter, Injectable, Output, signal
@@ -16,10 +16,12 @@ import {
 import { HttpParams } from '@angular/common/http';
 import { WorkspaceBackendService } from './workspace-backend.service';
 import { UnitMetadataStore } from '../classes/unit-metadata-store';
+import { UnitSchemeStore } from '../classes/unit-scheme-store';
 import { AppService } from '../../../services/app.service';
 import { RichNoteTagsService } from './rich-note-tags.service';
 import { UnitStoresService } from './unit-stores.service';
 import { reconcileItemVariables } from '../utils/item-variables.utils';
+import { isUnitKeyTaken, UNIT_KEY_PATTERN } from '../utils/unit-key.utils';
 
 /**
  * The state of the workspace currently open: which unit is selected, what the user may do in it,
@@ -37,8 +39,22 @@ export class WorkspaceService {
   selectedWorkspaceId = 0;
   selectedWorkspaceName = '';
   selectedUnit$ = new BehaviorSubject<number>(0);
-  workspaceSettings: WorkspaceSettingsDto;
+  private workspaceSettingsValue!: WorkspaceSettingsDto;
+  // The tabs the workspace hides, for whoever derives from them: the settings arrive from the server
+  // after the workspace is entered, and a unit may be shown before that (#2135).
+  // the same tabs in another order are no change: the settings dialog appends what it hides
+  private readonly hiddenRoutesState = signal<string[]>([], {
+    equal: (a, b) => a.every(route => b.includes(route)) && b.every(route => a.includes(route))
+  });
+
+  readonly hiddenRoutes = this.hiddenRoutesState.asReadonly();
+  // whether the settings are the workspace's stored ones, not the defaults it is entered with (#2135)
+  private readonly settingsLoadedState = signal(false);
+  readonly settingsLoaded = this.settingsLoadedState.asReadonly();
   unitList: { [key: string]: UnitInListDto[] } = {};
+  // the list again, for whoever derives from it: a computed cannot see the field replaced
+  private readonly unitListState = signal<{ [key: string]: UnitInListDto[] }>({});
+  readonly units = this.unitListState.asReadonly();
   private _isWorkspaceGroupAdmin = new BehaviorSubject<boolean>(false);
   private _userAccessLevel = new BehaviorSubject<number>(0);
 
@@ -98,7 +114,35 @@ export class WorkspaceService {
   }
 
   @Output() onCommentsUpdated = new EventEmitter<void>();
+  // a rich note added or deleted, for whoever tells whether the unit has any (#2135)
+  private readonly richNotesChangedSubject = new Subject<void>();
+  readonly richNotesChanged$ = this.richNotesChangedSubject.asObservable();
   @Output() unitMetadataReloaded = new EventEmitter<void>();
+
+  get workspaceSettings(): WorkspaceSettingsDto {
+    return this.workspaceSettingsValue;
+  }
+
+  set workspaceSettings(settings: WorkspaceSettingsDto) {
+    this.workspaceSettingsValue = settings;
+    this.hiddenRoutesState.set(settings?.hiddenRoutes ?? []);
+  }
+
+  /** Tells that a rich note of the unit was added or deleted. */
+  notifyRichNotesChanged(): void {
+    this.richNotesChangedSubject.next();
+  }
+
+  /** Marks the settings as the workspace's stored ones, or as the defaults it is entered with. */
+  setSettingsLoaded(loaded: boolean): void {
+    this.settingsLoadedState.set(loaded);
+  }
+
+  /** Changes the settings in place -- whoever holds them sees the change -- and what follows from them. */
+  updateWorkspaceSettings(changes: Partial<WorkspaceSettingsDto>): void {
+    Object.assign(this.workspaceSettingsValue, changes);
+    this.hiddenRoutesState.set(this.workspaceSettingsValue.hiddenRoutes ?? []);
+  }
 
   constructor(
     private backendService: WorkspaceBackendService,
@@ -119,7 +163,7 @@ export class WorkspaceService {
   }
 
   static unitKeyPatternString(): string {
-    return '[a-zA-Z][a-zA-Z0-9_-]*';
+    return UNIT_KEY_PATTERN;
   }
 
   /** As the column the group goes into on each of its units holds; a longer one failed there (#2131) */
@@ -135,15 +179,7 @@ export class WorkspaceService {
     unitList: () => { [key: string]: UnitInListDto[] }
   ): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const newKeyNormalised = control.value.toUpperCase().trim();
-      let allUnits: UnitInListDto[] = [];
-      Object.values(unitList()).forEach(units => {
-        allUnits = [...allUnits, ...units];
-      });
-      const allreadyIn = allUnits.filter(
-        u => u.key.toUpperCase().trim() === newKeyNormalised && u.id !== unitId
-      );
-      if (allreadyIn && allreadyIn.length > 0) {
+      if (isUnitKeyTaken(control.value, unitId, unitList())) {
         return {
           keyNotUnique:
             'Der Kurzname muss eindeutig innerhalb des Arbeitsbereiches sein.'
@@ -184,6 +220,7 @@ export class WorkspaceService {
     });
     const notUsedGroups = unitGroups.filter(g => !usedUnitGroups.includes(g));
     notUsedGroups.forEach(groupName => this.addEmptyUnitGroup(groupName));
+    this.unitListState.set(this.unitList);
   }
 
   private addEmptyUnitGroup(groupName: string) {
@@ -254,9 +291,10 @@ export class WorkspaceService {
     const unitId = this.selectedUnit$.getValue();
     const unitMetadataStore = this.unitStores.metadataStore();
     const unitDefinitionStore = this.unitStores.definitionStore();
-    const unitSchemeStore = this.unitStores.schemeStore();
+    let unitSchemeStore = this.unitStores.schemeStore();
     if (unitMetadataStore && (unitDefinitionStore?.isChanged() || unitSchemeStore?.isChanged())) {
-      await this.reconcileItemVariables(unitMetadataStore, unitId);
+      // loads the scheme where no tab has yet; the save of the variables renames its codings, too (#2135)
+      unitSchemeStore = await this.reconcileItemVariables(unitMetadataStore, unitId);
     }
     if (unitMetadataStore && unitMetadataStore.isChanged()) {
       const changedData = unitMetadataStore.getChangedData();
@@ -290,6 +328,10 @@ export class WorkspaceService {
         )
       );
       if (saveOk) {
+        // The server renamed and dropped codings with the variables; the scheme here has to follow (#2135).
+        // First: a schemer open beside the editor sends the scheme again when the definition is applied,
+        // and has to get it renamed -- else it reports the old names, and the next save writes them back.
+        if (sentDefinition.variables) unitSchemeStore?.applyVariables(sentDefinition.variables);
         unitDefinitionStore.applyChanges(sentDefinition);
         this.lastChangedDefinition = new Date();
         this.lastChangedDefinitionUser = this.getDisplayUserName();
@@ -334,18 +376,24 @@ export class WorkspaceService {
    * and the stored metadata kept an alias renamed or a variable removed elsewhere (#1361). It is done
    * only with the whole list -- the scheme loaded, the list not empty, the stores still this unit's --
    * since an incomplete list would remove assignments to variables that do exist.
+   *
+   * Answers the scheme store it loaded for this, if there is one.
    */
-  private async reconcileItemVariables(unitMetadataStore: UnitMetadataStore, unitId: number): Promise<void> {
+  private async reconcileItemVariables(
+    unitMetadataStore: UnitMetadataStore,
+    unitId: number
+  ): Promise<UnitSchemeStore | undefined> {
     const unitSchemeStore = await lastValueFrom(
       this.unitStores.loadSchemeStore(this.selectedWorkspaceId, unitId),
       { defaultValue: undefined }
     );
     const variables = this.unitStores.variables();
     const metadata = unitMetadataStore.getData().metadata;
-    if (!unitSchemeStore || !variables.length || !metadata) return;
-    if (this.unitStores.metadataStore() !== unitMetadataStore) return;
+    if (!unitSchemeStore || !variables.length || !metadata) return unitSchemeStore;
+    if (this.unitStores.metadataStore() !== unitMetadataStore) return unitSchemeStore;
     const reconciled = reconcileItemVariables(metadata, variables);
     if (reconciled) unitMetadataStore.setMetadata(reconciled);
+    return unitSchemeStore;
   }
 
   /**

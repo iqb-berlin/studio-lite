@@ -77,6 +77,16 @@
       "import": "Export",
       "import-tooltip": "Unit-Dateien (*.xml, *.voud usw.) herunterladen"
     },
+    "export-problems": {
+      "title": "Probleme vor dem Export",
+      "intro-scheme": "Diese Aufgaben lassen sich mit ihrem Kodierschema nicht kodieren: Der Schemer weist es zurück, oder es ist nicht lesbar. Die übrigen Aufgaben sind davon nicht betroffen."
+    },
+    "variable-id-conflicts": {
+      "intro-xml": "Im XML dieser Aufgaben haben zwei Variablen dieselbe ID. Das Testcenter nimmt solche Aufgaben ab Version 19 nicht an. Die übrigen Aufgaben sind davon nicht betroffen.",
+      "intro-json": "Im JSON dieser Aufgaben haben zwei Variablen dieselbe ID. Programme, die Variablen über ihre ID zuordnen, können die beiden verwechseln. Die übrigen Aufgaben sind davon nicht betroffen.",
+      "export-anyway": "Trotzdem exportieren",
+      "check-failed": "Ob im Export zwei Variablen dieselbe ID haben oder der Schemer eine Kodierung zurückweist, konnte nicht geprüft werden."
+    },
     "dialog": {
       "title": "Aufgabe(n) als Datei herunterladen",
       "ok-button-label": "Herunterladen",
@@ -610,6 +620,80 @@
     "NOT_REACHED": "Noch keine Interaktion möglich",
     "DISPLAYED": "Wurde angezeigt",
     "VALUE_CHANGED": "Wert geändert"
+  },
+  "variable-id-conflicts": {
+    "stands-for": "Die ID „{{id}}“ steht für:",
+    "base": "das Element „{{name}}“ im Editor – die ID ist seine interne ID, die dort nicht angezeigt wird",
+    "derived": "die abgeleitete Variable „{{name}}“ in der Kodierung",
+    "manual-fix": "Manuell beheben",
+    "manual-fix-intro": "Eine der beiden Variablen braucht einen anderen Namen. Welche, entscheiden Sie – das Studio benennt nichts von selbst um.",
+    "keep-derived": {
+      "title": "Den Namen der abgeleiteten Variable behalten (meist der richtige Weg)",
+      "step-duplicate": "Im Editor das Element duplizieren und das Original löschen. Die Kopie erhält dabei eine neue interne ID.",
+      "step-take-over": "Der Kopie Position und ID des Originals geben.",
+      "step-coding": "In der Kodierung die Kopie so einstellen wie das Original, z. B. deaktivieren, wenn das Original deaktiviert war.",
+      "step-sources": "Abgeleitete Variablen, die aus dem Element gebildet werden, auf die Kopie umstellen.",
+      "step-items": "Items, die mit dem Element verknüpft waren, unter „Eigenschaften“ neu verknüpfen.",
+      "note": "Antworten, die zu dem Element schon erhoben wurden, sind unter seiner alten internen ID gespeichert."
+    },
+    "new-element-id": {
+      "title": "Einem der Elemente eine neue interne ID geben"
+    },
+    "rename-derived": {
+      "title": "Die abgeleitete Variable umbenennen",
+      "step-rename": "Der abgeleiteten Variable in der Kodierung einen neuen Namen geben.",
+      "step-items": "Items, die mit ihr verknüpft waren, unter „Eigenschaften“ neu verknüpfen.",
+      "note": "Damit ändert sich der Name, den die Kodierer:innen sehen. Was unter dem alten Namen schon kodiert wurde, behält ihn."
+    }
+  },
+  "unit-check": {
+    "title": "Technische Validierung",
+    "hint": "Geprüft wird der aktuelle Stand der Aufgabe, auch noch nicht gespeicherte Änderungen.",
+    "ok": "in Ordnung",
+    "not-loaded": "Konnte nicht geladen werden.",
+    "modules-not-loaded": "Die Liste der installierten Module konnte nicht geladen werden. Ob die zugewiesenen Module installiert sind, wurde nicht geprüft.",
+    "no-editor": "Kein Editor zugewiesen.",
+    "no-player": "Kein Player zugewiesen.",
+    "no-schemer": "Kein Schemer zugewiesen.",
+    "not-installed-editor": "Der zugewiesene Editor „{{module}}“ ist nicht installiert.",
+    "not-installed-player": "Der zugewiesene Player „{{module}}“ ist nicht installiert.",
+    "not-installed-schemer": "Der zugewiesene Schemer „{{module}}“ ist nicht installiert.",
+    "key-missing": "Die Aufgabe hat keinen Kurznamen.",
+    "key-too-short": "Der Kurzname „{{key}}“ ist kürzer als die vorgesehenen {{min}} Zeichen.",
+    "key-too-long": "Der Kurzname „{{key}}“ ist länger als {{max}} Zeichen und lässt sich so nicht speichern.",
+    "key-format": "Der Kurzname „{{key}}“ weicht vom vorgesehenen Format ab: ein Buchstabe am Anfang, danach nur Buchstaben (A–Z, a–z), Ziffern, _ und -.",
+    "key-taken": "Der Kurzname „{{key}}“ ist in diesem Arbeitsbereich schon vergeben.",
+    "no-definition": "Die Aufgabe hat noch keinen Inhalt.",
+    "definition-not-loaded": "Der Inhalt der Aufgabe konnte nicht geladen werden.",
+    "definition-type-not-checked": "Ob der Player das Format dieser Aufgabe lesen kann, wurde nicht geprüft: Die Liste der installierten Module konnte nicht geladen werden.",
+    "no-scheme": "Die Aufgabe hat noch kein Kodierschema.",
+    "nothing-to-code": "Nichts zu kodieren – die Aufgabe enthält nur Elemente ohne Antwort, etwa Texte und Bilder.",
+    "scheme-not-loaded": "Das Kodierschema konnte nicht geladen werden und wurde deshalb nicht geprüft.",
+    "scheme-unreadable": "Das Kodierschema lässt sich nicht prüfen: Es hat nicht das Format, das der Schemer erwartet. In der Kodierung prüfen, ob es sich öffnen lässt.",
+    "fix-elsewhere": "Beheben lässt sich das nur in den Reitern „Editor“ und „Kodierung“. Dieser Arbeitsbereich blendet beide aus.",
+    "fix-elsewhere-coding": "Beheben lässt sich das nur in den Reitern „Editor“ und „Kodierung“. Dieser Arbeitsbereich blendet den Reiter „Kodierung“ aus.",
+    "variable-id-conflicts": "Im Export haben zwei Variablen dieselbe ID. Das Testcenter nimmt eine solche Aufgabe ab Version 19 nicht an.",
+    "scheme-problem": {
+      "NAME_TWICE": "Zwei Variablen heißen „{{variable}}“. Eine von ihnen umbenennen: ein Element im Editor über seine ID, eine abgeleitete Variable in der Kodierung.",
+      "INVALID_SOURCE": "„{{variable}}“ hat eine ungültige Quelle: Ihre ID kommt doppelt vor, ihr Name stimmt mit der ID einer anderen Variable überein, oder sie ist als Variable ohne Wert eingestellt, obwohl sie einen Wert hat. In der Kodierung die Variable prüfen und ihr wenn nötig einen eindeutigen Namen geben.",
+      "SOURCE_MISSING": "Für „{{variable}}“ fehlt eine Quelle: Die Basisvariable gibt es in der Aufgabe nicht mehr, oder eine Quelle der Ableitung fehlt. In der Kodierung die Quellen neu wählen oder die Variable löschen.",
+      "MORE_THAN_ONE_SOURCE": "„{{variable}}“ kopiert einen Wert, hat aber mehr als eine Quelle. In der Kodierung nur eine Quelle stehen lassen.",
+      "ONLY_ONE_SOURCE": "„{{variable}}“ wird aus nur einer Quelle abgeleitet. In der Kodierung weitere Quellen hinzufügen oder den Wert stattdessen kopieren.",
+      "VALUE_COPY_NOT_FROM_BASE": "„{{variable}}“ kopiert den Wert einer abgeleiteten Variable. In der Kodierung eine Basisvariable als Quelle wählen.",
+      "RULE_PARAMETER_COUNT_MISMATCH": "In der Kodierung von „{{variable}}“ hat eine Regel zu viele oder zu wenige Parameter. Die Parameter der Regel ergänzen oder entfernen.",
+      "RULE_REGEX_INVALID": "In der Kodierung von „{{variable}}“ ist der reguläre Ausdruck einer Regel ungültig. Den Ausdruck in der Regel korrigieren.",
+      "RULE_PARAMETER_INVALID": "In der Kodierung von „{{variable}}“ passt eine Regel nicht zum Wert der Variable oder hat einen ungültigen Parameter. Die Regel korrigieren.",
+      "RULE_NUMERIC_RANGE_INVALID": "In der Kodierung von „{{variable}}“ hat eine Bereichsregel ungültige Grenzen: Eine Grenze fehlt oder ist keine Zahl, oder die untere liegt über der oberen. Die Grenzen in der Regel korrigieren.",
+      "RULESET_VALUE_ARRAY_POS_INVALID": "In der Kodierung von „{{variable}}“ nennt ein Regelsatz eine Position im Wert, die es nicht gibt. Die Position im Regelsatz korrigieren."
+    },
+    "element-problem": {
+      "NAME_TWICE": "Zwei Elemente heißen „{{variable}}“. Im Editor einem von ihnen eine andere ID geben.",
+      "INVALID_SOURCE": "Das Element „{{variable}}“ passt nicht zu seiner Kodierung: Seine ID kommt doppelt vor, oder es hat einen Wert, ist aber als Variable ohne Wert kodiert, oder umgekehrt. Im Editor dem Element eine eindeutige ID geben. Ist sie schon eindeutig, in der Kodierung die Variable prüfen."
+    },
+    "comments-present": "Kommentare vorhanden",
+    "comments-absent": "Keine Kommentare",
+    "notes-present": "Begleitmaterial vorhanden",
+    "notes-absent": "Kein Begleitmaterial"
   },
   "workspace": {
     "no-responses": "Es liegen keine Kodierungen vor",

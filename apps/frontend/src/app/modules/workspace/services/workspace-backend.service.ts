@@ -13,7 +13,7 @@ import {
   RequestReportDto,
   ReviewFullDto,
   ReviewInListDto,
-  UnitDefinitionDto,
+  UnitDefinitionDto, UnitDefinitionSummaryDto,
   UnitDownloadSettingsDto,
   UnitExportContentsDto,
   UnitInListDto,
@@ -268,6 +268,18 @@ export class WorkspaceBackendService {
     return of(null);
   }
 
+  /** Whether the unit has a definition, and its format -- without the definition (#2135). */
+  getUnitDefinitionSummary(workspaceId: number, unitId: number): Observable<UnitDefinitionSummaryDto | null> {
+    if (workspaceId > 0 && unitId > 0) {
+      return this.http
+        .get<UnitDefinitionSummaryDto>(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/definition-summary`)
+        .pipe(
+          catchError(() => of(null))
+        );
+    }
+    return of(null);
+  }
+
   getUnitScheme(workspaceId: number, unitId: number): Observable<UnitSchemeDto | null> {
     if (workspaceId > 0 && unitId > 0) {
       return this.http
@@ -452,6 +464,19 @@ export class WorkspaceBackendService {
       .get<UnitRichNotesDto>(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/rich-notes`)
       .pipe(
         catchError(() => of(null))
+      );
+  }
+
+  /**
+   * Whether the unit has rich notes, counted by the server rather than read: they may embed images.
+   * undefined when the server does not answer (#2135).
+   */
+  hasUnitRichNotes(workspaceId: number, unitId: number): Observable<boolean | undefined> {
+    return this.http
+      .get<number>(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/rich-notes/count`)
+      .pipe(
+        map(count => count > 0),
+        catchError(() => of(undefined))
       );
   }
 

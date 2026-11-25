@@ -23,6 +23,9 @@ export { ProfilesRegistryDto } from './lib/dtos/setting/profiles-registry.dto';
 export { EmailTemplateDto } from './lib/dtos/setting/email-template.dto';
 export { UnitDownloadSettingsDto, UnitDownloadBookletSettingsDto } from './lib/dtos/unit/unit-download-settings.dto';
 export { UnitExportContentsDto } from './lib/dtos/unit/unit-export-contents.dto';
+export { VariableIdConflictDto } from './lib/dtos/unit/variable-id-conflict.dto';
+export { SchemeProblemDto } from './lib/dtos/unit/scheme-problem.dto';
+export { VariableIdConflictVariableDto } from './lib/dtos/unit/variable-id-conflict-variable.dto';
 export { RequestReportDto } from './lib/dtos/request-report.dto';
 export { UnitSchemeDto } from './lib/dtos/unit/unit-scheme.dto';
 export { AppLogoDto } from './lib/dtos/setting/app-logo.dto';
@@ -31,6 +34,7 @@ export { UpdateResourcePackageDto } from './lib/dtos/resource-package/update-res
 export { ConfigDto } from './lib/dtos/setting/config.dto';
 export { VeronaModuleFileDto } from './lib/dtos/verona-module/verona-module-file.dto';
 export { UnitDefinitionDto } from './lib/dtos/unit/unit-definition.dto';
+export { UnitDefinitionSummaryDto } from './lib/dtos/unit/unit-definition-summary.dto';
 export { UnitDependencyDto } from './lib/dtos/unit/unit-dependency.dto';
 export { UnitPropertiesDto } from './lib/dtos/unit/unit-properties.dto';
 export { WorkspaceSettingsDto } from './lib/dtos/workspace/workspace-settings.dto';

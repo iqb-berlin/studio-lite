@@ -1,5 +1,7 @@
 import { UnitMetadataValues, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
-import { EventEmitter, Signal, signal } from '@angular/core';
+import {
+  EventEmitter, Signal, signal, WritableSignal
+} from '@angular/core';
 import { dropSavedChanges } from '../utils/saved-changes.utils';
 
 const TEXT_FIELDS = [
@@ -41,6 +43,12 @@ export class UnitMetadataStore {
   dataChange: EventEmitter<void> = new EventEmitter<void>();
   private readonly changedState = signal(false);
   readonly changed: Signal<boolean> = this.changedState.asReadonly();
+  private readonly dataState: WritableSignal<UnitPropertiesDto>;
+  /**
+   * What {@link getData} answers, as a signal for whoever derives from it -- the unit check reads
+   * the modules from it, saved or not (#2135).
+   */
+  readonly data: Signal<UnitPropertiesDto>;
   private originalData: UnitPropertiesDto;
   private reported: Partial<UnitPropertiesDto> = {};
   // computed once per change: comparing the metadata runs over all of it
@@ -53,6 +61,8 @@ export class UnitMetadataStore {
   constructor(originalData: UnitPropertiesDto, readonly loaded = true) {
     this.originalData = originalData;
     this.changedData = { id: originalData.id };
+    this.dataState = signal(this.getData());
+    this.data = this.dataState.asReadonly();
   }
 
   setPlayer(newPlayer: string): void {
@@ -175,6 +185,7 @@ export class UnitMetadataStore {
   private notifyChange(measureMetadata = true): void {
     this.changedData = this.computeChangedData(measureMetadata);
     this.changedState.set(this.isChanged());
+    this.dataState.set(this.getData());
     this.dataChange.emit();
   }
 }

@@ -664,6 +664,7 @@ describe('Unit API tests', () => {
       { method: 'GET', route: unit => `units/${unit}/properties` },
       { method: 'GET', route: unit => `units/${unit}/metadata` },
       { method: 'GET', route: unit => `units/${unit}/definition` },
+      { method: 'GET', route: unit => `units/${unit}/definition-summary` },
       { method: 'GET', route: unit => `units/${unit}/scheme` },
       { method: 'PATCH', route: unit => `units/${unit}/properties`, body: () => ({}) },
       { method: 'PATCH', route: unit => `units/${unit}/definition`, body: () => ({}) },
@@ -688,6 +689,7 @@ describe('Unit API tests', () => {
         action: 'return'
       },
       { method: 'GET', route: unit => `units/${unit}/rich-notes` },
+      { method: 'GET', route: unit => `units/${unit}/rich-notes/count` },
       { method: 'POST', route: unit => `units/${unit}/rich-notes`, body: unit => ({ unitId: Number(unit) }) },
       { method: 'PATCH', route: unit => `units/${unit}/rich-notes/1`, body: () => ({}) },
       { method: 'PATCH', route: unit => `units/${unit}/rich-notes/1/items`, body: () => ({ itemReferences: [] }) },
@@ -726,6 +728,54 @@ describe('Unit API tests', () => {
         Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
+      });
+    });
+  });
+
+  // the technical validation asks whether there are notes, without the notes, which may embed images (#2135)
+  describe('GET /api/workspaces/{workspace_id}/units/{id}/rich-notes/count', () => {
+    const unit: UnitData = { shortname: 'D2135N', name: 'Notizen zählen', group: 'Group1' };
+    const token = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+    const ws = () => Cypress.expose(ws1.id);
+    let unitId = '';
+    const countNotes = () => cy.requestWorkspaceAPI('GET', `${ws()}/units/${unitId}/rich-notes/count`, token());
+
+    before(() => {
+      cy.createUnitAPI(ws(), unit, token()).then(resp => {
+        unitId = `${resp.body}`;
+      });
+    });
+
+    after(() => {
+      cy.deleteUnitsAPI([unitId], ws(), token());
+    });
+
+    it('200 positive test: should count the notes of a unit, none and then one', () => {
+      countNotes().then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(Number(resp.body)).to.equal(0);
+      });
+      cy.then(() => cy.requestWorkspaceAPI(
+        'POST',
+        `${ws()}/units/${unitId}/rich-notes`,
+        token(),
+        {
+          unitId: Number(unitId), tagId: 'tag-2135', content: 'Notiz', itemReferences: []
+        }
+      ).its('status').should('equal', 201));
+      countNotes().then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(Number(resp.body)).to.equal(1);
+      });
+    });
+
+    it('403 negative test: should not tell a user without access to the workspace whether there are notes', () => {
+      cy.requestWorkspaceAPI(
+        'GET',
+        `${ws()}/units/${unitId}/rich-notes/count`,
+        Cypress.expose(`token_${user3.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(403);
       });
     });
   });
@@ -1620,6 +1670,43 @@ describe('Unit API tests', () => {
         Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
+      });
+    });
+  });
+
+  // the unit check under the properties reads this instead of the definition, which embeds the
+  // unit's media (#2135)
+  describe('45a. GET /api/workspaces/{workspace_id}/units/{id}/definition-summary', () => {
+    it('200 positive test: should say that a unit has a definition, without handing it out', () => {
+      cy.getUnitDefinitionSummaryAPI(
+        Cypress.expose(unit4.shortname),
+        Cypress.expose(ws1.id),
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(resp.body.hasDefinition).to.equal(true);
+        expect(resp.body).not.to.have.property('definition');
+      });
+    });
+
+    it('200 positive test: should say that a unit has no definition', () => {
+      cy.getUnitDefinitionSummaryAPI(
+        Cypress.expose(unit3.shortname),
+        Cypress.expose(ws1.id),
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(resp.body).to.deep.equal({ hasDefinition: false });
+      });
+    });
+
+    it('403 negative test: should deny the summary to a user without sufficient privileges', () => {
+      cy.getUnitDefinitionSummaryAPI(
+        Cypress.expose(unit4.shortname),
+        Cypress.expose(ws1.id),
+        Cypress.expose(`token_${user3.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(403);
       });
     });
   });

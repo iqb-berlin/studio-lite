@@ -1,0 +1,12 @@
+<ul class="conflicts">
+  @for (conflict of lines(); track conflict.id) {
+    <li data-cy="variable-id-conflict">
+      {{ conflict.heading.key | translate: conflict.heading.params }}
+      <ul class="variables">
+        @for (variable of conflict.variables; track $index) {
+          <li data-cy="variable-id-conflict-variable">{{ variable.key | translate: variable.params }}</li>
+        }
+      </ul>
+    </li>
+  }
+</ul>

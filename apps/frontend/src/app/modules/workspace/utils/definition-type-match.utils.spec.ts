@@ -1,4 +1,4 @@
-import { matchDefinitionType } from './definition-type-match.utils';
+import { matchDefinitionType, playerRejectsDefinitionType } from './definition-type-match.utils';
 
 describe('matchDefinitionType', () => {
   const aspectModel = 'aspect-unit-definition@>=4.0 <=4.12';
@@ -89,5 +89,20 @@ describe('matchDefinitionType', () => {
     it('should be unknown for an unreadable range even when the names differ', () => {
       expect(matchDefinitionType('aspect-unit-definition@4.12.0', 'aspect@model-3.0.0')).toBe('unknown');
     });
+  });
+});
+
+describe('playerRejectsDefinitionType', () => {
+  const player = { metadata: { model: 'aspect-unit-definition@>=4.0 <=4.12' } };
+
+  it('is true only where the player declares a range that excludes the format', () => {
+    expect(playerRejectsDefinitionType('aspect-unit-definition@5.0.0', player)).toBe(true);
+    expect(playerRejectsDefinitionType('aspect-unit-definition@4.10.0', player)).toBe(false);
+  });
+
+  it('is false where either side says nothing, or there is no player', () => {
+    expect(playerRejectsDefinitionType(undefined, player)).toBe(false);
+    expect(playerRejectsDefinitionType('aspect-unit-definition@5.0.0', { metadata: {} })).toBe(false);
+    expect(playerRejectsDefinitionType('aspect-unit-definition@5.0.0', undefined)).toBe(false);
   });
 });

@@ -84,12 +84,18 @@ describe('WorkspaceUnitCommentController', () => {
   // The access guards ask about the workspace in the path alone; the unit has to be held to it
   // before anything else is asked about the unit.
   it.each([
-    'findOnesComments', 'findLastSeenTimestamp', 'patchOnesUnitUserLastSeen', 'createComment',
+    'findOnesComments', 'countComments', 'findLastSeenTimestamp', 'patchOnesUnitUserLastSeen', 'createComment',
     'patchCommentBody', 'patchCommentItems', 'removeComment',
     'patchCommentVisibility', 'toggleVote', 'getCommentVoters'
   ] as const)('should hold the unit of %s to the workspace in its path', method => {
     expect(Reflect.getMetadata('__guards__', WorkspaceUnitCommentController.prototype[method]).slice(0, 3))
       .toEqual([JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard]);
+  });
+
+  // whoever may not read the comments may not learn whether there are any (#2135)
+  it('should guard the count of the comments as their list', () => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceUnitCommentController.prototype.countComments))
+      .toEqual(Reflect.getMetadata('__guards__', WorkspaceUnitCommentController.prototype.findOnesComments));
   });
 
   // Only DELETE held the comment to the unit in its path (#1697), and only for a numeric unit (#1696).

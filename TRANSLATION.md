@@ -50,6 +50,7 @@ and map to one English term.
 | Definition | definition | `unit-definition`, Verona "unit definition" | |
 | Eigenschaften | properties | route `properties` | |
 | Vorschau | preview | route `preview` | |
+| Technische Validierung | technical validation | `unit-check` | The card under Eigenschaften (#2135). |
 | Status (of a unit) | status | `state` | Users read "status"; "state" stays in code. |
 | Paket | resource package | `resource-package` | The German UI says just "Paket". |
 | Paketname | package name | `packageName` | The name units give for a package; several packages may stand in for one (#1358). |

@@ -325,6 +325,20 @@ describe('WorkspaceBackendService', () => {
       httpMock.expectNone(() => true);
     });
   });
+
+  // a failed count is not taken for no notes (#2135)
+  it('tells from the count whether the unit has rich notes, or that it is not known', () => {
+    const answers: (boolean | undefined)[] = [];
+    service.hasUnitRichNotes(1, 2).subscribe(answer => answers.push(answer));
+    httpMock.expectOne(`${serverUrl}workspaces/1/units/2/rich-notes/count`).flush(3);
+    service.hasUnitRichNotes(1, 2).subscribe(answer => answers.push(answer));
+    httpMock.expectOne(`${serverUrl}workspaces/1/units/2/rich-notes/count`).flush(0);
+    service.hasUnitRichNotes(1, 2).subscribe(answer => answers.push(answer));
+    httpMock.expectOne(`${serverUrl}workspaces/1/units/2/rich-notes/count`)
+      .flush(null, { status: 500, statusText: 'Server Error' });
+
+    expect(answers).toEqual([true, false, undefined]);
+  });
   it('sends training requirement and selection to the direct codebook endpoint', () => {
     service.getCodingBook(1, '', {
       exportFormat: 'json',

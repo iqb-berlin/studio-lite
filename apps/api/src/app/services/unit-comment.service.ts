@@ -103,6 +103,11 @@ export class UnitCommentService {
           .createCommentItemConnection(unitId, itemUuid, commentId)));
   }
 
+  /** How many comments the unit has, without reading them: they may embed images (#2135). */
+  async countComments(unitId: number): Promise<number> {
+    return this.unitCommentsRepository.count({ where: { unitId } });
+  }
+
   /** Which of the given units have at least one comment. */
   async findUnitIdsWithComments(unitIds: number[]): Promise<Set<number>> {
     if (!unitIds.length) return new Set();

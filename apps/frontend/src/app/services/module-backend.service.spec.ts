@@ -65,5 +65,16 @@ describe('ModuleBackendService', () => {
       expect(req.request.method).toBe('GET');
       req.flush([]);
     });
+
+    // an empty list would pass for an installation without modules (#2135)
+    it('should answer null, not an empty list, when the list could not be loaded', done => {
+      service.getModuleList('PLAYER').subscribe(modules => {
+        expect(modules).toBeNull();
+        done();
+      });
+
+      httpMock.expectOne(`${baseUrl}verona-modules?type=PLAYER`)
+        .flush('', { status: 500, statusText: 'Server Error' });
+    });
   });
 });

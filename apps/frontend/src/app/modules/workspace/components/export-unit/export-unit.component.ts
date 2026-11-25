@@ -1,7 +1,10 @@
-import { Component, Inject } from '@angular/core';
-import { BookletConfigDto, UnitDownloadSettingsDto } from '@studio-lite-lib/api-dto';
 import {
-  MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
+  Component, Inject, OnDestroy, signal
+} from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
+import { BookletConfigDto, UnitDownloadSettingsDto, UnitExportContentsDto } from '@studio-lite-lib/api-dto';
+import {
+  MAT_DIALOG_DATA, MatDialog, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
 } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
@@ -21,6 +24,8 @@ import { ExportUnitFileConfigComponent } from '../export-unit-file-config/export
 import { mapBookletConfigToModernKeys, normalizeLegacyBookletConfig } from '../../utils/booklet-config-export.utils';
 import { HasTakersPipe } from '../../pipes/has-takers.pipe';
 import { ExportFileSelection } from '../../utils/export-file-options.utils';
+import { ExportProblemsComponent, UnitExportProblems } from '../export-problems/export-problems.component';
+import { schemeProblemFinding } from '../../utils/scheme-problems.utils';
 
 @Component({
   templateUrl: './export-unit.component.html',
@@ -35,7 +40,7 @@ import { ExportFileSelection } from '../../utils/export-file-options.utils';
     HasTakersPipe
   ]
 })
-export class ExportUnitComponent {
+export class ExportUnitComponent implements OnDestroy {
   unitExportSettings: UnitDownloadSettingsDto = {
     unitIdList: [],
     exportFormat: 'xml',
@@ -57,9 +62,18 @@ export class ExportUnitComponent {
   // The download button locks while the booklet id is invalid, so the reason shows while typing, not only on blur.
   readonly showErrorWhileTyping = new ShowOnDirtyErrorStateMatcher();
 
+  // undefined until the file config has the export contents; the download waits for them (#2119).
+  // null when they could not be read: the export stays possible, with a note that nothing was checked.
+  private readonly unitsWithExportProblemsState = signal<UnitExportContentsDto[] | null | undefined>(undefined);
+  readonly unitsWithExportProblems = this.unitsWithExportProblemsState.asReadonly();
+  private readonly problemsDialogOpen = signal(false);
+  private ngUnsubscribe = new Subject<void>();
+
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { units: number[], bookletConfigSettings: BookletConfigDto },
-    public workspaceService: WorkspaceService
+    public workspaceService: WorkspaceService,
+    private dialogRef: MatDialogRef<ExportUnitComponent>,
+    private dialog: MatDialog
   ) {
     if (this.data && this.data.bookletConfigSettings) {
       this.bookletConfigSettings = normalizeLegacyBookletConfig(data.bookletConfigSettings);
@@ -77,5 +91,56 @@ export class ExportUnitComponent {
   // binding that was already checked.
   setFileSelection(selection: ExportFileSelection): void {
     Object.assign(this.unitExportSettings, selection);
+  }
+
+  setUnitsWithExportProblems(units: UnitExportContentsDto[] | null): void {
+    this.unitsWithExportProblemsState.set(units);
+  }
+
+  // The chosen units whose export would go wrong are named before it runs, with how to fix them.
+  // - Both formats write an id twice where a derived alias equals an element's internal id: the
+  //   Testcenter (from version 19) rejects such a unit XML, and a reader of the JSON that looks
+  //   variables up by id mixes the two up (#2119).
+  // - A coding the schemer rejects makes coding with the exported scheme fail (#2135) -- only when the
+  //   scheme is exported. The ids are written either way: both formats carry the derived variables.
+  // Exporting anyway stays possible: the other units are fine.
+  download(): void {
+    if (this.problemsDialogOpen()) return;
+    const schemeExported = this.unitExportSettings.addCodingScheme !== false;
+    const unitsInList = Object.values(this.workspaceService.unitList).flat();
+    // the file config passes on only the units with a problem
+    const units: UnitExportProblems[] = (this.unitsWithExportProblems() ?? [])
+      .filter(contents => this.unitExportSettings.unitIdList.includes(contents.unitId))
+      .map(contents => {
+        const unit = unitsInList.find(unitInList => unitInList.id === contents.unitId);
+        return {
+          id: contents.unitId,
+          key: unit?.key ?? String(contents.unitId),
+          name: unit?.name,
+          conflicts: contents.variableIdConflicts,
+          schemeProblems: schemeExported ? contents.schemeProblems.map(schemeProblemFinding) : []
+        };
+      })
+      .filter(unit => unit.conflicts.length || unit.schemeProblems.length);
+    if (!units.length) {
+      this.dialogRef.close(this.unitExportSettings);
+      return;
+    }
+    this.problemsDialogOpen.set(true);
+    this.dialog.open(ExportProblemsComponent, {
+      width: '800px',
+      data: { units, exportFormat: this.unitExportSettings.exportFormat }
+    })
+      .afterClosed()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(result => {
+        this.problemsDialogOpen.set(false);
+        if (result === true) this.dialogRef.close(this.unitExportSettings);
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }

@@ -10,6 +10,8 @@ const unit = (unitId: number, contents: Partial<UnitExportContentsDto> = {}): Un
   codingScheme: false,
   comments: false,
   richNotes: false,
+  variableIdConflicts: [],
+  schemeProblems: [],
   ...contents
 });
 

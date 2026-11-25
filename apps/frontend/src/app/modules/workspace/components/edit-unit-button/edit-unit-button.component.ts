@@ -110,7 +110,7 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
         routingOk = true;
       }
       if (routingOk) {
-        Object.assign(this.workspaceService.workspaceSettings, result);
+        this.workspaceService.updateWorkspaceSettings(result);
 
         this.appBackendService.setWorkspaceSettings(
           this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
