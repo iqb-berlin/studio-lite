@@ -92,11 +92,12 @@ describe('ModuleService', () => {
     // an installation without modules has empty lists, a failed request none (#2135)
     it('should tell lists that loaded empty from a request that failed', async () => {
       mockBackendService.getModuleList.mockImplementation((type?: string) => of(type === 'PLAYER' ? null : []));
-      await service.loadList();
+      // the caller is told, to say that what it shows is out of date (#2214)
+      expect(await service.loadList()).toBe(false);
       expect(service.listLoaded()).toBe(false);
 
       mockBackendService.getModuleList.mockReturnValue(of([]));
-      await service.loadList();
+      expect(await service.loadList()).toBe(true);
       expect(service.listLoaded()).toBe(true);
       // what is computed from the maps is told of each load, a failed one as well
       expect(service.listVersion()).toBe(2);

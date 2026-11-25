@@ -559,6 +559,7 @@
     "delete-module": "Sie haben eine Datei ausgewählt. Soll die Datei gelöscht werden?",
     "delete-modules": "Sie haben {{count}} Dateien ausgewählt. Sollen die Dateien gelöscht werden?",
     "deleted": "{{count}} Verona Modul(e) gelöscht",
+    "list-not-loaded": "Die Liste der Verona-Module konnte nicht geladen werden; was sie zeigt, kann veraltet sein. Bitte die Seite neu laden.",
     "not-deleted": "Konnte Verona Modul(e) nicht löschen",
     "no-module-type": "Kein {{ module }} in diesem System verfügbar.",
     "not-defined-module-type": "{{ module }} ist nicht definiert.",

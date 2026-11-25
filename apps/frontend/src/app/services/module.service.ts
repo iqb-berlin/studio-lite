@@ -34,7 +34,8 @@ export class ModuleService {
 
   // Loads running side by side -- the workspace and the unit check both start one when a workspace
   // opens -- do no harm: a list that failed keeps the last one loaded, and listLoaded stays set.
-  async loadList(): Promise<void> {
+  /** Whether this load got all three lists; one that did not keeps the last one loaded (#2214). */
+  async loadList(): Promise<boolean> {
     const [editorModules, playerModules, schemerModules] = await Promise.all([
       lastValueFrom(this.backendService.getModuleList('EDITOR')),
       lastValueFrom(this.backendService.getModuleList('PLAYER')),
@@ -47,6 +48,7 @@ export class ModuleService {
     if (schemerModules) this.schemers = this.loaded('SCHEMER', schemerModules);
     this.listLoadedState.set(this.loadedLists.size === 3);
     this.listVersionState.update(version => version + 1);
+    return !!editorModules && !!playerModules && !!schemerModules;
   }
 
   private loaded(type: string, modules: VeronaModuleInListDto[]): { [key: string]: VeronaModuleClass } {

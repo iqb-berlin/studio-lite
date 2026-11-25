@@ -167,7 +167,8 @@ export abstract class VeronaModuleDirective implements AfterViewInit, OnDestroy 
     const metadataKey = unitMetadata[moduleType];
     const modules = this.getModulesByType(moduleType);
 
-    const loadList$ =
+    // only that the lists are loaded counts here, not whether all of them were
+    const loadList$: Observable<unknown> =
       Object.keys(modules).length === 0 ?
         from(this.moduleService.loadList()) :
         of(undefined);
