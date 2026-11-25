@@ -15,6 +15,7 @@ import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
 import { MatTab, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
+import { MatCheckbox } from '@angular/material/checkbox';
 import { DEFAULT_UI_LANGUAGE, LOCALIZED_CONFIG_TEXTS } from '@studio-lite/shared-code';
 
 import { ToTimePipe } from '../../pipes/to-time.pipe';
@@ -35,7 +36,7 @@ import {
   imports: [
     FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatDatepickerInput, MatDatepickerToggle,
     MatSuffix, MatDatepicker, MatSelect, MatOption, CdkTextareaAutosize, MatButton, TranslateModule, ToTimePipe,
-    MatTabGroup, MatTab, MatTabLabel
+    MatTabGroup, MatTab, MatTabLabel, MatCheckbox
   ]
 })
 
@@ -67,7 +68,8 @@ export class AppConfigComponent implements OnInit, OnDestroy {
     this.configForm = this.fb.group({
       texts: localizedTextsForm(this.fb, this.languages, LOCALIZED_CONFIG_TEXTS),
       globalWarningExpiredDay: this.fb.control(new Date()),
-      globalWarningExpiredHour: this.fb.control('')
+      globalWarningExpiredHour: this.fb.control(''),
+      snowfall: this.fb.control(false)
     });
     this.createExpiredHours();
   }
@@ -102,7 +104,8 @@ export class AppConfigComponent implements OnInit, OnDestroy {
           this.configForm.setValue({
             texts: localizedFormValue(this.appConfig, this.languages, LOCALIZED_CONFIG_TEXTS),
             globalWarningExpiredDay: this.appConfig.globalWarningExpiredDay,
-            globalWarningExpiredHour: this.appConfig.globalWarningExpiredHour
+            globalWarningExpiredHour: this.appConfig.globalWarningExpiredHour,
+            snowfall: this.appConfig.snowfall === true
           }, { emitEvent: false });
         }
       }
@@ -135,6 +138,7 @@ export class AppConfigComponent implements OnInit, OnDestroy {
       );
       this.appConfig.globalWarningExpiredDay = this.configForm.get('globalWarningExpiredDay')?.value;
       this.appConfig.globalWarningExpiredHour = this.configForm.get('globalWarningExpiredHour')?.value;
+      this.appConfig.snowfall = this.configForm.get('snowfall')?.value === true;
       this.backendService.setAppConfig(this.appConfig).subscribe(isOk => {
         this.save.finish();
         if (isOk) {

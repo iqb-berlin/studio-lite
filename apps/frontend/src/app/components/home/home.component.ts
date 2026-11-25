@@ -12,6 +12,7 @@ import { UserReviewsAreaComponent } from '../user-reviews-area/user-reviews-area
 import { UserWorkspacesAreaComponent } from '../user-workspaces-area/user-workspaces-area.component';
 import { LoginComponent } from '../login/login.component';
 import { AuthCheckFailedComponent } from '../auth-check-failed/auth-check-failed.component';
+import { SnowfallComponent } from '../snowfall/snowfall.component';
 
 /**
  * The start page: the login for whoever is not logged in, and for whoever is, the workspaces and
@@ -23,7 +24,8 @@ import { AuthCheckFailedComponent } from '../auth-check-failed/auth-check-failed
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
   imports: [
-    LoginComponent, AuthCheckFailedComponent, UserWorkspacesAreaComponent, UserReviewsAreaComponent, AppInfoComponent
+    LoginComponent, AuthCheckFailedComponent, UserWorkspacesAreaComponent, UserReviewsAreaComponent, AppInfoComponent,
+    SnowfallComponent
   ]
 })
 export class HomeComponent implements OnInit, OnDestroy {

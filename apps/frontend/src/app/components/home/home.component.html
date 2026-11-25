@@ -1,4 +1,7 @@
 <div class="home-body fx-row-center-start fx-gap-40 fx-wrap">
+  @if (appService.appConfig.snowfall) {
+    <studio-lite-snowfall></studio-lite-snowfall>
+  }
   @if (appService.authCheckFailed()) {
     <studio-lite-auth-check-failed
       class="mat-elevation-z8 box box-left">

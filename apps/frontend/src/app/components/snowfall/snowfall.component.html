@@ -1,0 +1,22 @@
+@if (!over()) {
+  <div class="snowfall" [class.fading]="fading()" aria-hidden="true" data-cy="home-snowfall">
+    @for (flake of flakes; track $index) {
+      <div class="flake"
+           [class.crystal]="flake.crystal"
+           [class.dot]="!flake.crystal"
+           [style.--flake-left]="flake.left"
+           [style.--flake-size]="flake.size"
+           [style.--flake-opacity]="flake.opacity"
+           [style.--flake-duration]="flake.duration"
+           [style.--flake-delay]="flake.delay"
+           [style.--flake-drift]="flake.drift"
+           [style.--flake-spin]="flake.spin">
+        @if (flake.crystal) {
+          <svg class="crystal-shape" viewBox="-11 -11 22 22">
+            <path class="crystal-arms" [attr.d]="crystalPath"></path>
+          </svg>
+        }
+      </div>
+    }
+  </div>
+}
