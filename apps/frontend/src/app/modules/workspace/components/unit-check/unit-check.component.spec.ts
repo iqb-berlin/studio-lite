@@ -146,6 +146,29 @@ describe('UnitCheckComponent', () => {
       .toBe('unit-check.notes-absent');
   }));
 
+  describe('an information unit', () => {
+    const textElement = (alias: string) => ({ id: 'text_x', alias, type: 'no-value' });
+
+    it('says there is nothing to code', fakeAsync(() => {
+      getUnitScheme.mockReturnValue(of({ scheme: '', schemeType: '', variables: [textElement('text_1')] }));
+      create();
+
+      expect(sectionOf('schemer')?.querySelector('[data-cy="unit-check-info"]')?.textContent)
+        .toBe('unit-check.nothing-to-code');
+    }));
+
+    // two elements of one internal id are written twice all the same: no information beside the warning
+    it('says nothing of it beside an id written twice', fakeAsync(() => {
+      getUnitScheme.mockReturnValue(of({
+        scheme: '', schemeType: '', variables: [textElement('text_1'), textElement('text_2')]
+      }));
+      create();
+
+      expect(sectionOf('schemer')?.querySelector('[data-cy="unit-check-info"]')).toBeNull();
+      expect(sectionOf('schemer')?.querySelector('[data-cy="unit-check-variable-id-conflicts"]')).toBeTruthy();
+    }));
+  });
+
   it('leaves out the comments and notes the workspace hides', fakeAsync(() => {
     hiddenRoutes = ['comments', 'notes'];
     create();

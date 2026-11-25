@@ -71,12 +71,14 @@ export class UnitSchemeStore {
 
   /**
    * Takes the scheme as the server stored it once the variables were saved, which renames and drops
-   * codings with them (#2135): kept as it was loaded, it named an element by its old name. A report of
-   * the scheme as it was is dropped -- measured against the new one, it would count as a change and be
-   * sent back with the old names. A scheme really edited stays a change, and is saved as reported.
+   * codings with them (#2135): kept as it was loaded, it named an element by its old name. What the
+   * schemer reported is renamed the same way: saved after the variables as it was reported, an edited
+   * scheme wrote the old names back, and a report of the scheme as it was counted as a change.
    */
   applyVariables(variables: readonly { id: string; alias?: string }[]) {
-    if (!this.isChanged()) this.reported = undefined;
+    if (this.reported) {
+      this.reported = { ...this.reported, scheme: schemeWithVariables(this.reported.scheme, variables) };
+    }
     this.originalData = {
       ...this.originalData,
       scheme: schemeWithVariables(this.originalData.scheme, variables)

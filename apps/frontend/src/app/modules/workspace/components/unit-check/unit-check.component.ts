@@ -147,10 +147,7 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
       // as the schemer is given them: an editor that never reported variables leaves them to the scheme
       variables: editorDefinition?.variables || schemeStore?.data().variables,
       scheme: schemeStore?.data(),
-      unsaved: {
-        variables: definitionStore?.variablesChanged() ?? false,
-        scheme: schemeStore?.changed() ?? false
-      },
+      unsaved: { variables: definitionStore?.variablesChanged() ?? false },
       ...presence,
       hiddenRoutes: this.workspaceService.hiddenRoutes()
     });

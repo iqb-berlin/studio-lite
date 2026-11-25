@@ -512,6 +512,35 @@ describe('WorkspaceService', () => {
       expect(backendService.setUnitScheme).not.toHaveBeenCalled();
     });
 
+    // A coding edited, then an element renamed, then one save: the scheme as the schemer reported it
+    // went to the server after the variables, and wrote the element's old name back (#2135).
+    it('should send an edited scheme with the codings renamed as the server renamed the stored one', async () => {
+      const schemeOf = (alias: string, label: string): string => JSON.stringify({
+        version: '3.0',
+        variableCodings: [{
+          id: 'text_b', alias, label, sourceType: 'BASE'
+        }]
+      });
+      const definitionStore = new UnitDefinitionStore(1, {
+        definition: 'd', variables: [{ id: 'text_b', alias: 'text_1' } as VariableInfo]
+      });
+      definitionStore.setData([{ id: 'text_b', alias: 'text_2' } as VariableInfo], 'd');
+      const schemeStore = new UnitSchemeStore(1, { scheme: schemeOf('text_1', ''), schemeType: 'type' });
+      schemeStore.setData(schemeOf('text_1', 'edited'), 'type');
+      unitStores.definitionStore.set(definitionStore);
+      unitStores.schemeStore.set(schemeStore);
+      backendService.setUnitDefinition.mockReturnValue(of(true));
+      backendService.setUnitScheme.mockReturnValue(of(true));
+
+      await service.saveUnitData();
+
+      expect(backendService.setUnitScheme).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ scheme: schemeOf('text_2', 'edited') })
+      );
+    });
+
     // a schemer beside the editor sends the scheme again when the definition is applied
     it('should rename the scheme before the definition is applied, for whoever follows the definition', async () => {
       const schemeOf = (alias: string): string => JSON.stringify({

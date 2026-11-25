@@ -34,7 +34,7 @@ const okInput = (): UnitCheckInput => ({
     scheme: scheme([{ id: 'text_1', sourceType: 'BASE', codes: [code] }]),
     schemeType: 'iqb-standard@3.0'
   },
-  unsaved: { variables: false, scheme: false },
+  unsaved: { variables: false },
   hasComments: false,
   hasRichNotes: true,
   hiddenRoutes: []
@@ -352,7 +352,7 @@ describe('checkUnit', () => {
     // the save renames the coding with the element (#2135)
     it('finds nothing wrong once one of two elements of the same name is renamed, before the save', () => {
       const input = renamedInput();
-      input.unsaved = { variables: true, scheme: false };
+      input.unsaved = { variables: true };
 
       expect(section(checkUnit(input), 'editor')).toEqual(expect.objectContaining({ status: 'ok', findings: [] }));
     });
@@ -361,19 +361,11 @@ describe('checkUnit', () => {
     it('finds nothing wrong once an element without value is deleted, before the save', () => {
       const input = nameTwiceInput();
       input.variables = [{ id: 'text_1749756922777_1', alias: 'text_1', type: 'no-value' } as VariableInfo];
-      input.unsaved = { variables: true, scheme: false };
+      input.unsaved = { variables: true };
       const sections = checkUnit(input);
 
       expect(section(sections, 'editor')).toEqual(expect.objectContaining({ status: 'ok', findings: [] }));
       expect(section(sections, 'schemer')).toEqual(expect.objectContaining({ status: 'ok', findings: [] }));
-    });
-
-    // the scheme the schemer reported is saved after the variables, as reported, old name and all
-    it('checks the coding as the schemer reported it when that is not saved either', () => {
-      const input = renamedInput();
-      input.unsaved = { variables: true, scheme: true };
-
-      expect(section(checkUnit(input), 'editor')?.findings).toEqual(nameTwice);
     });
 
     // as an import stores it: the definition before the scheme, which keeps its names until a save

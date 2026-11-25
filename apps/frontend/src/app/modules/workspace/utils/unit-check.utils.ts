@@ -32,10 +32,10 @@ export interface UnitCheckInput {
   variables: VariableInfo[] | undefined;
   scheme: UnitSchemeDto | undefined;
   /**
-   * What is not saved yet. The save of changed variables renames and drops codings with them, unless a
-   * changed scheme is saved after them as the schemer reported it.
+   * What is not saved yet. The save of changed variables renames and drops codings with them, in the
+   * stored scheme and in one the schemer reported (#2135).
    */
-  unsaved: { variables: boolean; scheme: boolean };
+  unsaved: { variables: boolean };
   /** undefined: not known (yet). */
   hasComments: boolean | undefined;
   hasRichNotes: boolean | undefined;
@@ -200,7 +200,7 @@ function checkScheme(input: UnitCheckInput, editorShown: boolean): CheckedScheme
   const problems = schemeProblemFindings(
     input.variables,
     // as the next save will store it: an element renamed or deleted in the editor is so in the coding
-    input.variables && input.unsaved.variables && !input.unsaved.scheme ?
+    input.variables && input.unsaved.variables ?
       schemeWithVariables(input.scheme.scheme, input.variables) :
       input.scheme.scheme,
     editorShown

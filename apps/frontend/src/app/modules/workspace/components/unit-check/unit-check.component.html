@@ -20,7 +20,8 @@
               }
             }
             <span class="section-title">{{ 'workspace.routes.' + section.tab | translate }}</span>
-            @if (section.info) {
+            <!-- information beside a warning would contradict it: nothing to code, but an id written twice -->
+            @if (section.info && section.status !== 'warning') {
               <span data-cy="unit-check-info">{{ section.info.key | translate }}</span>
             } @else if (section.status === 'ok') {
               <span data-cy="unit-check-ok">{{ 'unit-check.ok' | translate }}</span>
