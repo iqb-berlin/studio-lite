@@ -23,7 +23,11 @@ export function isUnitKeyTaken(
     .some(unit => unit.id !== unitId && unit.key.toUpperCase().trim() === normalised);
 }
 
-/** Each rule of the key form the unit's key breaks. */
+/**
+ * Each rule of the key form the unit's key breaks. A key too short or in another format is saved all
+ * the same, as units with such older keys are still worked on (#1842): a hint. One that is missing,
+ * taken or longer than the database column cannot be saved.
+ */
 export function checkUnitKey(
   key: string | undefined,
   unitId: number,
@@ -33,13 +37,17 @@ export function checkUnitKey(
   if (!key?.trim()) return [{ key: 'unit-check.key-missing' }];
   const params = { key };
   const findings: UnitCheckFinding[] = [];
-  if (key.length < UNIT_KEY_MIN_LENGTH || key.length > UNIT_KEY_MAX_LENGTH) {
+  if (key.length < UNIT_KEY_MIN_LENGTH) {
     findings.push({
-      key: 'unit-check.key-length',
-      params: { ...params, min: String(UNIT_KEY_MIN_LENGTH), max: String(UNIT_KEY_MAX_LENGTH) }
+      key: 'unit-check.key-too-short',
+      params: { ...params, min: String(UNIT_KEY_MIN_LENGTH) },
+      hint: true
     });
   }
-  if (!UNIT_KEY_REGEXP.test(key)) findings.push({ key: 'unit-check.key-format', params });
+  if (key.length > UNIT_KEY_MAX_LENGTH) {
+    findings.push({ key: 'unit-check.key-too-long', params: { ...params, max: String(UNIT_KEY_MAX_LENGTH) } });
+  }
+  if (!UNIT_KEY_REGEXP.test(key)) findings.push({ key: 'unit-check.key-format', params, hint: true });
   if (isUnitKeyTaken(key, unitId, unitList)) findings.push({ key: 'unit-check.key-taken', params });
   return findings;
 }

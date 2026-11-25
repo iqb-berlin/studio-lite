@@ -66,6 +66,8 @@ describe('checkUnit', () => {
 
     expect(sections.map(entry => entry.tab)).toEqual(['properties', 'editor', 'schemer', 'comments', 'notes']);
     expect(sections.every(entry => entry.ok)).toBe(true);
+    // comments and rich notes are information, not a pass
+    expect(sections.map(entry => entry.status)).toEqual(['ok', 'ok', 'ok', 'info', 'info']);
   });
 
   describe('properties', () => {
@@ -108,6 +110,31 @@ describe('checkUnit', () => {
       input.modules = { ...input.modules, editor: 'iqb-editor-aspect@2.7' };
 
       expect(section(checkUnit(input), 'properties')?.findings).toEqual([]);
+    });
+
+    // without its editor a unit cannot be edited, but preview, export and coding work all the same
+    it('names a missing or uninstalled editor as a hint, and the properties as in order', () => {
+      const input = okInput();
+      input.modules = { ...input.modules, editor: '' };
+      expect(section(checkUnit(input), 'properties')).toEqual(expect.objectContaining({
+        findings: [{ key: 'unit-check.no-editor', hint: true }], ok: true, status: 'info'
+      }));
+
+      input.modules = { ...input.modules, editor: 'iqb-editor-other@1.0' };
+      expect(section(checkUnit(input), 'properties')?.findings).toEqual([{
+        key: 'unit-check.not-installed-editor', params: { module: 'iqb-editor-other@1.0' }, hint: true
+      }]);
+    });
+
+    it('shows a missing player as a problem, hints beside it or not', () => {
+      const input = okInput();
+      input.modules = { editor: '', player: '', schemer: input.modules?.schemer };
+
+      expect(section(checkUnit(input), 'properties')).toEqual(expect.objectContaining({
+        findings: [{ key: 'unit-check.no-editor', hint: true }, { key: 'unit-check.no-player' }],
+        ok: false,
+        status: 'warning'
+      }));
     });
   });
 
@@ -180,6 +207,78 @@ describe('checkUnit', () => {
       const schemer = section(checkUnit(input), 'schemer');
       expect(schemer?.findings).toEqual([{ key: 'unit-check.no-scheme' }]);
       expect(schemer?.variableIdConflicts.map(conflict => conflict.id)).toEqual(['text_x']);
+    });
+
+    describe('a unit with nothing to code', () => {
+      // an information unit: texts and images only, which aspect reports as elements without value
+      const infoInput = (): UnitCheckInput => {
+        const input = okInput();
+        input.modules = { ...input.modules, schemer: '' };
+        input.scheme = { scheme: '', schemeType: '' };
+        // in the spelling of VariableInfo 1.x and of 2.0
+        input.variables = [
+          { id: 'text_1', alias: 'text_1', type: 'no-value' } as VariableInfo,
+          { id: 'image_1', alias: 'image_1', type: 'NO_VALUE' } as unknown as VariableInfo
+        ];
+        return input;
+      };
+
+      it('needs no scheme and no schemer, and says there is nothing to code', () => {
+        const sections = checkUnit(infoInput());
+
+        expect(section(sections, 'schemer')).toEqual(expect.objectContaining({
+          findings: [], info: { key: 'unit-check.nothing-to-code' }, ok: true, status: 'info'
+        }));
+        expect(section(sections, 'properties')?.findings).toEqual([]);
+      });
+
+      // the export writes the elements all the same
+      it('still lists two elements of one internal id', () => {
+        const input = infoInput();
+        input.variables = [
+          { id: 'text_x', alias: 'text_1', type: 'no-value' } as VariableInfo,
+          { id: 'text_x', alias: 'text_2', type: 'no-value' } as VariableInfo
+        ];
+
+        const schemer = section(checkUnit(input), 'schemer');
+        expect(schemer).toEqual(expect.objectContaining({ ok: false, status: 'warning' }));
+        expect(schemer?.variableIdConflicts.map(conflict => conflict.id)).toEqual(['text_x']);
+      });
+
+      it('is not one where an element has a value', () => {
+        const input = infoInput();
+        input.variables = [
+          ...input.variables ?? [],
+          { id: 'text_field_1', alias: 'name', type: 'string' } as VariableInfo
+        ];
+        const sections = checkUnit(input);
+
+        expect(section(sections, 'schemer')?.findings).toEqual([{ key: 'unit-check.no-scheme' }]);
+        expect(section(sections, 'properties')?.findings).toEqual([{ key: 'unit-check.no-schemer' }]);
+      });
+
+      // what is not known is not nothing: without the variables, or without the scheme, which may exist
+      it('is not one while the variables or the scheme are not known', () => {
+        const withoutVariables = infoInput();
+        withoutVariables.variables = undefined;
+        expect(section(checkUnit(withoutVariables), 'schemer')?.findings).toEqual([{ key: 'unit-check.no-scheme' }]);
+
+        const withoutScheme = infoInput();
+        withoutScheme.scheme = undefined;
+        expect(section(checkUnit(withoutScheme), 'properties')?.findings).toEqual([{ key: 'unit-check.no-schemer' }]);
+      });
+
+      // the scheme of an information unit is checked as any other: it may derive variables
+      it('is not one once it has a scheme', () => {
+        const input = infoInput();
+        input.scheme = {
+          scheme: scheme([{ id: 'text_1', alias: 'text_1', sourceType: 'BASE_NO_VALUE' }]),
+          schemeType: 'iqb-standard@3.0'
+        };
+
+        expect(section(checkUnit(input), 'properties')?.findings).toEqual([{ key: 'unit-check.no-schemer' }]);
+        expect(section(checkUnit(input), 'schemer')?.info).toBeUndefined();
+      });
     });
 
     it('lists the ids the export would write twice, from the variables as they are edited (#2119)', () => {
@@ -388,7 +487,16 @@ describe('checkUnit', () => {
 });
 
 describe('withKeyFindings', () => {
-  const keyFinding = { key: 'unit-check.key-format', params: { key: '00_INVALID_NAME' } };
+  const keyFinding = { key: 'unit-check.key-taken', params: { key: 'UNIT_01' } };
+
+  // a key in an older format is saved all the same (#1842)
+  it('leaves the properties in order with a hint about the key, and shows it', () => {
+    const hint = { key: 'unit-check.key-format', params: { key: '00_INVALID_NAME' }, hint: true };
+
+    expect(section(withKeyFindings(checkUnit(okInput()), [hint]), 'properties')).toEqual(expect.objectContaining({
+      findings: [hint], ok: true, status: 'info'
+    }));
+  });
 
   it('puts what is wrong with the key first under the properties, which are then not in order', () => {
     const input = okInput();

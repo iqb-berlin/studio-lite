@@ -8,24 +8,30 @@
       @for (section of checked; track section.tab) {
         <div class="section" [attr.data-cy]="'unit-check-' + section.tab">
           <div class="section-header">
-            @if (section.info) {
-              <mat-icon class="status-icon info-icon">info</mat-icon>
-            } @else if (section.ok) {
-              <mat-icon class="status-icon ok-icon">check_circle</mat-icon>
-            } @else {
-              <mat-icon class="status-icon warning-icon">warning</mat-icon>
+            @switch (section.status) {
+              @case ('warning') {
+                <mat-icon class="status-icon warning-icon">warning</mat-icon>
+              }
+              @case ('info') {
+                <mat-icon class="status-icon info-icon">info</mat-icon>
+              }
+              @default {
+                <mat-icon class="status-icon ok-icon">check_circle</mat-icon>
+              }
             }
             <span class="section-title">{{ 'workspace.routes.' + section.tab | translate }}</span>
             @if (section.info) {
               <span data-cy="unit-check-info">{{ section.info.key | translate }}</span>
-            } @else if (section.ok) {
+            } @else if (section.status === 'ok') {
               <span data-cy="unit-check-ok">{{ 'unit-check.ok' | translate }}</span>
             }
           </div>
           @if (section.findings.length) {
             <ul class="findings">
               @for (finding of section.findings; track $index) {
-                <li data-cy="unit-check-finding">{{ finding.key | translate: finding.params }}</li>
+                <!-- a hint fails nothing: set apart from the problems beside it -->
+                <li data-cy="unit-check-finding"
+                    [class.hint-finding]="finding.hint">{{ finding.key | translate: finding.params }}</li>
               }
             </ul>
           }

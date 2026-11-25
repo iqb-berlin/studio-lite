@@ -20,18 +20,26 @@ describe('checkUnitKey', () => {
     expect(findingKeys('   ')).toEqual(['unit-check.key-missing']);
   });
 
-  it('names a key too short or too long, with the limits', () => {
+  // a short key is saved all the same, as older units have them (#1842): a hint
+  it('names a key too short as a hint, with the limit', () => {
     expect(checkUnitKey('AB', 9, unitList)).toEqual([
-      { key: 'unit-check.key-length', params: { key: 'AB', min: '3', max: '20' } }
+      { key: 'unit-check.key-too-short', params: { key: 'AB', min: '3' }, hint: true }
     ]);
-    expect(findingKeys('A'.repeat(21))).toEqual(['unit-check.key-length']);
+    expect(findingKeys('ABC')).toEqual([]);
+  });
+
+  // the database column holds 20 characters: a longer key cannot be saved
+  it('names a key too long as a problem, with the limit', () => {
+    expect(checkUnitKey('A'.repeat(21), 9, unitList)).toEqual([
+      { key: 'unit-check.key-too-long', params: { key: 'A'.repeat(21), max: '20' } }
+    ]);
     expect(findingKeys('A'.repeat(20))).toEqual([]);
   });
 
-  // a key the form does not let through can still come with an import (#2135)
-  it('names a key that does not start with a letter', () => {
+  // a key the form marks is saved all the same, and older units have such keys (#1842): a hint
+  it('names a key that does not start with a letter as a hint', () => {
     expect(checkUnitKey('00_INVALID_NAME', 9, unitList)).toEqual([
-      { key: 'unit-check.key-format', params: { key: '00_INVALID_NAME' } }
+      { key: 'unit-check.key-format', params: { key: '00_INVALID_NAME' }, hint: true }
     ]);
   });
 
@@ -41,11 +49,12 @@ describe('checkUnitKey', () => {
   });
 
   it('names every rule a key breaks', () => {
-    expect(findingKeys('0')).toEqual(['unit-check.key-length', 'unit-check.key-format']);
+    expect(findingKeys('0')).toEqual(['unit-check.key-too-short', 'unit-check.key-format']);
   });
 
+  // the save is refused: a problem, not a hint
   it('names a key another unit of the workspace has', () => {
-    expect(findingKeys('unit_01')).toEqual(['unit-check.key-taken']);
+    expect(checkUnitKey('unit_01', 9, unitList)).toEqual([{ key: 'unit-check.key-taken', params: { key: 'unit_01' } }]);
   });
 });
 
