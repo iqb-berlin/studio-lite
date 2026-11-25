@@ -12,12 +12,6 @@
   left: 0;
   overflow: hidden;
   pointer-events: none;
-  // FADE_MS in the component
-  transition: opacity 3s ease-out;
-}
-
-.snowfall.fading {
-  opacity: 0;
 }
 
 .flake {
