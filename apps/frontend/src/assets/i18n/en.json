@@ -78,14 +78,14 @@
       "import-tooltip": "Download unit files (*.xml, *.voud etc.)"
     },
     "export-problems": {
-      "title": "Problems before the export",
-      "intro-scheme": "Coding with the coding scheme of these units fails: the schemer rejects it, or it could not be read. The other units are not affected."
+      "title": "Problems before export",
+      "intro-scheme": "These units cannot be coded with their coding scheme: the schemer rejects it, or it cannot be read. The other units are not affected."
     },
     "variable-id-conflicts": {
-      "intro-xml": "In the XML of these units, the same ID would stand for two variables. From version 19 on, the testcenter does not accept such units. The other units are not affected.",
-      "intro-json": "In the JSON of these units, the same ID would stand for two variables. Programs that match variables by their ID may confuse the two. The other units are not affected.",
+      "intro-xml": "In the XML of these units, two variables have the same ID. From version 19 onwards, the testcenter does not accept such units. The other units are not affected.",
+      "intro-json": "In the JSON of these units, two variables have the same ID. Programs that match variables by their ID may confuse the two. The other units are not affected.",
       "export-anyway": "Export anyway",
-      "check-failed": "Could not check whether the export writes a variable ID twice or the schemer rejects a coding."
+      "check-failed": "Could not check whether two variables have the same ID in the export or the schemer rejects a coding."
     },
     "dialog": {
       "title": "Download unit(s) as a file",
@@ -620,8 +620,8 @@
     "VALUE_CHANGED": "Value changed"
   },
   "variable-id-conflicts": {
-    "stands-for": "The ID \"{{id}}\" would stand for:",
-    "base": "the element \"{{name}}\" in the editor – the ID is its internal ID, which the editor does not show",
+    "stands-for": "The ID \"{{id}}\" stands for:",
+    "base": "the element \"{{name}}\" in the editor – the ID is its internal ID, which is not shown there",
     "derived": "the derived variable \"{{name}}\" in coding",
     "manual-fix": "Fix manually",
     "manual-fix-intro": "One of the two variables needs a different name. You decide which – the studio renames nothing by itself.",
@@ -631,7 +631,7 @@
       "step-take-over": "Give the copy the position and ID of the original.",
       "step-coding": "In coding, set up the copy like the original, e.g. deactivate it if the original was deactivated.",
       "step-sources": "Switch derived variables that are formed from the element over to the copy.",
-      "step-items": "Link the items that were linked to the element again under \"Properties\".",
+      "step-items": "Under \"Properties\", re-link the items that were linked to the element.",
       "note": "Responses already collected for the element are stored under its old internal ID."
     },
     "new-element-id": {
@@ -640,16 +640,16 @@
     "rename-derived": {
       "title": "Rename the derived variable",
       "step-rename": "In coding, give the derived variable a new name.",
-      "step-items": "Link the items that were linked to it again under \"Properties\".",
+      "step-items": "Under \"Properties\", re-link the items that were linked to it.",
       "note": "This changes the name the coders see. What has already been coded under the old name keeps it."
     }
   },
   "unit-check": {
     "title": "Technical validation",
-    "hint": "The unit is checked as it is being edited, including what has not been saved yet.",
+    "hint": "The current state of the unit is checked, including changes that have not been saved yet.",
     "ok": "OK",
     "not-loaded": "Could not be loaded.",
-    "modules-not-loaded": "Could not load the list of installed modules; whether the assigned ones are installed has not been checked.",
+    "modules-not-loaded": "Could not load the list of installed modules. Whether the assigned modules are installed has not been checked.",
     "no-editor": "No editor assigned.",
     "no-player": "No player assigned.",
     "no-schemer": "No schemer assigned.",
@@ -659,19 +659,19 @@
     "key-missing": "The unit has no key.",
     "key-length": "The key \"{{key}}\" must be {{min}} to {{max}} characters long.",
     "key-format": "The key \"{{key}}\" must start with a letter and may only contain letters (A–Z, a–z), digits, _ and -.",
-    "key-taken": "Another unit in this workspace already has the key \"{{key}}\".",
+    "key-taken": "The key \"{{key}}\" is already in use in this workspace.",
     "no-definition": "The unit has no content yet.",
     "definition-not-loaded": "Could not load the content of the unit.",
-    "definition-type-not-checked": "Whether the player reads the format of this unit has not been checked: the list of installed modules could not be loaded.",
+    "definition-type-not-checked": "Whether the player can read the format of this unit has not been checked: the list of installed modules could not be loaded.",
     "no-scheme": "The unit has no coding scheme yet.",
-    "scheme-not-loaded": "Could not load the coding scheme; duplicate IDs have not been checked.",
+    "scheme-not-loaded": "Could not load the coding scheme, so it has not been checked.",
     "scheme-unreadable": "The coding scheme could not be checked: it is not in the format the schemer expects. Check in coding whether it opens.",
-    "fix-elsewhere": "This can only be fixed in the \"Editor\" and \"Coding\" tabs, which this workspace hides.",
-    "fix-elsewhere-coding": "This can only be fixed in the \"Editor\" and \"Coding\" tabs, and this workspace hides the \"Coding\" tab.",
-    "variable-id-conflicts": "The export would contain the same ID for two variables. From version 19 on, the testcenter does not accept such a unit.",
+    "fix-elsewhere": "This can only be fixed in the \"Editor\" and \"Coding\" tabs. This workspace hides both.",
+    "fix-elsewhere-coding": "This can only be fixed in the \"Editor\" and \"Coding\" tabs. This workspace hides the \"Coding\" tab.",
+    "variable-id-conflicts": "In the export, two variables have the same ID. From version 19 onwards, the testcenter does not accept such a unit.",
     "scheme-problem": {
       "NAME_TWICE": "Two variables are named \"{{variable}}\". Rename one of them: an element in the editor by its ID, a derived variable in coding.",
-      "INVALID_SOURCE": "\"{{variable}}\" has an invalid source: its ID appears twice, its name equals the ID of another variable, or it is set up as a variable without a value although it has one. Check the variable in coding and give it a unique name if needed.",
+      "INVALID_SOURCE": "\"{{variable}}\" has an invalid source: its ID appears twice, its name matches the ID of another variable, or it is set up as a variable without a value although it has one. Check the variable in coding and give it a unique name if needed.",
       "SOURCE_MISSING": "A source of \"{{variable}}\" is missing: the base variable is no longer in the unit, or a source of the derivation does not exist. Select its sources again in coding, or delete the variable.",
       "MORE_THAN_ONE_SOURCE": "\"{{variable}}\" copies a value but has more than one source. Keep only one source in coding.",
       "ONLY_ONE_SOURCE": "\"{{variable}}\" is derived from only one source. Add more sources in coding, or copy the value instead.",

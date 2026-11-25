@@ -12,7 +12,7 @@ describe('VariableIdConflictListComponent', () => {
     const translate = TestBed.inject(TranslateService);
     translate.setTranslation('de', {
       'variable-id-conflicts': {
-        'stands-for': 'Die ID „{{id}}“ stünde für:',
+        'stands-for': 'Die ID „{{id}}“ steht für:',
         base: 'das Element „{{name}}“',
         derived: 'die abgeleitete Variable „{{name}}“'
       }
@@ -35,7 +35,7 @@ describe('VariableIdConflictListComponent', () => {
     const element = fixture.nativeElement as HTMLElement;
     const conflict = element.querySelector('[data-cy="variable-id-conflict"]');
 
-    expect(conflict?.firstChild?.textContent?.trim()).toBe('Die ID „05“ stünde für:');
+    expect(conflict?.firstChild?.textContent?.trim()).toBe('Die ID „05“ steht für:');
     expect(Array.from(
       element.querySelectorAll('[data-cy="variable-id-conflict-variable"]'),
       line => line.textContent?.trim()
