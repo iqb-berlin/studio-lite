@@ -2,7 +2,7 @@ import {
   AccessLevel, GroupData, modules, WsData, WsSettings
 } from '../../support/testData';
 import {
-  deleteAllModules, goToItem, goToWsMenu, login, logout, selectUnit
+  clickIndexTabWorkspace, deleteAllModules, goToItem, goToWsMenu, login, logout, selectUnit
 } from '../../support/helpers';
 import { deleteTextField } from '../../support/api';
 
@@ -123,6 +123,7 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
     login(Cypress.expose('username'), Cypress.expose('password'));
     cy.visitWs(ws1.name);
     selectUnit('MA_01');
+    clickIndexTabWorkspace('metadata');
     goToItem('01');
     cy.get('mat-select[placeholder="Variable auswählen"]')
       .eq(-1).find('svg').click()

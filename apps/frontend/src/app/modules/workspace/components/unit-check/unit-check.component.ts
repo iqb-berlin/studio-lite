@@ -96,17 +96,17 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
   // only the modules of the properties: the check, which parses the scheme, must not run again on
   // every keystroke in the name or the description
   private readonly modules = computed((): Modules | undefined => {
-    const metadataStore = this.unitStores.metadataStore();
-    if (!metadataStore?.loaded) return undefined;
-    const { editor, player, schemer } = metadataStore.data();
+    const propertiesStore = this.unitStores.propertiesStore();
+    if (!propertiesStore?.loaded) return undefined;
+    const { editor, player, schemer } = propertiesStore.data();
     return { editor, player, schemer };
   }, { equal: sameModules });
 
   // the key as it is being typed, and only the key: a keystroke in the name changes nothing here
   private readonly unitKey = computed((): UnitKey | undefined => {
-    const metadataStore = this.unitStores.metadataStore();
-    if (!metadataStore?.loaded) return undefined;
-    const { id, key } = metadataStore.data();
+    const propertiesStore = this.unitStores.propertiesStore();
+    if (!propertiesStore?.loaded) return undefined;
+    const { id, key } = propertiesStore.data();
     return { id, key };
   }, { equal: (a, b) => a?.id === b?.id && a?.key === b?.key });
 
@@ -226,7 +226,7 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
       this.backendService.getUnitDefinitionSummary(workspaceId, unitId).pipe(map(summary => summary ?? undefined));
     return forkJoin([
       modulesLoaded,
-      this.unitStores.loadMetadataStore(workspaceId, unitId),
+      this.unitStores.loadPropertiesStore(workspaceId, unitId),
       storedDefinition,
       this.unitStores.loadSchemeStore(workspaceId, unitId)
     ]).pipe(map(([, , summary]) => ({ definitionSummary: summary })));

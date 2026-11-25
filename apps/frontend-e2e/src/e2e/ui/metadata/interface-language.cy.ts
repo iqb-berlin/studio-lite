@@ -44,11 +44,11 @@ describe('The metadata form in the English interface', () => {
   });
 
   it('offers the terms in English and saves them in German and English', () => {
-    cy.intercept('PATCH', `/api/workspaces/${wsId}/units/${unitId}/properties`).as('saveProps');
-    cy.intercept('GET', `/api/workspaces/${wsId}/units/${unitId}/properties`).as('loadProps');
+    cy.intercept('PATCH', `/api/workspaces/${wsId}/units/${unitId}/metadata`).as('saveMetadata');
+    cy.intercept('GET', `/api/workspaces/${wsId}/units/${unitId}/metadata`).as('loadMetadata');
     // another path than the start page, so that the page loads anew rather than only its hash changing
-    cy.visit(`/index.html#/en/a/${wsId}/${unitId}/properties`);
-    cy.wait('@loadProps', { requestTimeout: FIRST_WORKSPACE_REQUEST_TIMEOUT });
+    cy.visit(`/index.html#/en/a/${wsId}/${unitId}/metadata`);
+    cy.wait('@loadMetadata', { requestTimeout: FIRST_WORKSPACE_REQUEST_TIMEOUT });
 
     // the field name stays German: the profile brings no other
     cy.contains('mat-form-field', 'Art der Daten').find('input').click();
@@ -58,9 +58,9 @@ describe('The metadata form in the English interface', () => {
     cy.contains('mat-chip-row', 'Survey Data');
 
     cy.get('[data-cy="workspace-unit-save-button"]').click();
-    cy.wait('@saveProps').then(save => {
+    cy.wait('@saveMetadata').then(save => {
       const entries: { id: string; value: { label: { lang: string; value: string }[] }[] }[] = save.request.body
-        .metadata.profiles.flatMap((saved: { entries: unknown[] }) => saved.entries);
+        .profiles.flatMap((saved: { entries: unknown[] }) => saved.entries);
       expect(entries.find(entry => entry.id === 'e2')?.value[0].label).to.deep.equal([
         { lang: 'de', value: 'Umfrage- und Aggregatedaten' },
         { lang: 'en', value: 'Survey Data' }

@@ -64,6 +64,16 @@
         </mat-cell>
       </ng-container>
 
+      <ng-container matColumnDef="metadata">
+        <mat-header-cell *matHeaderCellDef class="header-center">{{'workspace.routes.metadata' | translate}}</mat-header-cell>
+        <mat-cell *matCellDef="let element" class="cell-center">
+          <mat-icon [color]="isRouteHidden(element, 'metadata') ? '' : 'primary'"
+                    [matTooltip]="(isRouteHidden(element, 'metadata') ? 'wsg-admin.route-hidden' : 'wsg-admin.route-visible') | translate">
+            {{ isRouteHidden(element, 'metadata') ? 'directions_off' : 'directions' }}
+          </mat-icon>
+        </mat-cell>
+      </ng-container>
+
       <ng-container matColumnDef="editor">
         <mat-header-cell *matHeaderCellDef class="header-center">{{'workspace.routes.editor' | translate}}</mat-header-cell>
         <mat-cell *matCellDef="let element" class="cell-center">

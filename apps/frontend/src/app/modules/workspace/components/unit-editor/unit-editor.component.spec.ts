@@ -19,7 +19,7 @@ describe('UnitEditorComponent', () => {
 
   let backendServiceMock: jest.Mocked<WorkspaceBackendService>;
   let workspaceServiceMock: WorkspaceService;
-  let unitStoresMock: { definitionStore: jest.Mock; metadataStore: jest.Mock; loadDefinitionStore: jest.Mock };
+  let unitStoresMock: { definitionStore: jest.Mock; propertiesStore: jest.Mock; loadDefinitionStore: jest.Mock };
   let moduleServiceMock: ModuleService;
   let appServiceMock: AppService;
   let translateServiceMock: TranslateService;
@@ -39,7 +39,7 @@ describe('UnitEditorComponent', () => {
       definitionStore: jest.fn().mockReturnValue({
         setData: jest.fn()
       } as unknown as UnitDefinitionStore),
-      metadataStore: jest.fn(),
+      propertiesStore: jest.fn(),
       loadDefinitionStore: jest.fn()
     };
 

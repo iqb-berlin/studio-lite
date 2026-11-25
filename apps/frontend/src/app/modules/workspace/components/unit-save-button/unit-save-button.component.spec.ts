@@ -53,16 +53,16 @@ describe('UnitSaveButtonComponent', () => {
   });
 
   it('is disabled while nothing is unsaved', () => {
-    unitStores.loadMetadataStore(1, 1).subscribe();
+    unitStores.loadPropertiesStore(1, 1).subscribe();
 
     expect(saveButton(createButton()).disabled).toBe(true);
   });
 
   it('is enabled by a change and disabled again once it is discarded', () => {
     const fixture = createButton();
-    unitStores.loadMetadataStore(1, 1).subscribe();
+    unitStores.loadPropertiesStore(1, 1).subscribe();
 
-    unitStores.metadataStore()?.setPlayer('player@2.0');
+    unitStores.propertiesStore()?.setPlayer('player@2.0');
     fixture.detectChanges();
     expect(saveButton(fixture).disabled).toBe(false);
 
@@ -74,8 +74,8 @@ describe('UnitSaveButtonComponent', () => {
   // #1842, #2120: a key the server refuses blocks saving; one that only breaks the format rules does not
   it('is disabled while the key typed in the properties is refused', () => {
     const workspaceService = TestBed.inject(WorkspaceService);
-    unitStores.loadMetadataStore(1, 1).subscribe();
-    unitStores.metadataStore()?.setPlayer('player@2.0');
+    unitStores.loadPropertiesStore(1, 1).subscribe();
+    unitStores.propertiesStore()?.setPlayer('player@2.0');
     const fixture = createButton();
 
     workspaceService.setUnitKeyRefused(true);
@@ -94,8 +94,8 @@ describe('UnitSaveButtonComponent', () => {
       .mockReturnValue(createMock<MatDialogRef<ConfirmDialogComponent>>({ afterClosed: () => of(result) }));
 
     beforeEach(() => {
-      unitStores.loadMetadataStore(1, 1).subscribe();
-      unitStores.metadataStore()?.setPlayer('player@2.0');
+      unitStores.loadPropertiesStore(1, 1).subscribe();
+      unitStores.propertiesStore()?.setPlayer('player@2.0');
     });
 
     it('discards them once the discard button confirms', () => {
@@ -134,10 +134,10 @@ describe('UnitSaveButtonComponent', () => {
   // The button appears only once the user's access level is known, and the unit's properties may
   // have been loaded before that (#1290).
   it('takes notice of a store that was there before the button', () => {
-    unitStores.loadMetadataStore(1, 1).subscribe();
+    unitStores.loadPropertiesStore(1, 1).subscribe();
     const fixture = createButton();
 
-    unitStores.metadataStore()?.setPlayer('player@2.0');
+    unitStores.propertiesStore()?.setPlayer('player@2.0');
     fixture.detectChanges();
 
     expect(saveButton(fixture).disabled).toBe(false);

@@ -63,7 +63,7 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
   objectsDatasource = new TextSortTableDataSource<WorkspaceInListDto>([]);
   workspaces: WorkspaceInListDto[] = [];
   displayedColumns = [
-    'id', 'name', 'unitsCount', 'editor', 'preview', 'schemer', 'comments', 'notes', 'dropBoxId', 'delete'
+    'id', 'name', 'unitsCount', 'metadata', 'editor', 'preview', 'schemer', 'comments', 'notes', 'dropBoxId', 'delete'
   ];
 
   tableSelectionRow = new SelectionModel <WorkspaceInListDto>(false, []);

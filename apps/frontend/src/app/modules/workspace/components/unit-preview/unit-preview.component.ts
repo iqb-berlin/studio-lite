@@ -111,7 +111,7 @@ export class UnitPreviewComponent extends PreviewDirective {
 
   private subscribeForVeronaModuleLoaded(): void {
     this.getVeronaModuleId(
-      this.unitStores.metadataStore(),
+      this.unitStores.propertiesStore(),
       'player'
     )
       .pipe(takeUntil(this.ngUnsubscribe))

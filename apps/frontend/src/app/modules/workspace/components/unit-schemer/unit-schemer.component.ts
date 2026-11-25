@@ -104,7 +104,7 @@ export class UnitSchemerComponent extends UnitDefinitionDirective {
 
   private subscribeForVeronaModuleLoaded(): void {
     this.getVeronaModuleId(
-      this.unitStores.metadataStore(),
+      this.unitStores.propertiesStore(),
       'schemer'
     )
       .pipe(takeUntil(this.ngUnsubscribe))

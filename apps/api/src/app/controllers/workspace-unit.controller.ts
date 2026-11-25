@@ -38,6 +38,7 @@ import {
   UnitFullMetadataDto,
   UnitInListDto,
   UnitExportContentsDto,
+  UnitMetadataValues,
   UnitPropertiesDto,
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
@@ -273,7 +274,7 @@ export class WorkspaceUnitController {
   async findOnesProperties(
     @Param('workspace_id', ParseIntPipe) workspaceId: number, @Param('unit_id', ParseIntPipe) unitId: number
   ): Promise<UnitPropertiesDto> {
-    return this.unitService.findOnesProperties(unitId, workspaceId);
+    return this.unitService.findOnesPropertiesWithoutMetadata(unitId, workspaceId);
   }
 
   @Get(':unit_id/metadata')
@@ -285,9 +286,35 @@ export class WorkspaceUnitController {
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit')
   async findOnesMetadata(
-    @Param('unit_id', ParseIntPipe) unitId: number
+    @Param('workspace_id', ParseIntPipe) workspaceId: number, @Param('unit_id', ParseIntPipe) unitId: number
   ): Promise<UnitFullMetadataDto> {
-    return this.unitMetadataService.findOnesMetadata(unitId);
+    return this.unitMetadataService.findOnesCurrentMetadata(unitId, workspaceId);
+  }
+
+  /**
+   * Writes the unit's metadata, its profiles and its items, and answers them as stored, the items it
+   * created with their uuids (#2200).
+   */
+  @Patch(':unit_id/metadata')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteAccessGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiOkResponse({ type: UnitFullMetadataDto })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
+  @ApiTags('workspace unit')
+  async patchOnesMetadata(
+    @Param('workspace_id', ParseIntPipe) workspaceId: number,
+    @Param('unit_id', ParseIntPipe) unitId: number,
+    @User() user: UserEntity,
+    @Body() metadata: UnitMetadataValues
+  ): Promise<UnitFullMetadataDto> {
+    return this.unitMetadataService.patchMetadataOfUnit(
+      unitId,
+      workspaceId,
+      metadata,
+      await this.unitService.getDisplayNameForUser(user.id)
+    );
   }
 
   @Get(':unit_id/definition')
@@ -334,9 +361,9 @@ export class WorkspaceUnitController {
   }
 
   /**
-   * Writes the unit's properties, and its metadata along with them when the body carries any. The
-   * user's display name is resolved here because it is stored on the unit as "last changed by" --
-   * the unit keeps the name, not the id.
+   * Writes the unit's properties; a body with metadata is refused, they have a route of their own
+   * (#2200). The user's display name is resolved here because it is stored on the unit as "last
+   * changed by" -- the unit keeps the name, not the id.
    */
   @Patch(':unit_id/properties')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteAccessGuard)

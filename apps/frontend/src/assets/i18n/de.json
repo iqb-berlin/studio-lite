@@ -1034,6 +1034,9 @@
     "no-player": "Kein Player",
     "no-schemer": "Kein Schemer"
   },
+  "unit-metadata": {
+    "not-loaded": "Die Metadaten der Aufgabe konnten nicht geladen werden."
+  },
   "unit-properties": {
     "title": "Aufgaben-Eigenschaften",
     "modules": "Verona-Module",

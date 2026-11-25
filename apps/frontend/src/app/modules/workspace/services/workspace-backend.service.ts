@@ -17,6 +17,7 @@ import {
   UnitDownloadSettingsDto,
   UnitExportContentsDto,
   UnitInListDto,
+  UnitMetadataValues,
   UnitPropertiesDto,
   UnitSchemeDto,
   UsersInWorkspaceDto,
@@ -295,6 +296,32 @@ export class WorkspaceBackendService {
     return this.http
       .patch(`${this.serverUrl}workspaces/${workspaceId}/units/${unitData.id}/properties`, unitData)
       .pipe(succeeded());
+  }
+
+  /** The unit's metadata, its profiles and items, wherever the server holds them (#2200). */
+  getUnitMetadata(workspaceId: number, unitId: number): Observable<UnitMetadataValues | null> {
+    if (!(workspaceId > 0 && unitId > 0)) return of(null);
+    return this.http
+      .get<UnitMetadataValues>(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/metadata`)
+      .pipe(
+        catchError(() => of(null))
+      );
+  }
+
+  /**
+   * Saves the unit's metadata and answers them as the server stored them, the items it created with
+   * their uuids; null when the save failed (#1830, #2200).
+   */
+  setUnitMetadata(
+    workspaceId: number,
+    unitId: number,
+    metadata: UnitMetadataValues
+  ): Observable<UnitMetadataValues | null> {
+    return this.http
+      .patch<UnitMetadataValues>(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/metadata`, metadata)
+      .pipe(
+        catchError(() => of(null))
+      );
   }
 
   uploadUnits(workspaceId: number, files: FileList | null): Observable<RequestReportDto | number> {

@@ -25,7 +25,7 @@ import { WorkspaceBackendService } from '../../services/workspace-backend.servic
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitStoresService } from '../../services/unit-stores.service';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
-import { UnitMetadataStore } from '../../classes/unit-metadata-store';
+import { UnitPropertiesStore } from '../../classes/unit-properties-store';
 import { PreviewService } from '../../services/preview.service';
 import { ModuleService } from '../../../../services/module.service';
 import { AppService } from '../../../../services/app.service';
@@ -88,7 +88,7 @@ describe('UnitPreviewComponent', () => {
 
     unitStoresStub = {
       changed: jest.fn().mockReturnValue(false),
-      metadataStore: () => undefined,
+      propertiesStore: () => undefined,
       definitionStore$: new Subject<void>(),
       loadDefinitionStore: jest.fn().mockReturnValue(of(undefined)),
       loadSchemeStore: jest.fn().mockReturnValue(of(undefined))
@@ -758,7 +758,7 @@ describe('UnitPreviewComponent', () => {
     it('should name the player it loads for the unit', () => {
       const playerKey = 'iqb-player-aspect@3.0';
       moduleServiceStub.players = { [playerKey]: createMock<VeronaModuleClass>() };
-      jest.spyOn(unitStoresStub, 'metadataStore').mockReturnValue(createMock<UnitMetadataStore>({
+      jest.spyOn(unitStoresStub, 'propertiesStore').mockReturnValue(createMock<UnitPropertiesStore>({
         getData: () => ({ id: 5, player: playerKey }) as UnitPropertiesDto
       }));
 
@@ -771,7 +771,7 @@ describe('UnitPreviewComponent', () => {
     it('should name no player for a unit without one', () => {
       moduleServiceStub.players = { 'iqb-player-aspect@3.0': createMock<VeronaModuleClass>() };
       component.playerName = 'iqb-player-aspect@3.0';
-      jest.spyOn(unitStoresStub, 'metadataStore').mockReturnValue(createMock<UnitMetadataStore>({
+      jest.spyOn(unitStoresStub, 'propertiesStore').mockReturnValue(createMock<UnitPropertiesStore>({
         getData: () => ({ id: 6, player: '' }) as UnitPropertiesDto
       }));
 

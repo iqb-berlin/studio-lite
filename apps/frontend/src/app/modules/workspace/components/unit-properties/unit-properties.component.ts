@@ -1,5 +1,5 @@
 import {
-  Component, inject, OnDestroy, signal, ViewChild
+  Component, OnDestroy, signal, ViewChild
 } from '@angular/core';
 import {
   FormGroup,
@@ -9,15 +9,8 @@ import {
   FormsModule,
   ReactiveFormsModule
 } from '@angular/forms';
-import {
-  BehaviorSubject, EMPTY, Subject, Subscription, switchMap, takeUntil
-} from 'rxjs';
-import {
-  State,
-  UnitMetadataValues,
-  UnitPropertiesDto,
-  WorkspaceSettingsDto
-} from '@studio-lite-lib/api-dto';
+import { Subject, Subscription, takeUntil } from 'rxjs';
+import { State, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
@@ -41,12 +34,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIcon } from '@angular/material/icon';
-import { MDProfile } from '@iqbspecs/metadata-profile';
-import { ProfileFormComponent, UnitMetadataValues as IqbUnitMetadataValues } from '@iqb/metadata-components';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ConfirmDialogComponent } from '@studio-lite-lib/iqb-components';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
-import { ItemsComponent } from '../../../metadata/components/items/items.component';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { SelectModuleComponent } from '../../../../components/select-module/select-module.component';
 import { WorkspaceService } from '../../services/workspace.service';
@@ -54,18 +44,14 @@ import { UnitStoresService } from '../../services/unit-stores.service';
 import { ModuleService } from '../../../../services/module.service';
 import { RequestMessageDirective } from '../../directives/request-message.directive';
 import { CanReturnUnitPipe } from '../../pipes/can-return-unit.pipe';
-import { AliasId } from '../../../metadata/models/alias-id.interface';
-import { MetadataBackendService } from '../../../metadata/services/metadata-backend.service';
-import { MetadataService } from '../../../metadata/services/metadata.service';
 import { I18nService } from '../../../../services/i18n.service';
-import { LanguageService } from '../../../../services/language.service';
 import { UnitCheckComponent } from '../unit-check/unit-check.component';
 import { UNIT_KEY_MAX_LENGTH, UNIT_KEY_MIN_LENGTH } from '../../utils/unit-key.utils';
 
 /**
  * Everything about a unit that is not its content: name and key, the modules it is opened with, its
- * state and group, its transcript and reference -- and its metadata, which is edited in the profile
- * form below the rest.
+ * state and group, its transcript and reference, and beside them the technical validation. The
+ * metadata have a tab of their own (#2200).
  *
  * The form writes into the unit's stores rather than to the server; saving is a separate act, and
  * leaving the unit with unsaved changes is what the guard asks about.
@@ -93,8 +79,6 @@ import { UNIT_KEY_MAX_LENGTH, UNIT_KEY_MIN_LENGTH } from '../../utils/unit-key.u
     CdkTextareaAutosize,
     SelectModuleComponent,
     MatButton,
-    ProfileFormComponent,
-    ItemsComponent,
     DatePipe,
     TranslateModule,
     MatIcon,
@@ -116,17 +100,6 @@ export class UnitPropertiesComponent
   private schemerSelectionChangedSubscription: Subscription | undefined;
   private statesChangedSubscription: Subscription | undefined;
   ngUnsubscribe = new Subject<void>();
-  metadata!: UnitMetadataValues;
-  get iqbMetadataValues(): IqbUnitMetadataValues {
-    return this.metadata as unknown as IqbUnitMetadataValues;
-  }
-
-  workspaceSettings!: WorkspaceSettingsDto;
-  metadataLoader: BehaviorSubject<UnitMetadataValues> = new BehaviorSubject({});
-  variablesLoader: BehaviorSubject<AliasId[]> = new BehaviorSubject<AliasId[]>(
-    []
-  );
-
   unitForm: UntypedFormGroup;
   form = new FormGroup({});
   selectedStateId: string | null = null;
@@ -134,15 +107,6 @@ export class UnitPropertiesComponent
   selectedUnitId = 0;
   initialTranscript = '';
   initialReference = '';
-  unitProfile!: MDProfile;
-  itemProfile!: MDProfile;
-  variablesLoaded: boolean = false;
-  metadataLoaded: boolean = false;
-  /**
-   * The language of the interface, handed to the metadata forms: they show profiles and vocabularies
-   * in it where these bring it. The studio translates no metadata (#2204).
-   */
-  readonly language = inject(LanguageService).active.code;
   private readonly propertiesNotLoadedState = signal(false);
   readonly propertiesNotLoaded = this.propertiesNotLoadedState.asReadonly();
 
@@ -159,8 +123,6 @@ export class UnitPropertiesComponent
     public uploadReportDialog: MatDialog,
     private confirmDialog: MatDialog,
     public translateService: TranslateService,
-    private metadataBackendService: MetadataBackendService,
-    public metadataService: MetadataService,
     public i18nService: I18nService
   ) {
     super();
@@ -173,20 +135,6 @@ export class UnitPropertiesComponent
       transcript: this.fb.control(''),
       reference: this.fb.control('')
     });
-    this.metadataLoader
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(metadata => {
-        this.metadata = metadata;
-        this.metadataLoaded = true;
-      });
-    this.variablesLoader.pipe(takeUntil(this.ngUnsubscribe)).subscribe(() => {
-      this.variablesLoaded = true;
-    });
-    this.addSubscriptionForUnitDefinitionChanges();
-    // after a save that created items, so that the items editor holds their uuids
-    this.workspaceService.unitMetadataReloaded
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(() => this.loadMetaData());
     this.unitIdChangedSubscription =
       this.workspaceService.selectedUnit$.subscribe(id => {
         this.readDataForUnitId(id);
@@ -195,8 +143,6 @@ export class UnitPropertiesComponent
 
   private readDataForUnitId(unitId: number): void {
     this.selectedUnitId = unitId;
-    this.variablesLoaded = false;
-    this.metadataLoaded = false;
     this.propertiesNotLoadedState.set(false);
     this.readData();
   }
@@ -212,24 +158,18 @@ export class UnitPropertiesComponent
     this.workspaceService
       .loadUnitProperties()
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(() => {
-        this.setupForm();
-        // nothing more is asked for a unit whose properties the server did not answer for
-        if (this.propertiesNotLoaded()) return;
-        this.updateVariables();
-        this.loadMetaData();
-      });
+      .subscribe(() => this.setupForm());
   }
 
   private setupForm() {
     const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
-    const unitMetadataStore = this.unitStores.metadataStore();
+    const unitPropertiesStore = this.unitStores.propertiesStore();
     // the store of a unit the server did not answer for holds its id alone, and filling the form
     // with it failed, so that the form went on showing the unit before (#2004)
-    this.propertiesNotLoadedState.set(selectedUnitId > 0 && !!unitMetadataStore && !unitMetadataStore.loaded);
-    if (selectedUnitId > 0 && unitMetadataStore?.loaded) {
-      const unitMetadata = unitMetadataStore.getData();
-      this.selectedStateId = unitMetadata.state || null;
+    this.propertiesNotLoadedState.set(selectedUnitId > 0 && !!unitPropertiesStore && !unitPropertiesStore.loaded);
+    if (selectedUnitId > 0 && unitPropertiesStore?.loaded) {
+      const unitProperties = unitPropertiesStore.getData();
+      this.selectedStateId = unitProperties.state || null;
       const keyControl = this.unitForm.get('key');
       if (keyControl) {
         keyControl.markAsUntouched();
@@ -239,20 +179,20 @@ export class UnitPropertiesComponent
           Validators.maxLength(UNIT_KEY_MAX_LENGTH),
           Validators.pattern(WorkspaceService.unitKeyPatternString()),
           WorkspaceService.unitKeyUniquenessValidator(
-            unitMetadata.id,
+            unitProperties.id,
             () => this.workspaceService.unitList
           )
         ]);
       }
       this.unitForm.setValue(
         {
-          key: unitMetadata.key,
-          name: unitMetadata.name,
-          state: unitMetadata.state,
-          description: unitMetadata.description,
-          reference: unitMetadata.reference,
-          transcript: unitMetadata.transcript,
-          group: unitMetadata.groupName
+          key: unitProperties.key,
+          name: unitProperties.name,
+          state: unitProperties.state,
+          description: unitProperties.description,
+          reference: unitProperties.reference,
+          transcript: unitProperties.transcript,
+          group: unitProperties.groupName
         },
         { emitEvent: false }
       );
@@ -269,14 +209,14 @@ export class UnitPropertiesComponent
         this.reportUnitKeyRefused();
       }
 
-      this.selectedStateColor = unitMetadata.state || '';
+      this.selectedStateColor = unitProperties.state || '';
       this.unitFormDataChangedSubscription = this.unitForm.valueChanges.subscribe(() => {
         const filteredState = this.workspaceService.states
           ?.filter((state:State) => state.id.toString() === this.unitForm.get('state')?.value) || 0;
         filteredState.length ? this.selectedStateColor = filteredState[0].color : this.selectedStateColor = '';
         const isValidFormKey = this.unitForm.get('key')?.status === 'VALID';
         this.workspaceService.isValidFormKey.next(isValidFormKey);
-        this.unitStores.metadataStore()?.setBasicData(
+        this.unitStores.propertiesStore()?.setBasicData(
           this.unitForm.get('key')?.value,
           this.unitForm.get('name')?.value,
           this.unitForm.get('description')?.value,
@@ -289,10 +229,10 @@ export class UnitPropertiesComponent
       });
       this.unitForm.enable();
       // timeout because we access ViewChildren
-      setTimeout(() => this.initVeronaModules(unitMetadata));
+      setTimeout(() => this.initVeronaModules(unitProperties));
       setTimeout(() => {
         const filteredStates = this.workspaceService.states?.filter(
-          (state: State) => state.id.toString() === unitMetadata.state
+          (state: State) => state.id.toString() === unitProperties.state
         );
         filteredStates?.length ?
           (this.selectedStateColor = filteredStates[0].color) :
@@ -329,139 +269,41 @@ export class UnitPropertiesComponent
    * that the dialog on leaving the unit no longer blocks saving every key that breaks a rule (#2127).
    */
   private reportUnitKeyRefused(): void {
-    const keyChanged = this.unitStores.metadataStore()?.getChangedData().key !== undefined;
+    const keyChanged = this.unitStores.propertiesStore()?.getChangedData().key !== undefined;
     const keyControl = this.unitForm.get('key');
     const blank = !`${keyControl?.value ?? ''}`.trim();
     const refused = blank || !!keyControl?.hasError('keyNotUnique') || !!keyControl?.hasError('maxlength');
     this.workspaceService.setUnitKeyRefused(keyChanged && refused);
   }
 
-  private initVeronaModules(unitMetadata: UnitPropertiesDto): void {
+  private initVeronaModules(unitProperties: UnitPropertiesDto): void {
     if (this.editorSelector) {
-      this.editorSelector.value = unitMetadata.editor || '';
+      this.editorSelector.value = unitProperties.editor || '';
       this.editorSelectionChangedSubscription =
         this.editorSelector.selectionChanged.subscribe(selectedValue => {
           this.unitStores
-            .metadataStore()
+            .propertiesStore()
             ?.setEditor(selectedValue);
         });
     }
     if (this.playerSelector) {
-      this.playerSelector.value = unitMetadata.player || '';
+      this.playerSelector.value = unitProperties.player || '';
       this.playerSelectionChangedSubscription =
         this.playerSelector.selectionChanged.subscribe(selectedValue => {
           this.unitStores
-            .metadataStore()
+            .propertiesStore()
             ?.setPlayer(selectedValue);
         });
     }
     if (this.schemerSelector) {
-      this.schemerSelector.value = unitMetadata.schemer || '';
+      this.schemerSelector.value = unitProperties.schemer || '';
       this.schemerSelectionChangedSubscription =
         this.schemerSelector.selectionChanged.subscribe(selectedValue => {
           this.unitStores
-            .metadataStore()
+            .propertiesStore()
             ?.setSchemer(selectedValue);
         });
     }
-  }
-
-  private loadMetaData() {
-    const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
-    const unitMetadataStore = this.unitStores.metadataStore();
-    if (selectedUnitId > 0 && unitMetadataStore?.loaded) {
-      this.workspaceSettings = this.workspaceService.workspaceSettings;
-      const unitMetadata = unitMetadataStore.getData();
-      this.metadataLoader.next(
-        JSON.parse(JSON.stringify(unitMetadata.metadata))
-      );
-      this.getProfiles();
-    }
-  }
-
-  private getProfiles(): void {
-    if (
-      this.workspaceSettings &&
-      this.workspaceSettings.unitMDProfile &&
-      !this.unitProfile
-    ) {
-      this.metadataBackendService
-        .getMetadataProfile(this.workspaceSettings.unitMDProfile)
-        .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(profile => {
-          const unitProfile = profile as unknown as MDProfile;
-          this.metadataService.loadProfileVocabularies(unitProfile).then(() => {
-            this.unitProfile = unitProfile;
-          });
-        });
-    }
-
-    if (
-      this.workspaceSettings &&
-      this.workspaceSettings.itemMDProfile &&
-      !this.itemProfile
-    ) {
-      this.metadataBackendService
-        .getMetadataProfile(this.workspaceSettings.itemMDProfile)
-        .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(profile => {
-          const itemProfile = profile as unknown as MDProfile;
-          this.metadataService.loadProfileVocabularies(itemProfile).then(() => {
-            this.itemProfile = itemProfile;
-          });
-        });
-    }
-  }
-
-  private updateVariables(): void {
-    this.unitStores
-      .loadSchemeStore(this.workspaceService.selectedWorkspaceId, this.workspaceService.selectedUnit$.getValue())
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(unitSchemeStore => {
-        // handed on only once the scheme is there: without it the list is empty, and an item would
-        // take the empty list for its variable having gone
-        if (unitSchemeStore) this.variablesLoader.next(this.unitStores.variables());
-      });
-  }
-
-  // follows whichever definition store there is, the editor may open one only after this view
-  private addSubscriptionForUnitDefinitionChanges(): void {
-    this.unitStores.definitionStore$
-      .pipe(
-        switchMap(store => store?.dataChange ?? EMPTY),
-        takeUntil(this.ngUnsubscribe)
-      )
-      .subscribe(() => this.variablesLoader.next(this.unitStores.variables()));
-  }
-
-  /**
-   * Profiles and items are edited by two independent child components. Each change must update only
-   * its own slice of the stored metadata: merging into the store's current value (rather than
-   * replacing it, or rebuilding `this.metadata` which would retrigger the items editor and drop
-   * in-flight item edits) keeps both the unit profiles and the item metadata when either side
-   * changes.
-   */
-  onMetadataChange(metadata: Partial<IqbUnitMetadataValues>): void {
-    const store = this.unitStores.metadataStore();
-    if (!store) return;
-    const current = (store.getData().metadata ?? {}) as UnitMetadataValues;
-    // Only overwrite the profiles slice when the event actually carries one, so a
-    // profiles-less emit can never clobber the stored profiles (an empty array is
-    // a deliberate "clear", undefined is not).
-    store.setMetadata({
-      ...current,
-      ...(metadata.profiles && { profiles: metadata.profiles as unknown as UnitMetadataValues['profiles'] })
-    });
-  }
-
-  onItemsMetadataChange(metadata: UnitMetadataValues): void {
-    const store = this.unitStores.metadataStore();
-    if (!store) return;
-    const current = (store.getData().metadata ?? {}) as UnitMetadataValues;
-    store.setMetadata({
-      ...current,
-      ...(metadata.items && { items: metadata.items })
-    });
   }
 
   onGroupNameChange(name: string): void {

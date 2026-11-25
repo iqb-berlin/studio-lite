@@ -7,6 +7,7 @@ import { UnitSchemerComponent } from './components/unit-schemer/unit-schemer.com
 import { UnitCommentsComponent } from './components/unit-comments/unit-comments.component';
 import { UnitRichNotesComponent } from './components/unit-rich-notes/unit-rich-notes.component';
 import { UnitPropertiesComponent } from './components/unit-properties/unit-properties.component';
+import { UnitMetadataComponent } from './components/unit-metadata/unit-metadata.component';
 import { HiddenRouteGuard } from './guards/hidden-route.guard';
 
 export const WORKSPACE_ROUTES: Routes = [
@@ -23,12 +24,16 @@ export const WORKSPACE_ROUTES: Routes = [
         path: '', redirectTo: 'properties', pathMatch: 'full'
       },
       { path: 'properties', component: UnitPropertiesComponent },
+      { path: 'metadata', component: UnitMetadataComponent, canActivate: [HiddenRouteGuard] },
       { path: 'editor', component: UnitEditorComponent, canActivate: [HiddenRouteGuard] },
       { path: 'preview', component: UnitPreviewComponent, canActivate: [HiddenRouteGuard] },
       { path: 'schemer', component: UnitSchemerComponent, canActivate: [HiddenRouteGuard] },
       { path: 'comments', component: UnitCommentsComponent, canActivate: [HiddenRouteGuard] },
       { path: 'notes', component: UnitRichNotesComponent, canActivate: [HiddenRouteGuard] },
       { path: '**', component: UnitPropertiesComponent },
+      {
+        path: 'metadata', component: UnitMetadataComponent, outlet: 'secondary', canActivate: [HiddenRouteGuard]
+      },
       {
         path: 'editor', component: UnitEditorComponent, outlet: 'secondary', canActivate: [HiddenRouteGuard]
       },

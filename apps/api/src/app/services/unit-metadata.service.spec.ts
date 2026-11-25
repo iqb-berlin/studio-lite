@@ -511,6 +511,37 @@ describe('UnitMetadataService', () => {
       ]);
     });
 
+    // The metadata route read the tables alone and answered nothing for such a unit; the tab of its own
+    // would have shown none, and its next save written over them (#2200).
+    it('should answer the metadata route of a unit without the marker from its column', async () => {
+      unitMetadataToDeleteService.getOneByUnit.mockResolvedValue(null);
+      unitsRepository.findOne.mockResolvedValue({ id: 1, metadata: column } as Unit);
+      workspaceRepository.findOne.mockResolvedValue({ settings: { unitMDProfile: 'p-b' } } as Workspace);
+
+      const metadata = await service.findOnesCurrentMetadata(1, 3) as unknown as UnitMetadataValues;
+
+      expect(unitsRepository.findOne)
+        .toHaveBeenCalledWith(expect.objectContaining({ where: { id: 1, workspaceId: 3 } }));
+      expect(metadata.profiles.map(({ profileId, order }) => ({ profileId, order }))).toEqual([
+        { profileId: 'p-a', order: -1 }, { profileId: 'p-b', order: 0 }
+      ]);
+    });
+
+    it('should answer the metadata route of a unit with the marker from the tables', async () => {
+      unitMetadataToDeleteService.getOneByUnit.mockResolvedValue(createMock<UnitMetadataToDelete>({ unitId: 1 }));
+      unitsRepository.findOne.mockResolvedValue({ id: 1, metadata: column } as Unit);
+
+      const metadata = await service.findOnesCurrentMetadata(1, 3) as unknown as UnitMetadataValues;
+
+      expect(metadata.profiles.map(profile => profile.profileId)).toEqual(['from-table']);
+    });
+
+    it('should refuse the metadata of a unit the workspace does not hold', async () => {
+      unitsRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.findOnesCurrentMetadata(1, 3)).rejects.toThrow(UnitNotFoundException);
+    });
+
     // A copy takes its metadata from where the source keeps it.
     it.each([
       ['the tables of a source with the marker', createMock<UnitMetadataToDelete>({ unitId: 7 }), ['from-table']],
@@ -557,6 +588,27 @@ describe('UnitMetadataService', () => {
       await expect(service.patchMetadata(9, { profiles: [] })).rejects.toThrow(UnitNotFoundException);
       expect(workspaceRepository.findOne).not.toHaveBeenCalled();
       expect(mockRepository.save).not.toHaveBeenCalled();
+    });
+  });
+
+  // the metadata route writes them on their own: dated like a save of the properties, and answered as
+  // stored, so that the tab takes the uuids of the items it created (#1830, #2200)
+  describe('patchMetadataOfUnit', () => {
+    it('should write the metadata, date the change and answer them as stored', async () => {
+      const sent = { profiles: [], items: [{ id: 'item_1' }] } as unknown as UnitMetadataValues;
+      const stored = { profiles: [], items: [{ id: 'item_1', uuid: 'u-1' }] };
+      const patch = jest.spyOn(service, 'patchMetadata').mockResolvedValue();
+      const read = jest.spyOn(service, 'findOnesCurrentMetadata')
+        .mockResolvedValue(stored as unknown as Awaited<ReturnType<UnitMetadataService['findOnesCurrentMetadata']>>);
+
+      const answer = await service.patchMetadataOfUnit(1, 3, sent, 'Muster, Erika');
+
+      expect(patch).toHaveBeenCalledWith(1, sent, 'Muster, Erika');
+      expect(unitsRepository.update).toHaveBeenCalledWith(1, {
+        lastChangedMetadata: expect.any(Date), lastChangedMetadataUser: 'Muster, Erika'
+      });
+      expect(read).toHaveBeenCalledWith(1, 3);
+      expect(answer).toBe(stored);
     });
   });
 });

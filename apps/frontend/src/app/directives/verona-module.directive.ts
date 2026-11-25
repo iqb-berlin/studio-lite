@@ -8,7 +8,7 @@ import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SharedParameter } from '../models/verona.interface';
-import { UnitMetadataStore } from '../modules/workspace/classes/unit-metadata-store';
+import { UnitPropertiesStore } from '../modules/workspace/classes/unit-properties-store';
 import { ModuleService } from '../services/module.service';
 import { VeronaModuleClass } from '../models/verona-module.class';
 import { WorkspaceBackendService } from '../modules/workspace/services/workspace-backend.service';
@@ -156,14 +156,14 @@ export abstract class VeronaModuleDirective implements AfterViewInit, OnDestroy 
   }
 
   getVeronaModuleId(
-    unitMetadataStore: UnitMetadataStore | undefined,
+    unitPropertiesStore: UnitPropertiesStore | undefined,
     moduleType: 'player' | 'editor' | 'schemer'
   ): Observable<string> {
-    if (!unitMetadataStore) {
+    if (!unitPropertiesStore) {
       return of('');
     }
 
-    const unitMetadata = unitMetadataStore.getData();
+    const unitMetadata = unitPropertiesStore.getData();
     const metadataKey = unitMetadata[moduleType];
     const modules = this.getModulesByType(moduleType);
 

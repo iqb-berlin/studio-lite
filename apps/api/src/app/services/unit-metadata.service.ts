@@ -133,21 +133,64 @@ export class UnitMetadataService {
     workspace: Workspace,
     cache: MetadataReadCache = newMetadataReadCache()
   ): Promise<Unit> {
-    const unitMetadataToDelete = await this.unitMetadataToDeleteService.getOneByUnit(unit.id);
-    if (unitMetadataToDelete) {
-      // findOnesMetadata already backfills valueAsText.
-      unit.metadata = await this.findOnesMetadata(unit.id, cache);
-    } else {
-      unit.metadata = await this.resolveValueAsText(
-        UnitMetadataService.setCurrentProfiles(
-          workspace.settings?.unitMDProfile,
-          workspace.settings?.itemMDProfile,
-          unit.metadata
-        ),
-        cache
-      );
-    }
+    unit.metadata = await this.currentMetadata(unit, workspace, cache);
     return unit;
+  }
+
+  /**
+   * The metadata of one unit, wherever they are held -- as the properties have always read them. The
+   * tables alone answer nothing for a unit not saved since they came in 12.0.0: its metadata are still
+   * in its column, and a tab showing none would have the next save write over them (#2200).
+   */
+  async findOnesCurrentMetadata(unitId: number, workspaceId: number): Promise<UnitFullMetadataDto> {
+    const unit = await this.unitsRepository.findOne({
+      where: { id: unitId, workspaceId: workspaceId },
+      select: { id: true, metadata: true }
+    });
+    if (!unit) throw new UnitNotFoundException(unitId, workspaceId, 'GET');
+    const workspace = await this.workspaceRepository.findOne({ where: { id: workspaceId } });
+    return await this.currentMetadata(unit, workspace) as unknown as UnitFullMetadataDto;
+  }
+
+  /**
+   * Writes the unit's metadata on their own, and answers them as stored: the items the save created
+   * come with their uuids, so that the next save names them as existing ones (#1830, #2200). It sets
+   * when and by whom the metadata were last changed, as a save of the properties does.
+   */
+  async patchMetadataOfUnit(
+    unitId: number,
+    workspaceId: number,
+    metadata: UnitMetadataValues,
+    userName: string | null
+  ): Promise<UnitFullMetadataDto> {
+    await this.patchMetadata(unitId, metadata, userName);
+    await this.unitsRepository.update(unitId, {
+      lastChangedMetadata: new Date(),
+      lastChangedMetadataUser: userName
+    });
+    return this.findOnesCurrentMetadata(unitId, workspaceId);
+  }
+
+  /**
+   * From the tables once the unit carries the marker, else from its column with the workspace's current
+   * profiles marked and the texts of the values resolved.
+   */
+  private async currentMetadata(
+    unit: Unit,
+    workspace: Workspace | null,
+    cache: MetadataReadCache = newMetadataReadCache()
+  ): Promise<UnitMetadataValues> {
+    const unitMetadataToDelete = await this.unitMetadataToDeleteService.getOneByUnit(unit.id);
+    // findOnesMetadata already backfills valueAsText.
+    if (unitMetadataToDelete) return await this.findOnesMetadata(unit.id, cache) as unknown as UnitMetadataValues;
+    return this.resolveValueAsText(
+      UnitMetadataService.setCurrentProfiles(
+        workspace?.settings?.unitMDProfile,
+        workspace?.settings?.itemMDProfile,
+        unit.metadata
+      ),
+      cache
+    );
   }
 
   static setCurrentProfiles(
