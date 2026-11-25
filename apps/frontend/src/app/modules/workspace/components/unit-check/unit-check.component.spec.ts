@@ -267,7 +267,21 @@ describe('UnitCheckComponent', () => {
     expect(properties?.querySelector('[data-cy="unit-check-variable-id-conflicts"]')).toBeTruthy();
     // its steps lead into the tabs this workspace hides
     expect(properties?.querySelector('[data-cy="variable-id-conflicts-manual-fix"]')).toBeNull();
-    expect(properties?.querySelector('[data-cy="unit-check-fix-elsewhere"]')).toBeTruthy();
+    expect(properties?.querySelector('[data-cy="unit-check-fix-elsewhere"]')?.textContent)
+      .toBe('unit-check.fix-elsewhere');
+  }));
+
+  it('names only the coding as hidden when the editor is shown', fakeAsync(() => {
+    hiddenRoutes = ['schemer'];
+    getUnitScheme.mockReturnValue(of({
+      scheme: scheme([{ id: 'd_1', alias: '05', sourceType: 'MANUAL' }]),
+      schemeType: 'iqb-standard@3.0',
+      variables: [{ id: '05', alias: '_00a' }]
+    }));
+    create();
+
+    expect(sectionOf('properties')?.querySelector('[data-cy="unit-check-fix-elsewhere"]')?.textContent)
+      .toBe('unit-check.fix-elsewhere-coding');
   }));
 
   // the definition embeds the unit's media; the check needs only whether there is one and its format (#2135)

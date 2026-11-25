@@ -669,6 +669,7 @@
     "scheme-not-loaded": "Das Kodierschema konnte nicht geladen werden; doppelte IDs sind nicht geprüft.",
     "scheme-unreadable": "Das Kodierschema ließ sich nicht prüfen: Es hat nicht das Format, das der Schemer erwartet. In der Kodierung prüfen, ob es sich öffnen lässt.",
     "fix-elsewhere": "Beheben lässt sich das nur mit den Reitern „Editor“ und „Kodierung“, die dieser Arbeitsbereich ausblendet.",
+    "fix-elsewhere-coding": "Beheben lässt sich das nur mit den Reitern „Editor“ und „Kodierung“; den Reiter „Kodierung“ blendet dieser Arbeitsbereich aus.",
     "variable-id-conflicts": "Im Export stünde dieselbe ID für zwei Variablen. Das Testcenter nimmt eine solche Aufgabe ab Version 19 nicht an.",
     "scheme-problem": {
       "NAME_TWICE": "Zwei Variablen heißen „{{variable}}“. Eine von ihnen umbenennen: ein Element im Editor über seine ID, eine abgeleitete Variable in der Kodierung.",

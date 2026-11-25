@@ -161,6 +161,12 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
     return checked && withKeyFindings(checked, this.keyFindings());
   });
 
+  // Conflicts stand under the properties only where the coding is hidden; every way to resolve them
+  // needs it, and most the editor as well -- which may be shown (#2135)
+  readonly fixElsewhereKey = computed(() => (isTabShown(this.workspaceService.hiddenRoutes(), 'editor') ?
+    'unit-check.fix-elsewhere-coding' :
+    'unit-check.fix-elsewhere'));
+
   constructor(
     private workspaceService: WorkspaceService,
     private unitStores: UnitStoresService,

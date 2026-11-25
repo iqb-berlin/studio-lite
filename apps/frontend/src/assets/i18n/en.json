@@ -667,6 +667,7 @@
     "scheme-not-loaded": "Could not load the coding scheme; duplicate IDs have not been checked.",
     "scheme-unreadable": "The coding scheme could not be checked: it is not in the format the schemer expects. Check in coding whether it opens.",
     "fix-elsewhere": "This can only be fixed in the \"Editor\" and \"Coding\" tabs, which this workspace hides.",
+    "fix-elsewhere-coding": "This can only be fixed in the \"Editor\" and \"Coding\" tabs, and this workspace hides the \"Coding\" tab.",
     "variable-id-conflicts": "The export would contain the same ID for two variables. From version 19 on, the testcenter does not accept such a unit.",
     "scheme-problem": {
       "NAME_TWICE": "Two variables are named \"{{variable}}\". Rename one of them: an element in the editor by its ID, a derived variable in coding.",
