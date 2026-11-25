@@ -5,7 +5,9 @@ import { signal, WritableSignal } from '@angular/core';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { UnitCheckComponent } from './unit-check.component';
+import * as unitCheckUtils from '../../utils/unit-check.utils';
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitStoresService } from '../../services/unit-stores.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
@@ -288,6 +290,27 @@ describe('UnitCheckComponent', () => {
       sectionOf('editor')?.querySelectorAll('[data-cy="unit-check-finding"]') ?? [],
       finding => finding.textContent
     )).toEqual(['unit-check.no-definition']);
+  }));
+
+  // the editor reports with every keystroke in a text; the check parses and validates the scheme (#2135)
+  it('checks again when the editor changes the variables, not when it changes only the text', fakeAsync(() => {
+    create();
+    unitStores.loadDefinitionStore(1, 3).subscribe();
+    fixture.detectChanges();
+    const check = jest.spyOn(unitCheckUtils, 'checkUnit');
+
+    unitStores.definitionStore()?.setData([{ id: '05', alias: '_00a' } as VariableInfo], '{"pages":["typed"]}');
+    fixture.detectChanges();
+    expect(check).not.toHaveBeenCalled();
+
+    unitStores.definitionStore()?.setData([{ id: '05', alias: '_00b' } as VariableInfo], '{"pages":["typed"]}');
+    fixture.detectChanges();
+    expect(check).toHaveBeenCalledTimes(1);
+
+    // the list was changed before already: only the comparison of the variables tells this change
+    unitStores.definitionStore()?.setData([{ id: '05', alias: '_00c' } as VariableInfo], '{"pages":["typed"]}');
+    fixture.detectChanges();
+    expect(check).toHaveBeenCalledTimes(2);
   }));
 
   // the card reads the unit as it is being edited, so a fix shows before it is saved (#2135)

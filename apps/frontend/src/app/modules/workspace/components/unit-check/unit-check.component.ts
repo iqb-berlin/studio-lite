@@ -13,6 +13,8 @@ import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { TranslateModule } from '@ngx-translate/core';
 import { UnitDefinitionSummaryDto } from '@studio-lite-lib/api-dto';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import { sameVariableLists } from '@studio-lite/shared-code';
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitStoresService } from '../../services/unit-stores.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
@@ -49,6 +51,16 @@ interface PresenceQuery {
 
 const sameQuery = (a: PresenceQuery, b: PresenceQuery): boolean => a.unitId === b.unitId &&
   a.comments === b.comments && a.notes === b.notes;
+
+/** What the check reads of the definition the editor holds: not its text. */
+interface EditorDefinition {
+  summary: UnitDefinitionSummaryDto;
+  variables: VariableInfo[] | undefined;
+}
+
+const sameEditorDefinition = (a: EditorDefinition | undefined, b: EditorDefinition | undefined): boolean => a === b ||
+  (!!a && !!b && a.summary.hasDefinition === b.summary.hasDefinition &&
+    a.summary.definitionType === b.summary.definitionType && sameVariableLists(a.variables, b.variables));
 
 type Modules = Partial<Record<ModuleType, string>>;
 type UnitKey = { id: number; key: string | undefined };
@@ -105,6 +117,13 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
     return unitKey ? checkUnitKey(unitKey.key, unitKey.id, this.workspaceService.units()) : [];
   });
 
+  // what the check reads of the editor's definition, and only that: the editor reports with every
+  // keystroke in a text, and the check, which parses and validates the scheme, must not run on each
+  private readonly editorDefinition = computed((): EditorDefinition | undefined => {
+    const data = this.unitStores.definitionStore()?.data();
+    return data && { summary: definitionSummary(data), variables: data.variables };
+  }, { equal: sameEditorDefinition });
+
   private readonly checked = computed((): UnitCheckSection[] | undefined => {
     const sources = this.sources();
     const presence = this.presence();
@@ -112,6 +131,7 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
     // the maps of installed modules are no signals: checked again when a reload replaces them
     this.moduleService.listVersion();
     const definitionStore = this.unitStores.definitionStore();
+    const editorDefinition = this.editorDefinition();
     const schemeStore = this.unitStores.schemeStore();
     return checkUnit({
       modules: this.modules(),
@@ -123,9 +143,9 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
         } :
         undefined,
       // the editor's definition where it is loaded, unsaved changes included; else the server's summary
-      definition: definitionStore ? definitionSummary(definitionStore.data()) : sources.definitionSummary,
+      definition: editorDefinition ? editorDefinition.summary : sources.definitionSummary,
       // as the schemer is given them: an editor that never reported variables leaves them to the scheme
-      variables: definitionStore?.data().variables || schemeStore?.data().variables,
+      variables: editorDefinition?.variables || schemeStore?.data().variables,
       scheme: schemeStore?.data(),
       unsaved: {
         variables: definitionStore?.variablesChanged() ?? false,
