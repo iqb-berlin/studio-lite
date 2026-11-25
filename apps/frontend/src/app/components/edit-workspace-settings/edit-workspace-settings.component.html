@@ -144,6 +144,10 @@
         <div class="margin-top-20">
           <h4>{{'wsg-settings.route-visibility' | translate}}</h4>
           <div class="fx-column-start-stretch">
+            <mat-checkbox [checked]="!(dialogData.hiddenRoutes | include:'metadata')" (change)="toggleRouteVisibility('metadata', $event.checked)"
+                          data-cy="workspace-settings-route-metadata">
+              {{'workspace.routes.metadata' | translate}}
+            </mat-checkbox>
             <mat-checkbox [checked]="!(dialogData.hiddenRoutes | include:'editor')" (change)="toggleRouteVisibility('editor', $event.checked)">
               {{'workspace.routes.editor' | translate}}
             </mat-checkbox>

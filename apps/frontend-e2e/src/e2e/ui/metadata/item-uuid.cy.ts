@@ -3,7 +3,8 @@ import { addFirstUser, FIRST_WORKSPACE_REQUEST_TIMEOUT } from '../../../support/
 
 // A new item gets its uuid from the server when the unit is saved. Until #1830 the frontend did not
 // take it over: the next save in the same view sent the item as a new one, the server deleted it and
-// created it anew, and the links of comments and notes to it were gone.
+// created it anew, and the links of comments and notes to it were gone. The metadata have a tab and a
+// route of their own since #2200, and the save answers them as stored, the uuids included.
 describe('An item saved a second time in the same view', () => {
   const group = { id: '', name: 'ItemUuidGroup' };
   const ws = { id: '', name: 'ItemUuidWorkspace' };
@@ -37,10 +38,10 @@ describe('An item saved a second time in the same view', () => {
 
   it('keeps its uuid and the comment linked to it', () => {
     let itemUuid = '';
-    cy.intercept('PATCH', `/api/workspaces/${wsId}/units/${unitId}/properties`).as('saveProps');
-    cy.intercept('GET', `/api/workspaces/${wsId}/units/${unitId}/properties`).as('loadProps');
-    cy.visit(`/#/a/${wsId}/${unitId}/properties`);
-    cy.wait('@loadProps', { requestTimeout: FIRST_WORKSPACE_REQUEST_TIMEOUT });
+    cy.intercept('PATCH', `/api/workspaces/${wsId}/units/${unitId}/metadata`).as('saveMetadata');
+    cy.intercept('GET', `/api/workspaces/${wsId}/units/${unitId}/metadata`).as('loadMetadata');
+    cy.visit(`/#/a/${wsId}/${unitId}/metadata`);
+    cy.wait('@loadMetadata', { requestTimeout: FIRST_WORKSPACE_REQUEST_TIMEOUT });
 
     cy.get('.add-item-button').click();
     cy.translate(Cypress.expose('locale')).then(json => {
@@ -48,12 +49,14 @@ describe('An item saved a second time in the same view', () => {
     });
     cy.contains('studio-lite-item mat-form-field', 'Item ID').find('input').type('A1');
     cy.get('[data-cy="workspace-unit-save-button"]').click();
-    cy.wait('@saveProps').its('request.body.metadata.items.0.uuid').should('be.undefined');
-    // the frontend reads the item back, with the uuid the server gave it
-    cy.wait('@loadProps').its('response.body.metadata.items.0.uuid').should('be.a', 'string');
+    cy.wait('@saveMetadata').then(save => {
+      expect(save.request.body.items[0].uuid).to.equal(undefined);
+      // the save answers the item with the uuid the server gave it
+      expect(save.response?.body.items[0].uuid).to.be.a('string');
+    });
 
-    cy.getUnitPropertiesAPI(wsId, unitId, token).then(saved => {
-      itemUuid = saved.body.metadata.items[0].uuid;
+    cy.getUnitMetadataAPI(wsId, unitId, token).then(saved => {
+      itemUuid = saved.body.items[0].uuid;
       const comment: CommentData = {
         body: 'Zu Item A1', userName: Cypress.expose('username'), userId, unitId: Number(unitId)
       };
@@ -71,13 +74,13 @@ describe('An item saved a second time in the same view', () => {
     cy.contains('studio-lite-item mat-expansion-panel-header', 'A1').click();
     cy.contains('studio-lite-item mat-form-field', 'Item ID').find('input').clear().type('A2');
     cy.get('[data-cy="workspace-unit-save-button"]').click();
-    cy.wait('@saveProps').then(save => {
-      expect(save.request.body.metadata.items[0].uuid).to.equal(itemUuid);
+    cy.wait('@saveMetadata').then(save => {
+      expect(save.request.body.items[0].uuid).to.equal(itemUuid);
     });
 
-    cy.getUnitPropertiesAPI(wsId, unitId, token).then(saved => {
-      expect(saved.body.metadata.items).to.have.length(1);
-      expect(saved.body.metadata.items[0]).to.include({ id: 'A2', uuid: itemUuid });
+    cy.getUnitMetadataAPI(wsId, unitId, token).then(saved => {
+      expect(saved.body.items).to.have.length(1);
+      expect(saved.body.items[0]).to.include({ id: 'A2', uuid: itemUuid });
     });
     cy.getCommentsAPI(wsId, unitId, token).then(comments => {
       expect(comments.body[0].itemUuids).to.deep.equal([itemUuid]);

@@ -267,58 +267,9 @@
               }
             </mat-card-content>
           </mat-card>
-          @if (unitStores.metadataStore() &&
-          workspaceSettings && variablesLoaded && metadataLoaded &&
-          ((workspaceSettings.unitMDProfile && metadata && unitProfile) ||
-            !workspaceSettings.unitMDProfile)) {
-            <mat-card>
-              <mat-card-header class="properties-card-header">
-                <mat-card-title>
-                  {{ 'metadata.unit-title' | translate }}
-                </mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
-                <iqb-profile-form
-                  [metadataValues]="iqbMetadataValues"
-                  [profileData]="unitProfile"
-                  [language]="language"
-                  [formlyWrapper]="'panel'"
-                  [panelExpanded]="true"
-                  [vocabularyProvider]="metadataService"
-                  (metadataChange)="onMetadataChange($event)">
-                </iqb-profile-form>
-              </mat-card-content>
-            </mat-card>
-          } @else if (!propertiesNotLoaded()) {
-            <mat-spinner class="wait-animation"></mat-spinner>
-          }
         </div>
         <div class="fx-column-start-stretch fx-flex-row-50 fx-gap-10">
           <studio-lite-unit-check></studio-lite-unit-check>
-          @if (unitStores.metadataStore() &&
-          workspaceSettings && variablesLoaded && metadataLoaded &&
-          ((workspaceSettings.itemMDProfile && metadata && itemProfile)
-            || !workspaceSettings.itemMDProfile)) {
-            <mat-card>
-              <mat-card-header>
-                <mat-card-title>
-                  {{ 'metadata.items-title' | translate }}
-                </mat-card-title>
-              </mat-card-header>
-              <mat-card-content class="metadata-items">
-                <studio-lite-items
-                  class="fx-flex-row-50"
-                  [profile]="itemProfile"
-                  [metadata]="metadata"
-                  [language]="language"
-                  [variablesLoader]="variablesLoader"
-                  (metadataChange)="onItemsMetadataChange($event)">
-                </studio-lite-items>
-              </mat-card-content>
-            </mat-card>
-          } @else if (!propertiesNotLoaded()) {
-            <mat-spinner class="wait-animation"></mat-spinner>
-          }
         </div>
       </div>
     </form>

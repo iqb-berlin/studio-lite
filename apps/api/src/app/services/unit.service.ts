@@ -30,6 +30,29 @@ import { UnitNotFoundException } from '../exceptions/unit-not-found.exception';
 import { UnitKeyExistsException } from '../exceptions/unit-key-exists.exception';
 import { assertFitsColumn } from '../utils/column-length';
 
+/** The columns of a unit's properties, its metadata aside (#2200). */
+const PROPERTY_COLUMNS = {
+  id: true,
+  key: true,
+  name: true,
+  groupName: true,
+  editor: true,
+  schemer: true,
+  schemeType: true,
+  player: true,
+  description: true,
+  transcript: true,
+  reference: true,
+  uuid: true,
+  lastChangedMetadata: true,
+  lastChangedDefinition: true,
+  lastChangedScheme: true,
+  state: true,
+  lastChangedMetadataUser: true,
+  lastChangedDefinitionUser: true,
+  lastChangedSchemeUser: true
+} as const;
+
 /**
  * The units and their properties -- plus creating and copying a unit, moving it to another
  * workspace, and submitting it to a drop box. What a unit is made of has services of its own:
@@ -387,38 +410,33 @@ export class UnitService {
     });
   }
 
+  /**
+   * The properties of one unit with its metadata, as the export and the review read them. The
+   * properties route answers without them: the metadata have a tab and a route of their own (#2200).
+   */
   async findOnesProperties(unitId: number, workspaceId: number): Promise<UnitPropertiesDto> {
     this.logger.log(`Returning metadata for unit wit id: ${unitId}`);
     const unit = await this.unitsRepository.findOne({
       where: { id: unitId, workspaceId: workspaceId },
-      select: {
-        id: true,
-        key: true,
-        name: true,
-        groupName: true,
-        editor: true,
-        schemer: true,
-        metadata: true,
-        schemeType: true,
-        player: true,
-        description: true,
-        transcript: true,
-        reference: true,
-        uuid: true,
-        lastChangedMetadata: true,
-        lastChangedDefinition: true,
-        lastChangedScheme: true,
-        state: true,
-        lastChangedMetadataUser: true,
-        lastChangedDefinitionUser: true,
-        lastChangedSchemeUser: true
-      }
+      select: { ...PROPERTY_COLUMNS, metadata: true }
     });
     if (!unit) throw new UnitNotFoundException(unitId, workspaceId, 'GET');
     const workspace = await this.workspaceRepository.findOne({
       where: { id: workspaceId }
     });
     return this.unitMetadataService.getModifiedMetadataForUnit(unit, workspace);
+  }
+
+  /** The properties of one unit without its metadata, which are read and written on their own (#2200). */
+  async findOnesPropertiesWithoutMetadata(unitId: number, workspaceId: number): Promise<UnitPropertiesDto> {
+    const unit = await this.unitsRepository.findOne({
+      where: { id: unitId, workspaceId: workspaceId },
+      select: PROPERTY_COLUMNS
+    });
+    if (!unit) throw new UnitNotFoundException(unitId, workspaceId, 'GET');
+    // the entity starts with an empty `metadata` and `variables`, selected or not
+    const { metadata, variables, ...properties } = unit;
+    return properties;
   }
 
   async findAllWithProperties(workspaceId: number): Promise<UnitPropertiesDto[]> {
@@ -510,12 +528,16 @@ export class UnitService {
     return user.firstName && user.firstName.trim() ? `${displayName}, ${user.firstName.trim()}` : displayName;
   }
 
+  /**
+   * Writes the unit's properties. The metadata are written on their own route since they have a tab
+   * of their own (#2200): a body that still carries them is refused, so that no caller loses them
+   * without a word.
+   */
   async patchUnit(unitId: number, newData: UnitPropertiesDto, userName: string | null): Promise<void> {
-    await this.patchUnitProperties(unitId, newData, userName);
-    const dataKeys = Object.keys(newData);
-    if (dataKeys.indexOf('metadata') >= 0) {
-      await this.unitMetadataService.patchMetadata(unitId, newData.metadata, userName);
+    if (Object.keys(newData).includes('metadata')) {
+      throw new BadRequestException('The metadata of a unit are written to its metadata route.');
     }
+    await this.patchUnitProperties(unitId, newData, userName);
   }
 
   async patchUnitProperties(unitId: number, newData: UnitPropertiesDto, userName: string): Promise<void> {

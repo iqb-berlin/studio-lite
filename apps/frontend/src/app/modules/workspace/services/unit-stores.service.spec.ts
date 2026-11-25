@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { of, Subject } from 'rxjs';
-import { UnitPropertiesDto } from '@studio-lite-lib/api-dto';
+import { UnitMetadataValues, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { UnitStoresService } from './unit-stores.service';
 import { WorkspaceBackendService } from './workspace-backend.service';
@@ -10,6 +10,7 @@ describe('UnitStoresService', () => {
   let service: UnitStoresService;
   let backendService: {
     getUnitProperties: jest.Mock;
+    getUnitMetadata: jest.Mock;
     getUnitDefinition: jest.Mock;
     getUnitScheme: jest.Mock;
   };
@@ -17,6 +18,7 @@ describe('UnitStoresService', () => {
   beforeEach(() => {
     backendService = {
       getUnitProperties: jest.fn(),
+      getUnitMetadata: jest.fn(),
       getUnitDefinition: jest.fn(),
       getUnitScheme: jest.fn()
     };
@@ -29,39 +31,39 @@ describe('UnitStoresService', () => {
     service = TestBed.inject(UnitStoresService);
   });
 
-  describe('loadMetadataStore', () => {
+  describe('loadPropertiesStore', () => {
     it('should create the store from the server\'s answer and report the answer', () => {
       const properties: UnitPropertiesDto = { id: 3, key: 'U3', name: 'Unit 3' };
       const reported = jest.fn();
-      service.metadataLoaded$.subscribe(reported);
+      service.propertiesLoaded$.subscribe(reported);
       backendService.getUnitProperties.mockReturnValue(of(properties));
 
       let loaded;
-      service.loadMetadataStore(1, 3).subscribe(store => { loaded = store; });
+      service.loadPropertiesStore(1, 3).subscribe(store => { loaded = store; });
 
       expect(backendService.getUnitProperties).toHaveBeenCalledWith(1, 3);
-      expect(loaded).toBe(service.metadataStore());
-      expect(service.metadataStore()?.getData().key).toBe('U3');
-      expect(service.metadataStore()?.loaded).toBe(true);
+      expect(loaded).toBe(service.propertiesStore());
+      expect(service.propertiesStore()?.getData().key).toBe('U3');
+      expect(service.propertiesStore()?.loaded).toBe(true);
       expect(reported).toHaveBeenCalledWith(properties);
     });
 
     it('should create an empty store for the unit, marked as not loaded, when the server does not answer', () => {
       backendService.getUnitProperties.mockReturnValue(of(null));
 
-      service.loadMetadataStore(1, 5).subscribe();
+      service.loadPropertiesStore(1, 5).subscribe();
 
-      expect(service.metadataStore()?.getData().id).toBe(5);
-      expect(service.metadataStore()?.loaded).toBe(false);
+      expect(service.propertiesStore()?.getData().id).toBe(5);
+      expect(service.propertiesStore()?.loaded).toBe(false);
     });
 
     it('should hand out the store it has without asking the server again', () => {
       backendService.getUnitProperties.mockReturnValue(of({ id: 3 }));
-      service.loadMetadataStore(1, 3).subscribe();
-      const store = service.metadataStore();
+      service.loadPropertiesStore(1, 3).subscribe();
+      const store = service.propertiesStore();
 
       let loaded;
-      service.loadMetadataStore(1, 3).subscribe(again => { loaded = again; });
+      service.loadPropertiesStore(1, 3).subscribe(again => { loaded = again; });
 
       expect(loaded).toBe(store);
       expect(backendService.getUnitProperties).toHaveBeenCalledTimes(1);
@@ -73,14 +75,37 @@ describe('UnitStoresService', () => {
       const first = jest.fn();
       const second = jest.fn();
 
-      service.loadMetadataStore(1, 3).subscribe(first);
-      service.loadMetadataStore(1, 3).subscribe(second);
+      service.loadPropertiesStore(1, 3).subscribe(first);
+      service.loadPropertiesStore(1, 3).subscribe(second);
       response.next({ id: 3 });
       response.complete();
 
       expect(backendService.getUnitProperties).toHaveBeenCalledTimes(1);
-      expect(first).toHaveBeenCalledWith(service.metadataStore());
-      expect(second).toHaveBeenCalledWith(service.metadataStore());
+      expect(first).toHaveBeenCalledWith(service.propertiesStore());
+      expect(second).toHaveBeenCalledWith(service.propertiesStore());
+    });
+  });
+
+  // the metadata have a store of their own since they have a tab of their own (#2200)
+  describe('loadMetadataStore', () => {
+    it('should create the store for the unit asked for from the server\'s answer', () => {
+      backendService.getUnitMetadata.mockReturnValue(of({ profiles: [] }));
+
+      service.loadMetadataStore(1, 3).subscribe();
+
+      expect(backendService.getUnitMetadata).toHaveBeenCalledWith(1, 3);
+      expect(service.metadataStore()?.unitId).toBe(3);
+      expect(service.metadataStore()?.getData()).toEqual({ profiles: [] });
+    });
+
+    it('should hand out nothing when the server does not answer, and ask again next time', () => {
+      backendService.getUnitMetadata.mockReturnValue(of(null));
+      service.loadMetadataStore(1, 3).subscribe();
+      expect(service.metadataStore()).toBeUndefined();
+
+      backendService.getUnitMetadata.mockReturnValue(of({ profiles: [] }));
+      service.loadMetadataStore(1, 3).subscribe();
+      expect(service.metadataStore()?.unitId).toBe(3);
     });
   });
 
@@ -122,8 +147,10 @@ describe('UnitStoresService', () => {
   describe('changed', () => {
     beforeEach(() => {
       backendService.getUnitProperties.mockReturnValue(of({ id: 3, player: 'player@1.0' }));
+      backendService.getUnitMetadata.mockReturnValue(of({ profiles: [] }));
       backendService.getUnitDefinition.mockReturnValue(of({ definition: 'def', variables: [] }));
       backendService.getUnitScheme.mockReturnValue(of({ scheme: '{}', schemeType: 'type' }));
+      service.loadPropertiesStore(1, 3).subscribe();
       service.loadMetadataStore(1, 3).subscribe();
       service.loadDefinitionStore(1, 3).subscribe();
       service.loadSchemeStore(1, 3).subscribe();
@@ -134,10 +161,14 @@ describe('UnitStoresService', () => {
     });
 
     it('should follow a change in any of the stores', () => {
-      service.metadataStore()?.setPlayer('player@2.0');
+      service.propertiesStore()?.setPlayer('player@2.0');
       expect(service.changed()).toBe(true);
-      service.metadataStore()?.setPlayer('player@1.0');
+      service.propertiesStore()?.setPlayer('player@1.0');
       expect(service.changed()).toBe(false);
+
+      service.metadataStore()?.setMetadata({ items: [{ id: 'item1' }] });
+      expect(service.changed()).toBe(true);
+      service.metadataStore()?.restore();
 
       service.definitionStore()?.setData([], 'new');
       expect(service.changed()).toBe(true);
@@ -148,7 +179,8 @@ describe('UnitStoresService', () => {
     });
 
     it('should be false again once the changes are discarded', () => {
-      service.metadataStore()?.setPlayer('player@2.0');
+      service.propertiesStore()?.setPlayer('player@2.0');
+      service.metadataStore()?.setMetadata({ items: [{ id: 'item1' }] });
       service.definitionStore()?.setData([], 'new');
 
       service.restore();
@@ -157,7 +189,7 @@ describe('UnitStoresService', () => {
     });
 
     it('should be false once the stores are let go of', () => {
-      service.metadataStore()?.setPlayer('player@2.0');
+      service.propertiesStore()?.setPlayer('player@2.0');
 
       service.reset();
 
@@ -168,14 +200,17 @@ describe('UnitStoresService', () => {
   describe('reset', () => {
     it('should let go of all stores', () => {
       backendService.getUnitProperties.mockReturnValue(of({ id: 3 }));
+      backendService.getUnitMetadata.mockReturnValue(of({ profiles: [] }));
       backendService.getUnitDefinition.mockReturnValue(of({ definition: 'def', variables: [] }));
       backendService.getUnitScheme.mockReturnValue(of({ scheme: '{}', schemeType: 'type' }));
+      service.loadPropertiesStore(1, 3).subscribe();
       service.loadMetadataStore(1, 3).subscribe();
       service.loadDefinitionStore(1, 3).subscribe();
       service.loadSchemeStore(1, 3).subscribe();
 
       service.reset();
 
+      expect(service.propertiesStore()).toBeUndefined();
       expect(service.metadataStore()).toBeUndefined();
       expect(service.definitionStore()).toBeUndefined();
       expect(service.schemeStore()).toBeUndefined();
@@ -186,26 +221,43 @@ describe('UnitStoresService', () => {
       backendService.getUnitProperties.mockReturnValue(response);
       const reported = jest.fn();
       const waiting = jest.fn();
-      service.metadataLoaded$.subscribe(reported);
-      service.loadMetadataStore(1, 3).subscribe(waiting);
+      service.propertiesLoaded$.subscribe(reported);
+      service.loadPropertiesStore(1, 3).subscribe(waiting);
 
       service.reset();
       response.next({ id: 3 });
 
-      expect(service.metadataStore()).toBeUndefined();
+      expect(service.propertiesStore()).toBeUndefined();
       expect(reported).not.toHaveBeenCalled();
+      expect(waiting).not.toHaveBeenCalled();
+    });
+
+    // clicked through quickly: the metadata of the unit left must not land in the place of the next (#2200)
+    it('should not keep the metadata of a unit left before they arrived', () => {
+      const response = new Subject<UnitMetadataValues>();
+      backendService.getUnitMetadata.mockReturnValue(response);
+      const waiting = jest.fn();
+      service.loadMetadataStore(1, 3).subscribe(waiting);
+
+      service.reset();
+      backendService.getUnitMetadata.mockReturnValue(of({ profiles: [{ profileId: 'of-4', entries: [] }] }));
+      service.loadMetadataStore(1, 4).subscribe();
+      response.next({ profiles: [{ profileId: 'of-3', entries: [] }] });
+
+      expect(service.metadataStore()?.unitId).toBe(4);
+      expect(service.metadataStore()?.getData().profiles?.[0].profileId).toBe('of-4');
       expect(waiting).not.toHaveBeenCalled();
     });
 
     it('should ask the server anew for the next unit', () => {
       backendService.getUnitProperties.mockReturnValue(new Subject<UnitPropertiesDto>());
-      service.loadMetadataStore(1, 3).subscribe();
+      service.loadPropertiesStore(1, 3).subscribe();
 
       service.reset();
       backendService.getUnitProperties.mockReturnValue(of({ id: 4 }));
-      service.loadMetadataStore(1, 4).subscribe();
+      service.loadPropertiesStore(1, 4).subscribe();
 
-      expect(service.metadataStore()?.getData().id).toBe(4);
+      expect(service.propertiesStore()?.getData().id).toBe(4);
     });
   });
 

@@ -16,7 +16,7 @@ import { WorkspaceBackendService } from '../modules/workspace/services/workspace
 import { WorkspaceService } from '../modules/workspace/services/workspace.service';
 import { UnitStoresService } from '../modules/workspace/services/unit-stores.service';
 import { UnitDefinitionStore } from '../modules/workspace/classes/unit-definition-store';
-import { UnitMetadataStore } from '../modules/workspace/classes/unit-metadata-store';
+import { UnitPropertiesStore } from '../modules/workspace/classes/unit-properties-store';
 import { ModuleService } from '../services/module.service';
 import { VeronaModuleClass } from '../models/verona-module.class';
 import { VeronaModuleDirective } from './verona-module.directive';
@@ -243,7 +243,7 @@ describe('VeronaModuleDirective', () => {
   it('loads module list before resolving module id', async () => {
     const { directive, moduleService } = createDirective();
 
-    const metadataStore = new UnitMetadataStore({ id: 1, player: 'player-id' } as UnitPropertiesDto);
+    const propertiesStore = new UnitPropertiesStore({ id: 1, player: 'player-id' } as UnitPropertiesDto);
     const module = new VeronaModuleClass({
       key: 'module-1',
       sortKey: 'module-1',
@@ -266,7 +266,7 @@ describe('VeronaModuleDirective', () => {
 
     const matchSpy = jest.spyOn(VeronaModuleFactory, 'getBestMatch').mockReturnValue('module-1');
 
-    const moduleId = await firstValueFrom(directive.getVeronaModuleId(metadataStore, 'player'));
+    const moduleId = await firstValueFrom(directive.getVeronaModuleId(propertiesStore, 'player'));
 
     expect(moduleService.loadList).toHaveBeenCalled();
     expect(matchSpy).toHaveBeenCalledWith('player-id', ['module-1']);
@@ -279,9 +279,9 @@ describe('VeronaModuleDirective', () => {
   it('resolves the module id from the list it holds without loading the list again', async () => {
     const { directive, moduleService } = createDirective();
     moduleService.players = { 'player@1.2': createModule('player@1.2') };
-    const metadataStore = new UnitMetadataStore({ id: 1, player: 'player@1.1' } as UnitPropertiesDto);
+    const propertiesStore = new UnitPropertiesStore({ id: 1, player: 'player@1.1' } as UnitPropertiesDto);
 
-    const moduleId = await firstValueFrom(directive.getVeronaModuleId(metadataStore, 'player'));
+    const moduleId = await firstValueFrom(directive.getVeronaModuleId(propertiesStore, 'player'));
 
     expect(moduleService.loadList).not.toHaveBeenCalled();
     expect(moduleId).toBe('player@1.2');

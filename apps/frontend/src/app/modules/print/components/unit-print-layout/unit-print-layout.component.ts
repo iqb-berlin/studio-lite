@@ -1,6 +1,7 @@
 import {
   Component, EventEmitter, Input, OnInit, Output
 } from '@angular/core';
+import { forkJoin } from 'rxjs';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
@@ -58,12 +59,15 @@ export class UnitPrintLayoutComponent implements OnInit {
 
   private initPlayer(): void {
     setTimeout(() => {
-      this.backendService.getUnitProperties(this.workspaceId, this.unitId)
-        .subscribe(async unitProperties => {
-          if (unitProperties) {
-            await this.setUnitProperties(unitProperties);
-          }
-        });
+      // the properties come without the metadata, which have a route of their own (#2200)
+      forkJoin([
+        this.backendService.getUnitProperties(this.workspaceId, this.unitId),
+        this.backendService.getUnitMetadata(this.workspaceId, this.unitId)
+      ]).subscribe(async ([unitProperties, metadata]) => {
+        if (unitProperties) {
+          await this.setUnitProperties({ ...unitProperties, ...(metadata && { metadata }) });
+        }
+      });
     });
   }
 

@@ -1,5 +1,5 @@
 import {
-  BehaviorSubject, lastValueFrom, Observable, Subject
+  BehaviorSubject, defaultIfEmpty, forkJoin, lastValueFrom, Observable, Subject
 } from 'rxjs';
 import {
   EventEmitter, Injectable, Output, signal
@@ -9,12 +9,14 @@ import { map } from 'rxjs/operators';
 import {
   State,
   UnitInListDto,
+  UnitMetadataValues,
   UnitPropertiesDto,
   WorkspaceSettingsDto,
   UnitRichNoteTagDto
 } from '@studio-lite-lib/api-dto';
 import { HttpParams } from '@angular/common/http';
 import { WorkspaceBackendService } from './workspace-backend.service';
+import { UnitPropertiesStore } from '../classes/unit-properties-store';
 import { UnitMetadataStore } from '../classes/unit-metadata-store';
 import { UnitSchemeStore } from '../classes/unit-scheme-store';
 import { AppService } from '../../../services/app.service';
@@ -150,7 +152,7 @@ export class WorkspaceService {
     private richNoteTagsService: RichNoteTagsService,
     private unitStores: UnitStoresService
   ) {
-    this.unitStores.metadataLoaded$.subscribe(unitData => this.setLastChanged(unitData));
+    this.unitStores.propertiesLoaded$.subscribe(unitData => this.setLastChanged(unitData));
     this.workspaceSettings = {
       defaultEditor: '',
       defaultPlayer: '',
@@ -243,8 +245,8 @@ export class WorkspaceService {
     }
   }
 
-  loadUnitProperties(): Observable<UnitMetadataStore | undefined> {
-    return this.unitStores.loadMetadataStore(this.selectedWorkspaceId, this.selectedUnit$.getValue());
+  loadUnitProperties(): Observable<UnitPropertiesStore | undefined> {
+    return this.unitStores.loadPropertiesStore(this.selectedWorkspaceId, this.selectedUnit$.getValue());
   }
 
   /** Who changed which part of the unit when, as the server reports it with freshly loaded properties. */
@@ -289,15 +291,17 @@ export class WorkspaceService {
     this.appService.dataLoading = true;
     // the unit and its stores as they are when the save starts; another unit may be opened meanwhile
     const unitId = this.selectedUnit$.getValue();
-    const unitMetadataStore = this.unitStores.metadataStore();
+    const unitPropertiesStore = this.unitStores.propertiesStore();
+    let unitMetadataStore = this.unitStores.metadataStore();
     const unitDefinitionStore = this.unitStores.definitionStore();
     let unitSchemeStore = this.unitStores.schemeStore();
-    if (unitMetadataStore && (unitDefinitionStore?.isChanged() || unitSchemeStore?.isChanged())) {
-      // loads the scheme where no tab has yet; the save of the variables renames its codings, too (#2135)
-      unitSchemeStore = await this.reconcileItemVariables(unitMetadataStore, unitId);
+    if (unitDefinitionStore?.isChanged() || unitSchemeStore?.isChanged()) {
+      // loads the scheme and the metadata where no tab has yet: the save of the variables renames the
+      // codings with them (#2135), and the items follow them (#1361, #2200)
+      ({ unitSchemeStore, unitMetadataStore } = await this.reconcileItemVariables(unitId));
     }
-    if (unitMetadataStore && unitMetadataStore.isChanged()) {
-      const changedData = unitMetadataStore.getChangedData();
+    if (unitPropertiesStore && unitPropertiesStore.isChanged()) {
+      const changedData = unitPropertiesStore.getChangedData();
       saveOk = await lastValueFrom(
         this.backendService.setUnitProperties(
           this.selectedWorkspaceId,
@@ -305,14 +309,20 @@ export class WorkspaceService {
         )
       );
       if (saveOk) {
-        reloadUnitList = unitMetadataStore.isKeyOrNameOrGroupOrStateChanged();
-        unitMetadataStore.applyChanges(changedData);
+        reloadUnitList = unitPropertiesStore.isKeyOrNameOrGroupOrStateChanged();
+        unitPropertiesStore.applyChanges(changedData);
         this.lastChangedMetadata = new Date();
         this.lastChangedMetadataUser = this.getDisplayUserName();
-        if (changedData.metadata?.items?.some(item => !item.uuid)) {
-          await this.reloadUnitMetadata(changedData.id);
-        }
       }
+    }
+    const sentMetadata = saveOk ? unitMetadataStore?.getChangedData() : undefined;
+    if (unitMetadataStore && sentMetadata) {
+      // to the unit the store was loaded for, which may no longer be the one open
+      const storedMetadata = await lastValueFrom(
+        this.backendService.setUnitMetadata(this.selectedWorkspaceId, unitMetadataStore.unitId, sentMetadata)
+      );
+      saveOk = !!storedMetadata;
+      if (storedMetadata) this.applySavedMetadata(unitMetadataStore, sentMetadata, storedMetadata);
     }
     if (
       saveOk &&
@@ -377,40 +387,45 @@ export class WorkspaceService {
    * only with the whole list -- the scheme loaded, the list not empty, the stores still this unit's --
    * since an incomplete list would remove assignments to variables that do exist.
    *
-   * Answers the scheme store it loaded for this, if there is one.
+   * Answers the scheme and metadata stores it loaded for this, if there are any. Both are asked for in
+   * one step, before anything is awaited: the stores are loaded for the generation of the unit open
+   * when they are asked for, and asked for after a wait, those of the unit left would be put into the
+   * place of the unit opened meanwhile -- its tab would show them, and its next save write them (#2200).
    */
   private async reconcileItemVariables(
-    unitMetadataStore: UnitMetadataStore,
     unitId: number
-  ): Promise<UnitSchemeStore | undefined> {
-    const unitSchemeStore = await lastValueFrom(
-      this.unitStores.loadSchemeStore(this.selectedWorkspaceId, unitId),
-      { defaultValue: undefined }
-    );
+  ): Promise<{ unitSchemeStore: UnitSchemeStore | undefined; unitMetadataStore: UnitMetadataStore | undefined }> {
+    const [unitSchemeStore, unitMetadataStore] = await lastValueFrom(forkJoin([
+      this.unitStores.loadSchemeStore(this.selectedWorkspaceId, unitId).pipe(defaultIfEmpty(undefined)),
+      this.unitStores.loadMetadataStore(this.selectedWorkspaceId, unitId).pipe(defaultIfEmpty(undefined))
+    ]));
+    const stores = { unitSchemeStore, unitMetadataStore };
     const variables = this.unitStores.variables();
-    const metadata = unitMetadataStore.getData().metadata;
-    if (!unitSchemeStore || !variables.length || !metadata) return unitSchemeStore;
-    if (this.unitStores.metadataStore() !== unitMetadataStore) return unitSchemeStore;
-    const reconciled = reconcileItemVariables(metadata, variables);
+    if (!unitSchemeStore || !unitMetadataStore || !variables.length) return stores;
+    // the unit has been left meanwhile: the variables are already the next unit's
+    if (this.unitStores.metadataStore() !== unitMetadataStore || unitMetadataStore.unitId !== unitId) return stores;
+    const reconciled = reconcileItemVariables(unitMetadataStore.getData(), variables);
     if (reconciled) unitMetadataStore.setMetadata(reconciled);
-    return unitSchemeStore;
+    return stores;
   }
 
   /**
-   * Items that a save has just created get their uuid on the server only. Reading the metadata back
-   * hands it to the store and, via {@link unitMetadataReloaded}, to the form, so that the next save
-   * names these items as existing ones; named as new, the server would delete and recreate them
-   * (#1830). If the user has meanwhile moved to another unit, its store is left alone.
+   * Takes the metadata as the server stored them: items that a save has just created get their uuid
+   * there only, and named as new the next save would have the server delete and recreate them, links
+   * and all (#1830). The form is told, via {@link unitMetadataReloaded}, only where it shows this
+   * very store and the save created items; if the user has meanwhile moved to another unit, its form
+   * is left alone.
    */
-  private async reloadUnitMetadata(unitId: number): Promise<void> {
-    const unitData = await lastValueFrom(
-      this.backendService.getUnitProperties(this.selectedWorkspaceId, unitId)
-    );
-    const unitMetadataStore = this.unitStores.metadataStore();
-    if (unitData && unitMetadataStore?.getData().id === unitId) {
-      unitMetadataStore.reloadMetadata(unitData.metadata ?? {});
-      this.unitMetadataReloaded.emit();
-    }
+  private applySavedMetadata(
+    unitMetadataStore: UnitMetadataStore,
+    sent: UnitMetadataValues,
+    stored: UnitMetadataValues
+  ): void {
+    unitMetadataStore.applySaved(sent, stored);
+    this.lastChangedMetadata = new Date();
+    this.lastChangedMetadataUser = this.getDisplayUserName();
+    const createdItems = !!sent.items?.some(item => !item.uuid);
+    if (createdItems && this.unitStores.metadataStore() === unitMetadataStore) this.unitMetadataReloaded.emit();
   }
 
   loadRichNoteTags(): void {

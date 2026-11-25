@@ -7,6 +7,7 @@ import {
 } from 'rxjs';
 import { UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { WorkspaceBackendService } from './workspace-backend.service';
+import { UnitPropertiesStore } from '../classes/unit-properties-store';
 import { UnitMetadataStore } from '../classes/unit-metadata-store';
 import { UnitDefinitionStore } from '../classes/unit-definition-store';
 import { UnitSchemeStore } from '../classes/unit-scheme-store';
@@ -19,10 +20,10 @@ interface StoreSlot<T> {
 }
 
 /**
- * Holds the stores of the unit that is open -- metadata, definition and scheme -- and is the only
- * place that loads them. Whichever tab needs a store first asks for it here; a second tab asking
- * while it is still on its way shares the same request instead of starting one that would replace
- * the first store.
+ * Holds the stores of the unit that is open -- properties, metadata, definition and scheme -- and is
+ * the only place that loads them. Whichever tab needs a store first asks for it here; a second tab
+ * asking while it is still on its way shares the same request instead of starting one that would
+ * replace the first store.
  *
  * The stores and whether any of them holds unsaved work are signals, so whoever looks at them gets
  * the current answer, also one that comes later than the store. That is what the save button lacked:
@@ -32,18 +33,21 @@ interface StoreSlot<T> {
   providedIn: 'root'
 })
 export class UnitStoresService {
+  private readonly properties: StoreSlot<UnitPropertiesStore> = { store: signal(undefined) };
   private readonly metadata: StoreSlot<UnitMetadataStore> = { store: signal(undefined) };
   private readonly definition: StoreSlot<UnitDefinitionStore> = { store: signal(undefined) };
   private readonly scheme: StoreSlot<UnitSchemeStore> = { store: signal(undefined) };
   // counts the resets, so that a response arriving for a unit that has been left is not kept
   private generation = 0;
 
+  readonly propertiesStore = this.properties.store.asReadonly();
   readonly metadataStore = this.metadata.store.asReadonly();
   readonly definitionStore = this.definition.store.asReadonly();
   readonly schemeStore = this.scheme.store.asReadonly();
   readonly definitionStore$ = toObservable(this.definitionStore);
 
   readonly changed = computed(() => !!(
+    this.propertiesStore()?.changed() ||
     this.metadataStore()?.changed() ||
     this.definitionStore()?.changed() ||
     this.schemeStore()?.changed()
@@ -55,26 +59,35 @@ export class UnitStoresService {
     this.schemeStore()?.data()
   ));
 
-  private readonly metadataLoadedSubject = new Subject<UnitPropertiesDto>();
+  private readonly propertiesLoadedSubject = new Subject<UnitPropertiesDto>();
   /** The unit properties as they come from the server, each time they are loaded anew. */
-  readonly metadataLoaded$ = this.metadataLoadedSubject.asObservable();
+  readonly propertiesLoaded$ = this.propertiesLoadedSubject.asObservable();
 
   constructor(private backendService: WorkspaceBackendService) {}
 
   /**
-   * The unit's properties and metadata; a unit the server does not answer for gets an empty store,
-   * marked as not loaded.
+   * The unit's properties; a unit the server does not answer for gets an empty store, marked as not
+   * loaded.
    */
-  loadMetadataStore(workspaceId: number, unitId: number): Observable<UnitMetadataStore | undefined> {
+  loadPropertiesStore(workspaceId: number, unitId: number): Observable<UnitPropertiesStore | undefined> {
     return this.load(
-      this.metadata,
+      this.properties,
       () => this.backendService
         .getUnitProperties(workspaceId, unitId)
         .pipe(map(unitData => (unitData ?
-          new UnitMetadataStore(unitData) :
-          new UnitMetadataStore(<UnitPropertiesDto>{ id: unitId }, false)))),
-      store => this.metadataLoadedSubject.next(store.getData())
+          new UnitPropertiesStore(unitData) :
+          new UnitPropertiesStore(<UnitPropertiesDto>{ id: unitId }, false)))),
+      store => this.propertiesLoadedSubject.next(store.getData())
     );
+  }
+
+  /** The unit's metadata, its profiles and items (#2200); undefined if the server does not deliver them. */
+  loadMetadataStore(workspaceId: number, unitId: number): Observable<UnitMetadataStore | undefined> {
+    return this.load(this.metadata, () => this.backendService
+      .getUnitMetadata(workspaceId, unitId)
+      .pipe(
+        map(unitMetadata => (unitMetadata ? new UnitMetadataStore(unitId, unitMetadata) : undefined))
+      ));
   }
 
   /** The unit's definition; undefined if the server does not deliver it. */
@@ -97,6 +110,7 @@ export class UnitStoresService {
 
   /** Discards the unsaved work in every store there is. */
   restore(): void {
+    this.propertiesStore()?.restore();
     this.metadataStore()?.restore();
     this.definitionStore()?.restore();
     this.schemeStore()?.restore();
@@ -105,7 +119,7 @@ export class UnitStoresService {
   /** Lets go of the stores, when another unit is opened; requests still under way are ignored. */
   reset(): void {
     this.generation += 1;
-    [this.metadata, this.definition, this.scheme].forEach(slot => {
+    [this.properties, this.metadata, this.definition, this.scheme].forEach((slot: StoreSlot<unknown>) => {
       slot.loading = undefined;
       slot.store.set(undefined);
     });

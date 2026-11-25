@@ -153,7 +153,7 @@ export class UnitEditorComponent extends VeronaModuleDirective {
 
   private subscribeForVeronaModuleLoaded(): void {
     this.getVeronaModuleId(
-      this.unitStores.metadataStore(),
+      this.unitStores.propertiesStore(),
       'editor'
     )
       .pipe(takeUntil(this.ngUnsubscribe))

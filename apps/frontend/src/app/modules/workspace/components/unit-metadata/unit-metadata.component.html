@@ -1,0 +1,59 @@
+<div class="fx-column-start-stretch full-height">
+  <div class="metadata-container fx-flex-fill">
+    @if (notLoaded()) {
+      <p class="hint" data-cy="unit-metadata-not-loaded">{{ 'unit-metadata.not-loaded' | translate }}</p>
+    } @else {
+      <div class="fx-row-start-stretch fx-gap-10">
+        <div class="fx-column-start-stretch fx-flex-row-50 fx-gap-10">
+          @if (metadataLoaded() && variablesLoaded() &&
+            ((workspaceSettings.unitMDProfile && unitProfile) || !workspaceSettings.unitMDProfile)) {
+            <mat-card data-cy="unit-metadata-unit">
+              <mat-card-header class="metadata-card-header">
+                <mat-card-title>
+                  {{ 'metadata.unit-title' | translate }}
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <iqb-profile-form
+                  [metadataValues]="iqbMetadataValues"
+                  [profileData]="unitProfile"
+                  [language]="language"
+                  [formlyWrapper]="'panel'"
+                  [panelExpanded]="true"
+                  [vocabularyProvider]="metadataService"
+                  (metadataChange)="onMetadataChange($event)">
+                </iqb-profile-form>
+              </mat-card-content>
+            </mat-card>
+          } @else {
+            <mat-spinner class="wait-animation"></mat-spinner>
+          }
+        </div>
+        <div class="fx-column-start-stretch fx-flex-row-50 fx-gap-10">
+          @if (metadataLoaded() && variablesLoaded() &&
+            ((workspaceSettings.itemMDProfile && itemProfile) || !workspaceSettings.itemMDProfile)) {
+            <mat-card data-cy="unit-metadata-items">
+              <mat-card-header>
+                <mat-card-title>
+                  {{ 'metadata.items-title' | translate }}
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content class="metadata-items">
+                <studio-lite-items
+                  class="fx-flex-row-50"
+                  [profile]="itemProfile"
+                  [metadata]="metadata"
+                  [language]="language"
+                  [variablesLoader]="variablesLoader"
+                  (metadataChange)="onItemsMetadataChange($event)">
+                </studio-lite-items>
+              </mat-card-content>
+            </mat-card>
+          } @else {
+            <mat-spinner class="wait-animation"></mat-spinner>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

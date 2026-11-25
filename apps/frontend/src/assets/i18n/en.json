@@ -1031,6 +1031,9 @@
     "no-player": "No player",
     "no-schemer": "No schemer"
   },
+  "unit-metadata": {
+    "not-loaded": "Could not load the metadata of the unit."
+  },
   "unit-properties": {
     "title": "Unit properties",
     "modules": "Verona modules",

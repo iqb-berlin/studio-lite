@@ -651,6 +651,65 @@ describe('Unit API tests', () => {
     );
   });
 
+  // ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
+  // The metadata of a unit have a route of their own, and the properties come without them (#2200).
+  describe('#2200 the metadata of a unit on a route of their own', () => {
+    const unit: UnitData = { shortname: 'D2200', name: 'Metadaten', group: 'Group1' };
+    const token = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+    const ws = () => Cypress.expose(ws1.id);
+    const metadata = {
+      profiles: [{ profileId: 'unit-profile-2200', entries: [] }],
+      items: [{ id: 'item_2200', profiles: [] }]
+    };
+    const itemIdsOf = (body: { items?: { id: string }[] }) => (body.items || []).map(item => item.id);
+    let unitId = '';
+
+    before(() => {
+      cy.createUnitAPI(ws(), unit, token()).then(resp => {
+        expect(resp.status).to.equal(201);
+        unitId = `${resp.body}`;
+      });
+    });
+
+    after(() => {
+      cy.deleteUnitsAPI([unitId], ws(), token());
+    });
+
+    it('200 positive test: should save them and answer them as stored, a new item with its uuid', () => {
+      cy.requestWorkspaceAPI('PATCH', `${ws()}/units/${unitId}/metadata`, token(), metadata).then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(itemIdsOf(resp.body)).to.deep.equal(['item_2200']);
+        expect(resp.body.items[0].uuid).to.be.a('string');
+      });
+    });
+
+    it('200 positive test: should leave them out of the properties', () => {
+      cy.getUnitPropertiesAPI(ws(), unitId, token()).then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(resp.body).not.to.have.property('metadata');
+      });
+    });
+
+    it('400 negative test: should refuse them sent with the properties, and change nothing', () => {
+      cy.requestWorkspaceAPI('PATCH', `${ws()}/units/${unitId}/properties`, token(), {
+        id: Number(unitId), name: 'Umbenannt', metadata: { profiles: [], items: [] }
+      }).its('status').should('equal', 400);
+      cy.getUnitPropertiesAPI(ws(), unitId, token()).its('body.name').should('equal', unit.name);
+      cy.getUnitMetadataAPI(ws(), unitId, token()).then(resp => {
+        expect(itemIdsOf(resp.body)).to.deep.equal(['item_2200']);
+      });
+    });
+
+    it('403 negative test: should not let a user without access to the workspace save them', () => {
+      cy.requestWorkspaceAPI(
+        'PATCH',
+        `${ws()}/units/${unitId}/metadata`,
+        Cypress.expose(`token_${user3.username}`),
+        metadata
+      ).its('status').should('equal', 403);
+    });
+  });
+
   describe('#1775 a unit asked for under a workspace it is not in', () => {
     // unit1 lives in ws2 since 38. The admin may enter ws1 as well, so every guard that asks about
     // the workspace alone lets the calls through; what answers 404 is that ws1 does not hold unit1.
@@ -667,6 +726,7 @@ describe('Unit API tests', () => {
       { method: 'GET', route: unit => `units/${unit}/definition-summary` },
       { method: 'GET', route: unit => `units/${unit}/scheme` },
       { method: 'PATCH', route: unit => `units/${unit}/properties`, body: () => ({}) },
+      { method: 'PATCH', route: unit => `units/${unit}/metadata`, body: () => ({}) },
       { method: 'PATCH', route: unit => `units/${unit}/definition`, body: () => ({}) },
       { method: 'PATCH', route: unit => `units/${unit}/scheme`, body: () => ({}) },
       { method: 'DELETE', route: unit => `units/${unit}` },
@@ -957,9 +1017,9 @@ describe('Unit API tests', () => {
     };
     const saveMetadataOfA = (metadata: object) => cy.requestWorkspaceAPI(
       'PATCH',
-      `${ws()}/units/${ids.unitA}/properties`,
+      `${ws()}/units/${ids.unitA}/metadata`,
       token(),
-      { id: Number(ids.unitA), metadata }
+      metadata
     );
     type Row = { profileId: string };
     type Item = { uuid: string; id: string; unitId: number; profiles: Row[] };
@@ -974,10 +1034,12 @@ describe('Unit API tests', () => {
         ids.unitB = `${resp.body}`;
       });
       cy.then(() => {
-        cy.requestWorkspaceAPI('POST', `${ws()}/units/${ids.unitB}/items`, token(), { id: 'item_b' }).then(resp => {
-          expect(resp.status).to.equal(201);
-          ids.itemB = resp.body;
-        });
+        // saved as the interface saves it: the unit gets the marker, and its metadata are read from the tables
+        cy.requestWorkspaceAPI('PATCH', `${ws()}/units/${ids.unitB}/metadata`, token(), { items: [{ id: 'item_b' }] })
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+            ids.itemB = resp.body.items[0].uuid;
+          });
         saveMetadataOfA({
           profiles: [{ profileId: 'unit-profile-1816', entries: [] }],
           items: [{ id: 'item_a', profiles: [{ profileId: 'item-profile-1816', entries: [] }] }]

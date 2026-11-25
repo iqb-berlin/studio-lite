@@ -91,6 +91,36 @@ describe('Workspace Settings – hiddenRoutes', () => {
   });
 
   // -------------------------------------------------------------------------
+  // a tab of its own since #2200
+  describe('Hiding the Metadata tab', () => {
+    it('hides the Metadata tab and shows it hidden in the overview of the workspaces', () => {
+      openWorkspaceSettingsDialog(baseGroup, primaryWorkspace);
+      setRouteVisibility('metadata', false);
+      saveWorkspaceSettings();
+
+      cy.visitWs(primaryWorkspace);
+      cy.get('[data-cy="workspace-routes-metadata"]').should('not.exist');
+      cy.get('[data-cy="workspace-routes-properties"]').should('exist');
+
+      cy.visit('/');
+      cy.findAdminGroupSettings(baseGroup).click();
+      clickIndexTabWsgAdmin('workspaces');
+      cy.contains('mat-row', primaryWorkspace)
+        .find('.mat-column-metadata mat-icon')
+        .should('contain', 'directions_off');
+    });
+
+    it('restores the Metadata tab when the route is removed from hiddenRoutes', () => {
+      openWorkspaceSettingsDialog(baseGroup, primaryWorkspace);
+      setRouteVisibility('metadata', true);
+      saveWorkspaceSettings();
+
+      cy.visitWs(primaryWorkspace);
+      cy.get('[data-cy="workspace-routes-metadata"]').should('exist');
+    });
+  });
+
+  // -------------------------------------------------------------------------
   describe('Hiding multiple tabs at once', () => {
     it('hides both Schemer and Comments tabs simultaneously', () => {
       openWorkspaceSettingsDialog(baseGroup, primaryWorkspace);

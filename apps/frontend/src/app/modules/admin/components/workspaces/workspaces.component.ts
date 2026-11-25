@@ -44,7 +44,9 @@ import { buildWorkspaceReportFile } from '../../../../utils/workspace-report.uti
 
 export class WorkspacesComponent implements OnInit, AfterViewInit, OnDestroy {
   dataSource = new TextSortTableDataSource<WorkspaceFullDto>([]);
-  displayedColumns: string[] = ['id', 'name', 'groupId', 'editor', 'preview', 'schemer', 'comments', 'notes'];
+  displayedColumns: string[] = [
+    'id', 'name', 'groupId', 'metadata', 'editor', 'preview', 'schemer', 'comments', 'notes'
+  ];
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;

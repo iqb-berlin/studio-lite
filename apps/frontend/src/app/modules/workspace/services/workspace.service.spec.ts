@@ -16,6 +16,7 @@ import { WorkspaceBackendService } from './workspace-backend.service';
 import { AppService } from '../../../services/app.service';
 import { RichNoteTagsService } from './rich-note-tags.service';
 import { UnitStoresService } from './unit-stores.service';
+import { UnitPropertiesStore } from '../classes/unit-properties-store';
 import { UnitMetadataStore } from '../classes/unit-metadata-store';
 import { UnitDefinitionStore } from '../classes/unit-definition-store';
 import { UnitSchemeStore } from '../classes/unit-scheme-store';
@@ -26,12 +27,14 @@ describe('WorkspaceService', () => {
   let backendService: jest.Mocked<WorkspaceBackendService>;
   let appService: jest.Mocked<AppService>;
   let unitStores: {
+    propertiesStore: WritableSignal<UnitPropertiesStore | undefined>;
     metadataStore: WritableSignal<UnitMetadataStore | undefined>;
     definitionStore: WritableSignal<UnitDefinitionStore | undefined>;
     schemeStore: WritableSignal<UnitSchemeStore | undefined>;
     changed: Signal<boolean>;
     variables: WritableSignal<AliasId[]>;
-    metadataLoaded$: Subject<UnitPropertiesDto>;
+    propertiesLoaded$: Subject<UnitPropertiesDto>;
+    loadPropertiesStore: jest.Mock;
     loadMetadataStore: jest.Mock;
     loadSchemeStore: jest.Mock;
     reset: jest.Mock;
@@ -52,6 +55,8 @@ describe('WorkspaceService', () => {
       getUnitList: jest.fn(),
       getUnitProperties: jest.fn(),
       setUnitProperties: jest.fn(),
+      getUnitMetadata: jest.fn(),
+      setUnitMetadata: jest.fn(),
       setUnitDefinition: jest.fn(),
       setUnitScheme: jest.fn(),
       getUnitRichNoteTags: jest.fn()
@@ -69,20 +74,24 @@ describe('WorkspaceService', () => {
       getTagLabel: jest.fn().mockReturnValue([])
     };
 
+    const propertiesStore = signal<UnitPropertiesStore | undefined>(undefined);
     const metadataStore = signal<UnitMetadataStore | undefined>(undefined);
     const definitionStore = signal<UnitDefinitionStore | undefined>(undefined);
     const schemeStore = signal<UnitSchemeStore | undefined>(undefined);
     unitStores = {
+      propertiesStore,
       metadataStore,
       definitionStore,
       schemeStore,
       // as in UnitStoresService
       changed: computed(() => !!(
-        metadataStore()?.changed() || definitionStore()?.changed() || schemeStore()?.changed()
+        propertiesStore()?.changed() || metadataStore()?.changed() ||
+        definitionStore()?.changed() || schemeStore()?.changed()
       )),
       variables: signal<AliasId[]>([]),
-      metadataLoaded$: new Subject<UnitPropertiesDto>(),
-      loadMetadataStore: jest.fn(),
+      propertiesLoaded$: new Subject<UnitPropertiesDto>(),
+      loadPropertiesStore: jest.fn(),
+      loadMetadataStore: jest.fn(() => of(metadataStore())),
       loadSchemeStore: jest.fn(() => of(schemeStore())),
       reset: jest.fn()
     };
@@ -336,7 +345,7 @@ describe('WorkspaceService', () => {
 
   describe('freshly loaded unit properties', () => {
     it('should take who changed which part when', () => {
-      unitStores.metadataLoaded$.next({
+      unitStores.propertiesLoaded$.next({
         id: 1,
         lastChangedMetadata: new Date('2024-01-01'),
         lastChangedMetadataUser: 'User 1',
@@ -358,7 +367,7 @@ describe('WorkspaceService', () => {
       const fromServer: UnitPropertiesDto = JSON.parse(
         '{ "id": 1, "lastChangedMetadata": "2024-01-01T00:00:00.000Z" }'
       );
-      unitStores.metadataLoaded$.next(fromServer);
+      unitStores.propertiesLoaded$.next(fromServer);
 
       expect(service.lastChangedMetadata).toEqual(new Date('2024-01-01'));
     });
@@ -369,7 +378,7 @@ describe('WorkspaceService', () => {
       service.lastChangedDefinition = new Date();
       service.lastChangedScheme = new Date();
 
-      unitStores.metadataLoaded$.next({ id: 1 });
+      unitStores.propertiesLoaded$.next({ id: 1 });
 
       expect(service.lastChangedMetadata).toBeUndefined();
       expect(service.lastChangedMetadataUser).toBeUndefined();
@@ -391,9 +400,9 @@ describe('WorkspaceService', () => {
     });
 
     it('should save only changed metadata', async () => {
-      const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
-      metadataStore.setPlayer('newPlayer');
-      unitStores.metadataStore.set(metadataStore);
+      const propertiesStore = new UnitPropertiesStore({ id: 1, key: 'test', name: 'Test' });
+      propertiesStore.setPlayer('newPlayer');
+      unitStores.propertiesStore.set(propertiesStore);
 
       backendService.setUnitProperties.mockReturnValue(of(true));
       backendService.getUnitList.mockReturnValue(of([]));
@@ -432,14 +441,14 @@ describe('WorkspaceService', () => {
     });
 
     it('should save all changed stores in order', async () => {
-      const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
-      metadataStore.setPlayer('newPlayer');
+      const propertiesStore = new UnitPropertiesStore({ id: 1, key: 'test', name: 'Test' });
+      propertiesStore.setPlayer('newPlayer');
       const definitionStore = new UnitDefinitionStore(1, { definition: 'old', variables: [] });
       definitionStore.setData([], 'new');
       const schemeStore = new UnitSchemeStore(1, { scheme: 'old', schemeType: 'type' });
       schemeStore.setData('new', 'newType');
 
-      unitStores.metadataStore.set(metadataStore);
+      unitStores.propertiesStore.set(propertiesStore);
       unitStores.definitionStore.set(definitionStore);
       unitStores.schemeStore.set(schemeStore);
 
@@ -457,12 +466,12 @@ describe('WorkspaceService', () => {
     });
 
     it('should stop saving on first error', async () => {
-      const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
-      metadataStore.setPlayer('newPlayer');
+      const propertiesStore = new UnitPropertiesStore({ id: 1, key: 'test', name: 'Test' });
+      propertiesStore.setPlayer('newPlayer');
       const definitionStore = new UnitDefinitionStore(1, { definition: 'old', variables: [] });
       definitionStore.setData([], 'new');
 
-      unitStores.metadataStore.set(metadataStore);
+      unitStores.propertiesStore.set(propertiesStore);
       unitStores.definitionStore.set(definitionStore);
 
       backendService.setUnitProperties.mockReturnValue(of(false));
@@ -576,9 +585,9 @@ describe('WorkspaceService', () => {
     });
 
     it('should reload unit list when key/name/group/state changed', async () => {
-      const metadataStore = new UnitMetadataStore({ id: 1, key: 'old', name: 'Old' });
-      metadataStore.setBasicData('new', 'New', '', '', '', '', '');
-      unitStores.metadataStore.set(metadataStore);
+      const propertiesStore = new UnitPropertiesStore({ id: 1, key: 'old', name: 'Old' });
+      propertiesStore.setBasicData('new', 'New', '', '', '', '', '');
+      unitStores.propertiesStore.set(propertiesStore);
 
       backendService.setUnitProperties.mockReturnValue(of(true));
       backendService.getUnitList.mockReturnValue(of([
@@ -592,9 +601,9 @@ describe('WorkspaceService', () => {
     });
 
     it('should set dataLoading flag during save', async () => {
-      const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
-      metadataStore.setPlayer('newPlayer');
-      unitStores.metadataStore.set(metadataStore);
+      const propertiesStore = new UnitPropertiesStore({ id: 1, key: 'test', name: 'Test' });
+      propertiesStore.setPlayer('newPlayer');
+      unitStores.propertiesStore.set(propertiesStore);
 
       backendService.setUnitProperties.mockReturnValue(of(true));
       backendService.getUnitList.mockReturnValue(of([]));
@@ -606,66 +615,82 @@ describe('WorkspaceService', () => {
       expect(appService.dataLoading).toBe(false);
     });
 
-    it('should read the metadata back when the save created items', async () => {
-      const metadataStore = new UnitMetadataStore({ id: 1, metadata: { items: [] } });
-      metadataStore.setMetadata({ items: [{ id: 'item1' }] });
-      unitStores.metadataStore.set(metadataStore);
-      const reloadSpy = jest.fn();
-      service.unitMetadataReloaded.subscribe(reloadSpy);
-      const stored = { items: [{ id: 'item1', uuid: 'uuid-1' }] };
+    // the metadata go by a route of their own since they have a tab of their own (#2200)
+    describe('of the metadata', () => {
+      let metadataStore: UnitMetadataStore;
+      let reloadSpy: jest.Mock;
 
-      backendService.setUnitProperties.mockReturnValue(of(true));
-      backendService.getUnitProperties.mockReturnValue(of({ id: 1, metadata: stored }));
-
-      const result = await service.saveUnitData();
-
-      expect(result).toBe(true);
-      expect(backendService.getUnitProperties).toHaveBeenCalledWith(1, 1);
-      expect(metadataStore.getData().metadata).toEqual(stored);
-      expect(metadataStore.isChanged()).toBe(false);
-      expect(reloadSpy).toHaveBeenCalledTimes(1);
-    });
-
-    it('should not read the metadata back when all saved items exist', async () => {
-      const metadataStore = new UnitMetadataStore({ id: 1, metadata: { items: [{ id: 'item1', uuid: 'uuid-1' }] } });
-      metadataStore.setMetadata({ items: [{ id: 'item2', uuid: 'uuid-1' }] });
-      unitStores.metadataStore.set(metadataStore);
-      const reloadSpy = jest.fn();
-      service.unitMetadataReloaded.subscribe(reloadSpy);
-
-      backendService.setUnitProperties.mockReturnValue(of(true));
-
-      await service.saveUnitData();
-
-      expect(backendService.getUnitProperties).not.toHaveBeenCalled();
-      expect(reloadSpy).not.toHaveBeenCalled();
-    });
-
-    it('should leave the store alone when the reloaded unit is no longer selected', async () => {
-      const metadataStore = new UnitMetadataStore({ id: 1, metadata: { items: [] } });
-      metadataStore.setMetadata({ items: [{ id: 'item1' }] });
-      unitStores.metadataStore.set(metadataStore);
-      const otherStore = new UnitMetadataStore({ id: 2, metadata: { items: [] } });
-      const reloadSpy = jest.fn();
-      service.unitMetadataReloaded.subscribe(reloadSpy);
-
-      backendService.setUnitProperties.mockReturnValue(of(true));
-      backendService.getUnitProperties.mockImplementation(() => {
-        unitStores.metadataStore.set(otherStore);
-        return of({ id: 1, metadata: { items: [{ id: 'item1', uuid: 'uuid-1' }] } });
+      beforeEach(() => {
+        metadataStore = new UnitMetadataStore(1, { items: [] });
+        unitStores.metadataStore.set(metadataStore);
+        reloadSpy = jest.fn();
+        service.unitMetadataReloaded.subscribe(reloadSpy);
       });
 
-      await service.saveUnitData();
+      // #1830: items created by the save have their uuid on the server only
+      it('should take them as stored, with the uuids of the items the save created, and tell the form', async () => {
+        metadataStore.setMetadata({ items: [{ id: 'item1' }] });
+        const stored = { items: [{ id: 'item1', uuid: 'uuid-1' }] };
+        backendService.setUnitMetadata.mockReturnValue(of(stored));
 
-      expect(otherStore.getData().metadata).toEqual({ items: [] });
-      expect(reloadSpy).not.toHaveBeenCalled();
+        await expect(service.saveUnitData()).resolves.toBe(true);
+
+        expect(backendService.setUnitMetadata).toHaveBeenCalledWith(1, 1, { items: [{ id: 'item1' }] });
+        expect(backendService.setUnitProperties).not.toHaveBeenCalled();
+        expect(metadataStore.getData()).toEqual(stored);
+        expect(metadataStore.isChanged()).toBe(false);
+        expect(reloadSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should not tell the form when the save created no items', async () => {
+        metadataStore = new UnitMetadataStore(1, { items: [{ id: 'item1', uuid: 'uuid-1' }] });
+        unitStores.metadataStore.set(metadataStore);
+        metadataStore.setMetadata({ items: [{ id: 'item2', uuid: 'uuid-1' }] });
+        backendService.setUnitMetadata.mockReturnValue(of({ items: [{ id: 'item2', uuid: 'uuid-1' }] }));
+
+        await service.saveUnitData();
+
+        expect(reloadSpy).not.toHaveBeenCalled();
+      });
+
+      it('should keep them a change when the save fails', async () => {
+        metadataStore.setMetadata({ items: [{ id: 'item1' }] });
+        backendService.setUnitMetadata.mockReturnValue(of(null));
+
+        await expect(service.saveUnitData()).resolves.toBe(false);
+
+        expect(metadataStore.isChanged()).toBe(true);
+      });
+
+      // clicked through quickly: what is saved and what the server answers belong to the unit of the
+      // store, not to the unit opened meanwhile, whose form is left alone
+      it('should save them for their unit and hand the answer to their store when another unit is opened', async () => {
+        const propertiesStore = new UnitPropertiesStore({ id: 1, key: 'test', name: 'Test' });
+        propertiesStore.setPlayer('newPlayer');
+        unitStores.propertiesStore.set(propertiesStore);
+        metadataStore.setMetadata({ items: [{ id: 'item1' }] });
+        const otherStore = new UnitMetadataStore(2, { items: [] });
+        backendService.setUnitProperties.mockImplementation(() => {
+          service.selectedUnit$.next(2);
+          unitStores.metadataStore.set(otherStore);
+          return of(true);
+        });
+        backendService.setUnitMetadata.mockReturnValue(of({ items: [{ id: 'item1', uuid: 'uuid-1' }] }));
+
+        await service.saveUnitData();
+
+        expect(backendService.setUnitMetadata).toHaveBeenCalledWith(1, 1, { items: [{ id: 'item1' }] });
+        expect(metadataStore.getData()).toEqual({ items: [{ id: 'item1', uuid: 'uuid-1' }] });
+        expect(otherStore.getData()).toEqual({ items: [] });
+        expect(reloadSpy).not.toHaveBeenCalled();
+      });
     });
 
     // #1845: the leave dialog's "save" must not send the same changes beside a running save
     it('should not start a second save beside one under way', async () => {
-      const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
-      metadataStore.setPlayer('newPlayer');
-      unitStores.metadataStore.set(metadataStore);
+      const propertiesStore = new UnitPropertiesStore({ id: 1, key: 'test', name: 'Test' });
+      propertiesStore.setPlayer('newPlayer');
+      unitStores.propertiesStore.set(propertiesStore);
       const response = new Subject<boolean>();
       backendService.setUnitProperties.mockReturnValue(response);
 
@@ -682,14 +707,14 @@ describe('WorkspaceService', () => {
     });
 
     it('should save what was edited during a save once it is done, when asked meanwhile', async () => {
-      const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
-      metadataStore.setPlayer('newPlayer');
-      unitStores.metadataStore.set(metadataStore);
+      const propertiesStore = new UnitPropertiesStore({ id: 1, key: 'test', name: 'Test' });
+      propertiesStore.setPlayer('newPlayer');
+      unitStores.propertiesStore.set(propertiesStore);
       const firstResponse = new Subject<boolean>();
       backendService.setUnitProperties.mockReturnValueOnce(firstResponse).mockReturnValueOnce(of(true));
 
       const first = service.saveUnitData();
-      metadataStore.setEditor('newEditor');
+      propertiesStore.setEditor('newEditor');
       const second = service.saveUnitData();
       firstResponse.next(true);
       firstResponse.complete();
@@ -698,25 +723,25 @@ describe('WorkspaceService', () => {
 
       expect(backendService.setUnitProperties).toHaveBeenNthCalledWith(1, 1, { id: 1, player: 'newPlayer' });
       expect(backendService.setUnitProperties).toHaveBeenNthCalledWith(2, 1, { id: 1, editor: 'newEditor' });
-      expect(metadataStore.isChanged()).toBe(false);
+      expect(propertiesStore.isChanged()).toBe(false);
     });
 
     it('should keep what was edited while the save was under way unsaved', async () => {
-      const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
-      metadataStore.setPlayer('newPlayer');
-      unitStores.metadataStore.set(metadataStore);
+      const propertiesStore = new UnitPropertiesStore({ id: 1, key: 'test', name: 'Test' });
+      propertiesStore.setPlayer('newPlayer');
+      unitStores.propertiesStore.set(propertiesStore);
       const response = new Subject<boolean>();
       backendService.setUnitProperties.mockReturnValue(response);
 
       const save = service.saveUnitData();
-      metadataStore.setEditor('newEditor');
+      propertiesStore.setEditor('newEditor');
       response.next(true);
       response.complete();
       await save;
 
       expect(backendService.setUnitProperties).toHaveBeenCalledWith(1, { id: 1, player: 'newPlayer' });
-      expect(metadataStore.getChangedData()).toEqual({ id: 1, editor: 'newEditor' });
-      expect(metadataStore.getData().player).toBe('newPlayer');
+      expect(propertiesStore.getChangedData()).toEqual({ id: 1, editor: 'newEditor' });
+      expect(propertiesStore.getData().player).toBe('newPlayer');
     });
 
     // #1361: a renamed alias or a removed variable reaches the items with the save of the definition
@@ -731,68 +756,69 @@ describe('WorkspaceService', () => {
           }
         ]
       };
+      const inLine = {
+        items: [
+          {
+            id: 'A1', uuid: 'u1', variableReadOnlyId: 'text_1', variableId: 'Antwort'
+          },
+          {
+            id: 'A2', uuid: 'u2', variableReadOnlyId: null, variableId: null
+          }
+        ]
+      };
       let metadataStore: UnitMetadataStore;
+      const changedDefinition = (): UnitDefinitionStore => {
+        const definitionStore = new UnitDefinitionStore(1, { definition: 'old', variables: [] });
+        definitionStore.setData([], 'new');
+        return definitionStore;
+      };
 
       beforeEach(() => {
-        metadataStore = new UnitMetadataStore({ id: 1, metadata: itemsMetadata });
+        metadataStore = new UnitMetadataStore(1, itemsMetadata);
         unitStores.metadataStore.set(metadataStore);
         unitStores.schemeStore.set(new UnitSchemeStore(1, { scheme: '{}', schemeType: 'iqb@3.4' }));
         unitStores.variables.set([{ id: 'text_1', alias: 'Antwort' }]);
         backendService.setUnitProperties.mockReturnValue(of(true));
+        backendService.setUnitMetadata.mockImplementation((_, __, metadata) => of(metadata));
         backendService.setUnitDefinition.mockReturnValue(of(true));
       });
 
       it('should bring the items in line when the definition is saved', async () => {
-        const definitionStore = new UnitDefinitionStore(1, { definition: 'old', variables: [] });
-        definitionStore.setData([], 'new');
-        unitStores.definitionStore.set(definitionStore);
+        unitStores.definitionStore.set(changedDefinition());
 
         await service.saveUnitData();
 
-        expect(backendService.setUnitProperties).toHaveBeenCalledWith(1, {
-          id: 1,
-          metadata: {
-            items: [
-              {
-                id: 'A1', uuid: 'u1', variableReadOnlyId: 'text_1', variableId: 'Antwort'
-              },
-              {
-                id: 'A2', uuid: 'u2', variableReadOnlyId: null, variableId: null
-              }
-            ]
-          }
-        });
+        expect(backendService.setUnitMetadata).toHaveBeenCalledWith(1, 1, inLine);
       });
 
       it('should leave the items alone when neither definition nor scheme is saved', async () => {
-        metadataStore.setPlayer('newPlayer');
+        const propertiesStore = new UnitPropertiesStore({ id: 1 });
+        propertiesStore.setPlayer('newPlayer');
+        unitStores.propertiesStore.set(propertiesStore);
 
         await service.saveUnitData();
 
         expect(backendService.setUnitProperties).toHaveBeenCalledWith(1, { id: 1, player: 'newPlayer' });
+        expect(backendService.setUnitMetadata).not.toHaveBeenCalled();
       });
 
       it('should leave the items alone without the whole list of variables', async () => {
-        const definitionStore = new UnitDefinitionStore(1, { definition: 'old', variables: [] });
-        definitionStore.setData([], 'new');
-        unitStores.definitionStore.set(definitionStore);
+        unitStores.definitionStore.set(changedDefinition());
         unitStores.variables.set([]);
 
         await service.saveUnitData();
 
-        expect(backendService.setUnitProperties).not.toHaveBeenCalled();
+        expect(backendService.setUnitMetadata).not.toHaveBeenCalled();
         expect(backendService.setUnitDefinition).toHaveBeenCalled();
       });
 
       it('should send no metadata when the items are in line already', async () => {
         unitStores.variables.set([{ id: 'text_1', alias: 'old alias' }, { id: 'gone', alias: 'Gone' }]);
-        const definitionStore = new UnitDefinitionStore(1, { definition: 'old', variables: [] });
-        definitionStore.setData([], 'new');
-        unitStores.definitionStore.set(definitionStore);
+        unitStores.definitionStore.set(changedDefinition());
 
         await service.saveUnitData();
 
-        expect(backendService.setUnitProperties).not.toHaveBeenCalled();
+        expect(backendService.setUnitMetadata).not.toHaveBeenCalled();
         expect(backendService.setUnitDefinition).toHaveBeenCalled();
       });
 
@@ -816,29 +842,48 @@ describe('WorkspaceService', () => {
         expect(loaded.getData().scheme).toBe(schemeOf('Antwort'));
       });
 
-      it('should leave the items alone when another unit is opened while the scheme loads', async () => {
-        const definitionStore = new UnitDefinitionStore(1, { definition: 'old', variables: [] });
-        definitionStore.setData([], 'new');
-        unitStores.definitionStore.set(definitionStore);
+      // The metadata tab was never opened: the save loads them, and asks for them in the same step as
+      // for the scheme, before anything is awaited -- asked for later, a unit opened meanwhile would get
+      // the metadata of the one saved into its place (#2200).
+      it('should load the metadata for the items with the scheme, before anything is awaited', async () => {
+        unitStores.metadataStore.set(undefined);
+        unitStores.definitionStore.set(changedDefinition());
+        const loaded = new UnitMetadataStore(1, itemsMetadata);
+        unitStores.loadMetadataStore.mockImplementation(() => {
+          unitStores.metadataStore.set(loaded);
+          return of(loaded);
+        });
+
+        const save = service.saveUnitData();
+        expect(unitStores.loadSchemeStore).toHaveBeenCalledWith(1, 1);
+        expect(unitStores.loadMetadataStore).toHaveBeenCalledWith(1, 1);
+        await save;
+
+        expect(backendService.setUnitMetadata).toHaveBeenCalledWith(1, 1, inLine);
+      });
+
+      it('should leave the items alone when another unit is opened while the stores load', async () => {
+        unitStores.definitionStore.set(changedDefinition());
         const schemeStore = unitStores.schemeStore();
+        unitStores.loadMetadataStore.mockReturnValue(of(metadataStore));
         unitStores.loadSchemeStore.mockImplementation(() => {
-          unitStores.metadataStore.set(new UnitMetadataStore({ id: 2 }));
+          unitStores.metadataStore.set(new UnitMetadataStore(2, {}));
           return of(schemeStore);
         });
 
         await service.saveUnitData();
 
         expect(metadataStore.isChanged()).toBe(false);
-        expect(backendService.setUnitProperties).not.toHaveBeenCalled();
+        expect(backendService.setUnitMetadata).not.toHaveBeenCalled();
       });
     });
 
     it('should save every part under the unit that was open when the save started', async () => {
-      const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
-      metadataStore.setPlayer('newPlayer');
+      const propertiesStore = new UnitPropertiesStore({ id: 1, key: 'test', name: 'Test' });
+      propertiesStore.setPlayer('newPlayer');
       const definitionStore = new UnitDefinitionStore(1, { definition: 'old', variables: [] });
       definitionStore.setData([], 'new');
-      unitStores.metadataStore.set(metadataStore);
+      unitStores.propertiesStore.set(propertiesStore);
       unitStores.definitionStore.set(definitionStore);
 
       backendService.setUnitProperties.mockImplementation(() => {
@@ -854,9 +899,9 @@ describe('WorkspaceService', () => {
     });
 
     it('should update lastChanged timestamps after successful save', async () => {
-      const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
-      metadataStore.setPlayer('newPlayer');
-      unitStores.metadataStore.set(metadataStore);
+      const propertiesStore = new UnitPropertiesStore({ id: 1, key: 'test', name: 'Test' });
+      propertiesStore.setPlayer('newPlayer');
+      unitStores.propertiesStore.set(propertiesStore);
 
       backendService.setUnitProperties.mockReturnValue(of(true));
       backendService.getUnitList.mockReturnValue(of([]));
@@ -878,9 +923,9 @@ describe('WorkspaceService', () => {
         userLongName: ''
       };
 
-      const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
-      metadataStore.setPlayer('newPlayer');
-      unitStores.metadataStore.set(metadataStore);
+      const propertiesStore = new UnitPropertiesStore({ id: 1, key: 'test', name: 'Test' });
+      propertiesStore.setPlayer('newPlayer');
+      unitStores.propertiesStore.set(propertiesStore);
 
       backendService.setUnitProperties.mockReturnValue(of(true));
       backendService.getUnitList.mockReturnValue(of([]));

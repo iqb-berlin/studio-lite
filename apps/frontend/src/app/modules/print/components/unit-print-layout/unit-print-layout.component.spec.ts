@@ -17,7 +17,7 @@ import { environment } from '../../../../../environments/environment';
 describe('UnitPrintLayoutComponent', () => {
   let component: UnitPrintLayoutComponent;
   let fixture: ComponentFixture<UnitPrintLayoutComponent>;
-  let mockBackendService: { getUnitProperties: jest.Mock };
+  let mockBackendService: { getUnitProperties: jest.Mock; getUnitMetadata: jest.Mock };
   let mockModuleService: { loadList: jest.Mock; players: Record<string, unknown> };
   let mockAppService: Record<string, unknown>;
 
@@ -90,7 +90,8 @@ describe('UnitPrintLayoutComponent', () => {
 
   beforeEach(async () => {
     mockBackendService = {
-      getUnitProperties: jest.fn()
+      getUnitProperties: jest.fn(),
+      getUnitMetadata: jest.fn(() => of(null))
     };
 
     mockModuleService = {
@@ -147,6 +148,21 @@ describe('UnitPrintLayoutComponent', () => {
       tick(0);
 
       expect(component.unitProperties).toBeUndefined();
+    }));
+
+    // the properties come without them since they have a route of their own (#2200)
+    it('should print the metadata read from their own route', fakeAsync(() => {
+      const metadata = { profiles: [{ profileId: 'p1', entries: [] }], items: [{ id: 'item1' }] };
+      mockBackendService.getUnitProperties.mockReturnValue(of(createMockUnitProperties()));
+      mockBackendService.getUnitMetadata.mockReturnValue(of(metadata));
+
+      component.workspaceId = 1;
+      component.unitId = 10;
+      component.ngOnInit();
+      tick(0);
+
+      expect(mockBackendService.getUnitMetadata).toHaveBeenCalledWith(1, 10);
+      expect(component.unitProperties.metadata).toEqual(metadata);
     }));
   });
 

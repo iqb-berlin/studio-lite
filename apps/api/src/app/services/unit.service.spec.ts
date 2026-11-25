@@ -573,15 +573,14 @@ describe('UnitService', () => {
       expect(unitsRepository.save).toHaveBeenCalled();
     });
 
-    it('should hand the metadata on only when it is sent', async () => {
+    // they have a route of their own; a caller still sending them would lose them without a word (#2200)
+    it('should refuse metadata and write nothing', async () => {
       unitsRepository.findOne.mockResolvedValue({ id: 1 } as Unit);
-      const metadata = { profiles: [], items: [] };
 
-      await service.patchUnit(1, { name: 'n' } as UnitPropertiesDto, 'user');
+      await expect(service.patchUnit(1, { name: 'n', metadata: { profiles: [] } } as UnitPropertiesDto, 'user'))
+        .rejects.toThrow(BadRequestException);
+      expect(unitsRepository.save).not.toHaveBeenCalled();
       expect(unitMetadataService.patchMetadata).not.toHaveBeenCalled();
-
-      await service.patchUnit(1, { metadata } as UnitPropertiesDto, 'user');
-      expect(unitMetadataService.patchMetadata).toHaveBeenCalledWith(1, metadata, 'user');
     });
 
     describe('of the properties', () => {

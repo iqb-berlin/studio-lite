@@ -60,6 +60,7 @@ describe('Variable and Item Metadata Coherence', () => {
   it('creates item 01 and assigns variable text-field_1', () => {
     cy.visitWs(mathArea);
     selectUnit('MA_01');
+    clickIndexTabWorkspace('metadata');
     goToItem('01');
     assignVariableToItem('text-field_1');
     cy.get('[data-cy="workspace-unit-save-button"]').click();
@@ -91,6 +92,7 @@ describe('Variable and Item Metadata Coherence', () => {
   it('unassigns variable from item', () => {
     cy.visitWs(mathArea);
     selectUnit('MA_01');
+    clickIndexTabWorkspace('metadata');
     goToItem('03');
     assignVariableToItem('');
     cy.get('[data-cy="workspace-unit-save-button"]').click();
@@ -99,6 +101,7 @@ describe('Variable and Item Metadata Coherence', () => {
   it('removes variable from item properties', () => {
     cy.visitWs(mathArea);
     selectUnit('MA_01');
+    clickIndexTabWorkspace('metadata');
     goToItem('03');
     cy.translate(Cypress.expose('locale')).then(json => {
       cy.get(`mat-select[placeholder="${json.metadata['choose-item-variable']}"]`)
@@ -147,6 +150,7 @@ describe('Variable and Item Metadata Coherence', () => {
   it('excludes unassigned variable from preview', () => {
     cy.visitWs(mathArea);
     selectUnit('MA_01');
+    clickIndexTabWorkspace('metadata');
     goToItem('03');
     assignVariableToItem('');
     cy.contains('mat-icon', 'visibility').click({ force: true });

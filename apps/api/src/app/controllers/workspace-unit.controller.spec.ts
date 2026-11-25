@@ -126,10 +126,16 @@ describe('WorkspaceUnitController', () => {
   // before anything else is asked about the unit (#1775).
   it.each([
     'findOnesProperties', 'findOnesMetadata', 'findOnesDefinition', 'findOnesDefinitionSummary', 'findOnesScheme',
-    'patchUnitProperties', 'patchDefinition', 'patchScheme'
+    'patchUnitProperties', 'patchOnesMetadata', 'patchDefinition', 'patchScheme'
   ] as const)('should hold the unit of %s to the workspace in its path', method => {
     expect(Reflect.getMetadata('__guards__', WorkspaceUnitController.prototype[method]).slice(0, 3))
       .toEqual([JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard]);
+  });
+
+  // whoever may write the properties may write the metadata, which were saved with them until #2200
+  it('should let only who may write reach patchOnesMetadata, as patchUnitProperties', () => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceUnitController.prototype.patchOnesMetadata))
+      .toEqual([JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteAccessGuard]);
   });
 
   it('should hold the unit of removeUnit to the workspace in its path, after the group admin', () => {

@@ -1,4 +1,4 @@
-import type { UnitMetadataValues, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
+import type { UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import {
   getItem,
   getStructure,
@@ -14,7 +14,7 @@ import {
   UnitData
 } from '../../../support/testData';
 import { IqbProfile, IqbProfileExamples } from '../../../support/metadata/iqbProfile';
-import { waitForSuccess } from '../../../support/helpers';
+import { clickIndexTabWorkspace, waitForSuccess } from '../../../support/helpers';
 import { createGroupAdminBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Metadata Management', () => {
@@ -31,10 +31,10 @@ describe('Metadata Management', () => {
 
   /** The metadata the API holds of a unit, to read back what the interface saved */
   const storedMetadata = (wsId: string, unitId: string): Cypress.Chainable<UnitMetadataValues> => cy
-    .getUnitPropertiesAPI(wsId, unitId, token)
+    .getUnitMetadataAPI(wsId, unitId, token)
     .then(resp => {
-      expect(resp.status, 'unit properties').to.equal(200);
-      return (resp.body as UnitPropertiesDto).metadata || {};
+      expect(resp.status, 'unit metadata').to.equal(200);
+      return (resp.body as UnitMetadataValues) || {};
     });
 
   /** The texts stored for the developer of the unit, a field of the unit profile */
@@ -83,11 +83,13 @@ describe('Metadata Management', () => {
     cy.intercept({ method: 'GET', pathname: '/api/metadata/vocabularies' }).as('vocabs');
     cy.visitWs(mathArea);
     cy.contains(mathUnit.shortname).should('exist').click();
+    // the metadata have a tab of their own (#2200)
+    clickIndexTabWorkspace('metadata');
     cy.wait('@vocabs');
     cy.wait('@vocabs');
     getStructure('uMA', false);
     getItem('iMA', false);
-    cy.intercept('PATCH', '/api/workspaces/*/units/*/properties').as('saveMathMetadata');
+    cy.intercept('PATCH', '/api/workspaces/*/units/*/metadata').as('saveMathMetadata');
     cy.get('[data-cy="workspace-unit-save-button"]').click();
     waitForSuccess('@saveMathMetadata');
 
@@ -106,6 +108,7 @@ describe('Metadata Management', () => {
     cy.intercept({ method: 'GET', pathname: '/api/metadata/vocabularies' }).as('vocabs');
     cy.visitWs(germanArea);
     cy.contains(germanUnit.shortname).should('exist').click();
+    clickIndexTabWorkspace('metadata');
     cy.wait('@vocabs');
     cy.wait('@vocabs');
     getStructure('uDE', false);
@@ -114,7 +117,7 @@ describe('Metadata Management', () => {
     getItem('iDE', true, 'iDE');
     // The copy appears once its dialog has closed; a save sent before would go without it.
     cy.get('studio-lite-item').should('have.length', 3);
-    cy.intercept('PATCH', '/api/workspaces/*/units/*/properties').as('saveGermanMetadata');
+    cy.intercept('PATCH', '/api/workspaces/*/units/*/metadata').as('saveGermanMetadata');
     cy.get('[data-cy="workspace-unit-save-button"]').click();
     waitForSuccess('@saveGermanMetadata');
 

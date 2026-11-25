@@ -374,7 +374,7 @@ describe('UnitCheckComponent', () => {
   it('names a module the unit lost before it is saved', fakeAsync(() => {
     create();
 
-    unitStores.metadataStore()?.setPlayer('');
+    unitStores.propertiesStore()?.setPlayer('');
     fixture.detectChanges();
 
     expect(Array.from(
@@ -388,7 +388,7 @@ describe('UnitCheckComponent', () => {
     create();
     expect(sectionOf('properties')?.querySelector('[data-cy="unit-check-ok"]')).toBeTruthy();
 
-    unitStores.metadataStore()?.setBasicData('00_INVALID_NAME', '', '', '', '', '', '');
+    unitStores.propertiesStore()?.setBasicData('00_INVALID_NAME', '', '', '', '', '', '');
     fixture.detectChanges();
 
     expect(Array.from(
