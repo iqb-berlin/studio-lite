@@ -54,6 +54,19 @@ export class WorkspaceUnitRichNoteController {
     return this.unitRichNoteService.findNotes(unitId);
   }
 
+  /** How many notes the unit has, without the notes -- for the technical validation (#2135). */
+  @Get('count')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, ReadOrGroupAdminAccessGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiOkResponse({ description: 'The number of rich notes of the unit.', type: Number })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
+  @ApiTags('workspace unit rich note')
+  async countNotes(@Param('unit_id', ParseIntPipe) unitId: number): Promise<number> {
+    return this.unitRichNoteService.countNotes(unitId);
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteOrGroupAdminAccessGuard)
   @ApiBearerAuth()

@@ -36,7 +36,7 @@ describe('UnitCheckComponent', () => {
   let settingsLoadedState: WritableSignal<boolean>;
   let commentsUpdated: Subject<void>;
   let richNotesChanged: Subject<void>;
-  let getUnitRichNotes: jest.Mock;
+  let hasUnitRichNotes: jest.Mock;
   let getUnitDefinition: jest.Mock;
   let getUnitDefinitionSummary: jest.Mock;
   let getUnitScheme: jest.Mock;
@@ -87,7 +87,7 @@ describe('UnitCheckComponent', () => {
             getUnitDefinition,
             getUnitDefinitionSummary,
             getUnitScheme,
-            getUnitRichNotes
+            hasUnitRichNotes
           }
         },
         {
@@ -124,7 +124,7 @@ describe('UnitCheckComponent', () => {
     loadList = jest.fn().mockResolvedValue(undefined);
     units = signal({ '': [{ id: 4, key: 'UNIT_04' }] });
     hasComments = jest.fn(() => of(true));
-    getUnitRichNotes = jest.fn(() => of({ tags: [], notes: [] }));
+    hasUnitRichNotes = jest.fn(() => of(false));
     getUnitDefinition = jest.fn(() => of({ definition: '{}', variables: [{ id: '05', alias: '_00a' }] }));
     getUnitDefinitionSummary = jest.fn(() => of({ hasDefinition: true }));
     // the variables come with the scheme, as the schemer is given them
@@ -152,7 +152,7 @@ describe('UnitCheckComponent', () => {
 
     expect(tabs()).toEqual(['unit-check-properties', 'unit-check-editor', 'unit-check-schemer']);
     expect(hasComments).not.toHaveBeenCalled();
-    expect(getUnitRichNotes).not.toHaveBeenCalled();
+    expect(hasUnitRichNotes).not.toHaveBeenCalled();
   }));
 
   // after a reload of the page and on entering a workspace, its settings arrive after the unit (#2135)
@@ -169,7 +169,7 @@ describe('UnitCheckComponent', () => {
 
     expect(tabs()).toEqual(['unit-check-properties', 'unit-check-editor', 'unit-check-schemer']);
     expect(hasComments).not.toHaveBeenCalled();
-    expect(getUnitRichNotes).not.toHaveBeenCalled();
+    expect(hasUnitRichNotes).not.toHaveBeenCalled();
   }));
 
   // a change in the settings dialog: what is known of the other tab still holds
@@ -183,7 +183,7 @@ describe('UnitCheckComponent', () => {
       'unit-check-properties', 'unit-check-editor', 'unit-check-schemer', 'unit-check-comments'
     ]);
     expect(hasComments).toHaveBeenCalledTimes(1);
-    expect(getUnitRichNotes).toHaveBeenCalledTimes(1);
+    expect(hasUnitRichNotes).toHaveBeenCalledTimes(1);
   }));
 
   it('asks whether there are comments once the settings show their tab', fakeAsync(() => {
@@ -227,7 +227,7 @@ describe('UnitCheckComponent', () => {
     expect(sectionOf('notes')?.querySelector('[data-cy="unit-check-info"]')?.textContent)
       .toBe('unit-check.notes-absent');
 
-    getUnitRichNotes.mockReturnValue(of({ tags: [], notes: [{ id: 1 }] }));
+    hasUnitRichNotes.mockReturnValue(of(true));
     richNotesChanged.next();
     fixture.detectChanges();
 

@@ -102,6 +102,17 @@ describe('ModuleService', () => {
       expect(service.listVersion()).toBe(2);
     });
 
+    // the workspace, the properties and the unit check each ask as a unit opens (#2135)
+    it('should let a call join a load that is running, and load again once it is done', async () => {
+      mockBackendService.getModuleList.mockReturnValue(of([]));
+
+      await Promise.all([service.loadList(), service.loadList(), service.loadList()]);
+      expect(mockBackendService.getModuleList).toHaveBeenCalledTimes(3);
+
+      await service.loadList();
+      expect(mockBackendService.getModuleList).toHaveBeenCalledTimes(6);
+    });
+
     it('should keep the modules a failed reload could not fetch again', async () => {
       const player: VeronaModuleInListDto = {
         key: 'p1',

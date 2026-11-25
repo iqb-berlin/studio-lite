@@ -34,6 +34,11 @@ export class UnitRichNoteService {
     private settingService: SettingService
   ) {}
 
+  /** How many rich notes the unit has, without reading them: they may embed images (#2135). */
+  async countNotes(unitId: number): Promise<number> {
+    return this.unitRichNotesRepository.count({ where: { unitId } });
+  }
+
   /** Which of the given units have at least one rich note. */
   async findUnitIdsWithNotes(unitIds: number[]): Promise<Set<number>> {
     if (!unitIds.length) return new Set();

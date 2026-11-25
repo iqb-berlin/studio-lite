@@ -252,8 +252,7 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
     // the same for rich notes, added or deleted in a pinned tab
     const notesChanged: Observable<unknown> = this.workspaceService.richNotesChanged$;
     const askedRichNotes = (known ? notesChanged : notesChanged.pipe(startWith(undefined)))
-      .pipe(switchMap(() => this.backendService.getUnitRichNotes(workspaceId, unitId)
-        .pipe(map(richNotes => (richNotes ? richNotes.notes.length > 0 : undefined)))));
+      .pipe(switchMap(() => this.backendService.hasUnitRichNotes(workspaceId, unitId)));
     let hasRichNotes: Observable<boolean | undefined> = of(undefined);
     if (notes) hasRichNotes = known ? askedRichNotes.pipe(startWith(known.hasRichNotes)) : askedRichNotes;
     return combineLatest([hasComments, hasRichNotes])

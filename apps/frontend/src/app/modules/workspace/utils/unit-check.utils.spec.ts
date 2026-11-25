@@ -65,8 +65,7 @@ describe('checkUnit', () => {
     const sections = checkUnit(okInput());
 
     expect(sections.map(entry => entry.tab)).toEqual(['properties', 'editor', 'schemer', 'comments', 'notes']);
-    expect(sections.every(entry => entry.ok)).toBe(true);
-    // comments and rich notes are information, not a pass
+    // nothing fails anywhere; comments and rich notes are information, not a pass
     expect(sections.map(entry => entry.status)).toEqual(['ok', 'ok', 'ok', 'info', 'info']);
   });
 
@@ -117,7 +116,7 @@ describe('checkUnit', () => {
       const input = okInput();
       input.modules = { ...input.modules, editor: '' };
       expect(section(checkUnit(input), 'properties')).toEqual(expect.objectContaining({
-        findings: [{ key: 'unit-check.no-editor', hint: true }], ok: true, status: 'info'
+        findings: [{ key: 'unit-check.no-editor', hint: true }], status: 'info'
       }));
 
       input.modules = { ...input.modules, editor: 'iqb-editor-other@1.0' };
@@ -132,7 +131,6 @@ describe('checkUnit', () => {
 
       expect(section(checkUnit(input), 'properties')).toEqual(expect.objectContaining({
         findings: [{ key: 'unit-check.no-editor', hint: true }, { key: 'unit-check.no-player' }],
-        ok: false,
         status: 'warning'
       }));
     });
@@ -227,7 +225,7 @@ describe('checkUnit', () => {
         const sections = checkUnit(infoInput());
 
         expect(section(sections, 'schemer')).toEqual(expect.objectContaining({
-          findings: [], info: { key: 'unit-check.nothing-to-code' }, ok: true, status: 'info'
+          findings: [], info: { key: 'unit-check.nothing-to-code' }, status: 'info'
         }));
         expect(section(sections, 'properties')?.findings).toEqual([]);
       });
@@ -241,7 +239,7 @@ describe('checkUnit', () => {
         ];
 
         const schemer = section(checkUnit(input), 'schemer');
-        expect(schemer).toEqual(expect.objectContaining({ ok: false, status: 'warning' }));
+        expect(schemer).toEqual(expect.objectContaining({ status: 'warning' }));
         expect(schemer?.variableIdConflicts.map(conflict => conflict.id)).toEqual(['text_x']);
       });
 
@@ -251,6 +249,16 @@ describe('checkUnit', () => {
           ...input.variables ?? [],
           { id: 'text_field_1', alias: 'name', type: 'string' } as VariableInfo
         ];
+        const sections = checkUnit(input);
+
+        expect(section(sections, 'schemer')?.findings).toEqual([{ key: 'unit-check.no-scheme' }]);
+        expect(section(sections, 'properties')?.findings).toEqual([{ key: 'unit-check.no-schemer' }]);
+      });
+
+      // a new unit has no elements yet: nothing says it is an information unit
+      it('is not one without any elements', () => {
+        const input = infoInput();
+        input.variables = [];
         const sections = checkUnit(input);
 
         expect(section(sections, 'schemer')?.findings).toEqual([{ key: 'unit-check.no-scheme' }]);
@@ -290,7 +298,7 @@ describe('checkUnit', () => {
       };
 
       const schemer = section(checkUnit(input), 'schemer');
-      expect(schemer?.ok).toBe(false);
+      expect(schemer?.status).toBe('warning');
       expect(schemer?.variableIdConflicts).toEqual([{
         id: '05',
         variables: [
@@ -313,7 +321,7 @@ describe('checkUnit', () => {
       };
 
       const schemer = section(checkUnit(input), 'schemer');
-      expect(schemer?.ok).toBe(false);
+      expect(schemer?.status).toBe('warning');
       expect(schemer?.findings).toEqual([
         { key: 'unit-check.scheme-problem.SOURCE_MISSING', params: { variable: 'sum' } }
       ]);
@@ -324,10 +332,10 @@ describe('checkUnit', () => {
       const sections = checkUnit(nameTwiceInput());
 
       expect(section(sections, 'editor')).toEqual(expect.objectContaining({
-        ok: false,
+        status: 'warning',
         findings: [{ key: 'unit-check.element-problem.NAME_TWICE', params: { variable: 'text_1' } }]
       }));
-      expect(section(sections, 'schemer')).toEqual(expect.objectContaining({ ok: true, findings: [] }));
+      expect(section(sections, 'schemer')).toEqual(expect.objectContaining({ status: 'ok', findings: [] }));
     });
 
     // one of two elements of the same name renamed in the editor; the scheme holds the old name
@@ -346,7 +354,7 @@ describe('checkUnit', () => {
       const input = renamedInput();
       input.unsaved = { variables: true, scheme: false };
 
-      expect(section(checkUnit(input), 'editor')).toEqual(expect.objectContaining({ ok: true, findings: [] }));
+      expect(section(checkUnit(input), 'editor')).toEqual(expect.objectContaining({ status: 'ok', findings: [] }));
     });
 
     // the save drops the coding of an element without value with it (#2135)
@@ -356,8 +364,8 @@ describe('checkUnit', () => {
       input.unsaved = { variables: true, scheme: false };
       const sections = checkUnit(input);
 
-      expect(section(sections, 'editor')).toEqual(expect.objectContaining({ ok: true, findings: [] }));
-      expect(section(sections, 'schemer')).toEqual(expect.objectContaining({ ok: true, findings: [] }));
+      expect(section(sections, 'editor')).toEqual(expect.objectContaining({ status: 'ok', findings: [] }));
+      expect(section(sections, 'schemer')).toEqual(expect.objectContaining({ status: 'ok', findings: [] }));
     });
 
     // the scheme the schemer reported is saved after the variables, as reported, old name and all
@@ -388,9 +396,9 @@ describe('checkUnit', () => {
       const sections = checkUnit(okInput());
 
       expect(section(sections, 'comments'))
-        .toEqual(expect.objectContaining({ ok: true, info: { key: 'unit-check.comments-absent' } }));
+        .toEqual(expect.objectContaining({ status: 'info', info: { key: 'unit-check.comments-absent' } }));
       expect(section(sections, 'notes'))
-        .toEqual(expect.objectContaining({ ok: true, info: { key: 'unit-check.notes-present' } }));
+        .toEqual(expect.objectContaining({ status: 'info', info: { key: 'unit-check.notes-present' } }));
     });
 
     it('says so when it is not known', () => {
@@ -419,7 +427,7 @@ describe('checkUnit', () => {
       const sections = checkUnit(input);
 
       expect(sections.map(entry => entry.tab)).toEqual(['properties', 'comments', 'notes']);
-      expect(section(sections, 'properties')?.ok).toBe(true);
+      expect(section(sections, 'properties')?.status).toBe('ok');
     });
 
     // the preview and the export play the content whether the editor is shown or not
@@ -445,7 +453,7 @@ describe('checkUnit', () => {
       };
 
       const properties = section(checkUnit(input), 'properties');
-      expect(properties?.ok).toBe(false);
+      expect(properties?.status).toBe('warning');
       expect(properties?.variableIdConflicts.map(conflict => conflict.id)).toEqual(['05']);
     });
 
@@ -455,8 +463,8 @@ describe('checkUnit', () => {
       input.hiddenRoutes = ['schemer'];
       const sections = checkUnit(input);
 
-      expect(section(sections, 'properties')).toEqual(expect.objectContaining({ ok: true, findings: [] }));
-      expect(section(sections, 'editor')).toEqual(expect.objectContaining({ ok: true, findings: [] }));
+      expect(section(sections, 'properties')).toEqual(expect.objectContaining({ status: 'ok', findings: [] }));
+      expect(section(sections, 'editor')).toEqual(expect.objectContaining({ status: 'ok', findings: [] }));
     });
 
     it('names what the schemer finds wrong with an element under the coding when the editor is hidden', () => {
@@ -494,7 +502,7 @@ describe('withKeyFindings', () => {
     const hint = { key: 'unit-check.key-format', params: { key: '00_INVALID_NAME' }, hint: true };
 
     expect(section(withKeyFindings(checkUnit(okInput()), [hint]), 'properties')).toEqual(expect.objectContaining({
-      findings: [hint], ok: true, status: 'info'
+      findings: [hint], status: 'info'
     }));
   });
 
@@ -505,9 +513,9 @@ describe('withKeyFindings', () => {
 
     expect(section(sections, 'properties')).toEqual(expect.objectContaining({
       findings: [keyFinding, { key: 'unit-check.no-player' }],
-      ok: false
+      status: 'warning'
     }));
-    expect(section(sections, 'editor')?.ok).toBe(true);
+    expect(section(sections, 'editor')?.status).toBe('ok');
   });
 
   it('leaves the sections as they are when the key is in order', () => {

@@ -28,14 +28,15 @@ export class BackendService {
   }
 
   /**
-   * Whether a unit of a workspace has comments; undefined when the server does not answer, which
-   * {@link getComments} would report as no comments at all (#2135).
+   * Whether a unit of a workspace has comments, counted by the server rather than read: they may
+   * embed images. undefined when the server does not answer, which {@link getComments} would report
+   * as no comments at all (#2135).
    */
   hasComments(workspaceId: number, unitId: number): Observable<boolean | undefined> {
     return this.httpClient
-      .get<Comment[]>(this.commentsUrl(workspaceId, unitId, 0))
+      .get<number>(`${this.commentsUrl(workspaceId, unitId, 0)}/count`)
       .pipe(
-        map(comments => comments.length > 0),
+        map(count => count > 0),
         catchError(() => of(undefined))
       );
   }

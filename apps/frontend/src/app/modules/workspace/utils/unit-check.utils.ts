@@ -60,9 +60,10 @@ export interface UnitCheckSection {
   findings: UnitCheckFinding[];
   /** Ids the export would write twice; listed apart, since the card shows how to resolve them. */
   variableIdConflicts: VariableIdConflict[];
-  /** Nothing fails: no finding but hints, and no conflicts. */
-  ok: boolean;
-  /** What the section shows itself as: a problem, something to know (hints, info), or in order. */
+  /**
+   * What the section shows itself as: a warning where something fails -- a finding that is no hint, or
+   * an id written twice -- else something to know (hints, information), else in order.
+   */
   status: 'warning' | 'info' | 'ok';
   /**
    * Not a finding: whether there are comments and rich notes, neither of which is required, or
@@ -80,11 +81,12 @@ export function isTabShown(hiddenRoutes: string[], tab: string): boolean {
 
 /**
  * Whether the unit reports nothing to code: every element is one without a value, as texts and
- * images are in an information unit (#2135). Not known (undefined) is not nothing. Audio and video
+ * images are in an information unit (#2135). Neither not known (undefined) nor no elements at all --
+ * a unit without content, or from an editor that reports none -- is such a unit. Audio and video
  * report how often they were played, a number, which the check cannot tell from an answer.
  */
 export function hasNothingToCode(variables: VariableInfo[] | undefined): boolean {
-  return !!variables && variables.every(variable => toVariableInfoV1(variable).type === 'no-value');
+  return !!variables?.length && variables.every(variable => toVariableInfoV1(variable).type === 'no-value');
 }
 
 /**
@@ -264,16 +266,13 @@ export function checkUnit(input: UnitCheckInput): UnitCheckSection[] {
   return sections;
 }
 
-/**
- * A section with how it shows itself: a warning where something fails -- a finding that is no hint, or
- * an id written twice -- else the information icon where there are hints or information, else in order.
- */
-function withStatus(entry: Omit<UnitCheckSection, 'ok' | 'status'>): UnitCheckSection {
-  const ok = entry.findings.every(finding => finding.hint) && entry.variableIdConflicts.length === 0;
+/** A section with how it shows itself, see {@link UnitCheckSection.status}. */
+function withStatus(entry: Omit<UnitCheckSection, 'status'>): UnitCheckSection {
+  const fails = entry.findings.some(finding => !finding.hint) || entry.variableIdConflicts.length > 0;
   let status: UnitCheckSection['status'] = 'ok';
-  if (!ok) status = 'warning';
+  if (fails) status = 'warning';
   else if (entry.info || entry.findings.length) status = 'info';
-  return { ...entry, ok, status };
+  return { ...entry, status };
 }
 
 /**

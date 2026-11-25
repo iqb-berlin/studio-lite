@@ -1,7 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
-  Component, EventEmitter, Input, Output
+  Component, EventEmitter, Input, Output, signal
 } from '@angular/core';
 import {
   ActivatedRoute, Event, NavigationEnd, Router
@@ -66,6 +66,7 @@ class MockWorkspaceService {
   setWorkspaceGroupStates = jest.fn();
   loadRichNoteTags = jest.fn();
   setSettingsLoaded = jest.fn();
+  hiddenRoutes = signal<string[]>([]);
 }
 
 describe('WorkspaceComponent', () => {

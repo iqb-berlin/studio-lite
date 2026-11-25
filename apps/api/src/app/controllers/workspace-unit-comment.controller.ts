@@ -73,6 +73,19 @@ export class WorkspaceUnitCommentController {
     return this.unitCommentService.findOnesComments(unitId, request.user.id);
   }
 
+  /** How many comments the unit has, without the comments -- for the technical validation (#2135). */
+  @Get('count')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, CommentAccessGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiOkResponse({ description: 'The number of comments of the unit.', type: Number })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
+  @ApiTags('workspace unit comment')
+  async countComments(@Param('unit_id', ParseIntPipe) unitId: number): Promise<number> {
+    return this.unitCommentService.countComments(unitId);
+  }
+
   @Get('last-seen')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()

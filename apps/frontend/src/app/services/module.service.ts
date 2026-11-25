@@ -27,14 +27,27 @@ export class ModuleService {
   // computed from them reads this to be computed again when a reload replaces them (#2135)
   private readonly listVersionState = signal(0);
   readonly listVersion = this.listVersionState.asReadonly();
+  // the load of the three lists that is running, for whoever asks meanwhile
+  private loading: Promise<void> | undefined;
 
   constructor(
     private backendService: ModuleBackendService
   ) {}
 
-  // Loads running side by side -- the workspace and the unit check both start one when a workspace
-  // opens -- do no harm: a list that failed keeps the last one loaded, and listLoaded stays set.
-  async loadList(): Promise<void> {
+  /**
+   * Loads the lists of editors, players and schemers. A call while a load is running joins it rather
+   * than asking the server again: the workspace, the properties and the unit check each ask as a unit
+   * opens, at nearly the same time (#2135). A list that failed keeps the last one loaded, and
+   * listLoaded stays set.
+   */
+  loadList(): Promise<void> {
+    this.loading ??= this.fetchList().finally(() => {
+      this.loading = undefined;
+    });
+    return this.loading;
+  }
+
+  private async fetchList(): Promise<void> {
     const [editorModules, playerModules, schemerModules] = await Promise.all([
       lastValueFrom(this.backendService.getModuleList('EDITOR')),
       lastValueFrom(this.backendService.getModuleList('PLAYER')),

@@ -467,6 +467,19 @@ export class WorkspaceBackendService {
       );
   }
 
+  /**
+   * Whether the unit has rich notes, counted by the server rather than read: they may embed images.
+   * undefined when the server does not answer (#2135).
+   */
+  hasUnitRichNotes(workspaceId: number, unitId: number): Observable<boolean | undefined> {
+    return this.http
+      .get<number>(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/rich-notes/count`)
+      .pipe(
+        map(count => count > 0),
+        catchError(() => of(undefined))
+      );
+  }
+
   addUnitRichNote(workspaceId: number, unitId: number, newNote: CreateUnitRichNoteDto): Observable<number | null> {
     return this.http
       .post<number>(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/rich-notes`, newNote)

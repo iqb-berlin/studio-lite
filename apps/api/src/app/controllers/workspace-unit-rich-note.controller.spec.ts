@@ -36,13 +36,19 @@ describe('WorkspaceUnitRichNoteController', () => {
   });
 
   // The access guards ask about the workspace in the path alone (#1775).
-  it.each(['findNotes', 'createNote', 'patchNote', 'patchNoteItems', 'removeNote'] as const)(
+  it.each(['findNotes', 'countNotes', 'createNote', 'patchNote', 'patchNoteItems', 'removeNote'] as const)(
     'should hold the unit of %s to the workspace in its path',
     method => {
       expect(Reflect.getMetadata('__guards__', WorkspaceUnitRichNoteController.prototype[method]).slice(0, 3))
         .toEqual([JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard]);
     }
   );
+
+  // whoever may not read the notes may not learn whether there are any (#2135)
+  it('should guard the count of the notes as their list', () => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceUnitRichNoteController.prototype.countNotes))
+      .toEqual(Reflect.getMetadata('__guards__', WorkspaceUnitRichNoteController.prototype.findNotes));
+  });
 
   // The note of the path is held to the unit last, after the access is known (#1778).
   it.each(['patchNote', 'patchNoteItems', 'removeNote'] as const)(

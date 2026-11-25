@@ -213,6 +213,35 @@ describe('Comments API tests', () => {
       );
     });
 
+    // the technical validation asks whether there are comments, without the comments, which may embed
+    // images (#2135)
+    describe('57a. GET /api/workspaces/{workspace_id}/units/{id}/comments/count', () => {
+      const countComments = (workspaceId: string, token: string) => cy.requestWorkspaceAPI(
+        'GET',
+        `${workspaceId}/units/${Cypress.expose(unit1.shortname)}/comments/count`,
+        token
+      );
+
+      it('200 positive test: should count the comments of a unit', () => {
+        countComments(Cypress.expose(ws2.id), Cypress.expose(`token_${Cypress.expose('username')}`)).then(resp => {
+          expect(resp.status).to.be.equal(200);
+          expect(Number(resp.body)).to.be.equal(2);
+        });
+      });
+
+      it('403 negative test: should not tell a user without access to the workspace whether there are any', () => {
+        countComments(Cypress.expose(ws2.id), Cypress.expose(`token_${user3.username}`)).then(resp => {
+          expect(resp.status).to.be.equal(403);
+        });
+      });
+
+      it('404 negative test: should refuse the count for a unit under a workspace it is not in', () => {
+        countComments(Cypress.expose(ws1.id), Cypress.expose(`token_${Cypress.expose('username')}`)).then(resp => {
+          expect(resp.status).to.be.equal(404);
+        });
+      });
+    });
+
     describe('58. PATCH /api/workspaces/{workspace_id}/units/{id}/comments', () => {
       it('200 positive test: should allow an authorized user to update the comment visibility timestamp', () => {
         comment.lastSeenCommentChangedAt = new Date();
