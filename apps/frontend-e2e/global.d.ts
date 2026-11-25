@@ -77,12 +77,12 @@ declare namespace Cypress {
     copyToAPI(wsDestinationId:string, copyUnit: CopyUnit, token:string): Chainable<Response>; // 40
     getGroupsOfWsAPI(wsId: string, token:string): Chainable<Response>; // 41
     updateGroupNameOfWsAPI(wsId: string, groupName:string, token:string): Chainable<Response>; // 42
-    getUnitSchemeAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 43
+    getUnitSchemeAPI(unitId: string, wsId: string, token: string): Chainable<Response>; // 43
     // eslint-disable-next-line max-len
     updateUnitVariablesAPI(unitId: string, wsId: string, variables: Record<string, unknown>[], token: string): Chainable<Response>;
     uploadUnitFilesAPI(wsId: string, fixtures: string[], token: string): Chainable<Response>;
-    updateUnitDefinitionAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 44
-    getUnitDefinitionAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 45
+    updateUnitDefinitionAPI(unitId: string, wsId: string, token: string): Chainable<Response>; // 44
+    getUnitDefinitionAPI(unitId: string, wsId: string, token: string): Chainable<Response>; // 45
     updateUnitSchemeAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 46
     generateMetadataReportAPI(wsId: string, token:string): Chainable<Response>; // 47
     getWsSchemeAPI(wsId: string, token:string): Chainable<Response>; // 48
@@ -131,7 +131,6 @@ declare namespace Cypress {
     deleteReviewAPI(wsId:string, reviewId:string, token:string): Chainable<Response> // 74
     getWsForUserAPI(wsId:string, userId:string, token:string): Chainable<Response> // 75
     getReportAPI(token: string): Chainable<Response> // 76
-    getReportAPI(groupId:string, token: string): Chainable<Response> // 76
     getGroupReportAPI(groupId: string, token: string): Chainable<Response>; // 77
     downloadWsUnitsAPI(wsId: string, downloadQuery: string, token: string): Chainable<Response>; // 78
     deleteUnitsAPI(ids: string[], wsId: string, token: string): Chainable<Response>; // 79
