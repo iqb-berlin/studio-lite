@@ -57,19 +57,21 @@ export class UnitDefinitionService {
   }
 
   /**
-   * Whether the unit has a definition, and its format -- without the definition, which embeds the
-   * unit's media (#2135). Its length is read from the stored value's header, so the definition is
-   * never unpacked.
+   * Whether the unit has a definition, its format and its size -- without the definition, which
+   * embeds the unit's media (#2135, #2197). Its length in bytes is read from the stored value's
+   * header, so the definition is never unpacked.
    */
   async findOnesDefinitionSummary(unitId: number): Promise<UnitDefinitionSummaryDto> {
     const definition = await this.unitDefinitionsRepository
       .createQueryBuilder('definition')
       .select('definition.type', 'type')
-      .addSelect('octet_length(definition.data) > 0', 'hasDefinition')
+      .addSelect('octet_length(definition.data)', 'size')
       .where('definition.unitId = :unitId', { unitId })
-      .getRawOne<{ type: string | null; hasDefinition: boolean }>();
+      .getRawOne<{ type: string | null; size: number | null }>();
+    const size = definition?.size ?? 0;
     return {
-      hasDefinition: !!definition?.hasDefinition,
+      hasDefinition: size > 0,
+      size,
       ...(definition?.type && { definitionType: definition.type })
     };
   }

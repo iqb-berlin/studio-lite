@@ -4,10 +4,18 @@ import {
   findVariableIdConflicts, hasCodingScheme, schemeWithVariables, toVariableInfoV1, VariableIdConflict,
   VeronaModuleFactory
 } from '@studio-lite/shared-code';
+import { BytesPipe } from '@studio-lite-lib/iqb-components';
 import { playerRejectsDefinitionType } from './definition-type-match.utils';
 import { schemeProblemFindings } from './scheme-problems.utils';
+import { definitionSizeLevel } from './definition-size.utils';
 
 export type ModuleType = 'editor' | 'player' | 'schemer';
+
+/**
+ * What the check asks of a definition: whether there is one, and its format. Its size is shown
+ * beside the check, not asked by it (#2197).
+ */
+export type DefinitionContent = Omit<UnitDefinitionSummaryDto, 'size'>;
 
 /** What the check needs to know of an installed module. */
 export interface InstalledModule {
@@ -24,7 +32,7 @@ export interface UnitCheckInput {
    * Whether there is content, and its format -- of the editor's definition where it is loaded, saved
    * or not, else as the server summarizes the stored one (#2135). undefined: not loaded (yet).
    */
-  definition: UnitDefinitionSummaryDto | undefined;
+  definition: DefinitionContent | undefined;
   /**
    * The base variables: the editor's list where its definition is loaded, saved or not, else the list
    * the scheme came with -- the definition itself is not loaded for the check (#2135).
@@ -70,6 +78,11 @@ export interface UnitCheckSection {
    * that the unit has nothing to code.
    */
   info?: UnitCheckFinding;
+  /**
+   * Not a finding either: how large the definition is, and which level that is (#2197). It leaves
+   * the status alone -- a large unit works all the same.
+   */
+  definitionSize?: UnitCheckFinding;
 }
 
 const MODULE_TYPES: ModuleType[] = ['editor', 'player', 'schemer'];
@@ -132,8 +145,11 @@ function checkProperties(input: UnitCheckInput): UnitCheckFinding[] {
   return installed ? findings : [{ key: 'unit-check.modules-not-loaded' }, ...findings];
 }
 
-/** The summary of a definition the editor holds, as the server gives it for a stored one (#2135). */
-export function definitionSummary(definition: UnitDefinitionDto): UnitDefinitionSummaryDto {
+/**
+ * The summary of a definition the editor holds, as the server gives it for a stored one (#2135) --
+ * without the size, which the check does not ask for.
+ */
+export function definitionSummary(definition: UnitDefinitionDto): DefinitionContent {
   return {
     hasDefinition: !!definition.definition,
     ...(definition.definitionType && { definitionType: definition.definitionType })
@@ -284,4 +300,24 @@ export function withKeyFindings(sections: UnitCheckSection[], keyFindings: UnitC
   return sections.map(entry => (entry.tab === 'properties' ?
     withStatus({ ...entry, findings: [...keyFindings, ...entry.findings] }) :
     entry));
+}
+
+const bytesPipe = new BytesPipe();
+
+/**
+ * The sections with the size of the definition and its level, where its findings stand: under the
+ * editor, or under the properties where the workspace hides the editor (#2197). Added apart from
+ * {@link checkUnit}, as the key is: the size changes with every keystroke in the editor. Without a
+ * definition, or not known, there is no size to show -- the check says why.
+ */
+export function withDefinitionSize(sections: UnitCheckSection[], bytes: number | undefined): UnitCheckSection[] {
+  if (!bytes) return sections;
+  const tab: UnitCheckSection['tab'] = sections.some(entry => entry.tab === 'editor') ? 'editor' : 'properties';
+  const definitionSize: UnitCheckFinding = {
+    // unit-check.definition-size.small, unit-check.definition-size.medium, unit-check.definition-size.large,
+    // unit-check.definition-size.very-large
+    key: `unit-check.definition-size.${definitionSizeLevel(bytes)}`,
+    params: { size: bytesPipe.transform(bytes) }
+  };
+  return sections.map(entry => (entry.tab === tab ? { ...entry, definitionSize } : entry));
 }

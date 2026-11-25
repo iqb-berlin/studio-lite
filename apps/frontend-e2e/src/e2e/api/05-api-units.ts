@@ -1751,6 +1751,27 @@ describe('Unit API tests', () => {
       });
     });
 
+    // the size the unit check shows and classifies, counted by the database without unpacking it (#2197)
+    it('200 positive test: should give the size of the stored definition in bytes', () => {
+      cy.getUnitDefinitionAPI(
+        Cypress.expose(unit4.shortname),
+        Cypress.expose(ws1.id),
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(definitionResp => {
+        expect(definitionResp.status).to.equal(200);
+        const bytes = new TextEncoder().encode(definitionResp.body.definition).length;
+        expect(bytes).to.be.greaterThan(0);
+        cy.getUnitDefinitionSummaryAPI(
+          Cypress.expose(unit4.shortname),
+          Cypress.expose(ws1.id),
+          Cypress.expose(`token_${Cypress.expose('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(200);
+          expect(resp.body.size).to.equal(bytes);
+        });
+      });
+    });
+
     it('200 positive test: should say that a unit has no definition', () => {
       cy.getUnitDefinitionSummaryAPI(
         Cypress.expose(unit3.shortname),
@@ -1758,7 +1779,7 @@ describe('Unit API tests', () => {
         Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
-        expect(resp.body).to.deep.equal({ hasDefinition: false });
+        expect(resp.body).to.deep.equal({ hasDefinition: false, size: 0 });
       });
     });
 

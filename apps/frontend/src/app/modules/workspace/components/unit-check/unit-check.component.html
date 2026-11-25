@@ -27,6 +27,9 @@
               <span data-cy="unit-check-ok">{{ 'unit-check.ok' | translate }}</span>
             }
           </div>
+          @if (section.definitionSize; as size) {
+            <p class="definition-size" data-cy="unit-check-definition-size">{{ size.key | translate: size.params }}</p>
+          }
           @if (section.findings.length) {
             <ul class="findings">
               @for (finding of section.findings; track $index) {

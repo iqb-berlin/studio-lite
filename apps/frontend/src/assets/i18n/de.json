@@ -665,6 +665,12 @@
     "key-taken": "Der Kurzname „{{key}}“ ist in diesem Arbeitsbereich schon vergeben.",
     "no-definition": "Die Aufgabe hat noch keinen Inhalt.",
     "definition-not-loaded": "Der Inhalt der Aufgabe konnte nicht geladen werden.",
+    "definition-size": {
+      "small": "Größe der Aufgabe: {{size}} (klein)",
+      "medium": "Größe der Aufgabe: {{size}} (mittel)",
+      "large": "Größe der Aufgabe: {{size}} (groß)",
+      "very-large": "Größe der Aufgabe: {{size}} (sehr groß)"
+    },
     "definition-type-not-checked": "Ob der Player das Format dieser Aufgabe lesen kann, wurde nicht geprüft: Die Liste der installierten Module konnte nicht geladen werden.",
     "no-scheme": "Die Aufgabe hat noch kein Kodierschema.",
     "nothing-to-code": "Nichts zu kodieren – die Aufgabe enthält nur Elemente ohne Antwort, etwa Texte und Bilder.",
