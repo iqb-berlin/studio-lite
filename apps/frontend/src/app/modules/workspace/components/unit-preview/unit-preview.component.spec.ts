@@ -731,7 +731,7 @@ describe('UnitPreviewComponent', () => {
     });
 
     // what the studio has is read once per workspace, a failed read not kept: installed-dependencies.service.spec.ts
-    it('should say nothing when the packages cannot be read', () => {
+    it('should not name packages when their list cannot be read', () => {
       backendServiceStub.getResourcePackageNames = jest.fn().mockReturnValue(of(null));
 
       component.postStore(storeWith([{ id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }]));
