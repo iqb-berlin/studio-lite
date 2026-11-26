@@ -54,8 +54,8 @@ const QUOTED_KEYS = [
 
 /**
  * The keys that templates and components name in quotes but the texts lack: the page would show the key itself
- * (#2231). Not seen are keys put together at runtime, keys asked for as a list (`get([...])`) and keys kept in a
- * field or a constant before they reach the pipe.
+ * (#2231). Not seen are keys put together at runtime, keys chosen in a condition (`(a ? 'x.y' : 'x.z') | translate`),
+ * keys asked for as a list (`get([...])`) and keys kept in a field or a constant before they reach the pipe.
  */
 export function missingTranslationKeys(texts: TranslationTexts, sources: string[]): string[] {
   const known = flatten(texts);
