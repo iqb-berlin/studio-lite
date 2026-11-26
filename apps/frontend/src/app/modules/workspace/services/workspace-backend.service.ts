@@ -342,7 +342,7 @@ export class WorkspaceBackendService {
             if (event.type === HttpEventType.Response) {
               return event.body || {
                 source: 'upload-units',
-                messages: [{ objectKey: '', messageKey: 'upload-units.request-error' }]
+                messages: [{ objectKey: '', messageKey: 'unit-upload.request-error' }]
               };
             }
             return 0;

@@ -41,12 +41,13 @@ describe('translation files', () => {
     });
 
   // A key the code names but no file holds shows as the key itself (#2231). The texts of the coding components
-  // come in as translation-loader.ts mixes them in.
+  // come in as translation-loader.ts mixes them in. The components of libs/iqb-components take their texts from
+  // these files as well (#2237).
   it('should hold every key that a template or a component names in quotes', () => {
-    const app = join(__dirname, '..');
-    const sources = readdirSync(app, { recursive: true, encoding: 'utf8' })
-      .filter(file => /\.(html|ts)$/.test(file) && !file.endsWith('.spec.ts'))
-      .map(file => readFileSync(join(app, file), 'utf8'));
+    const sources = [join(__dirname, '..'), join(__dirname, '../../../../../libs/iqb-components/src')]
+      .flatMap(sourceDirectory => readdirSync(sourceDirectory, { recursive: true, encoding: 'utf8' })
+        .filter(file => /\.(html|ts)$/.test(file) && !file.endsWith('.spec.ts'))
+        .map(file => readFileSync(join(sourceDirectory, file), 'utf8')));
     const german = mergeTranslations(
       NGX_CODING_COMPONENTS_DE_TRANSLATIONS,
       read(DEFAULT_UI_LANGUAGE)

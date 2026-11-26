@@ -46,18 +46,19 @@ export function compareTranslations(source: TranslationTexts, translation: Trans
 }
 
 // A key in quotes right before the translate pipe, or as the first argument of instant() or stream(). A quoted piece
-// after a `+` is the end of a key put together at runtime, which only the running page knows.
+// after a `+` is the end of a key put together at runtime, which only the running page knows. Any character but
+// spaces, quotes and brackets counts: a stray one, such as the `!` in #2237, is what makes a key wrong.
 const QUOTED_KEYS = [
-  /(?<!\+\s*)['"]([\w.-]+)['"]\s*\|\s*translate\b/g,
-  /\b(?:instant|stream)\(\s*['"]([\w.-]+)['"]/g
+  /(?<!\+\s*)['"]([^'"\s|{}()+]+)['"]\s*\|\s*translate\b/g,
+  /\b(?:instant|stream)\(\s*['"]([^'"\s{}()+]+)['"]/g
 ];
 
 /**
  * The keys that templates and components name in quotes but the texts lack: the page would show the key itself
- * (#2231). Seen are only keys of letters, digits, `_`, `.` and `-` in plain quotes, right before the pipe or as the
- * first argument of instant() or stream(). Not seen are keys put together at runtime, chosen in a condition
+ * (#2231). Seen are only keys in plain quotes without spaces, right before the pipe or as the first argument of
+ * instant() or stream(). Not seen are keys put together at runtime, chosen in a condition
  * (`(a ? 'x.y' : 'x.z') | translate`), asked for with get(), written in backticks, kept in a field or a constant, or
- * handed to a helper that translates them, nor keys in sources the caller does not pass, such as the libraries.
+ * handed to a helper that translates them, nor keys in sources the caller does not pass.
  */
 export function missingTranslationKeys(texts: TranslationTexts, sources: string[]): string[] {
   const known = flatten(texts);

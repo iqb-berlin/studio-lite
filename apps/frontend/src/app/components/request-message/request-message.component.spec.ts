@@ -128,4 +128,34 @@ describe('RequestMessageComponent', () => {
       expect(component.messageType).toBe('error');
     });
   });
+
+  // A message about no object in particular began with a lone colon (#2237).
+  describe('with a message about no object in particular', () => {
+    it('should put the object before its message, and nothing before a message without one', async () => {
+      await TestBed.configureTestingModule({
+        imports: [
+          MatIconModule,
+          TranslateModule.forRoot()
+        ],
+        providers: [
+          {
+            provide: MAT_DIALOG_DATA,
+            useValue: {
+              source: 'test',
+              messages: [
+                { objectKey: '', messageKey: 'unit-upload.request-error' },
+                { objectKey: 'unit.xml', messageKey: 'unit-upload.api-warning.xml-parse' }
+              ]
+            }
+          }
+        ]
+      }).compileComponents();
+      const fixture = TestBed.createComponent(RequestMessageComponent);
+      fixture.detectChanges();
+
+      const items: string[] = [...fixture.nativeElement.querySelectorAll('li')]
+        .map((item: HTMLElement) => item.textContent?.replace(/\s+/g, ' ').trim());
+      expect(items).toEqual(['unit-upload.request-error', 'unit.xml: unit-upload.api-warning.xml-parse']);
+    });
+  });
 });

@@ -1,5 +1,7 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { HttpResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import {
   RequestReportDto,
@@ -10,7 +12,8 @@ import {
   UnitItemDto,
   UnitRichNotesDto
 } from '@studio-lite-lib/api-dto';
-import { firstValueFrom, Observable } from 'rxjs';
+import { createMock } from '@golevelup/ts-jest';
+import { filter, firstValueFrom, Observable } from 'rxjs';
 import { WorkspaceBackendService } from './workspace-backend.service';
 
 describe('WorkspaceBackendService', () => {
@@ -386,4 +389,20 @@ describe('WorkspaceBackendService', () => {
       expect(request.request.params.get('workspaceGroupId')).toBe(param);
       request.flush([]);
     });
+
+  // An empty answer to the upload named a key that no translation file holds (#2237).
+  describe('uploadUnits', () => {
+    it('should report an empty answer with a German text', async () => {
+      const german = JSON.parse(readFileSync(join(__dirname, '../../../../assets/i18n/de.json'), 'utf8'));
+      const files = createMock<FileList>({ 0: new File(['unit'], 'unit.xml'), length: 1 });
+      const report = firstValueFrom(service.uploadUnits(1, files)
+        .pipe(filter((event): event is RequestReportDto => typeof event !== 'number')));
+
+      httpMock.expectOne(`${serverUrl}workspaces/1`).event(new HttpResponse<RequestReportDto>({ body: null }));
+
+      const key = (await report).messages[0].messageKey;
+      expect(key.split('.').reduce<unknown>((texts, part) => (texts as Record<string, unknown>)?.[part], german))
+        .toEqual(expect.any(String));
+    });
+  });
 });
