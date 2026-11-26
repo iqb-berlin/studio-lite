@@ -1,4 +1,4 @@
-import { compareTranslations } from './translation-check.utils';
+import { compareTranslations, missingTranslationKeys } from './translation-check.utils';
 
 describe('compareTranslations', () => {
   const german = {
@@ -67,5 +67,29 @@ describe('compareTranslations', () => {
         'hidden-info': ' Hidden: {{hidden}}.'
       }
     })).toEqual({ ...nothing, missing: ['save'], extra: ['save.now'] });
+  });
+});
+
+describe('missingTranslationKeys', () => {
+  const texts = { save: 'Speichern', workspace: { renamed: 'Arbeitsbereich umbenannt' } };
+
+  it('should name the keys a template or a component names that the texts lack (#2231)', () => {
+    expect(missingTranslationKeys(texts, [
+      "<span>{{ 'accordion.expand' | translate }}</span>",
+      "this.translateService.instant('workspace.user-list-no-selection', { name })",
+      "return translate.stream('metadata.id-assigned');"
+    ])).toEqual(['accordion.expand', 'workspace.user-list-no-selection', 'metadata.id-assigned']);
+  });
+
+  it('should not name a key the texts hold, nested or not', () => {
+    expect(missingTranslationKeys(texts, [
+      '[matTooltip]="\'save\' | translate"',
+      'this.translateService.instant("workspace.renamed")'
+    ])).toEqual([]);
+  });
+
+  // The end of a key put together at runtime: only the running page knows the whole key.
+  it('should not name a quoted piece after a plus', () => {
+    expect(missingTranslationKeys(texts, ["{{ 'metadata.' + field + '-name' | translate }}"])).toEqual([]);
   });
 });

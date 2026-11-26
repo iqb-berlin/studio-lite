@@ -29,6 +29,7 @@ describe('UnitGroupsComponent', () => {
     fixture.detectChanges();
   });
 
+  // Both buttons were announced as expanding the groups (#2231).
   it('expands all groups when expand button is clicked', () => {
     component.numberOfGroups = 2;
     component.expandedGroups = 0;
@@ -38,7 +39,7 @@ describe('UnitGroupsComponent', () => {
     jest.spyOn(component.expandAll, 'next');
 
     const button: HTMLButtonElement | null = fixture.nativeElement.querySelector('button');
-    expect(button).not.toBeNull();
+    expect(button?.getAttribute('aria-label')).toBe('accordion.expand-all');
     button?.click();
 
     expect(component.expandedGroups).toBe(2);
@@ -54,7 +55,7 @@ describe('UnitGroupsComponent', () => {
     jest.spyOn(component.expandAll, 'next');
 
     const button: HTMLButtonElement | null = fixture.nativeElement.querySelector('button');
-    expect(button).not.toBeNull();
+    expect(button?.getAttribute('aria-label')).toBe('accordion.collapse-all');
     button?.click();
 
     expect(component.expandedGroups).toBe(0);

@@ -19,7 +19,7 @@
     @if (expanded) {
       <button
         mat-icon-button
-        [attr.aria-label]="'accordion.expand' | translate"
+        [attr.aria-label]="'accordion.collapse' | translate"
         (click)="expandedChange.emit(!expanded);expanded = !expanded; "
         >
         <mat-icon>expand_less</mat-icon>

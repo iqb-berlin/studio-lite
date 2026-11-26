@@ -1,7 +1,9 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { UnitRichNoteLinkDto, UnitRichNoteTagDto } from '@studio-lite-lib/api-dto';
 import { UnitRichNoteDialogComponent } from './unit-rich-note-dialog.component';
@@ -71,6 +73,21 @@ describe('UnitRichNoteDialogComponent', () => {
     unitId: 1,
     tags: mockTags,
     items: []
+  });
+
+  // The button of a new note named a text that is in no translation file, and showed its key (#2231).
+  it('should label the save button of a new note with a German text', async () => {
+    await setupNewNote();
+    const translate = TestBed.inject(TranslateService);
+    translate.setTranslation(
+      'de',
+      JSON.parse(readFileSync(join(__dirname, '../../../../../assets/i18n/de.json'), 'utf8'))
+    );
+    translate.use('de');
+    fixture.detectChanges();
+
+    const button: HTMLElement = fixture.nativeElement.querySelector('[data-cy="rich-note-dialog-save"]');
+    expect(button.textContent?.trim()).toBe('Hinzufügen');
   });
 
   it('should disable save button if content is empty', async () => {

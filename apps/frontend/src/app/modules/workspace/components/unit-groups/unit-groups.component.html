@@ -6,7 +6,7 @@
     @if (!expandedGroups) {
       <button
         mat-icon-button
-        [attr.aria-label]="'accordion.expand' | translate"
+        [attr.aria-label]="'accordion.expand-all' | translate"
         (click)="expandedGroups= numberOfGroups; expandAll.next(true)">
         <mat-icon>expand_more</mat-icon>
       </button>
@@ -14,7 +14,7 @@
     @if (expandedGroups>0) {
       <button
         mat-icon-button
-        [attr.aria-label]="'accordion.expand' | translate"
+        [attr.aria-label]="'accordion.collapse-all' | translate"
         (click)="expandedGroups= 0; expandAll.next(false)">
         <mat-icon>expand_less</mat-icon>
       </button>

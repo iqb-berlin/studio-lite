@@ -44,3 +44,24 @@ export function compareTranslations(source: TranslationTexts, translation: Trans
     whitespace: differingIn(edgesOf)
   };
 }
+
+// A key in quotes right before the translate pipe, or as the first argument of instant() or stream(). A quoted piece
+// after a `+` is the end of a key put together at runtime, which only the running page knows.
+const QUOTED_KEYS = [
+  /(?<!\+\s*)['"]([\w.-]+)['"]\s*\|\s*translate\b/g,
+  /\b(?:instant|stream)\(\s*['"]([\w.-]+)['"]/g
+];
+
+/**
+ * The keys that templates and components name in quotes but the texts lack: the page would show the key itself
+ * (#2231). Seen are only keys of letters, digits, `_`, `.` and `-` in plain quotes, right before the pipe or as the
+ * first argument of instant() or stream(). Not seen are keys put together at runtime, chosen in a condition
+ * (`(a ? 'x.y' : 'x.z') | translate`), asked for with get(), written in backticks, kept in a field or a constant, or
+ * handed to a helper that translates them, nor keys in sources the caller does not pass, such as the libraries.
+ */
+export function missingTranslationKeys(texts: TranslationTexts, sources: string[]): string[] {
+  const known = flatten(texts);
+  const named = new Set(sources.flatMap(source => QUOTED_KEYS
+    .flatMap(pattern => [...source.matchAll(pattern)].map(match => match[1]))));
+  return [...named].filter(key => !known.has(key));
+}

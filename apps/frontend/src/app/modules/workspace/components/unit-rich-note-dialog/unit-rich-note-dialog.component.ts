@@ -90,7 +90,7 @@ export class UnitRichNoteDialogComponent implements OnInit, OnDestroy {
   ) {
     this.isEditMode = !!data.note;
     this.dialogTitle = this.isEditMode ? 'workspace.edit-rich-note' : 'workspace.add-rich-note';
-    this.saveButtonLabel = this.isEditMode ? 'workspace.save' : 'workspace.add';
+    this.saveButtonLabel = this.isEditMode ? 'workspace.save' : 'add';
     this.initialItemReferences = data.note?.itemReferences || [];
 
     this.noteForm = this.fb.group({
