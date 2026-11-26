@@ -3,7 +3,7 @@ import {
   ComponentFixture, fakeAsync, flush, TestBed
 } from '@angular/core/testing';
 import {
-  Component, EventEmitter, Input, Output
+  Component, EventEmitter, Input, Output, signal, WritableSignal
 } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import {
@@ -49,6 +49,7 @@ describe('UnitMetadataComponent', () => {
   let selectedUnit$: BehaviorSubject<number>;
   let unitMetadataReloaded: Subject<void>;
   let workspaceSettings: WorkspaceSettingsDto;
+  let settingsLoaded: WritableSignal<boolean>;
   // the metadata the server answers with, per unit; a Subject holds the answer back
   let metadataOf: Record<number, UnitMetadataValues | Subject<UnitMetadataValues>>;
   let schemeThere: boolean;
@@ -73,7 +74,7 @@ describe('UnitMetadataComponent', () => {
         {
           provide: WorkspaceService,
           useValue: {
-            selectedUnit$, selectedWorkspaceId: 1, workspaceSettings, unitMetadataReloaded
+            selectedUnit$, selectedWorkspaceId: 1, workspaceSettings, settingsLoaded, unitMetadataReloaded
           }
         },
         {
@@ -109,6 +110,7 @@ describe('UnitMetadataComponent', () => {
     workspaceSettings = {
       defaultEditor: '', defaultPlayer: '', defaultSchemer: '', unitGroups: [], stableModulesOnly: true
     };
+    settingsLoaded = signal(true);
     metadataOf = { 3: metadata('of-3'), 4: metadata('of-4') };
     schemeThere = true;
     pendingSchemeOf = {};
@@ -224,6 +226,32 @@ describe('UnitMetadataComponent', () => {
     expect(getProfile.mock.calls).toEqual([['https://profiles/unit.json']]);
     expect(offeredBefore).toBeUndefined();
     expect(component[offered]).toBe(profile as unknown as MDProfile);
+  }));
+
+  // After a reload the stores may come before the workspace settings: the forms kept the defaults the
+  // workspace is entered with, and showed no profile (#2223).
+  it('builds the forms only once the workspace settings are loaded, with their profile', fakeAsync(() => {
+    const profile: MetadataProfileDto = {
+      id: 'profile', label: [], groups: [], modifiedAt: new Date()
+    };
+    settingsLoaded.set(false);
+    create();
+    const getProfile = jest.mocked(TestBed.inject(MetadataBackendService).getMetadataProfile)
+      .mockReturnValue(of(profile));
+    flush();
+    const builtBefore = component.metadataLoaded();
+
+    // as the workspace does: the stored settings replace the defaults, then they count as loaded
+    TestBed.inject(WorkspaceService).workspaceSettings = {
+      ...workspaceSettings, unitMDProfile: 'https://profiles/unit.json'
+    };
+    settingsLoaded.set(true);
+    fixture.detectChanges();
+    flush();
+
+    expect(builtBefore).toBe(false);
+    expect(getProfile.mock.calls).toEqual([['https://profiles/unit.json']]);
+    expect(component.metadataLoaded()).toBe(true);
   }));
 
   it('says so when the metadata of the unit could not be loaded', fakeAsync(() => {
