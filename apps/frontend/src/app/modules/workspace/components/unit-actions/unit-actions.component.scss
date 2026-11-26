@@ -1,11 +1,20 @@
 .unit-actions-header {
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.action-row {
+  flex-wrap: wrap;
+  padding: 4px 0;
 }
 
 .hint {
   color: #666;
 }
 
+.info {
+  margin-top: 28px;
+}
+
 .info-line {
-  margin: 0 0 4px;
+  margin: 0 0 6px;
 }

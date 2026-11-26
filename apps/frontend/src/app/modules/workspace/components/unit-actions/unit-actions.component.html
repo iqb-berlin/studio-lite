@@ -3,8 +3,8 @@
     <mat-card-header class="unit-actions-header">
       <mat-card-title>{{ 'unit-actions.title' | translate }}</mat-card-title>
     </mat-card-header>
-    <mat-card-content class="fx-column-start-stretch fx-gap-10">
-      <div class="fx-row-start-center fx-gap-10">
+    <mat-card-content>
+      <div class="fx-row-start-center fx-gap-20 action-row">
         <!-- a disabled button shows no tooltip: it hangs on the element around it -->
         @if (canSubmit()) {
           <span [matTooltip]="'workspace.submit-unit' | translate">
@@ -58,7 +58,7 @@
           <span [matTooltip]="'unit-actions.delete-title' | translate">
             <button mat-mini-fab
                     type="button"
-                    color="primary"
+                    color="warn"
                     [attr.aria-label]="'unit-actions.delete-title' | translate"
                     (click)="deleteUnit()"
                     data-cy="unit-actions-delete">
@@ -68,7 +68,7 @@
         }
       </div>
       @if (canSubmit()) {
-        <div class="hint">
+        <div class="hint info">
           <p class="info-line" data-cy="unit-actions-drop-box">{{ dropBoxLine().key | translate: dropBoxLine().params }}</p>
           @if (sourceLine(); as source) {
             <p class="info-line" data-cy="unit-actions-source">{{ source.key | translate: source.params }}</p>
