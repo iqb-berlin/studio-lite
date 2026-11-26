@@ -2,16 +2,21 @@ import { baseGroup, primaryWorkspace, AccessLevel } from '../../../support/testD
 
 import {
   clickIndexTabWsgAdmin,
+  FIRST_WORKSPACE_REQUEST_TIMEOUT,
   openWorkspaceSettingsDialog,
   saveWorkspaceSettings,
   setRouteVisibility
 } from '../../../support/helpers';
-import { createGroupAdminBaseAPI } from '../../../support/helpers/test-base';
+import { createGroupAdminBaseAPI, GroupAdminBase } from '../../../support/helpers/test-base';
 
 // ===========================================================================
 describe('Workspace Settings – hiddenRoutes', () => {
+  let base: GroupAdminBase;
+
   before(() => {
-    createGroupAdminBaseAPI({ users: [], firstUserAccess: AccessLevel.Admin });
+    createGroupAdminBaseAPI({ users: [], firstUserAccess: AccessLevel.Admin }).then(created => {
+      base = created;
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -147,6 +152,47 @@ describe('Workspace Settings – hiddenRoutes', () => {
       cy.visitWs(primaryWorkspace);
       cy.get('[data-cy="workspace-routes-schemer"]').should('exist');
       cy.get('[data-cy="workspace-routes-comments"]').should('exist');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Opened with its address, by a reload or a bookmark, a hidden tab showed: the workspace had not
+  // loaded its settings when the router let the view through (#2223).
+  describe('Opening a hidden tab by its address', () => {
+    let unitId = '';
+
+    /** Loads the page anew at this address, as a bookmark does, not by the router of the page open. */
+    const openAnew = (address: string) => {
+      cy.window().then(win => win.history.replaceState(null, '', `#/a/${base.wsId}/${unitId}/${address}`));
+      cy.reload();
+    };
+
+    before(() => {
+      cy.createUnitAPI(base.wsId, { shortname: 'HIDDEN1', name: 'Ausgeblendet', group: '' }, base.token)
+        .then(created => {
+          expect(created.status, 'unit').to.equal(201);
+          unitId = String(created.body);
+        });
+      cy.updateWsSettingsAPI(base.wsId, { hiddenRoutes: ['notes', 'editor'] }, base.token)
+        .its('status').should('equal', 200);
+    });
+
+    it('leads to the properties instead of a hidden tab', () => {
+      openAnew('notes');
+
+      cy.url({ timeout: FIRST_WORKSPACE_REQUEST_TIMEOUT })
+        .should('match', new RegExp(`/a/${base.wsId}/${unitId}/properties$`));
+      cy.get('[data-cy="workspace-routes-properties"]').should('exist');
+      cy.get('studio-lite-unit-rich-notes').should('not.exist');
+    });
+
+    it('unpins a hidden tab pinned beside another', () => {
+      openAnew('(properties//secondary:editor)');
+
+      cy.url({ timeout: FIRST_WORKSPACE_REQUEST_TIMEOUT })
+        .should('match', new RegExp(`/a/${base.wsId}/${unitId}/properties$`));
+      cy.get('[data-cy="workspace-routes-properties"]').should('exist');
+      cy.get('studio-lite-unit-editor').should('not.exist');
     });
   });
 });

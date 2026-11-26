@@ -7,11 +7,18 @@ import {
   UrlTree,
   PRIMARY_OUTLET
 } from '@angular/router';
+import { map, Observable } from 'rxjs';
 import { WorkspaceService } from '../services/workspace.service';
+import { BackendService as AppBackendService } from '../../../services/backend.service';
+import { AppService } from '../../../services/app.service';
 
 /**
  * Keeps the views a workspace has switched off out of reach, even when their URL is entered or
  * bookmarked: such a route is redirected to the unit's properties, which every workspace has.
+ *
+ * It decides by the settings of the workspace in the URL. The workspace loads them itself, but only
+ * once the router has let its views through: after a reload none are there yet, and coming from
+ * another workspace they are that one's. Then the guard asks for them itself (#2223).
  */
 @Injectable({
   providedIn: 'root'
@@ -19,16 +26,32 @@ import { WorkspaceService } from '../services/workspace.service';
 export class HiddenRouteGuard {
   constructor(
     private workspaceService: WorkspaceService,
+    private appBackendService: AppBackendService,
+    private appService: AppService,
     private router: Router
   ) {}
 
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
-  ): boolean | UrlTree {
-    const hiddenRoutes = this.workspaceService.workspaceSettings?.hiddenRoutes || [];
-    const targetRoute = route.routeConfig?.path;
+  ): boolean | UrlTree | Observable<boolean | UrlTree> {
+    const workspaceId = Number(route.pathFromRoot.map(snapshot => snapshot.paramMap.get('ws')).find(id => id));
+    if (this.workspaceService.settingsLoaded() && this.workspaceService.selectedWorkspaceId === workspaceId) {
+      return this.decide(route, state, this.workspaceService.hiddenRoutes());
+    }
+    // the user is known by now: the auth guard of the workspace route runs before this one and waits
+    // for the login; a failed request lets the view through, as the workspace reports the failure
+    return this.appBackendService
+      .getUserWorkspaceData(workspaceId, this.appService.authData.userId)
+      .pipe(map(workspace => this.decide(route, state, workspace?.settings?.hiddenRoutes ?? [])));
+  }
 
+  private decide(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot,
+    hiddenRoutes: string[]
+  ): boolean | UrlTree {
+    const targetRoute = route.routeConfig?.path;
     if (!targetRoute || !hiddenRoutes.includes(targetRoute)) return true;
     const tree = this.router.parseUrl(state.url);
     // With a view pinned beside it, the views are children of the unit's group

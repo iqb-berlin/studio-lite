@@ -80,6 +80,8 @@ export interface WsSettings {
   itemMDProfile?: string;
   /** Workspace states */
   states?: string[];
+  /** The views of a unit the workspace hides, such as `notes` */
+  hiddenRoutes?: string[];
 }
 
 /**

@@ -532,7 +532,8 @@ Cypress.Commands.add('updateWsSettingsAPI', (wsId:string, ws: WsSettings, token:
       unitGroups: ws.unitGroups,
       stableModulesOnly: ws.stableModulesOnly,
       unitMDProfile: ws.unitMDProfile,
-      itemMDProfile: ws.itemMDProfile
+      itemMDProfile: ws.itemMDProfile,
+      hiddenRoutes: ws.hiddenRoutes
     },
     failOnStatusCode: false
   });

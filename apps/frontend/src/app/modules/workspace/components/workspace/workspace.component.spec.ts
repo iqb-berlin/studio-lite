@@ -174,6 +174,21 @@ describe('WorkspaceComponent', () => {
     expect(jest.mocked(TestBed.inject(WorkspaceService).setSettingsLoaded).mock.calls).toEqual([[false], [true]]);
   });
 
+  // The hidden-route guard took the settings of an earlier visit for current, and a late answer for a
+  // workspace left could have been taken for the next one's (#2223).
+  it('should let go of the settings when the workspace is left, also of an answer still on its way', async () => {
+    const answer = new Subject<UserWorkspaceFullDto>();
+    await configure('/a/5/7/editor', { answer });
+    const workspaceService = TestBed.inject(WorkspaceService);
+    const settingsBefore = workspaceService.workspaceSettings;
+
+    fixture.destroy();
+    answer.next({ ...loadedWorkspace, settings: { ...settingsBefore, hiddenRoutes: ['notes'] } });
+
+    expect(jest.mocked(workspaceService.setSettingsLoaded).mock.calls).toEqual([[false], [false]]);
+    expect(workspaceService.workspaceSettings).toBe(settingsBefore);
+  });
+
   // The unit list asks for the groups itself. Its answer was lost when the settings came after it,
   // and the group select of a unit was empty (#1872).
   it('should keep the unit groups that were loaded before the settings', async () => {

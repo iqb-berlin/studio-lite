@@ -112,7 +112,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.appBackendService.getUserWorkspaceData(
       this.workspaceService.selectedWorkspaceId,
       this.appService.authData.userId
-    ).subscribe(
+    ).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
       wResponse => {
         if (wResponse) {
           this.initWorkspace(wResponse);
@@ -166,5 +166,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
+    // The settings stay in the service, but they count as loaded only while this workspace is open: the
+    // hidden-route guard took them for current when the workspace was opened again later (#2223).
+    this.workspaceService.setSettingsLoaded(false);
   }
 }

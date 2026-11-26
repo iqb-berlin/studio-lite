@@ -2,8 +2,9 @@ import {
   Component, inject, OnDestroy, OnInit, signal
 } from '@angular/core';
 import {
-  BehaviorSubject, EMPTY, forkJoin, Subject, switchMap, takeUntil, tap
+  BehaviorSubject, EMPTY, filter, forkJoin, Observable, of, Subject, switchMap, take, takeUntil, tap
 } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { UnitMetadataValues, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
 import {
@@ -67,12 +68,16 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
    */
   readonly language = inject(LanguageService).active.code;
 
+  private readonly settingsLoaded$: Observable<boolean>;
+
   constructor(
     private workspaceService: WorkspaceService,
     private unitStores: UnitStoresService,
     private metadataBackendService: MetadataBackendService,
     public metadataService: MetadataService
-  ) {}
+  ) {
+    this.settingsLoaded$ = toObservable(this.workspaceService.settingsLoaded);
+  }
 
   ngOnInit(): void {
     this.workspaceService.selectedUnit$
@@ -83,7 +88,12 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
           if (!(unitId > 0)) return EMPTY;
           return forkJoin([
             this.unitStores.loadMetadataStore(workspaceId, unitId),
-            this.unitStores.loadSchemeStore(workspaceId, unitId)
+            this.unitStores.loadSchemeStore(workspaceId, unitId),
+            // The forms take the profiles from the workspace settings, which may come later than the
+            // stores: the forms kept the defaults the workspace is entered with, without profiles (#2223).
+            this.workspaceService.settingsLoaded() ?
+              of(true) :
+              this.settingsLoaded$.pipe(filter(loaded => loaded), take(1))
           ]);
         }),
         takeUntil(this.ngUnsubscribe)
