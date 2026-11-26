@@ -10,6 +10,7 @@ import { schemeProblemFindings } from './scheme-problems.utils';
 import { definitionSizeLevel } from './definition-size.utils';
 import { InstalledDependencies } from './missing-dependencies.utils';
 import { CheckedDependencies, checkDependencies, UnitDependencyList } from './dependency-check.utils';
+import { hasUnusedProfiles, MetadataProfiles } from './metadata-profiles.utils';
 
 export type ModuleType = 'editor' | 'player' | 'schemer';
 
@@ -67,7 +68,7 @@ export interface UnitCheckFinding {
 
 export interface UnitCheckSection {
   /** The route of the tab, which also names it (`workspace.routes.<tab>`). */
-  tab: 'properties' | 'editor' | 'schemer' | 'comments' | 'notes';
+  tab: 'properties' | 'metadata' | 'editor' | 'schemer' | 'comments' | 'notes';
   /** Problems first, as found, and hints among them. */
   findings: UnitCheckFinding[];
   /** Ids the export would write twice; listed apart, since the card shows how to resolve them. */
@@ -98,6 +99,11 @@ export interface UnitCheckSection {
    * leave the status alone.
    */
   lastChanges?: UnitCheckFinding[];
+  /**
+   * Under the metadata: which profiles the workspace assigns, and of which others the unit keeps values
+   * that are not used (#2235).
+   */
+  metadataProfiles?: MetadataProfiles;
 }
 
 /** The last change of each part, as it is shown: a key and its date and user. */
@@ -393,4 +399,32 @@ export function withLastChanges(sections: UnitCheckSection[], lines: LastChangeL
     const lastChanges = placed.flatMap(([tab, line]) => (tab === entry.tab && line ? [line] : []));
     return lastChanges.length ? { ...entry, lastChanges } : entry;
   });
+}
+
+/**
+ * The sections with one for the metadata after the properties, in the order of the tabs (#2235): which
+ * profiles the workspace assigns, and of which others the unit keeps values that are not used. These fail
+ * nothing, they are there to be known. Added apart from {@link checkUnit}, as the key is: the metadata
+ * change with every keystroke in their forms. A workspace that hides the tab gets no section, as for the
+ * comments; metadata still on their way get none yet, and metadata the server did not deliver (null)
+ * one that says so.
+ */
+export function withMetadataProfiles(
+  sections: UnitCheckSection[],
+  profiles: MetadataProfiles | null | undefined,
+  hiddenRoutes: string[]
+): UnitCheckSection[] {
+  if (profiles === undefined || !isTabShown(hiddenRoutes, 'metadata')) return sections;
+  const metadata: UnitCheckSection = profiles ?
+    {
+      tab: 'metadata',
+      findings: [],
+      variableIdConflicts: [],
+      metadataProfiles: profiles,
+      status: hasUnusedProfiles(profiles) ? 'info' : 'ok'
+    } :
+    withStatus({
+      tab: 'metadata', findings: [], variableIdConflicts: [], info: { key: 'unit-check.not-loaded' }
+    });
+  return sections.flatMap(entry => (entry.tab === 'properties' ? [entry, metadata] : [entry]));
 }

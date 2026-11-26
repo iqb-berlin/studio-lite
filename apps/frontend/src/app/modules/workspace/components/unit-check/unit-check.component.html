@@ -33,6 +33,11 @@
           @for (change of section.lastChanges; track change.key) {
             <p class="last-change" data-cy="unit-check-last-change">{{ change.key | translate: change.params }}</p>
           }
+          @if (section.metadataProfiles; as profiles) {
+            <studio-lite-metadata-profiles class="metadata-profiles" data-cy="unit-check-metadata-profiles"
+                                           [unit]="profiles.unit" [items]="profiles.items" [withTarget]="true">
+            </studio-lite-metadata-profiles>
+          }
           @if (section.findings.length) {
             <ul class="findings">
               @for (finding of section.findings; track $index) {

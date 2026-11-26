@@ -1,0 +1,11 @@
+@for (line of lines().assigned; track $index) {
+  <p class="assigned-profile" data-cy="metadata-profiles-assigned">{{ line.key | translate: line.params }}</p>
+}
+@if (lines().unused.length) {
+  <p class="unused-title" data-cy="metadata-profiles-unused-title">{{ 'metadata.unused-profiles' | translate }}</p>
+  <ul class="unused-profiles">
+    @for (line of lines().unused; track $index) {
+      <li data-cy="metadata-profiles-unused">{{ line.key | translate: line.params }}</li>
+    }
+  </ul>
+}

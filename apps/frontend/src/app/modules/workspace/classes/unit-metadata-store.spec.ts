@@ -26,6 +26,22 @@ describe('UnitMetadataStore', () => {
     expect(store.getChangedData()).toBeUndefined();
   });
 
+  // for whoever derives from the metadata as they are edited, as the unit check does (#2235)
+  it('gives the metadata as they are edited, restored and saved as a signal', () => {
+    const store = new UnitMetadataStore(10, stored());
+    const edited = { items: [{ id: 'item1' }] };
+    const saved = { items: [{ id: 'item1', uuid: 'uuid-1' }] };
+
+    expect(store.data()).toEqual(stored());
+    store.setMetadata(edited);
+    expect(store.data()).toEqual(edited);
+    store.restore();
+    expect(store.data()).toEqual(stored());
+    store.setMetadata(edited);
+    store.applySaved(edited, saved);
+    expect(store.data()).toEqual(saved);
+  });
+
   it('restore drops what was edited and emits', () => {
     const store = new UnitMetadataStore(10, stored());
     const emitSpy = jest.fn();

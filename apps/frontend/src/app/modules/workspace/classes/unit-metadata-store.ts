@@ -1,5 +1,7 @@
 import { UnitMetadataValues } from '@studio-lite-lib/api-dto';
-import { EventEmitter, Signal, signal } from '@angular/core';
+import {
+  EventEmitter, Signal, signal, WritableSignal
+} from '@angular/core';
 
 /**
  * Metadata edited again while their save was under way, with the uuids the save gave its new items. Named
@@ -39,9 +41,14 @@ export class UnitMetadataStore {
   readonly changed: Signal<boolean> = this.changedState.asReadonly();
   private originalData: UnitMetadataValues;
   private reported: UnitMetadataValues | undefined;
+  private readonly dataState: WritableSignal<UnitMetadataValues>;
+  /** The metadata as {@link getData} gives them, for whoever derives from them as they are edited (#2235). */
+  readonly data: Signal<UnitMetadataValues>;
 
   constructor(readonly unitId: number, originalData: UnitMetadataValues) {
     this.originalData = originalData;
+    this.dataState = signal(originalData);
+    this.data = this.dataState.asReadonly();
   }
 
   setMetadata(newMetadata: UnitMetadataValues): void {
@@ -84,6 +91,7 @@ export class UnitMetadataStore {
   // reads the store again
   private notifyChange(): void {
     this.changedState.set(this.reported !== undefined && !same(this.reported, this.originalData));
+    this.dataState.set(this.getData());
     this.dataChange.emit();
   }
 }
