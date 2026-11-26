@@ -6,7 +6,10 @@
   <ul>
     @for (m of messageData.messages; track m) {
       <li>
-        <span class="list-element">{{m.objectKey}}</span>: {{m.messageKey | translate}}
+        @if (m.objectKey) {
+          <span class="list-element">{{m.objectKey}}</span>:
+        }
+        {{m.messageKey | translate}}
       </li>
     }
   </ul>

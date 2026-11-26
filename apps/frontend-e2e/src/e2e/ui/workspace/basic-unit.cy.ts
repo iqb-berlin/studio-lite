@@ -75,8 +75,8 @@ describe('Workspace Unit Management (Core CRUD)', () => {
     cy.get('input[formControlName="name"]').invoke('val').should('have.length', 100);
   });
 
-  // #2237: the report of an upload answered without a body named a key that no translation file holds. The API always
-  // sends a report, so the answer is faked; the report dialog has to show the text.
+  // #2237: the report of an upload answered without a body named a key that no translation file holds, after a lone
+  // colon. The API always sends a report, so the answer is faked; the report dialog has to show the text alone.
   it('reports an upload answered without a report in words', () => {
     cy.visitWs(primaryWorkspace);
     cy.intercept('POST', '**/api/workspaces/*', { statusCode: 201, body: '' }).as('emptyUpload');
@@ -87,7 +87,8 @@ describe('Workspace Unit Management (Core CRUD)', () => {
     );
     cy.wait('@emptyUpload');
     cy.translate(Cypress.expose('locale')).then(json => {
-      cy.get('mat-dialog-container').should('contain.text', json['unit-upload']['request-error']);
+      cy.get('mat-dialog-container li')
+        .should(item => expect(item.text().replace(/\s+/g, ' ').trim()).to.equal(json['unit-upload']['request-error']));
     });
   });
 });
