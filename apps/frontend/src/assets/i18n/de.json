@@ -387,6 +387,7 @@
     "changed-settings-warning": "Sollen die Änderungen in den Einstellungen gespeichert werden?",
     "route-visibility": "Arbeitsfläche",
     "unit-rich-note-tags": "Kategorien für Begleitmaterial",
+    "unit-rich-note-tags-url": "Vokabular-URL",
     "unit-rich-note-tags-info": "Wenn hier keine Kategorien für Begleitmaterial angegeben werden, werden die allgemeinen Kategorien für Begleitmaterial des IQB-Studios verwendet.",
     "use-global-tags": "Kategorien für Begleitmaterial aus den allgemeinen Einstellungen kopieren",
     "unit-rich-note-tags-group": "Kategorien für Begleitmaterial der Bereichsgruppen",
@@ -891,7 +892,7 @@
     "player-not-loaded": "Der Player \"{{id}}\" konnte nicht geladen werden.",
     "schemer-not-loaded": "Der Editor für das Kodierschema \"{{id}}\" konnte nicht geladen werden.",
     "unit-not-found": "Aufgabe nicht gefunden oder Daten fehlerhaft.",
-    "unit-not-loaded": "Konnte Aufgabendefinition nicht laden",
+    "unit-definition-not-loaded": "Konnte Aufgabendefinition nicht laden",
     "coding-check-error": "Kodierung erst anlegen und verändern!",
     "coding-scheme-not-loaded": "Konnte Kodierschema nicht laden",
     "coding-check": "Kodierung prüfen",
@@ -1464,6 +1465,12 @@
     "unit": "Aufgabe {{index}}",
     "block": "Review \"{{name}}\" (Block)",
     "booklet": "Review \"{{name}}\" (Testheft)"
+  },
+  "accordion": {
+    "expand": "Aufklappen",
+    "collapse": "Zuklappen",
+    "expand-all": "Alle aufklappen",
+    "collapse-all": "Alle zuklappen"
   },
   "paginator": {
     "items-per-page": "Einträge pro Seite",

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { RequestReportDto, UnitDownloadSettingsDto, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { format } from 'date-fns';
 import { saveAs } from 'file-saver-es';
@@ -57,7 +57,7 @@ import { SelectUnitComponent, SelectUnitData } from '../select-unit/select-unit.
   imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, MatMenuItem, MatIcon, MatDivider,
     TranslateModule]
 })
-export class EditUnitButtonComponent extends RequestMessageDirective implements OnInit {
+export class EditUnitButtonComponent extends RequestMessageDirective {
   ngUnsubscribe: Subject<void> = new Subject<void>();
   constructor(
     public workspaceService: WorkspaceService,
@@ -80,16 +80,6 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
     private codingReportDialog: MatDialog
   ) {
     super();
-  }
-
-  userListTitle: string = '';
-
-  ngOnInit(): void {
-    this.userListTitle = this.workspaceService.selectedWorkspaceName ?
-      this.translateService
-        .instant('workspace.user-list', { workspace: this.workspaceService.selectedWorkspaceName }) :
-      this.translateService
-        .instant('workspace.user-list-no-selection');
   }
 
   async settings(): Promise<void> {

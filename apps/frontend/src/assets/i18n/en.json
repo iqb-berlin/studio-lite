@@ -387,6 +387,7 @@
     "changed-settings-warning": "Save the changes to the settings?",
     "route-visibility": "Visible tabs",
     "unit-rich-note-tags": "Categories for supplementary material",
+    "unit-rich-note-tags-url": "Vocabulary URL",
     "unit-rich-note-tags-info": "If no categories for supplementary material are given here, the general categories for supplementary material of the IQB-Studio are used.",
     "use-global-tags": "Copy categories for supplementary material from the general settings",
     "unit-rich-note-tags-group": "Categories for supplementary material of the workspace groups",
@@ -889,7 +890,7 @@
     "player-not-loaded": "The player \"{{id}}\" could not be loaded.",
     "schemer-not-loaded": "The editor for the coding scheme \"{{id}}\" could not be loaded.",
     "unit-not-found": "Unit not found or data faulty.",
-    "unit-not-loaded": "Could not load the unit definition",
+    "unit-definition-not-loaded": "Could not load the unit definition",
     "coding-check-error": "Create the coding scheme first.",
     "coding-scheme-not-loaded": "Could not load the coding scheme",
     "coding-check": "Check coding",
@@ -1460,6 +1461,12 @@
     "unit": "Unit {{index}}",
     "block": "Review \"{{name}}\" (block)",
     "booklet": "Review \"{{name}}\" (booklet)"
+  },
+  "accordion": {
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "expand-all": "Expand all",
+    "collapse-all": "Collapse all"
   },
   "paginator": {
     "items-per-page": "Entries per page",

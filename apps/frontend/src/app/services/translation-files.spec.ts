@@ -1,8 +1,9 @@
 import { readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { DEFAULT_UI_LANGUAGE, UI_LANGUAGES } from '@studio-lite/shared-code';
+import { mergeTranslations, NGX_CODING_COMPONENTS_DE_TRANSLATIONS } from '@iqb/ngx-coding-components/translations';
 import { UI_LOCALE_DATA } from './ui-locale-data';
-import { compareTranslations, TranslationTexts } from '../utils/translation-check.utils';
+import { compareTranslations, missingTranslationKeys, TranslationTexts } from '../utils/translation-check.utils';
 
 /**
  * The translation files against the language list (#2174). A language is offered only when it is
@@ -10,7 +11,8 @@ import { compareTranslations, TranslationTexts } from '../utils/translation-chec
  * its key and no `{{name}}` stays unfilled. German is the source every other file is translated from.
  *
  * Failing here after adding a text to `de.json`: add it to every other file as well; the failure
- * names the keys. How to translate is in TRANSLATION.md.
+ * names the keys. How to translate is in TRANSLATION.md. Failing at the keys the code names: the text
+ * is in no file yet, add it to all of them (#2231).
  */
 describe('translation files', () => {
   const directory = join(__dirname, '../../assets/i18n');
@@ -37,4 +39,19 @@ describe('translation files', () => {
           });
       });
     });
+
+  // A key the code names but no file holds shows as the key itself (#2231). The texts of the coding components
+  // come in as translation-loader.ts mixes them in.
+  it('should hold every key that a template or a component names in quotes', () => {
+    const app = join(__dirname, '..');
+    const sources = readdirSync(app, { recursive: true, encoding: 'utf8' })
+      .filter(file => /\.(html|ts)$/.test(file) && !file.endsWith('.spec.ts'))
+      .map(file => readFileSync(join(app, file), 'utf8'));
+    const german = mergeTranslations(
+      NGX_CODING_COMPONENTS_DE_TRANSLATIONS,
+      read(DEFAULT_UI_LANGUAGE)
+    ) as TranslationTexts;
+
+    expect(missingTranslationKeys(german, sources)).toEqual([]);
+  });
 });

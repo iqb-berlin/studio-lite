@@ -120,10 +120,6 @@ describe('EditUnitButtonComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should set userListTitle on init', () => {
-    expect(component.userListTitle).toBe('workspace.user-list');
-  });
-
   describe('exportUnit', () => {
     const buildSettings = (format: 'json' | 'xml'): UnitDownloadSettingsDto => ({
       unitIdList: [1],
