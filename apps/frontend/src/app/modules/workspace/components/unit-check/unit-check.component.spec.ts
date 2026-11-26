@@ -13,6 +13,7 @@ import { UnitStoresService } from '../../services/unit-stores.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { ModuleService } from '../../../../services/module.service';
 import { BackendService as CommentsBackendService } from '../../../comments/services/backend.service';
+import { InstalledDependenciesService } from '../../services/installed-dependencies.service';
 
 const scheme = (variableCodings: unknown[]): string => JSON.stringify({ version: '3.0', variableCodings });
 
@@ -46,6 +47,7 @@ describe('UnitCheckComponent', () => {
   let listVersion: WritableSignal<number>;
   let editors: Record<string, { nameAndVersion: string }>;
   let loadList: jest.Mock;
+  let loadInstalledDependencies: jest.Mock;
 
   const element = (): HTMLElement => fixture.nativeElement as HTMLElement;
   const tabs = () => Array.from(
@@ -104,10 +106,10 @@ describe('UnitCheckComponent', () => {
       ]
     }).overrideComponent(UnitCheckComponent, {
       set: {
-        providers: [{
-          provide: CommentsBackendService,
-          useValue: { hasComments }
-        }]
+        providers: [
+          { provide: CommentsBackendService, useValue: { hasComments } },
+          { provide: InstalledDependenciesService, useValue: { load: loadInstalledDependencies } }
+        ]
       }
     });
     unitStores = TestBed.inject(UnitStoresService);
@@ -122,6 +124,7 @@ describe('UnitCheckComponent', () => {
     listVersion = signal(1);
     editors = { 'iqb-editor-aspect@2.9': { nameAndVersion: 'Editor' } };
     loadList = jest.fn().mockResolvedValue(undefined);
+    loadInstalledDependencies = jest.fn(() => of({ packages: ['GeoGebra'], widgets: [] }));
     units = signal({ '': [{ id: 4, key: 'UNIT_04' }] });
     hasComments = jest.fn(() => of(true));
     hasUnitRichNotes = jest.fn(() => of(false));
@@ -347,6 +350,39 @@ describe('UnitCheckComponent', () => {
 
       expect(definitionSize()).toEqual({ key: 'unit-check.definition-size.small', params: { size: '7.0 B' } });
     }));
+
+  // what the stored unit needs comes with the summary; once the editor holds the definition, what it reports (#2198)
+  it('lists what the stored unit needs, then what the editor reports, unsaved changes included', fakeAsync(() => {
+    getUnitDefinitionSummary.mockReturnValue(of({
+      hasDefinition: true,
+      dependenciesToPlay: [{ id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }],
+      dependenciesToEdit: []
+    }));
+    create();
+    const entries = (purpose: string) => Array.from(
+      sectionOf('editor')
+        ?.querySelectorAll(`[data-cy="unit-check-dependencies-${purpose}"] [data-cy="unit-check-dependency"]`) ?? [],
+      entry => entry.textContent
+    );
+
+    expect(loadInstalledDependencies).toHaveBeenCalledWith(1);
+    expect(entries('play')).toEqual(['unit-check.dependency.package-installed']);
+    expect(sectionOf('editor')?.querySelector('[data-cy="unit-check-dependencies-edit"]')?.textContent?.trim())
+      .toBe('unit-check.dependencies-edit-none');
+
+    unitStores.loadDefinitionStore(1, 3).subscribe();
+    unitStores.definitionStore()?.setData([], '{}', undefined, {
+      toPlay: [{ id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }],
+      toEdit: [{ id: 'PERIODIC_TABLE', type: 'WIDGET' }]
+    });
+    fixture.detectChanges();
+
+    expect(entries('edit')).toEqual(['unit-check.dependency.widget-missing']);
+    expect(Array.from(
+      sectionOf('editor')?.querySelectorAll('[data-cy="unit-check-finding"]') ?? [],
+      finding => finding.textContent
+    )).toEqual(['unit-check.dependencies-missing-to-edit-widgets', 'workspace.dependencies-missing-install-hint']);
+  }));
 
   // the editor reports with every keystroke in a text; the check parses and validates the scheme (#2135)
   it('checks again when the editor changes the variables, not when it changes only the text', fakeAsync(() => {

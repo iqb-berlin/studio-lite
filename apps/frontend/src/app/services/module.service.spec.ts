@@ -157,6 +157,16 @@ describe('ModuleService', () => {
       // eslint-disable-next-line @typescript-eslint/dot-notation
       expect(service.widgets['w1'].metadata.name).toBe('W1');
     });
+
+    // an empty map alone would pass for an installation without widgets (#2198)
+    it('should tell an installation without widgets from a request that failed', async () => {
+      mockBackendService.getModuleList.mockReturnValue(of([]));
+      expect(await service.loadWidgets()).toBe(true);
+
+      mockBackendService.getModuleList.mockReturnValue(of(null));
+      expect(await service.loadWidgets()).toBe(false);
+      expect(service.widgets).toEqual({});
+    });
   });
 
   describe('getModuleHtml', () => {

@@ -67,9 +67,14 @@ export class ModuleService {
     return ModuleService.toModuleMap(modules);
   }
 
-  async loadWidgets() {
+  /**
+   * Loads the widgets, and says whether their list arrived: a failed request leaves the map empty,
+   * which must not pass for an installation without widgets (#2198).
+   */
+  async loadWidgets(): Promise<boolean> {
     const widgetModules = await lastValueFrom(this.backendService.getModuleList('WIDGET'));
     this.widgets = ModuleService.toModuleMap(widgetModules);
+    return widgetModules !== null;
   }
 
   private static toModuleMap(modules: VeronaModuleInListDto[] | null): { [key: string]: VeronaModuleClass } {

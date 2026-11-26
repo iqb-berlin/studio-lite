@@ -1,9 +1,7 @@
 import {
   Component, ElementRef, signal, ViewChild
 } from '@angular/core';
-import {
-  forkJoin, from, map, Observable, of, shareReplay, skip, takeUntil, tap
-} from 'rxjs';
+import { skip, takeUntil } from 'rxjs';
 import { UnitDependency } from '@studio-lite/shared-code';
 import { MatDialog } from '@angular/material/dialog';
 import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
@@ -25,6 +23,7 @@ import { UnitState } from '../../../../models/verona.interface';
 import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
 import { matchDefinitionType, playerRejectsDefinitionType } from '../../utils/definition-type-match.utils';
 import { findMissingDependencies } from '../../utils/missing-dependencies.utils';
+import { InstalledDependenciesService } from '../../services/installed-dependencies.service';
 
 /**
  * The preview in the workspace: the unit as a test taker would see it, running in the player the
@@ -35,6 +34,8 @@ import { findMissingDependencies } from '../../utils/missing-dependencies.utils'
   templateUrl: './unit-preview.component.html',
   styleUrls: ['./unit-preview.component.scss'],
   host: { class: 'unit-preview' },
+  // read once per workspace while the preview is shown, as the unit check does for itself (#2198)
+  providers: [InstalledDependenciesService],
   imports: [PreviewBarComponent, MatProgressSpinner, TrackIframeActivityDirective]
 })
 export class UnitPreviewComponent extends PreviewDirective {
@@ -42,11 +43,6 @@ export class UnitPreviewComponent extends PreviewDirective {
   definitionTypeWarning = '';
   /** What the unit needs to be played that the studio does not have (#1602); empty when nothing. */
   readonly dependencyWarning = signal('');
-  // per workspace: which package serves a name depends on the workspace's group (#1358)
-  private installedDependencies?: {
-    workspaceId: number;
-    installed$: Observable<{ packages: string[]; widgets: string[] } | null>;
-  };
 
   private dataParts!: Record<string, string> | null;
   private unitStateDataType: string | null = null;
@@ -54,7 +50,8 @@ export class UnitPreviewComponent extends PreviewDirective {
   constructor(
     public previewService: PreviewService,
     public override errorDialog: MatDialog,
-    private router: Router
+    private router: Router,
+    private installedDependencies: InstalledDependenciesService
   ) {
     super();
   }
@@ -206,17 +203,18 @@ export class UnitPreviewComponent extends PreviewDirective {
   /**
    * A warning when the unit needs, to be played, a resource package, a widget or another file the
    * studio does not have (#1602). The player still runs; it may only show part of the unit. Nothing
-   * is said when the packages cannot be read, and nothing for a unit left before they arrived.
+   * is said when the packages or the widgets cannot be read, and nothing for a unit left before they
+   * arrived.
    */
   private updateDependencyWarning(dependencies: UnitDependency[] | undefined): void {
     this.dependencyWarning.set('');
     if (!dependencies?.length) return;
     const unitId = this.workspaceService.selectedUnit$.getValue();
-    this.loadInstalledDependencies()
+    this.installedDependencies.load(this.workspaceService.selectedWorkspaceId)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(installed => {
         if (!installed || this.workspaceService.selectedUnit$.getValue() !== unitId) return;
-        const missing = findMissingDependencies(dependencies, installed.packages, installed.widgets);
+        const missing = findMissingDependencies(dependencies, installed);
         // one whole sentence per kind, with only the names put in: the word order differs between languages
         const sentences = ([
           ['workspace.dependencies-missing-packages', missing.packages],
@@ -233,36 +231,6 @@ export class UnitPreviewComponent extends PreviewDirective {
         }
         this.dependencyWarning.set(sentences.join(' '));
       });
-  }
-
-  /**
-   * The package names served in the workspace and the installed widget types, read once per
-   * workspace for the preview. A failed read is not kept: the next unit asks again rather than
-   * going without a warning for the rest of the session.
-   */
-  private loadInstalledDependencies(): Observable<{ packages: string[]; widgets: string[] } | null> {
-    const workspaceId = this.workspaceService.selectedWorkspaceId;
-    if (this.installedDependencies?.workspaceId !== workspaceId) {
-      const installed$ = forkJoin([
-        this.backendService.getResourcePackageNames(workspaceId),
-        Object.keys(this.moduleService.widgets).length === 0 ? from(this.moduleService.loadWidgets()) : of(undefined)
-      ]).pipe(
-        map(([packages]) => (packages ?
-          {
-            packages,
-            widgets: Object.values(this.moduleService.widgets).map(widget => widget.metadata?.model ?? '')
-          } :
-          null)),
-        tap(installed => {
-          if (!installed && this.installedDependencies?.installed$ === installed$) {
-            this.installedDependencies = undefined;
-          }
-        }),
-        shareReplay(1)
-      );
-      this.installedDependencies = { workspaceId, installed$ };
-    }
-    return this.installedDependencies.installed$;
   }
 
   gotoUnit(target: string): void {

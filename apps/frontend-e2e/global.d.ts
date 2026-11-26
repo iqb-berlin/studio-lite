@@ -81,7 +81,12 @@ declare namespace Cypress {
     // eslint-disable-next-line max-len
     updateUnitVariablesAPI(unitId: string, wsId: string, variables: Record<string, unknown>[], token: string): Chainable<Response>;
     uploadUnitFilesAPI(wsId: string, fixtures: string[], token: string): Chainable<Response>;
-    updateUnitDefinitionAPI(unitId: string, wsId: string, token: string): Chainable<Response>; // 44
+    updateUnitDefinitionAPI(
+      unitId: string,
+      wsId: string,
+      token: string,
+      dependencies?: Record<'dependenciesToPlay' | 'dependenciesToEdit', { id: string; type: string }[]>
+    ): Chainable<Response>; // 44
     getUnitDefinitionAPI(unitId: string, wsId: string, token: string): Chainable<Response>; // 45
     getUnitDefinitionSummaryAPI(unitId: string, wsId: string, token: string): Chainable<Response>; // 45a
     updateUnitSchemeAPI(unitId: string, wsId: string, token: string, scheme?: string): Chainable<Response>; // 46

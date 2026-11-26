@@ -6,7 +6,8 @@ import { createTestBaseAPI, deleteTestBaseAPI, TestBase } from '../../../support
  * The card „Technische Validierung“ under „Eigenschaften“ tells, tab by tab, whether the unit is in order
  * (#2135). Its questions are answered in unit-check.utils.spec.ts; what only the running studio
  * shows is that the card asks them of the unit the server delivers -- here an id the export would
- * write twice (#2119), and the same unit once the derived variable has been renamed.
+ * write twice (#2119), and the same unit once the derived variable has been renamed, the size of
+ * the content (#2197) and what it needs besides the modules (#2198).
  */
 describe('Workspace Unit Check', () => {
   const unit = { shortname: 'CHECK_ID05', name: 'Doppelte ID', group: '' };
@@ -147,5 +148,39 @@ describe('Workspace Unit Check', () => {
 
     cy.then(() => cy.get('[data-cy="unit-check-editor"] [data-cy="unit-check-definition-size"]')
       .should('have.text', `Größe der Aufgabe: ${(size / 1024).toFixed(1)} KB (klein)`));
+  });
+
+  // what the editor reported the unit needs, as the server stores it, and what of it the studio lacks (#2198)
+  it('lists what the unit needs under the editor, and names what the studio lacks', () => {
+    const neededUnit = { shortname: 'CHECK_DEPS', name: 'Abhängigkeiten', group: '' };
+    // a name no installation serves
+    const missingPackage = { id: 'E2E-Fehlt.itcr.zip', type: 'FILE_TO_UNPACK' };
+    cy.then(() => cy.createUnitAPI(base.wsId, neededUnit, base.token).then(response => {
+      expect(response.status, neededUnit.shortname).to.equal(201);
+      cy.updateUnitDefinitionAPI(String(response.body), base.wsId, base.token, {
+        dependenciesToPlay: [
+          missingPackage, { id: 'sheet.pdf', type: 'FILE' }, { id: 'formel-dienst', type: 'SERVICE' }
+        ],
+        dependenciesToEdit: [missingPackage]
+      }).its('status').should('equal', 200);
+    }));
+    cy.visitWs(primaryWorkspace);
+    selectUnit(neededUnit.shortname);
+    clickIndexTabWorkspace('properties');
+
+    cy.get('[data-cy="unit-check-editor"]').within(() => {
+      cy.get('[data-cy="unit-check-dependencies-play"] [data-cy="unit-check-dependency"]')
+        .should(entries => expect(Cypress._.map(entries, 'innerText')).to.deep.equal([
+          'E2E-Fehlt.itcr.zip – Paket, nicht installiert',
+          'sheet.pdf – Datei, kann das Studio nicht bereitstellen',
+          'formel-dienst – Dienst'
+        ]));
+      cy.get('[data-cy="unit-check-dependencies-edit"] [data-cy="unit-check-dependency"]')
+        .should('have.text', 'E2E-Fehlt.itcr.zip – Paket, nicht installiert');
+      cy.contains(
+        '[data-cy="unit-check-finding"]',
+        'Zum Abspielen braucht diese Aufgabe Pakete, die im Studio nicht installiert sind: E2E-Fehlt.itcr.zip.'
+      ).should('be.visible');
+    });
   });
 });

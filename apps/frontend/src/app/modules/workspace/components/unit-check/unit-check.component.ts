@@ -14,7 +14,7 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { TranslateModule } from '@ngx-translate/core';
 import { UnitDefinitionSummaryDto } from '@studio-lite-lib/api-dto';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
-import { sameVariableLists } from '@studio-lite/shared-code';
+import { sameDependencyLists, sameVariableLists } from '@studio-lite/shared-code';
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitStoresService } from '../../services/unit-stores.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
@@ -26,6 +26,8 @@ import {
 } from '../../utils/unit-check.utils';
 import { byteLength } from '../../utils/definition-size.utils';
 import { checkUnitKey } from '../../utils/unit-key.utils';
+import { InstalledDependencies } from '../../utils/missing-dependencies.utils';
+import { InstalledDependenciesService } from '../../services/installed-dependencies.service';
 import { VariableIdConflictListComponent } from '../variable-id-conflict-list/variable-id-conflict-list.component';
 import { VariableIdConflictFixComponent } from '../variable-id-conflict-fix/variable-id-conflict-fix.component';
 
@@ -33,6 +35,8 @@ import { VariableIdConflictFixComponent } from '../variable-id-conflict-fix/vari
 interface UnitCheckSources {
   /** The server's summary of the stored definition; not asked for where the editor holds it. */
   definitionSummary: UnitDefinitionSummaryDto | undefined;
+  /** The packages and widgets the studio has (#2198); null: they could not be read. */
+  installedDependencies: InstalledDependencies | null;
 }
 
 /**
@@ -62,7 +66,9 @@ interface EditorDefinition {
 
 const sameEditorDefinition = (a: EditorDefinition | undefined, b: EditorDefinition | undefined): boolean => a === b ||
   (!!a && !!b && a.summary.hasDefinition === b.summary.hasDefinition &&
-    a.summary.definitionType === b.summary.definitionType && sameVariableLists(a.variables, b.variables));
+    a.summary.definitionType === b.summary.definitionType && sameVariableLists(a.variables, b.variables) &&
+    sameDependencyLists(a.summary.dependenciesToPlay, b.summary.dependenciesToPlay) &&
+    sameDependencyLists(a.summary.dependenciesToEdit, b.summary.dependenciesToEdit));
 
 type Modules = Partial<Record<ModuleType, string>>;
 type UnitKey = { id: number; key: string | undefined };
@@ -79,8 +85,9 @@ const sameModules = (a: Modules | undefined, b: Modules | undefined): boolean =>
   selector: 'studio-lite-unit-check',
   templateUrl: './unit-check.component.html',
   styleUrls: ['./unit-check.component.scss'],
-  // the comment calls are provided where they are used, as the comments component does
-  providers: [CommentsBackendService],
+  // the comment calls are provided where they are used, as the comments component does; what the
+  // studio has of what units need is read once per workspace while the card is shown (#2198)
+  providers: [CommentsBackendService, InstalledDependenciesService],
   imports: [
     MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatIcon, MatProgressSpinner, TranslateModule,
     VariableIdConflictListComponent, VariableIdConflictFixComponent
@@ -144,6 +151,7 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
           schemer: this.moduleService.schemers
         } :
         undefined,
+      installedDependencies: sources.installedDependencies,
       // the editor's definition where it is loaded, unsaved changes included; else the server's summary
       definition: editorDefinition ? editorDefinition.summary : sources.definitionSummary,
       // as the schemer is given them: an editor that never reported variables leaves them to the scheme
@@ -178,7 +186,8 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
     private unitStores: UnitStoresService,
     private moduleService: ModuleService,
     private backendService: WorkspaceBackendService,
-    private commentsBackendService: CommentsBackendService
+    private commentsBackendService: CommentsBackendService,
+    private installedDependencies: InstalledDependenciesService
   ) {
     this.hiddenRoutes$ = toObservable(this.workspaceService.hiddenRoutes);
     this.settingsLoaded$ = toObservable(this.workspaceService.settingsLoaded);
@@ -237,8 +246,13 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
       modulesLoaded,
       this.unitStores.loadPropertiesStore(workspaceId, unitId),
       storedDefinition,
-      this.unitStores.loadSchemeStore(workspaceId, unitId)
-    ]).pipe(map(([, , summary]) => ({ definitionSummary: summary })));
+      this.unitStores.loadSchemeStore(workspaceId, unitId),
+      // asked whatever the stored unit needs: the editor may report what it needs at any time (#2198)
+      this.installedDependencies.load(workspaceId)
+    ]).pipe(map(([, , summary, , installed]) => ({
+      definitionSummary: summary,
+      installedDependencies: installed
+    })));
   }
 
   /**

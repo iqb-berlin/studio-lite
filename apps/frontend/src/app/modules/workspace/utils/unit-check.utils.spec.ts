@@ -1,6 +1,7 @@
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import {
-  checkUnit, definitionSummary, UnitCheckInput, UnitCheckSection, withDefinitionSize, withKeyFindings
+  checkUnit, DefinitionContent, definitionSummary, UnitCheckInput, UnitCheckSection, withDefinitionSize,
+  withKeyFindings
 } from './unit-check.utils';
 
 const scheme = (variableCodings: unknown[]): string => JSON.stringify({ version: '3.0', variableCodings });
@@ -16,6 +17,14 @@ const code = {
   ruleSets: [{ ruleOperatorAnd: false, rules: [{ method: 'IS_EMPTY' }] }]
 };
 
+// a definition as the check reads it, by default one that reports nothing it needs
+const content = (fields: Partial<DefinitionContent>): DefinitionContent => ({
+  hasDefinition: true, dependenciesToPlay: [], dependenciesToEdit: [], ...fields
+});
+
+const geogebra = { id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' as const };
+const sheet = { id: 'sheet.pdf', type: 'FILE' as const };
+
 const okInput = (): UnitCheckInput => ({
   modules: { editor: 'iqb-editor-aspect@2.9', player: 'iqb-player-aspect@2.9', schemer: 'iqb-schemer@2.5' },
   installed: {
@@ -28,7 +37,8 @@ const okInput = (): UnitCheckInput => ({
     },
     schemer: { 'iqb-schemer@2.5': { nameAndVersion: 'Schemer 2.5' } }
   },
-  definition: { hasDefinition: true, definitionType: 'aspect-unit-definition@4.10.0' },
+  installedDependencies: { packages: [], widgets: [] },
+  definition: content({ definitionType: 'aspect-unit-definition@4.10.0' }),
   variables: [{ id: 'text_1', alias: 'text_1' } as VariableInfo],
   scheme: {
     scheme: scheme([{ id: 'text_1', sourceType: 'BASE', codes: [code] }]),
@@ -149,21 +159,21 @@ describe('checkUnit', () => {
     it('does not say so for a unit that names no format, as there would be nothing to check', () => {
       const input = okInput();
       input.installed = undefined;
-      input.definition = { hasDefinition: true, definitionType: undefined };
+      input.definition = content({ definitionType: undefined });
 
       expect(section(checkUnit(input), 'editor')?.findings).toEqual([]);
     });
 
     it('names a unit without content', () => {
       const input = okInput();
-      input.definition = { hasDefinition: false };
+      input.definition = content({ hasDefinition: false });
 
       expect(section(checkUnit(input), 'editor')?.findings).toEqual([{ key: 'unit-check.no-definition' }]);
     });
 
     it('names a format the player says it does not read', () => {
       const input = okInput();
-      input.definition = { hasDefinition: true, definitionType: 'aspect-unit-definition@5.0.0' };
+      input.definition = content({ definitionType: 'aspect-unit-definition@5.0.0' });
 
       expect(section(checkUnit(input), 'editor')?.findings).toEqual([{
         key: 'workspace.definition-type-incompatible',
@@ -173,7 +183,7 @@ describe('checkUnit', () => {
 
     it('finds no fault where the format is unknown', () => {
       const input = okInput();
-      input.definition = { hasDefinition: true, definitionType: undefined };
+      input.definition = content({ definitionType: undefined });
 
       expect(section(checkUnit(input), 'editor')?.findings).toEqual([]);
     });
@@ -376,10 +386,19 @@ describe('checkUnit', () => {
 
   // the editor's definition, unsaved changes included, read as the server reads a stored one (#2135)
   describe('definitionSummary', () => {
-    it('tells whether the editor holds content, and its format', () => {
-      expect(definitionSummary({ definition: '{"pages":[]}', definitionType: 'aspect-unit-definition@4.10.0' }))
-        .toEqual({ hasDefinition: true, definitionType: 'aspect-unit-definition@4.10.0' });
-      expect(definitionSummary({ definition: '', variables: [] })).toEqual({ hasDefinition: false });
+    it('tells whether the editor holds content, its format, and what it needs (#2198)', () => {
+      expect(definitionSummary({
+        definition: '{"pages":[]}',
+        definitionType: 'aspect-unit-definition@4.10.0',
+        dependenciesToPlay: [geogebra],
+        dependenciesToEdit: [geogebra]
+      })).toEqual(content({
+        definitionType: 'aspect-unit-definition@4.10.0',
+        dependenciesToPlay: [geogebra],
+        dependenciesToEdit: [geogebra]
+      }));
+      // a unit without a stored definition comes without the lists
+      expect(definitionSummary({ definition: '', variables: [] })).toEqual(content({ hasDefinition: false }));
     });
   });
 
@@ -426,7 +445,7 @@ describe('checkUnit', () => {
     it('names content the player cannot play under the properties when the editor is hidden', () => {
       const input = okInput();
       input.hiddenRoutes = ['editor'];
-      input.definition = { hasDefinition: true, definitionType: 'aspect-unit-definition@5.0.0' };
+      input.definition = content({ definitionType: 'aspect-unit-definition@5.0.0' });
 
       expect(section(checkUnit(input), 'properties')?.findings).toEqual([{
         key: 'workspace.definition-type-incompatible',
@@ -482,6 +501,47 @@ describe('checkUnit', () => {
       input.modules = {};
 
       expect(section(checkUnit(input), 'properties')?.findings).toEqual([{ key: 'unit-check.no-player' }]);
+    });
+
+    // the preview and the export need it whether the editor is shown or not; editing nobody does here (#2198)
+    it('names what is missing to be played under the properties when the editor is hidden', () => {
+      const input = okInput();
+      input.hiddenRoutes = ['editor'];
+      input.definition = content({ dependenciesToPlay: [geogebra], dependenciesToEdit: [sheet] });
+
+      const properties = section(checkUnit(input), 'properties');
+      expect(properties?.findings).toEqual([
+        { key: 'workspace.dependencies-missing-packages', params: { names: 'GeoGebra.itcr.zip' } },
+        { key: 'workspace.dependencies-missing-install-hint', hint: true }
+      ]);
+      expect(properties?.dependencies).toBeUndefined();
+    });
+  });
+
+  // what the content needs besides the modules, where its findings stand (#2198)
+  describe('dependencies', () => {
+    it('lists what the unit needs under the editor, with what the studio lacks among its findings', () => {
+      const input = okInput();
+      input.definition = content({ dependenciesToPlay: [geogebra, sheet], dependenciesToEdit: [geogebra] });
+
+      const editor = section(checkUnit(input), 'editor');
+      expect(editor?.status).toBe('warning');
+      expect(editor?.findings.map(finding => finding.key)).toEqual([
+        'workspace.dependencies-missing-packages',
+        'workspace.dependencies-missing-files',
+        'unit-check.dependencies-missing-to-edit-packages',
+        'workspace.dependencies-missing-install-hint'
+      ]);
+      expect(editor?.dependencies?.map(list => list.entries.length)).toEqual([2, 1]);
+    });
+
+    it('lists nothing for a unit without content, nor where the content is not known', () => {
+      const input = okInput();
+      input.definition = content({ hasDefinition: false, dependenciesToPlay: [geogebra] });
+      expect(section(checkUnit(input), 'editor')?.dependencies).toBeUndefined();
+
+      input.definition = undefined;
+      expect(section(checkUnit(input), 'editor')?.dependencies).toBeUndefined();
     });
   });
 });

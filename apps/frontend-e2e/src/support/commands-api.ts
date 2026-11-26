@@ -790,7 +790,13 @@ Cypress.Commands.add('uploadUnitFilesAPI', (wsId: string, fixtures: string[], to
 });
 
 // 44
-Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, token:string) => {
+// With dependencies, what the editor reports the unit needs to be played and edited (#2198)
+Cypress.Commands.add('updateUnitDefinitionAPI', (
+  unitId: string,
+  wsId: string,
+  token: string,
+  dependencies?: Record<'dependenciesToPlay' | 'dependenciesToEdit', { id: string; type: string }[]>
+) => {
   const authorization = `bearer ${token}`;
 
   cy.request({
@@ -1199,7 +1205,8 @@ Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, t
           ],
           valuesComplete: true
         }
-      ]
+      ],
+      ...dependencies
     },
     failOnStatusCode: false
   });

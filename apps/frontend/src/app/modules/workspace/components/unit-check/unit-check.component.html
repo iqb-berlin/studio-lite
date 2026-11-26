@@ -39,6 +39,20 @@
               }
             </ul>
           }
+          @if (section.dependencies; as lists) {
+            @for (list of lists; track list.purpose) {
+              <div class="dependencies" [attr.data-cy]="'unit-check-dependencies-' + list.purpose">
+                <p class="dependencies-title">{{ list.key | translate }}</p>
+                @if (list.entries.length) {
+                  <ul class="dependency-list">
+                    @for (entry of list.entries; track $index) {
+                      <li data-cy="unit-check-dependency">{{ entry.key | translate: entry.params }}</li>
+                    }
+                  </ul>
+                }
+              </div>
+            }
+          }
           @if (section.variableIdConflicts.length) {
             <div class="conflicts" data-cy="unit-check-variable-id-conflicts">
               <p>{{ 'unit-check.variable-id-conflicts' | translate }}</p>

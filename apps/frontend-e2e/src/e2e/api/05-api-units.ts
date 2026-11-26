@@ -1779,7 +1779,9 @@ describe('Unit API tests', () => {
         Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
-        expect(resp.body).to.deep.equal({ hasDefinition: false, size: 0 });
+        expect(resp.body).to.deep.equal({
+          hasDefinition: false, size: 0, dependenciesToPlay: [], dependenciesToEdit: []
+        });
       });
     });
 

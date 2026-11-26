@@ -8,12 +8,14 @@ import { BytesPipe } from '@studio-lite-lib/iqb-components';
 import { playerRejectsDefinitionType } from './definition-type-match.utils';
 import { schemeProblemFindings } from './scheme-problems.utils';
 import { definitionSizeLevel } from './definition-size.utils';
+import { InstalledDependencies } from './missing-dependencies.utils';
+import { CheckedDependencies, checkDependencies, UnitDependencyList } from './dependency-check.utils';
 
 export type ModuleType = 'editor' | 'player' | 'schemer';
 
 /**
- * What the check asks of a definition: whether there is one, and its format. Its size is shown
- * beside the check, not asked by it (#2197).
+ * What the check asks of a definition: whether there is one, its format, and what it needs to be
+ * played and edited (#2198). Its size is shown beside the check, not asked by it (#2197).
  */
 export type DefinitionContent = Omit<UnitDefinitionSummaryDto, 'size'>;
 
@@ -28,6 +30,8 @@ export interface UnitCheckInput {
   modules: Partial<Record<ModuleType, string>> | undefined;
   /** undefined: the lists of installed modules could not be loaded. */
   installed: Record<ModuleType, Record<string, InstalledModule>> | undefined;
+  /** The packages and widgets the studio has (#2198); null: they could not be read. */
+  installedDependencies: InstalledDependencies | null;
   /**
    * Whether there is content, and its format -- of the editor's definition where it is loaded, saved
    * or not, else as the server summarizes the stored one (#2135). undefined: not loaded (yet).
@@ -83,6 +87,11 @@ export interface UnitCheckSection {
    * the status alone -- a large unit works all the same.
    */
   definitionSize?: UnitCheckFinding;
+  /**
+   * Under the editor, where the unit has content: what it needs to be played and edited, and
+   * whether the studio has it (#2198). What is missing is among the findings.
+   */
+  dependencies?: UnitDependencyList[];
 }
 
 const MODULE_TYPES: ModuleType[] = ['editor', 'player', 'schemer'];
@@ -152,8 +161,23 @@ function checkProperties(input: UnitCheckInput): UnitCheckFinding[] {
 export function definitionSummary(definition: UnitDefinitionDto): DefinitionContent {
   return {
     hasDefinition: !!definition.definition,
-    ...(definition.definitionType && { definitionType: definition.definitionType })
+    ...(definition.definitionType && { definitionType: definition.definitionType }),
+    dependenciesToPlay: definition.dependenciesToPlay ?? [],
+    dependenciesToEdit: definition.dependenciesToEdit ?? []
   };
+}
+
+/** What the unit needs, where it has content: without, nothing is reported for it (#2198). */
+function checkUnitDependencies(
+  input: UnitCheckInput,
+  editorShown: boolean
+): CheckedDependencies | undefined {
+  if (!input.definition?.hasDefinition) return undefined;
+  return checkDependencies(
+    { toPlay: input.definition.dependenciesToPlay, toEdit: input.definition.dependenciesToEdit },
+    input.installedDependencies,
+    editorShown
+  );
 }
 
 function checkEditor(input: UnitCheckInput): UnitCheckFinding[] {
@@ -229,22 +253,27 @@ function checkScheme(input: UnitCheckInput, editorShown: boolean): CheckedScheme
 
 /**
  * The state of the unit, tab by tab (#2135): whether its modules are assigned and installed, whether
- * it has content in a format its player reads, whether it has a coding scheme, what the schemer finds
+ * it has content in a format its player reads, what that content needs besides the modules and
+ * whether the studio has it (#2198), whether it has a coding scheme, what the schemer finds
  * wrong with it, and whether the export can write its variables without writing an id twice, and
  * whether it has comments and rich notes. What the schemer finds is asked only where the coding is
  * shown: it is fixed there, and unlike a doubled id it does not stop the export. Where its cause is an
  * element -- two of the same name -- it is named under the editor instead, if shown.
  *
  * A tab the workspace hides gets no section, and its module is not asked for. What the preview and
- * the export need all the same is asked under the properties instead: whether there is content and
- * the player can play it, where the editor is hidden, and whether an id would be written twice,
+ * the export need all the same is asked under the properties instead: whether there is content, the
+ * player can play it and the studio has what it needs to be played, where the editor is hidden, and
+ * whether an id would be written twice,
  * where the coding is -- a scheme may come with an import. Having no scheme is no finding there.
  *
  * What fails nothing -- a unit without its editor -- is a hint, and leaves its section in order. A unit
  * with nothing to code, an information unit, needs neither a scheme nor a schemer.
  */
 export function checkUnit(input: UnitCheckInput): UnitCheckSection[] {
-  const section = (tab: UnitCheckSection['tab'], checked: Checked): UnitCheckSection => withStatus({
+  const section = (
+    tab: UnitCheckSection['tab'],
+    checked: Checked & Pick<UnitCheckSection, 'dependencies'>
+  ): UnitCheckSection => withStatus({
     tab,
     ...checked
   });
@@ -258,14 +287,15 @@ export function checkUnit(input: UnitCheckInput): UnitCheckSection[] {
     });
   };
   const shown = (tab: UnitCheckSection['tab']) => isTabShown(input.hiddenRoutes, tab);
-  const editorFindings = checkEditor(input);
+  const dependencies = checkUnitDependencies(input, shown('editor'));
+  const contentFindings = [...checkEditor(input), ...(dependencies?.findings ?? [])];
   const idConflicts = shown('schemer') ? undefined : checkIdConflicts(input);
   const scheme = shown('schemer') ? checkScheme(input, shown('editor')) : undefined;
   const sections: UnitCheckSection[] = [
     section('properties', {
       findings: [
         ...checkProperties(input),
-        ...(shown('editor') ? [] : editorFindings),
+        ...(shown('editor') ? [] : contentFindings),
         ...(idConflicts?.findings ?? [])
       ],
       variableIdConflicts: idConflicts?.variableIdConflicts ?? []
@@ -273,7 +303,9 @@ export function checkUnit(input: UnitCheckInput): UnitCheckSection[] {
   ];
   if (shown('editor')) {
     sections.push(section('editor', {
-      findings: [...editorFindings, ...(scheme?.editor ?? [])], variableIdConflicts: []
+      findings: [...contentFindings, ...(scheme?.editor ?? [])],
+      variableIdConflicts: [],
+      ...(dependencies && { dependencies: dependencies.lists })
     }));
   }
   if (scheme) sections.push(section('schemer', scheme.schemer));
