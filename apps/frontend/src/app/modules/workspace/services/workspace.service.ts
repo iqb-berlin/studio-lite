@@ -26,6 +26,12 @@ import { reconcileItemVariables } from '../utils/item-variables.utils';
 import { isUnitKeyTaken, UNIT_KEY_PATTERN } from '../utils/unit-key.utils';
 import { LastChange, UnitLastChanges } from '../models/unit-last-changes.interface';
 
+/** A workspace units are submitted to, and its name. */
+export interface DropBox {
+  id: number;
+  name: string;
+}
+
 /**
  * The state of the workspace currently open: which unit is selected, what the user may do in it,
  * and what happens to the selected unit as a whole -- loading it, letting go of it, saving it.
@@ -102,10 +108,9 @@ export class WorkspaceService {
   readonly saving = this.savingState.asReadonly();
   private runningSave: Promise<boolean> | undefined;
   states: State[] = [];
-  dropBoxId: number | null = null;
-  private readonly dropBoxNameState = signal<string | undefined>(undefined);
-  /** The name of the workspace units from here are submitted to, if there is one (#2232). */
-  readonly dropBoxName = this.dropBoxNameState.asReadonly();
+  private readonly dropBoxState = signal<DropBox | null>(null);
+  /** The workspace units from here are submitted to, if there is one the server accepts (#1805, #2232). */
+  readonly dropBox = this.dropBoxState.asReadonly();
   hasDroppedUnits: boolean = false;
 
   get richNoteTags(): UnitRichNoteTagDto[] {
@@ -269,8 +274,7 @@ export class WorkspaceService {
 
   /** Sets the drop box of the workspace entered, as the server names it. */
   setDropBox(id: number | null, name: string | undefined): void {
-    this.dropBoxId = id;
-    this.dropBoxNameState.set(id ? name : undefined);
+    this.dropBoxState.set(id ? { id, name: name ?? '' } : null);
   }
 
   private getDisplayUserName(): string {

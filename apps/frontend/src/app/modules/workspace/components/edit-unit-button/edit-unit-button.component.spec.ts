@@ -397,7 +397,7 @@ describe('EditUnitButtonComponent', () => {
     });
 
     it('should submit the selected units to the drop box after leaving the open unit', async () => {
-      mockWorkspaceService.dropBoxId = 7;
+      mockWorkspaceService.dropBox.mockReturnValue({ id: 7, name: 'Abgabe' });
       closeSelectDialogWith(true, [3, 4]);
 
       component.submitUnits();
@@ -424,7 +424,7 @@ describe('EditUnitButtonComponent', () => {
       ['is cancelled', false, [3]],
       ['has no unit selected', true, []]
     ])('should submit nothing when the dialog %s', async (_, result, ids) => {
-      mockWorkspaceService.dropBoxId = 7;
+      mockWorkspaceService.dropBox.mockReturnValue({ id: 7, name: 'Abgabe' });
       closeSelectDialogWith(result, ids);
 
       component.submitUnits();

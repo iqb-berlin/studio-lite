@@ -54,7 +54,8 @@ describe('Workspace Unit Actions', () => {
     cy.intercept('PATCH', '/api/workspaces/*/units/drop-box-history').as('dropBoxHistory');
     openProperties(primaryWorkspace, units.submitted);
     cy.get('[data-cy="unit-actions-drop-box"]').should('contain.text', secondaryWorkspace);
-    cy.get('[data-cy="unit-actions-return"]').should('be.disabled');
+    // greyed out, but there for its tooltip
+    cy.get('[data-cy="unit-actions-return"]').should('have.attr', 'aria-disabled', 'true');
 
     cy.get('[data-cy="unit-actions-submit"]').click();
     cy.get('mat-dialog-container')
@@ -66,7 +67,8 @@ describe('Workspace Unit Actions', () => {
 
     openProperties(secondaryWorkspace, units.submitted);
     cy.get('[data-cy="unit-actions-source"]').should('contain.text', primaryWorkspace);
-    cy.get('[data-cy="unit-actions-return"]').should('be.enabled').click();
+    cy.get('[data-cy="unit-actions-return"]').should('not.have.attr', 'aria-disabled');
+    cy.get('[data-cy="unit-actions-return"]').click();
     cy.get('mat-dialog-container').should('contain.text', primaryWorkspace);
     confirmDialog();
     waitForSuccess('@dropBoxHistory');

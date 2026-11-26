@@ -219,11 +219,9 @@ describe('UnitService', () => {
     describe('with the drop box history', () => {
       beforeEach(() => {
         unitsRepository.find.mockResolvedValue([{ id: 1 }, { id: 2 }] as Unit[]);
-        unitDropBoxHistoryRepository.findOne.mockImplementation(async ({ where }) => (
-          (where as { unitId: number }[])[0].unitId === 1 ?
-            { sourceWorkspaceId: 4, targetWorkspaceId: 9, returned: true } as UnitDropBoxHistory :
-            null
-        ));
+        unitDropBoxHistoryRepository.find.mockResolvedValue([{
+          id: 1, unitId: 1, sourceWorkspaceId: 4, targetWorkspaceId: 9, returned: true, changedAt: new Date()
+        }]);
       });
 
       it('should tell for each unit where it was submitted from and to, and whether it came back', async () => {
@@ -235,6 +233,21 @@ describe('UnitService', () => {
           { sourceWorkspaceId: 4, targetWorkspaceId: 9, returned: true },
           { sourceWorkspaceId: null, targetWorkspaceId: null, returned: false }
         ]);
+      });
+
+      // a unit sent on from the drop box and returned there: what was submitted to it decides (#2232)
+      it('should tell about the submission that can be returned, before a later one out of the workspace', async () => {
+        const submission = (id: number, from: number, to: number, returned: boolean, day: number) => ({
+          id, unitId: 1, sourceWorkspaceId: from, targetWorkspaceId: to, returned, changedAt: new Date(2026, 10, day)
+        });
+        unitDropBoxHistoryRepository.find.mockResolvedValue([
+          submission(2, 9, 5, true, 3),
+          submission(1, 4, 9, false, 1)
+        ]);
+
+        const [unit] = await service.findAllForWorkspace(9, null, false, 9);
+
+        expect(unit).toEqual(expect.objectContaining({ sourceWorkspaceId: 4, targetWorkspaceId: 9, returned: false }));
       });
 
       it('should keep only the units submitted to the workspace when asked to', async () => {

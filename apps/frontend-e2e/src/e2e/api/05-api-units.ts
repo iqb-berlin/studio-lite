@@ -1341,7 +1341,9 @@ describe('Unit API tests', () => {
     const token = () => Cypress.expose(`token_${Cypress.expose('username')}`);
     const userId = () => Cypress.expose(`id_${Cypress.expose('username')}`);
     const unit: UnitData = { shortname: 'D2232', name: 'Abgabe', group: '' };
-    const ids = { source: '', dropBox: '', unit: '' };
+    const ids = {
+      source: '', dropBox: '', further: '', unit: ''
+    };
     const createWorkspace = (name: string, assign: (id: string) => void) => cy
       .createWsAPI(Cypress.expose(groupVera.id), { id: '', name }, token())
       .then(resp => {
@@ -1350,21 +1352,31 @@ describe('Unit API tests', () => {
         cy.updateUsersOfWsAPI(`${resp.body}`, AccessLevel.Admin, userId(), token())
           .its('status').should('equal', 200);
       });
+    // a target of '' returns the unit to where it came from
+    const submit = (from: string, to: string) => cy.submitUnitsAPI(from, to, ids.unit, token())
+      .its('status').should('equal', 200);
+    type ListedUnit = { key: string; sourceWorkspaceId?: number; sourceWorkspaceName?: string; returned?: boolean };
+    const submittedUnitIn = (wsId: string) => cy.getUnitsWithSubmissionsAPI(wsId, token()).then(resp => {
+      expect(resp.status).to.equal(200);
+      return (resp.body as ListedUnit[]).find(entry => entry.key === unit.shortname);
+    });
 
     before(() => {
       createWorkspace('Abgebend-2232', id => { ids.source = id; });
       createWorkspace('Ablage-2232', id => { ids.dropBox = id; });
+      createWorkspace('Weiter-2232', id => { ids.further = id; });
       cy.then(() => {
         cy.createUnitAPI(ids.source, unit, token()).then(resp => {
           expect(resp.status).to.equal(201);
           ids.unit = `${resp.body}`;
         });
         cy.dropboxWsAPI(ids.source, ids.dropBox, token()).its('status').should('equal', 200);
+        cy.dropboxWsAPI(ids.dropBox, ids.further, token()).its('status').should('equal', 200);
       });
     });
 
     after(() => {
-      cy.deleteWsAPI([ids.source, ids.dropBox], token());
+      cy.deleteWsAPI([ids.source, ids.dropBox, ids.further], token());
     });
 
     it('200 positive test: should name the drop box of the workspace', () => {
@@ -1376,12 +1388,22 @@ describe('Unit API tests', () => {
     });
 
     it('200 positive test: should name the workspace a unit in the drop box was submitted from', () => {
-      cy.submitUnitsAPI(ids.source, ids.dropBox, ids.unit, token()).its('status').should('equal', 200);
-      cy.getUnitsWithSubmissionsAPI(ids.dropBox, token()).then(resp => {
-        expect(resp.status).to.equal(200);
-        const submitted = (resp.body as { key: string; sourceWorkspaceName?: string }[])
-          .find(entry => entry.key === unit.shortname);
-        expect(submitted?.sourceWorkspaceName).to.equal('Abgebend-2232');
+      submit(ids.source, ids.dropBox);
+      submittedUnitIn(ids.dropBox).its('sourceWorkspaceName').should('equal', 'Abgebend-2232');
+    });
+
+    // Sent on from the drop box and returned there, the unit has a submission into the drop box and one out of
+    // it. The list tells about the one returning undoes, as the server picks it (#1806), not about whichever
+    // the database gives first.
+    it('200 positive test: should tell about the submission that can be returned, though one went on', () => {
+      submit(ids.dropBox, ids.further);
+      submit(ids.further, '');
+      submit(ids.dropBox, '');
+      submit(ids.source, ids.dropBox);
+      submittedUnitIn(ids.dropBox).then(submitted => {
+        expect(submitted).to.include({
+          sourceWorkspaceId: Number(ids.source), sourceWorkspaceName: 'Abgebend-2232', returned: false
+        });
       });
     });
 

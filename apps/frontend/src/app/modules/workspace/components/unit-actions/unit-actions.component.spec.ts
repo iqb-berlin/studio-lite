@@ -8,7 +8,7 @@ import { BehaviorSubject, of, Subject } from 'rxjs';
 import { createMock } from '@golevelup/ts-jest';
 import { AuthDataDto, UnitInListDto, WorkspaceGroupDto } from '@studio-lite-lib/api-dto';
 import { UnitActionsComponent } from './unit-actions.component';
-import { WorkspaceService } from '../../services/workspace.service';
+import { DropBox, WorkspaceService } from '../../services/workspace.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { UnitStoresService } from '../../services/unit-stores.service';
 import { AppService } from '../../../../services/app.service';
@@ -20,8 +20,10 @@ describe('UnitActionsComponent', () => {
   let component: UnitActionsComponent;
   let accessLevel: number;
   let otherWorkspaces: WorkspaceGroupDto['workspaces'];
-  let dropBoxName: WritableSignal<string | undefined>;
+  let dropBox: WritableSignal<DropBox | null>;
+  let resetUnitList: jest.Mock;
   let unit: UnitInListDto;
+  let units: WritableSignal<{ [group: string]: UnitInListDto[] }>;
   let changed: WritableSignal<boolean>;
   let authDataChanged: Subject<AuthDataDto>;
   let backend: {
@@ -37,9 +39,12 @@ describe('UnitActionsComponent', () => {
   const element = (): HTMLElement => fixture.nativeElement as HTMLElement;
   const button = (action: string) => element()
     .querySelector<HTMLButtonElement>(`[data-cy="unit-actions-${action}"]`);
+  // greyed out, but there for its tooltip (disabledInteractive)
+  const greyed = (action: string) => button(action)?.getAttribute('aria-disabled') === 'true';
   const text = (name: string) => element().querySelector(`[data-cy="unit-actions-${name}"]`)?.textContent?.trim();
 
   const create = () => {
+    units.set({ '': [unit] });
     TestBed.configureTestingModule({
       imports: [UnitActionsComponent, TranslateModule.forRoot()],
       providers: [
@@ -50,9 +55,11 @@ describe('UnitActionsComponent', () => {
             selectedWorkspaceId: 1,
             selectedUnit$: new BehaviorSubject(5),
             userAccessLevel$: new BehaviorSubject(accessLevel),
-            units: signal({ '': [unit] }).asReadonly(),
-            dropBoxId: 9,
-            dropBoxName: dropBoxName.asReadonly()
+            units: units.asReadonly(),
+            dropBox: dropBox.asReadonly(),
+            // what reading the list again after a change touches
+            workspaceSettings: {},
+            resetUnitList
           }
         },
         {
@@ -87,8 +94,10 @@ describe('UnitActionsComponent', () => {
   beforeEach(() => {
     accessLevel = 4;
     otherWorkspaces = [{ id: 7, name: 'Dort', userAccessLevel: 4 }];
-    dropBoxName = signal('Abgabe');
+    dropBox = signal({ id: 9, name: 'Abgabe' });
+    resetUnitList = jest.fn();
     unit = { id: 5, key: 'M6_AK01', name: 'Zahlen' };
+    units = signal({});
     changed = signal(false);
     authDataChanged = new Subject<AuthDataDto>();
     backend = {
@@ -145,14 +154,14 @@ describe('UnitActionsComponent', () => {
   it('names the drop box, and offers to submit only where there is one', () => {
     create();
 
-    expect(button('submit')?.disabled).toBe(false);
+    expect(greyed('submit')).toBe(false);
     expect(text('drop-box')).toBe('unit-actions.drop-box');
     expect(component.dropBoxLine()).toEqual({ key: 'unit-actions.drop-box', params: { name: 'Abgabe' } });
 
-    dropBoxName.set(undefined);
+    dropBox.set(null);
     fixture.detectChanges();
 
-    expect(button('submit')?.disabled).toBe(true);
+    expect(greyed('submit')).toBe(true);
     expect(text('drop-box')).toBe('workspace.no-dropbox-defined');
   });
 
@@ -166,7 +175,7 @@ describe('UnitActionsComponent', () => {
     unit = { ...unit, ...submission };
     create();
 
-    expect(button('return')?.disabled).toBe(!returnable);
+    expect(greyed('return')).toBe(!returnable);
     expect(component.sourceLine()).toEqual(line);
     expect(!!text('source')).toBe(returnable);
   });
@@ -179,6 +188,10 @@ describe('UnitActionsComponent', () => {
     ['returnUnit', 'returnSubmittedUnits', [1, [5]]],
     ['deleteUnit', 'deleteUnits', [1, [5]]]
   ])('%s', (action, sentWith, args) => {
+    beforeEach(() => {
+      unit = { ...unit, sourceWorkspaceId: 3 };
+    });
+
     it.each<[boolean | undefined, boolean, boolean]>([
       [true, true, true],
       [true, false, false],
@@ -195,7 +208,36 @@ describe('UnitActionsComponent', () => {
 
       expect(selectUnit.mock.calls).toEqual(confirmed === true ? [[0]] : []);
       expect(backend[sentWith].mock.calls).toEqual(sent ? [args] : []);
+      // what was done shows in the list at once
+      expect(resetUnitList).toHaveBeenCalledTimes(sent ? 1 : 0);
     });
+  });
+
+  // a greyed-out button stays interactive for its tooltip, but must not act
+  it('does nothing when a greyed-out button is clicked', () => {
+    dropBox = signal(null);
+    create();
+    const open = jest.spyOn(TestBed.inject(MatDialog), 'open');
+
+    button('submit')?.click();
+    button('return')?.click();
+
+    expect([greyed('submit'), greyed('return')]).toEqual([true, true]);
+    expect(open).not.toHaveBeenCalled();
+  });
+
+  // opened on a unit, the page may show the card before the list: the questions could not name the unit
+  it('offers nothing until the list has the unit', () => {
+    create();
+    units.set({});
+    fixture.detectChanges();
+
+    expect(['submit', 'return', 'copy', 'move', 'delete'].filter(greyed)).toHaveLength(5);
+
+    units.set({ '': [unit] });
+    fixture.detectChanges();
+
+    expect(['submit', 'copy', 'move', 'delete'].filter(greyed)).toEqual([]);
   });
 
   it('asks about this unit and its drop box before submitting it', () => {

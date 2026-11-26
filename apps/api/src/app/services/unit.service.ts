@@ -29,6 +29,7 @@ import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
 import { UnitNotFoundException } from '../exceptions/unit-not-found.exception';
 import { UnitKeyExistsException } from '../exceptions/unit-key-exists.exception';
 import { assertFitsColumn } from '../utils/column-length';
+import { shownSubmission } from '../utils/shown-submission';
 
 /** The columns of a unit's properties, its metadata aside (#2200). */
 const PROPERTY_COLUMNS = {
@@ -223,20 +224,27 @@ export class UnitService {
       }));
     }
     if (targetWorkspaceId) {
-      units = await Promise.all(units.map(async unit => {
-        const history = await this.unitDropBoxHistoryRepository.findOne({
-          where: [
-            { unitId: unit.id, targetWorkspaceId: targetWorkspaceId },
-            { unitId: unit.id, sourceWorkspaceId: targetWorkspaceId }
-          ]
-        });
+      const unitIds = units.map(unit => unit.id);
+      const submissions = unitIds.length ? await this.unitDropBoxHistoryRepository.find({
+        where: [
+          { unitId: In(unitIds), targetWorkspaceId: targetWorkspaceId },
+          { unitId: In(unitIds), sourceWorkspaceId: targetWorkspaceId }
+        ]
+      }) : [];
+      const submissionsOf = new Map<number, UnitDropBoxHistory[]>();
+      submissions.forEach(submission => submissionsOf.set(
+        submission.unitId,
+        [...(submissionsOf.get(submission.unitId) ?? []), submission]
+      ));
+      units = units.map(unit => {
+        const history = shownSubmission(submissionsOf.get(unit.id) ?? [], targetWorkspaceId);
         return {
           ...unit,
           targetWorkspaceId: history?.targetWorkspaceId || null,
           sourceWorkspaceId: history?.sourceWorkspaceId || null,
           returned: history?.returned || false
         };
-      }));
+      });
       units = await this.withSourceWorkspaceNames(units);
     }
     if (filterTargetWorkspaceId) {
