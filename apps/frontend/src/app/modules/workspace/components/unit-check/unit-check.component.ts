@@ -215,20 +215,23 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
     return this.metadataNotLoaded() ? null : undefined;
   });
 
-  readonly sections = computed((): UnitCheckSection[] | undefined => {
+  // the sections but the metadata's: an edit of the metadata, with every keystroke in their forms, builds
+  // only that one anew
+  private readonly sectionsBesideMetadata = computed((): UnitCheckSection[] | undefined => {
     const checked = this.checked();
-    return checked && withMetadataProfiles(
-      withLastChanges(
-        withDefinitionSize(
-          withKeyFindings(checked, this.keyFindings()),
-          this.definitionSize(),
-          this.sources()?.sizeLevels ?? null
-        ),
-        this.lastChangeLines()
+    return checked && withLastChanges(
+      withDefinitionSize(
+        withKeyFindings(checked, this.keyFindings()),
+        this.definitionSize(),
+        this.sources()?.sizeLevels ?? null
       ),
-      this.profileUse(),
-      this.workspaceService.hiddenRoutes()
+      this.lastChangeLines()
     );
+  });
+
+  readonly sections = computed((): UnitCheckSection[] | undefined => {
+    const sections = this.sectionsBesideMetadata();
+    return sections && withMetadataProfiles(sections, this.profileUse(), this.workspaceService.hiddenRoutes());
   });
 
   // Conflicts stand under the properties only where the coding is hidden; every way to resolve them
@@ -260,9 +263,11 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
       )
       .subscribe(sources => this.sources.set(sources));
     // apart from the rest, which a slow answer would hold up; the store is shared with the metadata tab. Not
-    // asked for where the workspace hides the tab, and asked for once it shows it (#2235)
-    combineLatest([this.workspaceService.selectedUnit$, this.hiddenRoutes$])
+    // asked for where the workspace hides the tab, and asked for once it shows it (#2235); as for the comments,
+    // only once the settings are loaded: the defaults a workspace is entered with hide no tab (#2135)
+    combineLatest([this.workspaceService.selectedUnit$, this.hiddenRoutes$, this.settingsLoaded$])
       .pipe(
+        filter(([, , settingsLoaded]) => settingsLoaded),
         switchMap(([unitId, hiddenRoutes]) => {
           this.metadataNotLoaded.set(false);
           return unitId > 0 && isTabShown(hiddenRoutes, 'metadata') ?

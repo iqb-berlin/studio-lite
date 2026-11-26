@@ -367,6 +367,38 @@ describe('UnitCheckComponent', () => {
       expect(metadata()?.status).toBe('ok');
     }));
 
+  // the defaults a workspace is entered with hide no tab: asked only once its settings say it shows them
+  it('asks for the metadata only once the settings show their tab', fakeAsync(() => {
+    settingsLoaded = false;
+    create();
+    expect(getUnitMetadata).not.toHaveBeenCalled();
+
+    hiddenRoutesState.set(['metadata']);
+    settingsLoadedState.set(true);
+    fixture.detectChanges();
+    flush();
+    fixture.detectChanges();
+
+    expect(getUnitMetadata).not.toHaveBeenCalled();
+    expect(tabs()).not.toContain('unit-check-metadata');
+  }));
+
+  // every keystroke in the metadata forms changes them; the other sections stay as they are
+  it('builds only the metadata section anew when the metadata are edited', fakeAsync(() => {
+    // with a size, the editor's section is a new object whenever the sections are built
+    getUnitDefinitionSummary.mockReturnValue(of({ hasDefinition: true, size: 1024 }));
+    create();
+    const before = fixture.componentInstance.sections();
+
+    unitStores.metadataStore()?.setMetadata({ profiles: [], items: [{ id: 'ITEM_1' }] });
+    fixture.detectChanges();
+    const after = fixture.componentInstance.sections();
+
+    expect(after).not.toBe(before);
+    after?.filter(entry => entry.tab !== 'metadata')
+      .forEach(entry => expect(entry).toBe(before?.find(earlier => earlier.tab === entry.tab)));
+  }));
+
   it('says so where the metadata were not delivered', fakeAsync(() => {
     getUnitMetadata.mockReturnValue(of(null));
     create();

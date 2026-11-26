@@ -75,7 +75,12 @@ describe('Metadata of a profile the workspace no longer assigns', () => {
   });
 
   it('are named in the unit check, as something to know', () => {
+    cy.intercept('GET', `/api/workspaces/${wsId}/units/${unitId}/metadata`).as('loadMetadataForCheck');
     cy.visit(`/#/a/${wsId}/${unitId}/properties`);
+    // a new page: the visit only changes the hash, and the metadata the tab loaded before would still be held,
+    // where the check is to ask for them itself
+    cy.reload();
+    cy.wait('@loadMetadataForCheck', { requestTimeout: FIRST_WORKSPACE_REQUEST_TIMEOUT });
 
     cy.get('[data-cy="unit-check-metadata"]').within(() => {
       cy.contains('[data-cy="metadata-profiles-assigned"]', 'IQB Deutsch Primar - Aufgabe');
