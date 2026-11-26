@@ -37,10 +37,4 @@ export class ConfigDto {
 
   @ApiProperty()
   hasUsers = true;
-
-  @ApiProperty({
-    required: false,
-    description: 'Whether snow falls on the start page; a config without it shows none.'
-  })
-  snowfall?: boolean;
 }

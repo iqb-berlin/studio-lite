@@ -4,7 +4,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import {
-  ConfigDto, AppLogoDto, UnitExportConfigDto, MissingsProfilesDto,
+  ConfigDto, AppLogoDto, EffectsDto, UnitExportConfigDto, MissingsProfilesDto,
   ProfilesRegistryDto, EmailTemplateDto, UnitRichNoteTagDto, MetadataVocabularyDto
 } from '@studio-lite-lib/api-dto';
 import Setting from '../entities/setting.entity';
@@ -146,6 +146,23 @@ describe('SettingService', () => {
       await service.patchAppLogo({} as AppLogoDto);
       expect(settingsRepository.create).toHaveBeenCalled();
       expect(settingsRepository.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('findEffects', () => {
+    it('should answer no snow while no effects are stored (#2221)', async () => {
+      settingsRepository.findOne.mockResolvedValue(null);
+      expect(await service.findEffects()).toEqual({ snowfall: false });
+    });
+  });
+
+  describe('patchEffects', () => {
+    it('should store the snow switch and nothing else a request carries (#2221)', async () => {
+      const setting = { key: 'effects', content: '{"snowfall":false}' } as Setting;
+      settingsRepository.findOne.mockResolvedValue(setting);
+      await service.patchEffects(Object.assign(new EffectsDto(), { snowfall: true, data: 'logo' }));
+      expect(settingsRepository.save).toHaveBeenCalledWith(setting);
+      expect(JSON.parse(setting.content)).toEqual({ snowfall: true });
     });
   });
 

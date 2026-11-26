@@ -8,7 +8,7 @@ import { SafeUrl } from '@angular/platform-browser';
 import { HttpErrorResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { AuthDataDto, ConfigDto } from '@studio-lite-lib/api-dto';
+import { AuthDataDto, EffectsDto } from '@studio-lite-lib/api-dto';
 import { UI_LANGUAGES } from '@studio-lite/shared-code';
 import { HomeComponent } from './home.component';
 import { AppService, defaultAppConfig } from '../../services/app.service';
@@ -52,6 +52,7 @@ describe('HomeComponent', () => {
   beforeEach(async () => {
     backendService = createMock<BackendService>({
       getConfig: jest.fn().mockReturnValue(of(null)),
+      getEffects: jest.fn().mockReturnValue(of(null)),
       getAuthData: jest.fn().mockReturnValue(of(AppService.defaultAuthData))
     });
     await TestBed.configureTestingModule({
@@ -91,27 +92,26 @@ describe('HomeComponent', () => {
 
   afterEach(() => localStorage.removeItem('id_token'));
 
-  // an administrator switches the snow on and off; a config from before the switch has none
+  // an administrator switches the snow on and off (#2221)
   describe('snow', () => {
-    const openWith = (config: ConfigDto): HTMLElement => {
-      backendService.getConfig.mockReturnValue(of(config));
+    const openWith = (effects: EffectsDto | null): HTMLElement => {
+      backendService.getEffects.mockReturnValue(of(effects));
       fixture.detectChanges();
       tick();
       fixture.detectChanges();
       return fixture.nativeElement;
     };
 
-    it('falls on the start page when the config switches it on', fakeAsync(() => {
-      expect(openWith({ ...defaultAppConfig, snowfall: true }).querySelector('studio-lite-snowfall'))
-        .not.toBeNull();
+    it('falls on the start page once switched on', fakeAsync(() => {
+      expect(openWith({ snowfall: true }).querySelector('studio-lite-snowfall')).not.toBeNull();
     }));
 
-    it('does not fall when the config switches it off', fakeAsync(() => {
-      expect(openWith({ ...defaultAppConfig, snowfall: false }).querySelector('studio-lite-snowfall')).toBeNull();
+    it('does not fall once switched off', fakeAsync(() => {
+      expect(openWith({ snowfall: false }).querySelector('studio-lite-snowfall')).toBeNull();
     }));
 
-    it('does not fall with a config from before the switch', fakeAsync(() => {
-      expect(openWith({ ...defaultAppConfig }).querySelector('studio-lite-snowfall')).toBeNull();
+    it('does not fall when the effects could not be read', fakeAsync(() => {
+      expect(openWith(null).querySelector('studio-lite-snowfall')).toBeNull();
     }));
   });
 

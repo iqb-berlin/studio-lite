@@ -401,6 +401,7 @@
   "settings": {
     "texts": "Texts",
     "logo-and-colors": "Logo and colours",
+    "effects": "Animations and effects",
     "unit-export-params": "Parameters for the unit export",
     "missings-profiles": "Coding: missings profiles",
     "profiles-registry": "Profile registry",
@@ -425,7 +426,6 @@
     "date": "Date",
     "hour": "Hour",
     "time-in-past": "The time is in the past",
-    "snowfall": "Snow falling on the home page",
     "app-name": "Name of the application",
     "app-name-placeholder": "Name",
     "start-page-content-right": "HTML content for the home page",
@@ -433,6 +433,12 @@
     "config-data-saved": "Configuration of the application saved - please reload.",
     "config-data-not-saved": "Could not save the configuration of the application",
     "config-data-not-loaded": "The configuration could not be loaded."
+  },
+  "effects": {
+    "snowfall": "Snow falling on the home page",
+    "saved": "Animations and effects saved",
+    "not-saved": "Could not save the animations and effects",
+    "not-loaded": "The animations and effects could not be loaded."
   },
   "email-template": {
     "template-saved": "Email template saved",

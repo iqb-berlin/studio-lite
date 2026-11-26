@@ -6,6 +6,7 @@ import {
   MissingsProfilesDto,
   ConfigDto,
   AppLogoDto,
+  EffectsDto,
   CreateUserDto,
   CreateWorkspaceGroupDto,
   UserFullDto,
@@ -235,6 +236,12 @@ export class BackendService {
   setAppConfig(appConfig: ConfigDto): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}settings/config`, appConfig)
+      .pipe(succeeded());
+  }
+
+  setEffects(effects: EffectsDto): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}settings/effects`, effects)
       .pipe(succeeded());
   }
 

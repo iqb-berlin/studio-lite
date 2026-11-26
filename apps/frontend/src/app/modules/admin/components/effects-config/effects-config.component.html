@@ -1,0 +1,20 @@
+@if (notLoaded()) {
+  <p class="info" data-cy="admin-effects-not-loaded">{{'effects.not-loaded' | translate}}</p>
+} @else {
+  <div class="fx-column-start-stretch">
+    <mat-slide-toggle class="snowfall-toggle"
+                      [formControl]="snowfall"
+                      data-cy="admin-effects-snowfall">
+      {{'effects.snowfall' | translate}}
+    </mat-slide-toggle>
+    <div class="fx-row-end-center">
+      <button mat-raised-button
+              color="primary"
+              [disabled]="!dataChanged() || save.saving()"
+              (click)="saveData()"
+              data-cy="admin-effects-save-button">
+        {{'save' | translate}}
+      </button>
+    </div>
+  </div>
+}

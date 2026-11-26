@@ -1,4 +1,6 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component, OnDestroy, OnInit, signal
+} from '@angular/core';
 import { DomSanitizer, Title } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject, takeUntil } from 'rxjs';
@@ -30,6 +32,9 @@ import { SnowfallComponent } from '../snowfall/snowfall.component';
 })
 export class HomeComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();
+  // switched on by an administrator; read on every visit, so that a change shows without reloading
+  private readonly snowfallState = signal(false);
+  readonly snowfall = this.snowfallState.asReadonly();
 
   constructor(
     public appService: AppService,
@@ -56,6 +61,9 @@ export class HomeComponent implements OnInit, OnDestroy {
             this.appService.globalWarning = this.appService.appConfig.globalWarningText();
           }
         });
+      this.backendService.getEffects()
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(effects => this.snowfallState.set(effects?.snowfall === true));
       this.appService.appConfig.setPageTitle(this.translateService.instant('home.welcome'));
       this.appService.dataLoading = false;
       const token = localStorage.getItem('id_token');

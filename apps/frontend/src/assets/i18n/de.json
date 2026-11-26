@@ -401,6 +401,7 @@
   "settings": {
     "texts": "Texte",
     "logo-and-colors": "Logo und Farben",
+    "effects": "Animationen und Effekte",
     "unit-export-params": "Parameter für den Unit-Export",
     "missings-profiles": "Kodierung: Missings Profile",
     "profiles-registry": "Profilregistrierung",
@@ -425,7 +426,6 @@
     "date": "Datum",
     "hour": "Stunde",
     "time-in-past": "Zeitpunkt ist in der Vergangenheit",
-    "snowfall": "Schneefall auf der Startseite",
     "app-name": "Name der Anwendung",
     "app-name-placeholder": "Name",
     "start-page-content-right": "Html-Inhalt für die Startseite",
@@ -433,6 +433,12 @@
     "config-data-saved": "Konfigurationsdaten der Anwendung gespeichert - bitte neu laden!",
     "config-data-not-saved": "Konnte Konfigurationsdaten der Anwendung nicht speichern",
     "config-data-not-loaded": "Die Konfiguration konnte nicht geladen werden."
+  },
+  "effects": {
+    "snowfall": "Schneefall auf der Startseite",
+    "saved": "Animationen und Effekte gespeichert",
+    "not-saved": "Konnte Animationen und Effekte nicht speichern",
+    "not-loaded": "Die Animationen und Effekte konnten nicht geladen werden."
   },
   "email-template": {
     "template-saved": "E-Mail-Template gespeichert",

@@ -13,6 +13,7 @@ describe('SettingController', () => {
   it.each([
     'patchConfig',
     'patchAppLogo',
+    'patchEffects',
     'patchUnitExportConfig',
     'patchProfilesRegistry',
     'findEmailTemplate',

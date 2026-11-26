@@ -1,75 +1,73 @@
-<div class="fx-column-start-stretch fx-gap-20 admin-tab-content">
+<div class="settings-cards admin-tab-content">
+  <mat-card>
+    <mat-card-header class="card-header">
+      <mat-card-title>{{'settings.texts' | translate}}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <studio-lite-app-config></studio-lite-app-config>
+    </mat-card-content>
+  </mat-card>
 
-  <div class="fx-row-start-stretch fx-gap-20">
-    <mat-card class="fx-flex-fill">
-      <mat-card-header class="card-header">
-        <mat-card-title>{{'settings.texts' | translate}}</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <studio-lite-app-config></studio-lite-app-config>
-      </mat-card-content>
-    </mat-card>
+  <mat-card>
+    <mat-card-header class="card-header">
+      <mat-card-title>{{'settings.email-template' | translate}}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <studio-lite-email-template></studio-lite-email-template>
+    </mat-card-content>
+  </mat-card>
 
-    <mat-card class="fx-flex-fill">
-      <mat-card-header class="card-header">
-        <mat-card-title>{{'settings.email-template' | translate}}</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <studio-lite-email-template></studio-lite-email-template>
-      </mat-card-content>
-    </mat-card>
-  </div>
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>{{'settings.logo-and-colors' | translate}}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <studio-lite-app-logo></studio-lite-app-logo>
+    </mat-card-content>
+  </mat-card>
 
-  <div class="fx-row-start-stretch fx-gap-20">
-    <mat-card class="fx-flex-fill">
-      <mat-card-header>
-        <mat-card-title>{{'settings.logo-and-colors' | translate}}</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <studio-lite-app-logo></studio-lite-app-logo>
-      </mat-card-content>
-    </mat-card>
+  <mat-card>
+    <mat-card-header class="card-header">
+      <mat-card-title>{{'settings.effects' | translate}}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <studio-lite-effects-config></studio-lite-effects-config>
+    </mat-card-content>
+  </mat-card>
 
-    <mat-card class="fx-flex-fill">
-      <mat-card-header class="card-header">
-        <mat-card-title>{{'settings.unit-export-params' | translate}}</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <studio-lite-unit-export-config></studio-lite-unit-export-config>
-      </mat-card-content>
-    </mat-card>
-  </div>
+  <mat-card>
+    <mat-card-header class="card-header">
+      <mat-card-title>{{'settings.unit-export-params' | translate}}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <studio-lite-unit-export-config></studio-lite-unit-export-config>
+    </mat-card-content>
+  </mat-card>
 
-  <div class="fx-row-start-stretch fx-gap-20">
-    <mat-card class="fx-flex-fill">
-      <mat-card-header class="card-header">
-        <mat-card-title>{{'settings.profiles-registry' | translate}}</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <studio-lite-profiles-registry></studio-lite-profiles-registry>
-      </mat-card-content>
-    </mat-card>
+  <mat-card>
+    <mat-card-header class="card-header">
+      <mat-card-title>{{'settings.profiles-registry' | translate}}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <studio-lite-profiles-registry></studio-lite-profiles-registry>
+    </mat-card-content>
+  </mat-card>
 
-    <mat-card class="fx-flex-fill">
-      <mat-card-header class="card-header">
-        <mat-card-title>{{'settings.missings-profiles' | translate}}</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <studio-lite-missings-profiles-config></studio-lite-missings-profiles-config>
-      </mat-card-content>
-    </mat-card>
-  </div>
+  <mat-card>
+    <mat-card-header class="card-header">
+      <mat-card-title>{{'settings.missings-profiles' | translate}}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <studio-lite-missings-profiles-config></studio-lite-missings-profiles-config>
+    </mat-card-content>
+  </mat-card>
 
-  <div class="fx-row-start-stretch fx-gap-20">
-    <mat-card class="fx-flex-fill">
-      <mat-card-header class="card-header">
-        <mat-card-title>{{'settings.unit-rich-note-tags' | translate}}</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <studio-lite-unit-rich-note-tags-config [isGlobal]="true"></studio-lite-unit-rich-note-tags-config>
-      </mat-card-content>
-    </mat-card>
-
-    <div class="fx-flex-fill"></div>
-  </div>
+  <mat-card>
+    <mat-card-header class="card-header">
+      <mat-card-title>{{'settings.unit-rich-note-tags' | translate}}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <studio-lite-unit-rich-note-tags-config [isGlobal]="true"></studio-lite-unit-rich-note-tags-config>
+    </mat-card-content>
+  </mat-card>
 </div>
