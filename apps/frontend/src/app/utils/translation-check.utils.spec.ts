@@ -77,8 +77,9 @@ describe('missingTranslationKeys', () => {
     expect(missingTranslationKeys(texts, [
       "<span>{{ 'accordion.expand' | translate }}</span>",
       "this.translateService.instant('workspace.user-list-no-selection', { name })",
-      "return translate.stream('metadata.id-assigned');"
-    ])).toEqual(['accordion.expand', 'workspace.user-list-no-selection', 'metadata.id-assigned']);
+      "return translate.stream('metadata.id-assigned');",
+      "this.translateService.instant('workspace.confirm!')"
+    ])).toEqual(['accordion.expand', 'workspace.user-list-no-selection', 'metadata.id-assigned', 'workspace.confirm!']);
   });
 
   it('should not name a key the texts hold, nested or not', () => {

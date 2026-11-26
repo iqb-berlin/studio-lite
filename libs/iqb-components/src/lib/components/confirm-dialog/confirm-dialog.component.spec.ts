@@ -39,7 +39,6 @@ describe('ConfirmDialogComponent', () => {
     }).compileComponents();
   });
 
-  // The defaults named keys with an exclamation mark, which no translation file holds (#2237).
   it('should take default properties for those which are omitted on #ngOnInit()', async () => {
     createComponent({
       title: '',
