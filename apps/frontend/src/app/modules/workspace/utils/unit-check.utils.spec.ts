@@ -504,7 +504,7 @@ describe('checkUnit', () => {
     });
 
     // the preview and the export need it whether the editor is shown or not; editing nobody does here (#2198)
-    it('names what is missing to be played under the properties when the editor is hidden', () => {
+    it('lists what the unit needs to be played under the properties when the editor is hidden', () => {
       const input = okInput();
       input.hiddenRoutes = ['editor'];
       input.definition = content({ dependenciesToPlay: [geogebra], dependenciesToEdit: [sheet] });
@@ -514,7 +514,7 @@ describe('checkUnit', () => {
         { key: 'workspace.dependencies-missing-packages', params: { names: 'GeoGebra.itcr.zip' } },
         { key: 'workspace.dependencies-missing-install-hint', hint: true }
       ]);
-      expect(properties?.dependencies).toBeUndefined();
+      expect(properties?.dependencies?.map(list => list.purpose)).toEqual(['play']);
     });
   });
 

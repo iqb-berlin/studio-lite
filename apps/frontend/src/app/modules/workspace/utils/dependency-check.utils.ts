@@ -4,7 +4,10 @@ import { CheckedDependency, checkDependency, InstalledDependencies } from './mis
 
 type Purpose = 'play' | 'edit';
 
-/** What a unit needs for one purpose, as the editor reported it, each with whether the studio has it. */
+/**
+ * What a unit needs for one purpose, as its editor reported it or its import file named it, each with
+ * whether the studio has it.
+ */
 export interface UnitDependencyList {
   purpose: Purpose;
   /** The list's title, or that nothing is reported -- which does not say that nothing is needed. */
@@ -17,7 +20,7 @@ export interface UnitDependencyList {
 }
 
 export interface CheckedDependencies {
-  /** Both lists, to be played first; none where the editor is hidden. */
+  /** Both lists, to be played first; only that one where the editor is hidden. */
   lists: UnitDependencyList[];
   findings: UnitCheckFinding[];
 }
@@ -79,8 +82,9 @@ function toList({ purpose, entries }: Checked): UnitDependencyList {
  * packages and widgets can be installed is said once, after them. Where what is installed could not
  * be read, that is said instead of a finding -- unknown is not missing.
  *
- * Where the editor is hidden, only what is needed to be played is checked, and the lists are left
- * out: the findings stand under the properties then, as the other findings on the content do.
+ * Where the editor is hidden, only what is needed to be played is checked and listed: the preview
+ * and the export need it all the same. A unit of a module without an editor -- its lists come with
+ * its import file -- is shown so as well.
  */
 export function checkDependencies(
   dependencies: { toPlay: UnitDependency[] | undefined; toEdit: UnitDependency[] | undefined },
@@ -109,5 +113,5 @@ export function checkDependencies(
       []),
     ...(installable ? [{ key: 'workspace.dependencies-missing-install-hint', hint: true }] : [])
   ];
-  return { lists: editorShown ? checked.map(toList) : [], findings };
+  return { lists: checked.map(toList), findings };
 }

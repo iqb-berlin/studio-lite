@@ -88,8 +88,9 @@ export interface UnitCheckSection {
    */
   definitionSize?: UnitCheckFinding;
   /**
-   * Under the editor, where the unit has content: what it needs to be played and edited, and
-   * whether the studio has it (#2198). What is missing is among the findings.
+   * Where the unit has content: what it needs to be played and edited, and whether the studio has it
+   * (#2198) -- under the editor, or what it needs to be played under the properties where the
+   * workspace hides the editor. What is missing is among the findings.
    */
   dependencies?: UnitDependencyList[];
 }
@@ -298,7 +299,9 @@ export function checkUnit(input: UnitCheckInput): UnitCheckSection[] {
         ...(shown('editor') ? [] : contentFindings),
         ...(idConflicts?.findings ?? [])
       ],
-      variableIdConflicts: idConflicts?.variableIdConflicts ?? []
+      variableIdConflicts: idConflicts?.variableIdConflicts ?? [],
+      // with the editor hidden, what the unit needs to be played stands with its findings (#2198)
+      ...(!shown('editor') && dependencies && { dependencies: dependencies.lists })
     })
   ];
   if (shown('editor')) {

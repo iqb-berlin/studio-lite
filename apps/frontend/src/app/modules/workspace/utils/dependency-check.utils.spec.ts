@@ -97,13 +97,18 @@ describe('checkDependencies', () => {
       .toEqual([{ key: 'unit-check.dependencies-not-checked', hint: true }]);
   });
 
-  it('checks only what is needed to be played, without the lists, where the editor is hidden', () => {
+  // the preview and the export need it all the same, also for a module without an editor
+  it('checks and lists only what is needed to be played where the editor is hidden', () => {
     expect(checkDependencies(
       { toPlay: [periodicTable], toEdit: [geogebra] },
       { packages: [], widgets: [] },
       false
     )).toEqual({
-      lists: [],
+      lists: [{
+        purpose: 'play',
+        key: 'unit-check.dependencies-play',
+        entries: [{ key: 'unit-check.dependency.widget-missing', params: { name: 'PERIODIC_TABLE' } }]
+      }],
       findings: [
         { key: 'workspace.dependencies-missing-widgets', params: { names: 'PERIODIC_TABLE' } },
         { key: 'workspace.dependencies-missing-install-hint', hint: true }
