@@ -41,7 +41,10 @@ describe('Snow on the start page', () => {
   it('stops the snow once switched off', () => {
     login(Cypress.expose('username'), Cypress.expose('password'));
     switchSnowfall(false);
+    // the start page begins without snow: only after its own answer does "no snow" say anything
+    cy.intercept('GET', '/api/settings/effects').as('startPageEffects');
     logout();
+    cy.wait('@startPageEffects').its('response.body.snowfall').should('equal', false);
     cy.get('[data-cy="home-user-name"]').should('exist');
     cy.get(snowfall).should('not.exist');
   });
