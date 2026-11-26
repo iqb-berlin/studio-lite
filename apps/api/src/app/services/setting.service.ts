@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
-  ConfigDto, AppLogoDto, UnitExportConfigDto, MissingsProfilesDto,
+  ConfigDto, AppLogoDto, EffectsDto, UnitExportConfigDto, MissingsProfilesDto,
   ProfilesRegistryDto, EmailTemplateDto, UnitRichNoteTagDto, TopConcept
 } from '@studio-lite-lib/api-dto';
 import {
@@ -39,8 +39,8 @@ function withLocalizedTexts<T extends object>(setting: T, keys: readonly (keyof 
 
 /**
  * The installation-wide settings, all of them rows of {@link Setting} whose content is JSON kept as
- * text: the config, the logo, the export configuration, the profile registry, the mail template,
- * the missings profiles, the rich-note tags.
+ * text: the config, the logo, the effects, the export configuration, the profile registry, the mail
+ * template, the missings profiles, the rich-note tags.
  *
  * The rich-note tags are the one setting that is not simply read back: they may be configured as a
  * vocabulary URL, and are then resolved through {@link MetadataVocabularyService} into the tags a
@@ -117,6 +117,26 @@ export class SettingService {
         key: 'app-logo',
         content: JSON.stringify(newLogo)
       });
+      await this.settingsRepository.save(newSetting);
+    }
+  }
+
+  async findEffects(): Promise<EffectsDto> {
+    this.logger.log('Returning settings effects.');
+    const effects = await this.settingsRepository.findOne({ where: { key: 'effects' } });
+    return effects ? JSON.parse(effects.content) : new EffectsDto();
+  }
+
+  // Only what the DTO names is stored: no ValidationPipe strips what else a request carries.
+  async patchEffects(newEffects: EffectsDto): Promise<void> {
+    this.logger.log('Updating settings effects.');
+    const content = JSON.stringify({ snowfall: newEffects.snowfall === true });
+    const settingToUpdate = await this.settingsRepository.findOne({ where: { key: 'effects' } });
+    if (settingToUpdate) {
+      settingToUpdate.content = content;
+      await this.settingsRepository.save(settingToUpdate);
+    } else {
+      const newSetting = this.settingsRepository.create({ key: 'effects', content });
       await this.settingsRepository.save(newSetting);
     }
   }

@@ -23,8 +23,6 @@ export class AppConfig {
   private readonly _globalWarningExpiredHour: number | undefined;
   private readonly titleService: Title;
   readonly hasUsers: boolean;
-  // switched on and off by an administrator; a config from before the switch has none
-  readonly snowfall: boolean;
 
   constructor(
     titleService: Title,
@@ -46,7 +44,6 @@ export class AppConfig {
     this._globalWarningExpiredDay = appConfig ? appConfig.globalWarningExpiredDay : undefined;
     this._globalWarningExpiredHour = appConfig ? appConfig.globalWarningExpiredHour : undefined;
     this.hasUsers = appConfig ? appConfig.hasUsers : true;
-    this.snowfall = appConfig?.snowfall === true;
     this.titleService = titleService;
   }
 

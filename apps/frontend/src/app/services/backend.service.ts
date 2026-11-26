@@ -7,6 +7,7 @@ import {
   ChangePasswordDto,
   ConfigDto,
   AppLogoDto,
+  EffectsDto,
   MyDataDto,
   WorkspaceFullDto,
   WorkspaceSettingsDto,
@@ -155,6 +156,15 @@ export class BackendService {
       .get<AppLogoDto | null>(`${this.serverUrl}settings/app-logo`, {})
       .pipe(
         catchError(() => of(false as const))
+      );
+  }
+
+  // A failure answers null: the start page then shows no snow, and the admin form says it could not load.
+  getEffects(): Observable<EffectsDto | null> {
+    return this.http
+      .get<EffectsDto>(`${this.serverUrl}settings/effects`, {})
+      .pipe(
+        catchError(() => of(null))
       );
   }
 

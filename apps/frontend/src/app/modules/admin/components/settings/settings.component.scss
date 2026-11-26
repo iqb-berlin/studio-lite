@@ -9,6 +9,13 @@
   padding: 20px;
 }
 
+// Two cards side by side, row by row in the order of the template; cards in one row are equally high.
+.settings-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
 .card-header {
   margin-bottom: 20px;
 }

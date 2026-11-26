@@ -266,7 +266,7 @@ describe('Admin Settings Tab Configuration', () => {
         'PATCH',
         '/api/settings/unit-export-config',
         'clearUnitExport',
-        3
+        4
       );
     });
 
@@ -279,7 +279,7 @@ describe('Admin Settings Tab Configuration', () => {
         'PATCH',
         '/api/settings/unit-export-config',
         'saveUnitExport',
-        3
+        4
       );
     });
   });
@@ -300,7 +300,7 @@ describe('Admin Settings Tab Configuration', () => {
         'PATCH',
         '/api/settings/profiles-registry',
         'clearRegistry',
-        4
+        5
       );
     });
 
@@ -311,7 +311,7 @@ describe('Admin Settings Tab Configuration', () => {
         'PATCH',
         '/api/settings/profiles-registry',
         'saveRegistry',
-        4
+        5
       );
     });
 
@@ -338,7 +338,7 @@ describe('Admin Settings Tab Configuration', () => {
         'PATCH',
         '/api/settings/profiles-registry',
         'saveRegistry',
-        4
+        5
       );
 
       // checks that we have only 33 profiles
@@ -371,7 +371,7 @@ describe('Admin Settings Tab Configuration', () => {
         'PATCH',
         '/api/settings/missings-profiles',
         'saveMissings',
-        5
+        6
       );
     });
 
@@ -382,7 +382,7 @@ describe('Admin Settings Tab Configuration', () => {
         'PATCH',
         '/api/settings/missings-profiles',
         'clearMissings',
-        5
+        6
       );
     });
   });
@@ -394,13 +394,13 @@ describe('Admin Settings Tab Configuration', () => {
       cy.get('studio-lite-unit-rich-note-tags-config input').last()
         .clear({ force: true })
         .type('https://w3id.org/iqb/v06/t1/index.json', { force: true });
-      saveAndExpect('PATCH', '/api/settings/unit-rich-note-tags-config', 'saveRichNoteTags', 6);
+      saveAndExpect('PATCH', '/api/settings/unit-rich-note-tags-config', 'saveRichNoteTags', 7);
     });
 
     it('deletes the second rich note tags JSON and set again the default', () => {
       goToSettings();
       cy.get('studio-lite-unit-rich-note-tags-config .delete-button').last().click();
-      saveAndExpect('PATCH', '/api/settings/unit-rich-note-tags-config', 'deleteRichNoteTags', 6);
+      saveAndExpect('PATCH', '/api/settings/unit-rich-note-tags-config', 'deleteRichNoteTags', 7);
     });
 
     it('resets the default JSON', () => {
@@ -409,7 +409,7 @@ describe('Admin Settings Tab Configuration', () => {
         .last()
         .clear({ force: true })
         .type('https://w3id.org/iqb/v05/r1/index.json', { force: true });
-      saveAndExpect('PATCH', '/api/settings/unit-rich-note-tags-config', 'resetRichNoteTags', 6);
+      saveAndExpect('PATCH', '/api/settings/unit-rich-note-tags-config', 'resetRichNoteTags', 7);
     });
   });
 });

@@ -2455,6 +2455,20 @@ Cypress.Commands.add('patchSettingConfigAPI', (config: object, token: string) =>
   });
 });
 
+// the effects, as the settings card saves them (#2221)
+Cypress.Commands.add('patchSettingEffectsAPI', (effects: { snowfall: boolean }, token: string) => {
+  cy.request({
+    method: 'PATCH',
+    url: '/api/settings/effects',
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization: `bearer ${token}`
+    },
+    body: effects,
+    failOnStatusCode: false
+  });
+});
+
 // 102
 Cypress.Commands.add('getSettingLogoAPI', (token:string) => {
   const authorization = `bearer ${token}`;

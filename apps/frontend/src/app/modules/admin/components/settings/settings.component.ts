@@ -10,6 +10,7 @@ import { MissingsProfilesConfigComponent } from '../missings-profiles-config/mis
 import { UnitExportConfigComponent } from '../unit-export-config/unit-export-config.component';
 import { EmailTemplateComponent } from '../email-template/email-template.component';
 import { UnitRichNoteTagsConfigComponent } from '../unit-rich-note-tags-config/unit-rich-note-tags-config.component';
+import { EffectsConfigComponent } from '../effects-config/effects-config.component';
 
 @Component({
   selector: 'studio-lite-settings',
@@ -18,6 +19,7 @@ import { UnitRichNoteTagsConfigComponent } from '../unit-rich-note-tags-config/u
   imports: [
     AppConfigComponent,
     AppLogoComponent,
+    EffectsConfigComponent,
     ProfilesRegistryComponent,
     TranslateModule,
     MissingsProfilesConfigComponent,

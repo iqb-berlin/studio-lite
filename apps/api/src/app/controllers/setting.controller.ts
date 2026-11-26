@@ -6,7 +6,7 @@ import {
   ApiForbiddenResponse
 } from '@nestjs/swagger';
 import {
-  MissingsProfilesDto, ConfigDto, AppLogoDto, UnitExportConfigDto, ProfilesRegistryDto,
+  MissingsProfilesDto, ConfigDto, AppLogoDto, EffectsDto, UnitExportConfigDto, ProfilesRegistryDto,
   EmailTemplateDto, UnitRichNoteTagDto
 } from '@studio-lite-lib/api-dto';
 import { SettingService } from '../services/setting.service';
@@ -15,17 +15,17 @@ import { IsAdminGuard } from '../guards/is-admin.guard';
 import { AppVersionGuard } from '../guards/app-version.guard';
 
 /**
- * `settings` -- the installation-wide settings: the config, the logo, the export configuration, the
- * profile registry, the mail template, the missings profiles, the rich-note tags. Each is a GET and
- * a PATCH. The tags are read in two forms: `unit-rich-note-tags` answers the tags they resolve to
- * for a group, `unit-rich-note-tags-config` the stored configuration itself, which is also what
- * the PATCH writes.
+ * `settings` -- the installation-wide settings: the config, the logo, the effects, the export
+ * configuration, the profile registry, the mail template, the missings profiles, the rich-note
+ * tags. Each is a GET and a PATCH. The tags are read in two forms: `unit-rich-note-tags` answers
+ * the tags they resolve to for a group, `unit-rich-note-tags-config` the stored configuration
+ * itself, which is also what the PATCH writes.
  *
- * Every PATCH is an administrator's, the GETs are not all. `config` and `app-logo` have to answer
- * before anyone has logged in and therefore carry no token guard -- `config` is guarded by the app
- * version alone, which is what makes it the route that sends a stale frontend to reload. The
- * settings only an administrator ever reads, the mail template and the tag configuration, are
- * guarded on the way in as well.
+ * Every PATCH is an administrator's, the GETs are not all. `config`, `app-logo` and `effects` have
+ * to answer before anyone has logged in and therefore carry no token guard -- `config` is guarded
+ * by the app version alone, which is what makes it the route that sends a stale frontend to
+ * reload. The settings only an administrator ever reads, the mail template and the tag
+ * configuration, are guarded on the way in as well.
  */
 @Controller('settings')
 export class SettingController {
@@ -73,6 +73,23 @@ export class SettingController {
   @ApiTags('settings')
   async patchAppLogo(@Body() newLogo: AppLogoDto) {
     return this.settingService.patchAppLogo(newLogo);
+  }
+
+  @Get('effects')
+  @ApiOkResponse({ description: 'Effects retrieved successfully.', type: EffectsDto })
+  @ApiTags('settings')
+  async findEffects(): Promise<EffectsDto> {
+    return this.settingService.findEffects();
+  }
+
+  @Patch('effects')
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiOkResponse({ description: 'Effects updated successfully.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
+  @ApiBearerAuth()
+  @ApiTags('settings')
+  async patchEffects(@Body() effects: EffectsDto) {
+    return this.settingService.patchEffects(effects);
   }
 
   @Get('unit-export-config')
