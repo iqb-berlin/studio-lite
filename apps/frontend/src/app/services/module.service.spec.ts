@@ -158,14 +158,21 @@ describe('ModuleService', () => {
       expect(service.widgets['w1'].metadata.name).toBe('W1');
     });
 
-    // an empty map alone would pass for an installation without widgets (#2198)
-    it('should tell an installation without widgets from a request that failed', async () => {
-      mockBackendService.getModuleList.mockReturnValue(of([]));
+    // emptied, the widgets would pass for none installed (#2198)
+    it('should tell a request that failed, and keep the widgets loaded before', async () => {
+      const widget = {
+        key: 'w1',
+        sortKey: 'w1',
+        metadata: {
+          id: 'w1', name: 'W1', type: 'WIDGET', model: 'CALC', version: '1.0', specVersion: '1.0', isStable: true
+        }
+      } as VeronaModuleInListDto;
+      mockBackendService.getModuleList.mockReturnValue(of([widget]));
       expect(await service.loadWidgets()).toBe(true);
 
       mockBackendService.getModuleList.mockReturnValue(of(null));
       expect(await service.loadWidgets()).toBe(false);
-      expect(service.widgets).toEqual({});
+      expect(Object.keys(service.widgets)).toEqual(['w1']);
     });
   });
 

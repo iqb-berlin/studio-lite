@@ -19,8 +19,8 @@ describe('InstalledDependenciesService', () => {
     }
   } as never);
 
-  const loaded = (workspaceId: number): InstalledDependencies | null | undefined => {
-    let installed: InstalledDependencies | null | undefined;
+  const loaded = (workspaceId: number): InstalledDependencies | undefined => {
+    let installed: InstalledDependencies | undefined;
     service.load(workspaceId).subscribe(answer => {
       installed = answer;
     });
@@ -66,15 +66,18 @@ describe('InstalledDependenciesService', () => {
 
   it('does not keep a failed read of the packages, so that the next unit asks again', fakeAsync(() => {
     getResourcePackageNames.mockReturnValue(of(null));
-    expect(loaded(7)).toBeNull();
+    expect(loaded(7)).toEqual({ packages: null, widgets: ['CALC'] });
 
     getResourcePackageNames.mockReturnValue(of(['GeoGebra']));
     expect(loaded(7)).toEqual({ packages: ['GeoGebra'], widgets: ['CALC'] });
   }));
 
   // the failed request left the map empty, and every widget passed for not installed (#2198)
-  it('does not take widgets that could not be read for none installed', fakeAsync(() => {
-    moduleService.loadWidgets.mockResolvedValue(false);
-    expect(loaded(7)).toBeNull();
+  it('does not take widgets that could not be read for none installed, nor keeps the read', fakeAsync(() => {
+    moduleService.loadWidgets.mockResolvedValueOnce(false);
+    expect(loaded(7)).toEqual({ packages: ['GeoGebra'], widgets: null });
+
+    expect(loaded(7)).toEqual({ packages: ['GeoGebra'], widgets: ['CALC'] });
+    expect(getResourcePackageNames).toHaveBeenCalledTimes(2);
   }));
 });

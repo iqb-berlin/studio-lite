@@ -30,8 +30,8 @@ export interface UnitCheckInput {
   modules: Partial<Record<ModuleType, string>> | undefined;
   /** undefined: the lists of installed modules could not be loaded. */
   installed: Record<ModuleType, Record<string, InstalledModule>> | undefined;
-  /** The packages and widgets the studio has (#2198); null: they could not be read. */
-  installedDependencies: InstalledDependencies | null;
+  /** The packages and widgets the studio has (#2198); a list that could not be read is null. */
+  installedDependencies: InstalledDependencies;
   /**
    * Whether there is content, and its format -- of the editor's definition where it is loaded, saved
    * or not, else as the server summarizes the stored one (#2135). undefined: not loaded (yet).
@@ -263,8 +263,8 @@ function checkScheme(input: UnitCheckInput, editorShown: boolean): CheckedScheme
  * A tab the workspace hides gets no section, and its module is not asked for. What the preview and
  * the export need all the same is asked under the properties instead: whether there is content, the
  * player can play it and the studio has what it needs to be played, where the editor is hidden, and
- * whether an id would be written twice,
- * where the coding is -- a scheme may come with an import. Having no scheme is no finding there.
+ * whether an id would be written twice, where the coding is -- a scheme may come with an import.
+ * Having no scheme is no finding there.
  *
  * What fails nothing -- a unit without its editor -- is a hint, and leaves its section in order. A unit
  * with nothing to code, an information unit, needs neither a scheme nor a schemer.

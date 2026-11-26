@@ -84,7 +84,7 @@ function toList({ purpose, entries }: Checked): UnitDependencyList {
  */
 export function checkDependencies(
   dependencies: { toPlay: UnitDependency[] | undefined; toEdit: UnitDependency[] | undefined },
-  installed: InstalledDependencies | null,
+  installed: InstalledDependencies,
   editorShown: boolean
 ): CheckedDependencies {
   const check = (purpose: Purpose, reported: UnitDependency[] | undefined): Checked => ({
@@ -102,7 +102,10 @@ export function checkDependencies(
     ...checked.flatMap(missingFindings),
     // a hint where only what is needed to be edited could not be checked
     ...(unknown.length ?
-      [{ key: 'unit-check.dependencies-not-checked', ...(unknown[0].purpose === 'edit' && { hint: true }) }] :
+      [{
+        key: 'unit-check.dependencies-not-checked',
+        ...(unknown.every(({ purpose }) => purpose === 'edit') && { hint: true })
+      }] :
       []),
     ...(installable ? [{ key: 'workspace.dependencies-missing-install-hint', hint: true }] : [])
   ];

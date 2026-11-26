@@ -739,6 +739,24 @@ describe('UnitPreviewComponent', () => {
       expect(component.dependencyWarning()).toBe('');
     });
 
+    // a list that could not be read hides only what it would tell (#2198)
+    it('should still name the packages the studio lacks when the widgets cannot be read', fakeAsync(() => {
+      moduleServiceStub.widgets = {};
+      moduleServiceStub.loadWidgets = jest.fn().mockResolvedValue(false);
+      backendServiceStub.getResourcePackageNames = jest.fn().mockReturnValue(of([]));
+
+      component.postStore(storeWith([
+        { id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }, { id: 'PERIODIC_TABLE', type: 'WIDGET' }
+      ]));
+      tick();
+
+      expect(component.dependencyWarning()).toBe([
+        'workspace.dependencies-missing-packages',
+        'workspace.dependencies-missing-hint',
+        'workspace.dependencies-missing-install-hint'
+      ].join(' '));
+    }));
+
     it('should not ask for the packages of a unit that needs nothing', () => {
       backendServiceStub.getResourcePackageNames = jest.fn().mockReturnValue(of([]));
 

@@ -1,11 +1,14 @@
 import { isResourcePackageName, namesResourcePackage, UnitDependency } from '@studio-lite/shared-code';
 
-/** What the studio has of what units need besides their modules (#1602). */
+/**
+ * What the studio has of what units need besides their modules (#1602). Each list is null where it
+ * could not be read: what it would tell is not known, and the other list still tells its part (#2198).
+ */
 export interface InstalledDependencies {
   /** The names of the resource packages the workspace finds served. */
-  packages: string[];
+  packages: string[] | null;
   /** The widget types installed widgets declare as their `model`. */
-  widgets: string[];
+  widgets: string[] | null;
 }
 
 /** What a unit needs to be played that the studio does not have, by kind. */
@@ -42,27 +45,24 @@ export interface CheckedDependency {
  * studio does not have, since it hands the modules nothing but its installed packages. A service
  * it cannot check: unknown is not missing.
  */
-export function checkDependency(
-  dependency: UnitDependency,
-  installed: InstalledDependencies | null
-): CheckedDependency {
+export function checkDependency(dependency: UnitDependency, installed: InstalledDependencies): CheckedDependency {
   const checked = (kind: DependencyKind, state: DependencyState): CheckedDependency => ({
     id: dependency.id, kind, state
   });
   if (dependency.type === 'SERVICE') return checked('service', 'not-checked');
   if (dependency.type === 'WIDGET') {
-    if (!installed) return checked('widget', 'unknown');
+    if (!installed.widgets) return checked('widget', 'unknown');
     return checked('widget', installed.widgets.includes(dependency.id) ? 'installed' : 'missing');
   }
   if (!isResourcePackageName(dependency.id)) return checked('file', 'not-provided');
-  if (!installed) return checked('package', 'unknown');
+  if (!installed.packages) return checked('package', 'unknown');
   return checked(
     'package',
     installed.packages.some(name => namesResourcePackage(dependency.id, name)) ? 'installed' : 'missing'
   );
 }
 
-/** What of the given dependencies the studio lacks, see {@link checkDependency}. */
+/** What of the given dependencies the studio lacks, see {@link checkDependency}; what is unknown is not missing. */
 export function findMissingDependencies(
   dependencies: UnitDependency[] | undefined,
   installed: InstalledDependencies

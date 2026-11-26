@@ -67,13 +67,17 @@ describe('checkDependency', () => {
     ]);
   });
 
-  // what could not be read is not known, and unknown is not missing (#2198)
-  it('should not know of packages and widgets without the lists, and still of other files', () => {
-    expect([
+  // what could not be read is not known, and unknown is not missing; the other list still counts (#2198)
+  it('should not know of what a list that could not be read would tell, and still of the rest', () => {
+    const dependencies = [
       { id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' },
-      { id: 'CALC', type: 'WIDGET' },
+      { id: 'PERIODIC_TABLE', type: 'WIDGET' },
       { id: 'sheet.pdf', type: 'FILE' }
-    ].map(dependency => checkDependency(dependency as UnitDependency, null).state))
-      .toEqual(['unknown', 'unknown', 'not-provided']);
+    ] as UnitDependency[];
+    const states = (lists: { packages: string[] | null; widgets: string[] | null }) => dependencies
+      .map(dependency => checkDependency(dependency, lists).state);
+
+    expect(states({ packages: [], widgets: null })).toEqual(['missing', 'unknown', 'not-provided']);
+    expect(states({ packages: null, widgets: [] })).toEqual(['unknown', 'missing', 'not-provided']);
   });
 });

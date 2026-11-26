@@ -68,12 +68,12 @@ export class ModuleService {
   }
 
   /**
-   * Loads the widgets, and says whether their list arrived: a failed request leaves the map empty,
-   * which must not pass for an installation without widgets (#2198).
+   * Loads the widgets, and says whether their list arrived. A failed request keeps the widgets loaded
+   * before, as `loadList` keeps the modules: emptied, they would pass for none installed (#2198).
    */
   async loadWidgets(): Promise<boolean> {
     const widgetModules = await lastValueFrom(this.backendService.getModuleList('WIDGET'));
-    this.widgets = ModuleService.toModuleMap(widgetModules);
+    if (widgetModules) this.widgets = ModuleService.toModuleMap(widgetModules);
     return widgetModules !== null;
   }
 

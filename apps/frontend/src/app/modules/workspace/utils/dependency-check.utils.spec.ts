@@ -8,6 +8,7 @@ describe('checkDependencies', () => {
   const sheet: UnitDependency = { id: 'sheet.pdf', type: 'FILE' };
   const service: UnitDependency = { id: 'formula-service', type: 'SERVICE' };
   const installed = { packages: ['GeoGebra'], widgets: ['CALC'] };
+  const unread = { packages: null, widgets: null };
 
   it('lists what the unit needs to be played and to be edited, each with whether the studio has it', () => {
     const { lists, findings } = checkDependencies(
@@ -81,7 +82,7 @@ describe('checkDependencies', () => {
 
   // unknown is not missing (#1602)
   it('says packages and widgets were not checked where what is installed could not be read', () => {
-    const toPlay = checkDependencies({ toPlay: [geogebra, sheet], toEdit: [] }, null, true);
+    const toPlay = checkDependencies({ toPlay: [geogebra, sheet], toEdit: [] }, unread, true);
     expect(toPlay.lists[0].entries.map(entry => entry.key)).toEqual([
       'unit-check.dependency.package-unknown',
       'unit-check.dependency.file-not-provided'
@@ -92,7 +93,7 @@ describe('checkDependencies', () => {
     ]);
 
     // what is needed only to be edited is a hint, also when it could not be checked
-    expect(checkDependencies({ toPlay: [service], toEdit: [calc] }, null, true).findings)
+    expect(checkDependencies({ toPlay: [service], toEdit: [calc] }, unread, true).findings)
       .toEqual([{ key: 'unit-check.dependencies-not-checked', hint: true }]);
   });
 
@@ -108,6 +109,6 @@ describe('checkDependencies', () => {
         { key: 'workspace.dependencies-missing-install-hint', hint: true }
       ]
     });
-    expect(checkDependencies({ toPlay: [], toEdit: [geogebra] }, null, false).findings).toEqual([]);
+    expect(checkDependencies({ toPlay: [], toEdit: [geogebra] }, unread, false).findings).toEqual([]);
   });
 });

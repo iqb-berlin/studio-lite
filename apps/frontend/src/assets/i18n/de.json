@@ -690,7 +690,7 @@
     "dependencies-missing-to-edit-packages": "Zum Bearbeiten braucht diese Aufgabe Pakete, die im Studio nicht installiert sind: {{names}}.",
     "dependencies-missing-to-edit-widgets": "Zum Bearbeiten braucht diese Aufgabe Widgets, die im Studio nicht installiert sind: {{names}}.",
     "dependencies-missing-to-edit-files": "Zum Bearbeiten braucht diese Aufgabe Dateien, die das Studio nicht bereitstellen kann: {{names}}.",
-    "dependencies-not-checked": "Ob das Studio die Pakete und Widgets hat, die die Aufgabe braucht, wurde nicht geprüft: Die Liste der installierten Pakete und Widgets konnte nicht geladen werden.",
+    "dependencies-not-checked": "Ob das Studio alles hat, was die Aufgabe braucht, wurde nicht vollständig geprüft: Die Liste der installierten Pakete oder Widgets konnte nicht geladen werden.",
     "no-scheme": "Die Aufgabe hat noch kein Kodierschema.",
     "nothing-to-code": "Nichts zu kodieren – die Aufgabe enthält nur Elemente ohne Antwort, etwa Texte und Bilder.",
     "scheme-not-loaded": "Das Kodierschema konnte nicht geladen werden und wurde deshalb nicht geprüft.",

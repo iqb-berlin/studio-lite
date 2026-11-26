@@ -35,8 +35,8 @@ import { VariableIdConflictFixComponent } from '../variable-id-conflict-fix/vari
 interface UnitCheckSources {
   /** The server's summary of the stored definition; not asked for where the editor holds it. */
   definitionSummary: UnitDefinitionSummaryDto | undefined;
-  /** The packages and widgets the studio has (#2198); null: they could not be read. */
-  installedDependencies: InstalledDependencies | null;
+  /** The packages and widgets the studio has (#2198); a list that could not be read is null. */
+  installedDependencies: InstalledDependencies;
 }
 
 /**

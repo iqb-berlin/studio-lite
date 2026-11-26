@@ -12,14 +12,15 @@ import { InstalledDependencies } from '../utils/missing-dependencies.utils';
  * against (#1602, #2198), so that both answer alike. Read once per workspace for the component
  * that provides the service, for as long as it is shown.
  *
- * Null when either could not be read: unknown is not missing. A failed read is not kept, so the
- * next unit asks again rather than going without a check for the rest of the visit.
+ * A list that could not be read is null: unknown is not missing, and the other list still counts. A
+ * failed read is not kept, so the next unit asks again rather than going without a check for the
+ * rest of the visit.
  */
 @Injectable()
 export class InstalledDependenciesService {
   private loaded?: {
     workspaceId: number;
-    installed$: Observable<InstalledDependencies | null>;
+    installed$: Observable<InstalledDependencies>;
   };
 
   constructor(
@@ -27,21 +28,22 @@ export class InstalledDependenciesService {
     private moduleService: ModuleService
   ) {}
 
-  load(workspaceId: number): Observable<InstalledDependencies | null> {
+  load(workspaceId: number): Observable<InstalledDependencies> {
     if (this.loaded?.workspaceId !== workspaceId) {
       const installed$ = forkJoin([
         this.backendService.getResourcePackageNames(workspaceId),
         // the module service keeps the widgets for the session; an empty list may be one never loaded
         Object.keys(this.moduleService.widgets).length === 0 ? from(this.moduleService.loadWidgets()) : of(true)
       ]).pipe(
-        map(([packages, widgetsLoaded]) => (packages && widgetsLoaded ?
-          {
-            packages,
-            widgets: Object.values(this.moduleService.widgets).map(widget => widget.metadata?.model ?? '')
-          } :
-          null)),
+        map(([packages, widgetsLoaded]): InstalledDependencies => ({
+          packages,
+          widgets: widgetsLoaded ?
+            Object.values(this.moduleService.widgets).map(widget => widget.metadata?.model ?? '') :
+            null
+        })),
         tap(installed => {
-          if (!installed && this.loaded?.installed$ === installed$) this.loaded = undefined;
+          const failed = !installed.packages || !installed.widgets;
+          if (failed && this.loaded?.installed$ === installed$) this.loaded = undefined;
         }),
         shareReplay(1)
       );

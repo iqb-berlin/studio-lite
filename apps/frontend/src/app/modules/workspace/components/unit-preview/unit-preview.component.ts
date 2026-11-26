@@ -203,8 +203,8 @@ export class UnitPreviewComponent extends PreviewDirective {
   /**
    * A warning when the unit needs, to be played, a resource package, a widget or another file the
    * studio does not have (#1602). The player still runs; it may only show part of the unit. Nothing
-   * is said when the packages or the widgets cannot be read, and nothing for a unit left before they
-   * arrived.
+   * is said of packages or widgets whose list cannot be read (#2198), and nothing for a unit left
+   * before the lists arrived.
    */
   private updateDependencyWarning(dependencies: UnitDependency[] | undefined): void {
     this.dependencyWarning.set('');
@@ -213,7 +213,7 @@ export class UnitPreviewComponent extends PreviewDirective {
     this.installedDependencies.load(this.workspaceService.selectedWorkspaceId)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(installed => {
-        if (!installed || this.workspaceService.selectedUnit$.getValue() !== unitId) return;
+        if (this.workspaceService.selectedUnit$.getValue() !== unitId) return;
         const missing = findMissingDependencies(dependencies, installed);
         // one whole sentence per kind, with only the names put in: the word order differs between languages
         const sentences = ([
