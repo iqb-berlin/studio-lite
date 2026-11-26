@@ -43,11 +43,11 @@ export class ConfirmDialogComponent implements OnInit {
 
   ngOnInit(): void {
     if ((typeof this.confirmData.title === 'undefined') || (this.confirmData.title.length === 0)) {
-      this.confirmData.title = this.translateService.instant('workspace.please-confirm!');
+      this.confirmData.title = this.translateService.instant('workspace.please-confirm');
     }
     if ((typeof this.confirmData.confirmButtonLabel === 'undefined') ||
       (this.confirmData.confirmButtonLabel.length === 0)) {
-      this.confirmData.confirmButtonLabel = this.translateService.instant('workspace.confirm!');
+      this.confirmData.confirmButtonLabel = this.translateService.instant('workspace.confirm');
     }
     if (!this.confirmData.showCancel) {
       this.showCancel = false;

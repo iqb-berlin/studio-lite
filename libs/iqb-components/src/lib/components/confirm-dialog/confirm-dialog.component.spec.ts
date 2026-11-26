@@ -39,6 +39,7 @@ describe('ConfirmDialogComponent', () => {
     }).compileComponents();
   });
 
+  // The defaults named keys with an exclamation mark, which no translation file holds (#2237).
   it('should take default properties for those which are omitted on #ngOnInit()', async () => {
     createComponent({
       title: '',
@@ -47,8 +48,8 @@ describe('ConfirmDialogComponent', () => {
       showCancel: true
     });
     component.ngOnInit();
-    expect(component.confirmData.title).toEqual('workspace.please-confirm!');
-    expect(component.confirmData.confirmButtonLabel).toEqual('workspace.confirm!');
+    expect(component.confirmData.title).toEqual('workspace.please-confirm');
+    expect(component.confirmData.confirmButtonLabel).toEqual('workspace.confirm');
     expect(component.confirmData.content).toEqual('');
     expect(component.showCancel).toBe(true);
   });
