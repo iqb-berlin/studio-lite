@@ -4,68 +4,74 @@
       <mat-card-title>{{ 'unit-actions.title' | translate }}</mat-card-title>
     </mat-card-header>
     <mat-card-content class="fx-column-start-stretch fx-gap-10">
-      @if (canSubmit()) {
-        <div class="fx-row-start-center fx-gap-20">
-          <button mat-flat-button
-                  type="button"
-                  color="primary"
-                  class="action-button"
-                  [disabled]="!workspaceService.dropBoxName()"
-                  (click)="submitUnit()"
-                  data-cy="unit-actions-submit">
-            <mat-icon>assignment_turned_in</mat-icon>
-            {{ 'workspace.submit-units' | translate }}
-          </button>
-          <span class="hint" data-cy="unit-actions-drop-box">{{ dropBoxLine().key | translate: dropBoxLine().params }}</span>
-        </div>
-        <div class="fx-row-start-center fx-gap-20">
-          <button mat-flat-button
-                  type="button"
-                  color="primary"
-                  class="action-button"
-                  [disabled]="!returnable()"
-                  (click)="returnUnit()"
-                  data-cy="unit-actions-return">
-            <mat-icon>assignment_return</mat-icon>
-            {{ 'workspace.return-submitted-units' | translate }}
-          </button>
-          <span class="hint" data-cy="unit-actions-source">{{ sourceLine().key | translate: sourceLine().params }}</span>
-        </div>
-      }
-      @if (canCopy() || canDelete()) {
-        <div class="fx-row-start-center fx-gap-10 action-row">
-          @if (canCopy()) {
-            <button mat-flat-button
+      <div class="fx-row-start-center fx-gap-10">
+        <!-- a disabled button shows no tooltip: it hangs on the element around it -->
+        @if (canSubmit()) {
+          <span [matTooltip]="'workspace.submit-unit' | translate">
+            <button mat-mini-fab
                     type="button"
                     color="primary"
-                    class="action-button"
+                    [attr.aria-label]="'workspace.submit-unit' | translate"
+                    [disabled]="!workspaceService.dropBoxName()"
+                    (click)="submitUnit()"
+                    data-cy="unit-actions-submit">
+              <mat-icon>assignment_turned_in</mat-icon>
+            </button>
+          </span>
+          <span [matTooltip]="'workspace.return-submitted-unit' | translate">
+            <button mat-mini-fab
+                    type="button"
+                    color="primary"
+                    [attr.aria-label]="'workspace.return-submitted-unit' | translate"
+                    [disabled]="!returnable()"
+                    (click)="returnUnit()"
+                    data-cy="unit-actions-return">
+              <mat-icon>assignment_return</mat-icon>
+            </button>
+          </span>
+        }
+        @if (canCopy()) {
+          <span [matTooltip]="'unit-actions.copy-tooltip' | translate">
+            <button mat-mini-fab
+                    type="button"
+                    color="primary"
+                    [attr.aria-label]="'unit-actions.copy-tooltip' | translate"
                     (click)="copyUnit()"
                     data-cy="unit-actions-copy">
               <mat-icon>content_copy</mat-icon>
-              {{ 'unit-actions.copy' | translate }}
             </button>
-          }
-          @if (canMove()) {
-            <button mat-flat-button
+          </span>
+        }
+        @if (canMove()) {
+          <span [matTooltip]="'unit-actions.move-tooltip' | translate">
+            <button mat-mini-fab
                     type="button"
                     color="primary"
-                    class="action-button"
+                    [attr.aria-label]="'unit-actions.move-tooltip' | translate"
                     (click)="moveUnit()"
                     data-cy="unit-actions-move">
               <mat-icon>swap_horiz</mat-icon>
-              {{ 'unit-actions.move' | translate }}
             </button>
-          }
-          @if (canDelete()) {
-            <button mat-flat-button
+          </span>
+        }
+        @if (canDelete()) {
+          <span [matTooltip]="'unit-actions.delete-title' | translate">
+            <button mat-mini-fab
                     type="button"
                     color="primary"
-                    class="action-button"
+                    [attr.aria-label]="'unit-actions.delete-title' | translate"
                     (click)="deleteUnit()"
                     data-cy="unit-actions-delete">
               <mat-icon>delete</mat-icon>
-              {{ 'unit-actions.delete' | translate }}
             </button>
+          </span>
+        }
+      </div>
+      @if (canSubmit()) {
+        <div class="hint">
+          <p class="info-line" data-cy="unit-actions-drop-box">{{ dropBoxLine().key | translate: dropBoxLine().params }}</p>
+          @if (sourceLine(); as source) {
+            <p class="info-line" data-cy="unit-actions-source">{{ source.key | translate: source.params }}</p>
           }
         </div>
       }

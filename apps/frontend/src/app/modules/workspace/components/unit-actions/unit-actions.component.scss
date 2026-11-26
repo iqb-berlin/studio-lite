@@ -2,16 +2,10 @@
   margin-bottom: 8px;
 }
 
-// all five alike, with round ends, as wide as the longest label
-.action-button {
-  border-radius: 999px;
-  min-width: 150px;
-}
-
-.action-row {
-  flex-wrap: wrap;
-}
-
 .hint {
   color: #666;
+}
+
+.info-line {
+  margin: 0 0 4px;
 }

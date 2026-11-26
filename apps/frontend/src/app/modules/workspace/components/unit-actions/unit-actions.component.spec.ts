@@ -156,18 +156,19 @@ describe('UnitActionsComponent', () => {
     expect(text('drop-box')).toBe('workspace.no-dropbox-defined');
   });
 
-  it.each<[Partial<UnitInListDto>, boolean, { key: string; params?: Record<string, string> }]>([
+  it.each<[Partial<UnitInListDto>, boolean, { key: string; params?: Record<string, string> } | undefined]>([
     [{ sourceWorkspaceId: 3, sourceWorkspaceName: 'Mathe 6' }, true,
       { key: 'unit-actions.submitted-from', params: { name: 'Mathe 6' } }],
     [{ sourceWorkspaceId: 3 }, true, { key: 'unit-actions.submitted-from', params: { name: 'workspace.unknown' } }],
-    [{ sourceWorkspaceId: 3, returned: true }, false, { key: 'unit-actions.not-submitted-here' }],
-    [{}, false, { key: 'unit-actions.not-submitted-here' }]
+    [{ sourceWorkspaceId: 3, returned: true }, false, undefined],
+    [{}, false, undefined]
   ])('offers to return a unit submitted here and names where from: %j', (submission, returnable, line) => {
     unit = { ...unit, ...submission };
     create();
 
     expect(button('return')?.disabled).toBe(!returnable);
     expect(component.sourceLine()).toEqual(line);
+    expect(!!text('source')).toBe(returnable);
   });
 
   // Leaving the unit first lets the guard ask about unsaved changes; staying, nothing is sent.
