@@ -389,7 +389,7 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
   handleWidgetCall(data: WidgetCallData): void {
     const loadWidgets$ = Object.keys(this.widgetModuleService.widgets).length === 0 ?
       from(this.widgetModuleService.loadWidgets()) :
-      from(Promise.resolve());
+      from(Promise.resolve(true));
 
     loadWidgets$
       .pipe(takeUntil(this.ngUnsubscribe))

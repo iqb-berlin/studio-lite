@@ -331,7 +331,7 @@ export class WorkspaceUnitController {
     return this.unitDefinitionService.findOnesDefinition(unitId);
   }
 
-  /** Whether the unit has a definition, and its format -- without the definition (#2135). */
+  /** Whether the unit has a definition, its format, size and dependencies -- without the definition (#2135). */
   @Get(':unit_id/definition-summary')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()

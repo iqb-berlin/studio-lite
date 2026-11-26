@@ -14,6 +14,14 @@ import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
 import { isCodingScheme } from '../utils/coding-scheme';
 
+/** What the summary of a definition reads of it; no row without a stored definition. */
+interface DefinitionSummaryRow {
+  type: string | null;
+  size: number | null;
+  toPlay: UnitDependency[] | null;
+  toEdit: UnitDependency[] | null;
+}
+
 /**
  * What a unit is played and coded from: its definition, written by the editor, and its coding
  * scheme, written by the schemer -- read for the modules and the export, saved from the modules,
@@ -57,22 +65,26 @@ export class UnitDefinitionService {
   }
 
   /**
-   * Whether the unit has a definition, its format and its size -- without the definition, which
-   * embeds the unit's media (#2135, #2197). Its length in bytes is read from the stored value's
-   * header, so the definition is never unpacked.
+   * Whether the unit has a definition, its format, its size and what it needs -- without the
+   * definition, which embeds the unit's media (#2135, #2197, #2198). Its length in bytes is read from
+   * the stored value's header, so the definition is never unpacked.
    */
   async findOnesDefinitionSummary(unitId: number): Promise<UnitDefinitionSummaryDto> {
     const definition = await this.unitDefinitionsRepository
       .createQueryBuilder('definition')
       .select('definition.type', 'type')
       .addSelect('octet_length(definition.data)', 'size')
+      .addSelect('definition.dependenciesToPlay', 'toPlay')
+      .addSelect('definition.dependenciesToEdit', 'toEdit')
       .where('definition.unitId = :unitId', { unitId })
-      .getRawOne<{ type: string | null; size: number | null }>();
+      .getRawOne<DefinitionSummaryRow>();
     const size = definition?.size ?? 0;
     return {
       hasDefinition: size > 0,
       size,
-      ...(definition?.type && { definitionType: definition.type })
+      ...(definition?.type && { definitionType: definition.type }),
+      dependenciesToPlay: definition?.toPlay ?? [],
+      dependenciesToEdit: definition?.toEdit ?? []
     };
   }
 

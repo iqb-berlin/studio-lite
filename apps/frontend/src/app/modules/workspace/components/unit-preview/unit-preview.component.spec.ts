@@ -684,6 +684,8 @@ describe('UnitPreviewComponent', () => {
         { id: 'sheet.pdf', type: 'FILE' }
       ]));
 
+      // which package serves a name depends on the workspace's group (#1358)
+      expect(backendServiceStub.getResourcePackageNames).toHaveBeenCalledWith(7);
       expect(instant).toHaveBeenCalledWith('workspace.dependencies-missing-packages', { names: 'GeoGebra.itcr.zip' });
       expect(instant).toHaveBeenCalledWith('workspace.dependencies-missing-widgets', { names: 'PERIODIC_TABLE' });
       expect(instant).toHaveBeenCalledWith('workspace.dependencies-missing-files', { names: 'sheet.pdf' });
@@ -728,35 +730,32 @@ describe('UnitPreviewComponent', () => {
       expect(component.dependencyWarning()).toBe('');
     });
 
-    it('should say nothing when the packages cannot be read, and ask again for the next unit', () => {
+    // what the studio has is read once per workspace, a failed read not kept: installed-dependencies.service.spec.ts
+    it('should not name packages when their list cannot be read', () => {
       backendServiceStub.getResourcePackageNames = jest.fn().mockReturnValue(of(null));
 
       component.postStore(storeWith([{ id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }]));
 
       expect(component.dependencyWarning()).toBe('');
-
-      (backendServiceStub.getResourcePackageNames as jest.Mock).mockReturnValue(of([]));
-      component.postStore(storeWith([{ id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }]));
-
-      expect(component.dependencyWarning()).toContain('workspace.dependencies-missing-packages');
     });
 
-    // which package serves a name depends on the workspace's group (#1358)
-    it('should ask the workspace shown which package names it finds served, once per workspace', () => {
+    // a list that could not be read hides only what it would tell (#2198)
+    it('should still name the packages the studio lacks when the widgets cannot be read', fakeAsync(() => {
+      moduleServiceStub.widgets = {};
+      moduleServiceStub.loadWidgets = jest.fn().mockResolvedValue(false);
       backendServiceStub.getResourcePackageNames = jest.fn().mockReturnValue(of([]));
-      const geogebraUnit = storeWith([{ id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }]);
 
-      component.postStore(geogebraUnit);
-      component.postStore(geogebraUnit);
-      expect(component.dependencyWarning()).toContain('workspace.dependencies-missing-packages');
+      component.postStore(storeWith([
+        { id: 'GeoGebra.itcr.zip', type: 'FILE_TO_UNPACK' }, { id: 'PERIODIC_TABLE', type: 'WIDGET' }
+      ]));
+      tick();
 
-      (backendServiceStub.getResourcePackageNames as jest.Mock).mockReturnValue(of(['GeoGebra']));
-      workspaceServiceStub.selectedWorkspaceId = 8;
-      component.postStore(geogebraUnit);
-
-      expect(component.dependencyWarning()).toBe('');
-      expect((backendServiceStub.getResourcePackageNames as jest.Mock).mock.calls).toEqual([[7], [8]]);
-    });
+      expect(component.dependencyWarning()).toBe([
+        'workspace.dependencies-missing-packages',
+        'workspace.dependencies-missing-hint',
+        'workspace.dependencies-missing-install-hint'
+      ].join(' '));
+    }));
 
     it('should not ask for the packages of a unit that needs nothing', () => {
       backendServiceStub.getResourcePackageNames = jest.fn().mockReturnValue(of([]));
