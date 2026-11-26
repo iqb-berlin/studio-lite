@@ -188,6 +188,34 @@ describe('AppConfigComponent', () => {
     }));
   });
 
+  describe('snow on the start page', () => {
+    it('shows the stored switch', () => {
+      backendService.getAppConfig.mockReturnValue(of({ ...defaultAppConfig, snowfall: true }));
+      fixture.detectChanges();
+
+      expect(component.configForm.get('snowfall')?.value).toBe(true);
+    });
+
+    it('saves the switch once it is checked', () => {
+      fixture.detectChanges();
+      component.configForm.get('snowfall')?.setValue(true);
+      backendService.setAppConfig.mockReturnValue(of(true));
+      component.saveData();
+
+      expect(backendService.setAppConfig).toHaveBeenCalledWith(expect.objectContaining({ snowfall: true }));
+    });
+
+    it('takes a config from before the switch for one without snow, and saves it so', () => {
+      fixture.detectChanges();
+      expect(component.configForm.get('snowfall')?.value).toBe(false);
+
+      backendService.setAppConfig.mockReturnValue(of(true));
+      component.saveData();
+
+      expect(backendService.setAppConfig).toHaveBeenCalledWith(expect.objectContaining({ snowfall: false }));
+    });
+  });
+
   // Each text is written once per language; a language the studio does not offer keeps its text (#2186)
   it('should save the texts of every language and keep those of a language the form does not show', () => {
     backendService.getAppConfig.mockReturnValue(of({

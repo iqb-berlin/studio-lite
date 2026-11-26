@@ -8,7 +8,7 @@ import { SafeUrl } from '@angular/platform-browser';
 import { HttpErrorResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { AuthDataDto } from '@studio-lite-lib/api-dto';
+import { AuthDataDto, ConfigDto } from '@studio-lite-lib/api-dto';
 import { UI_LANGUAGES } from '@studio-lite/shared-code';
 import { HomeComponent } from './home.component';
 import { AppService, defaultAppConfig } from '../../services/app.service';
@@ -90,6 +90,30 @@ describe('HomeComponent', () => {
   });
 
   afterEach(() => localStorage.removeItem('id_token'));
+
+  // an administrator switches the snow on and off; a config from before the switch has none
+  describe('snow', () => {
+    const openWith = (config: ConfigDto): HTMLElement => {
+      backendService.getConfig.mockReturnValue(of(config));
+      fixture.detectChanges();
+      tick();
+      fixture.detectChanges();
+      return fixture.nativeElement;
+    };
+
+    it('falls on the start page when the config switches it on', fakeAsync(() => {
+      expect(openWith({ ...defaultAppConfig, snowfall: true }).querySelector('studio-lite-snowfall'))
+        .not.toBeNull();
+    }));
+
+    it('does not fall when the config switches it off', fakeAsync(() => {
+      expect(openWith({ ...defaultAppConfig, snowfall: false }).querySelector('studio-lite-snowfall')).toBeNull();
+    }));
+
+    it('does not fall with a config from before the switch', fakeAsync(() => {
+      expect(openWith({ ...defaultAppConfig }).querySelector('studio-lite-snowfall')).toBeNull();
+    }));
+  });
 
   // Back on the start page, the workspaces and reviews are read again: they may have changed since the login.
   it('should reload the auth data of a stored login', fakeAsync(() => {

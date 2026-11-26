@@ -1,0 +1,69 @@
+// no box of its own: in the flex row of the start page it would take a place and a gap
+:host {
+  display: contents;
+}
+
+// below the header of the app; the boxes of the start page stack above it
+.snowfall {
+  position: fixed;
+  top: 70px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.flake {
+  position: absolute;
+  top: -20px;
+  left: var(--flake-left);
+  width: var(--flake-size);
+  height: var(--flake-size);
+  opacity: var(--flake-opacity);
+  animation: flake-fall var(--flake-duration) linear var(--flake-delay) infinite;
+  will-change: transform;
+}
+
+// a faint rim on both kinds: the background is the administrator's to choose, and may be white as well
+.dot {
+  border-radius: 50%;
+  background-color: white;
+  box-shadow: 0 0 2px rgb(0 0 0 / 35%);
+}
+
+.crystal-shape {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 1px rgb(0 0 0 / 45%));
+}
+
+.crystal-arms {
+  fill: none;
+  stroke: white;
+  stroke-width: 1.3;
+  stroke-linecap: round;
+}
+
+// down the whole height, swaying to one side and back, turning on the way
+@keyframes flake-fall {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+
+  50% {
+    transform: translate3d(var(--flake-drift), 50vh, 0) rotate(calc(var(--flake-spin) / 2));
+  }
+
+  100% {
+    transform: translate3d(0, 100vh, 0) rotate(var(--flake-spin));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .snowfall {
+    display: none;
+  }
+}
