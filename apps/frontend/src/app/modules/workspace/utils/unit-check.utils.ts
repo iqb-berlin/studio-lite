@@ -93,6 +93,18 @@ export interface UnitCheckSection {
    * workspace hides the editor. What is missing is among the findings.
    */
   dependencies?: UnitDependencyList[];
+  /**
+   * Not findings: when the parts shown in the section were last changed, and by whom (#2232). They
+   * leave the status alone.
+   */
+  lastChanges?: UnitCheckFinding[];
+}
+
+/** The last change of each part, as it is shown: a key and its date and user. */
+export interface LastChangeLines {
+  metadata?: UnitCheckFinding;
+  definition?: UnitCheckFinding;
+  scheme?: UnitCheckFinding;
 }
 
 const MODULE_TYPES: ModuleType[] = ['editor', 'player', 'schemer'];
@@ -355,4 +367,23 @@ export function withDefinitionSize(sections: UnitCheckSection[], bytes: number |
     params: { size: bytesPipe.transform(bytes) }
   };
   return sections.map(entry => (entry.tab === tab ? { ...entry, definitionSize } : entry));
+}
+
+/**
+ * The sections with when each part of the unit was last changed, in the section of the tab where the
+ * part is edited: the properties, the definition under the editor and the scheme under the coding, and
+ * under the properties where the workspace hides that tab, as their findings are (#2232). Added apart
+ * from {@link checkUnit}, which they do not change.
+ */
+export function withLastChanges(sections: UnitCheckSection[], lines: LastChangeLines): UnitCheckSection[] {
+  const shownOr = (tab: UnitCheckSection['tab']) => (sections.some(entry => entry.tab === tab) ? tab : 'properties');
+  const placed: [UnitCheckSection['tab'], UnitCheckFinding | undefined][] = [
+    ['properties', lines.metadata],
+    [shownOr('editor'), lines.definition],
+    [shownOr('schemer'), lines.scheme]
+  ];
+  return sections.map(entry => {
+    const lastChanges = placed.flatMap(([tab, line]) => (tab === entry.tab && line ? [line] : []));
+    return lastChanges.length ? { ...entry, lastChanges } : entry;
+  });
 }

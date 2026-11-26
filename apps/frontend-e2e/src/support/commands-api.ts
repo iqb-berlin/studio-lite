@@ -620,6 +620,21 @@ Cypress.Commands.add('getUnitsByWsAPI', (wsId:string, token:string) => {
   });
 });
 
+// The units as the frontend lists them in the workspace, with where each was submitted from and to
+Cypress.Commands.add('getUnitsWithSubmissionsAPI', (wsId:string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}/units`,
+    qs: { targetWorkspaceId: wsId },
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
 // The workspace as a user sees it, with their access level -- what the frontend loads to open it
 Cypress.Commands.add('getUserWorkspaceAPI', (wsId:string, userId: string, token:string) => {
   const authorization = `bearer ${token}`;

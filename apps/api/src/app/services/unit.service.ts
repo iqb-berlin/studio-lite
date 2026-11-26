@@ -237,11 +237,29 @@ export class UnitService {
           returned: history?.returned || false
         };
       }));
+      units = await this.withSourceWorkspaceNames(units);
     }
     if (filterTargetWorkspaceId) {
       units = units.filter(unit => unit.targetWorkspaceId === workspaceId);
     }
     return units;
+  }
+
+  /**
+   * The units with the name of the workspace they were submitted from, which those working in the drop box
+   * need not be able to enter (#2232). Asked once for all of them.
+   */
+  private async withSourceWorkspaceNames(units: UnitInListDto[]): Promise<UnitInListDto[]> {
+    const sourceIds = [...new Set(units.map(unit => unit.sourceWorkspaceId).filter(id => !!id))];
+    if (!sourceIds.length) return units;
+    const sources = await this.workspaceRepository.find({
+      where: { id: In(sourceIds) },
+      select: { id: true, name: true }
+    });
+    const names = new Map(sources.map(source => [source.id, source.name]));
+    return units.map(unit => (unit.sourceWorkspaceId && names.has(unit.sourceWorkspaceId) ?
+      { ...unit, sourceWorkspaceName: names.get(unit.sourceWorkspaceId) } :
+      unit));
   }
 
   private async getLastChangedMetadataUser(unit: Unit, newKey: string, user: User): Promise<string> {

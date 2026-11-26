@@ -1334,6 +1334,67 @@ describe('Unit API tests', () => {
     });
   });
 
+  // Whoever submits sees where the unit goes, and whoever works in the drop box where it came from, whether
+  // or not they can enter the other workspace. A deleted drop box stayed set, and submitting to it was offered
+  // and refused: it is none (#2232).
+  describe('#2232 names of the drop box and of the workspace a unit was submitted from', () => {
+    const token = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+    const userId = () => Cypress.expose(`id_${Cypress.expose('username')}`);
+    const unit: UnitData = { shortname: 'D2232', name: 'Abgabe', group: '' };
+    const ids = { source: '', dropBox: '', unit: '' };
+    const createWorkspace = (name: string, assign: (id: string) => void) => cy
+      .createWsAPI(Cypress.expose(groupVera.id), { id: '', name }, token())
+      .then(resp => {
+        expect(resp.status).to.equal(201);
+        assign(`${resp.body}`);
+        cy.updateUsersOfWsAPI(`${resp.body}`, AccessLevel.Admin, userId(), token())
+          .its('status').should('equal', 200);
+      });
+
+    before(() => {
+      createWorkspace('Abgebend-2232', id => { ids.source = id; });
+      createWorkspace('Ablage-2232', id => { ids.dropBox = id; });
+      cy.then(() => {
+        cy.createUnitAPI(ids.source, unit, token()).then(resp => {
+          expect(resp.status).to.equal(201);
+          ids.unit = `${resp.body}`;
+        });
+        cy.dropboxWsAPI(ids.source, ids.dropBox, token()).its('status').should('equal', 200);
+      });
+    });
+
+    after(() => {
+      cy.deleteWsAPI([ids.source, ids.dropBox], token());
+    });
+
+    it('200 positive test: should name the drop box of the workspace', () => {
+      cy.getUserWorkspaceAPI(ids.source, userId(), token()).then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(resp.body.dropBoxId).to.equal(Number(ids.dropBox));
+        expect(resp.body.dropBoxName).to.equal('Ablage-2232');
+      });
+    });
+
+    it('200 positive test: should name the workspace a unit in the drop box was submitted from', () => {
+      cy.submitUnitsAPI(ids.source, ids.dropBox, ids.unit, token()).its('status').should('equal', 200);
+      cy.getUnitsWithSubmissionsAPI(ids.dropBox, token()).then(resp => {
+        expect(resp.status).to.equal(200);
+        const submitted = (resp.body as { key: string; sourceWorkspaceName?: string }[])
+          .find(entry => entry.key === unit.shortname);
+        expect(submitted?.sourceWorkspaceName).to.equal('Abgebend-2232');
+      });
+    });
+
+    it('200 positive test: should name no drop box once it is deleted', () => {
+      cy.deleteWsAPI([ids.dropBox], token()).its('status').should('equal', 200);
+      cy.getUserWorkspaceAPI(ids.source, userId(), token()).then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(resp.body.dropBoxId).to.equal(null);
+        expect(resp.body).not.to.have.property('dropBoxName');
+      });
+    });
+  });
+
   describe('39. PATCH /api/workspaces/{workspace_id}/name', () => {
     it('200 positive test: should allow an authorized user to rename a workspace', () => {
       cy.renameWsAPI(

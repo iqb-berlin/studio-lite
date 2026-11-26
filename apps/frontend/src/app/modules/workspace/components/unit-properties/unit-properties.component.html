@@ -140,82 +140,6 @@
                 </div>
               </mat-expansion-panel>
 
-              @if (workspaceService.userAccessLevel > 0) {
-                <mat-expansion-panel>
-                  <mat-expansion-panel-header>
-                    <mat-panel-title>
-                      {{ 'workspace.unit-actions' | translate }}
-                    </mat-panel-title>
-                  </mat-expansion-panel-header>
-                  <div class="fx-column-start-start fx-gap-10">
-                    @if (workspaceService.userAccessLevel > 0) {
-                      <div class="fx-row-start-center fx-gap-20">
-                        <button mat-raised-button
-                                color="primary"
-                                [disabled]="!workspaceService.dropBoxId"
-                                (click)="submitUnit()">
-                          <mat-icon>assignment_turned_in</mat-icon>
-                          {{ 'workspace.submit-unit' | translate }}
-                        </button>
-                        @if (!workspaceService.dropBoxId) {
-                          <p class="hint">{{ 'workspace.no-dropbox-defined' | translate }}</p>
-                        }
-                      </div>
-                    }
-                    @if (workspaceService.userAccessLevel > 0) {
-                      <button mat-raised-button
-                              color="primary"
-                              [disabled]="!(selectedUnitId | canReturnUnit : workspaceService.unitList)"
-                              (click)="returnSubmittedUnit()">
-                        <mat-icon>assignment_return</mat-icon>
-                        {{ 'workspace.return-submitted-unit' | translate }}
-                      </button>
-                    }
-                  </div>
-                </mat-expansion-panel>
-              }
-              <mat-expansion-panel>
-                <mat-expansion-panel-header>
-                  <mat-panel-title>
-                    {{ 'workspace.last-changed' | translate }}
-                  </mat-panel-title>
-                </mat-expansion-panel-header>
-                <div class="fx-column-start-stretch fx-gap-10">
-                  @if (workspaceService.lastChangedMetadata) {
-                    <div>
-                      {{
-                        'workspace.last-changed-metadata' | translate: {
-                          date: (workspaceService.lastChangedMetadata |
-                            date : i18nService.dateTimeFormat : i18nService.timeZone),
-                          user: workspaceService.lastChangedMetadataUser || 'workspace.unknown' | translate
-                        }
-                      }}
-                    </div>
-                  }
-                  @if (workspaceService.lastChangedDefinition) {
-                    <div>
-                      {{
-                        'workspace.last-changed-definition' | translate: {
-                          date: (workspaceService.lastChangedDefinition |
-                            date : i18nService.dateTimeFormat : i18nService.timeZone),
-                          user: workspaceService.lastChangedDefinitionUser || 'workspace.unknown' | translate
-                        }
-                      }}
-                    </div>
-                  }
-                  @if (workspaceService.lastChangedScheme) {
-                    <div>
-                      {{
-                        'workspace.last-changed-scheme' | translate: {
-                          date: (workspaceService.lastChangedScheme |
-                            date : i18nService.dateTimeFormat : i18nService.timeZone),
-                          user: workspaceService.lastChangedSchemeUser || 'workspace.unknown' | translate
-                        }
-                      }}
-                    </div>
-                  }
-                </div>
-              </mat-expansion-panel>
               @if (initialTranscript || initialReference) {
                 <mat-expansion-panel>
                   <mat-expansion-panel-header>
@@ -267,6 +191,7 @@
               }
             </mat-card-content>
           </mat-card>
+          <studio-lite-unit-actions></studio-lite-unit-actions>
         </div>
         <div class="fx-column-start-stretch fx-flex-row-50 fx-gap-10">
           <studio-lite-unit-check></studio-lite-unit-check>

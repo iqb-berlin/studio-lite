@@ -1,0 +1,74 @@
+@if (shown()) {
+  <mat-card data-cy="unit-actions">
+    <mat-card-header class="unit-actions-header">
+      <mat-card-title>{{ 'unit-actions.title' | translate }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="fx-column-start-stretch fx-gap-10">
+      @if (canSubmit()) {
+        <div class="fx-row-start-center fx-gap-20">
+          <button mat-flat-button
+                  type="button"
+                  color="primary"
+                  class="action-button"
+                  [disabled]="!workspaceService.dropBoxName()"
+                  (click)="submitUnit()"
+                  data-cy="unit-actions-submit">
+            <mat-icon>assignment_turned_in</mat-icon>
+            {{ 'workspace.submit-units' | translate }}
+          </button>
+          <span class="hint" data-cy="unit-actions-drop-box">{{ dropBoxLine().key | translate: dropBoxLine().params }}</span>
+        </div>
+        <div class="fx-row-start-center fx-gap-20">
+          <button mat-flat-button
+                  type="button"
+                  color="primary"
+                  class="action-button"
+                  [disabled]="!returnable()"
+                  (click)="returnUnit()"
+                  data-cy="unit-actions-return">
+            <mat-icon>assignment_return</mat-icon>
+            {{ 'workspace.return-submitted-units' | translate }}
+          </button>
+          <span class="hint" data-cy="unit-actions-source">{{ sourceLine().key | translate: sourceLine().params }}</span>
+        </div>
+      }
+      @if (canCopy() || canDelete()) {
+        <div class="fx-row-start-center fx-gap-10 action-row">
+          @if (canCopy()) {
+            <button mat-flat-button
+                    type="button"
+                    color="primary"
+                    class="action-button"
+                    (click)="copyUnit()"
+                    data-cy="unit-actions-copy">
+              <mat-icon>content_copy</mat-icon>
+              {{ 'unit-actions.copy' | translate }}
+            </button>
+          }
+          @if (canMove()) {
+            <button mat-flat-button
+                    type="button"
+                    color="primary"
+                    class="action-button"
+                    (click)="moveUnit()"
+                    data-cy="unit-actions-move">
+              <mat-icon>swap_horiz</mat-icon>
+              {{ 'unit-actions.move' | translate }}
+            </button>
+          }
+          @if (canDelete()) {
+            <button mat-flat-button
+                    type="button"
+                    color="primary"
+                    class="action-button"
+                    (click)="deleteUnit()"
+                    data-cy="unit-actions-delete">
+              <mat-icon>delete</mat-icon>
+              {{ 'unit-actions.delete' | translate }}
+            </button>
+          }
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+}

@@ -199,9 +199,9 @@ describe('WorkspaceService', () => {
 
   describe('resetUnitData', () => {
     it('should reset the timestamps and let go of the stores', () => {
-      service.lastChangedMetadata = new Date();
-      service.lastChangedScheme = new Date();
-      service.lastChangedDefinition = new Date();
+      unitStores.propertiesLoaded$.next({
+        id: 1, lastChangedMetadata: new Date(), lastChangedScheme: new Date(), lastChangedDefinition: new Date()
+      });
       service.isValidFormKey.next(false);
       service.setUnitKeyRefused(true);
 
@@ -209,9 +209,7 @@ describe('WorkspaceService', () => {
 
       expect(service.isValidFormKey.value).toBe(true);
       expect(service.unitKeyRefused()).toBe(false);
-      expect(service.lastChangedMetadata).toBeUndefined();
-      expect(service.lastChangedScheme).toBeUndefined();
-      expect(service.lastChangedDefinition).toBeUndefined();
+      expect(service.lastChanges()).toEqual({});
       expect(unitStores.reset).toHaveBeenCalled();
     });
   });
@@ -355,12 +353,11 @@ describe('WorkspaceService', () => {
         lastChangedSchemeUser: 'User 3'
       });
 
-      expect(service.lastChangedMetadata).toEqual(new Date('2024-01-01'));
-      expect(service.lastChangedMetadataUser).toBe('User 1');
-      expect(service.lastChangedDefinition).toEqual(new Date('2024-01-02'));
-      expect(service.lastChangedDefinitionUser).toBe('User 2');
-      expect(service.lastChangedScheme).toEqual(new Date('2024-01-03'));
-      expect(service.lastChangedSchemeUser).toBe('User 3');
+      expect(service.lastChanges()).toEqual({
+        metadata: { at: new Date('2024-01-01'), user: 'User 1' },
+        definition: { at: new Date('2024-01-02'), user: 'User 2' },
+        scheme: { at: new Date('2024-01-03'), user: 'User 3' }
+      });
     });
 
     it('should turn the dates the server sends as strings into dates', () => {
@@ -369,23 +366,21 @@ describe('WorkspaceService', () => {
       );
       unitStores.propertiesLoaded$.next(fromServer);
 
-      expect(service.lastChangedMetadata).toEqual(new Date('2024-01-01'));
+      expect(service.lastChanges().metadata?.at).toEqual(new Date('2024-01-01'));
     });
 
     it('should forget the previous unit\'s timestamps when the server sends none', () => {
-      service.lastChangedMetadata = new Date();
-      service.lastChangedMetadataUser = 'Someone';
-      service.lastChangedDefinition = new Date();
-      service.lastChangedScheme = new Date();
+      unitStores.propertiesLoaded$.next({
+        id: 1,
+        lastChangedMetadata: new Date(),
+        lastChangedMetadataUser: 'Someone',
+        lastChangedDefinition: new Date(),
+        lastChangedScheme: new Date()
+      });
 
       unitStores.propertiesLoaded$.next({ id: 1 });
 
-      expect(service.lastChangedMetadata).toBeUndefined();
-      expect(service.lastChangedMetadataUser).toBeUndefined();
-      expect(service.lastChangedDefinition).toBeUndefined();
-      expect(service.lastChangedDefinitionUser).toBeUndefined();
-      expect(service.lastChangedScheme).toBeUndefined();
-      expect(service.lastChangedSchemeUser).toBeUndefined();
+      expect(service.lastChanges()).toEqual({});
     });
   });
 
@@ -496,7 +491,7 @@ describe('WorkspaceService', () => {
 
       expect(result).toBe(false);
       expect(definitionStore.isChanged()).toBe(true);
-      expect(service.lastChangedDefinition).toBeUndefined();
+      expect(service.lastChanges().definition).toBeUndefined();
       expect(backendService.setUnitScheme).not.toHaveBeenCalled();
     });
 
@@ -581,7 +576,7 @@ describe('WorkspaceService', () => {
 
       expect(result).toBe(false);
       expect(schemeStore.isChanged()).toBe(true);
-      expect(service.lastChangedScheme).toBeUndefined();
+      expect(service.lastChanges().scheme).toBeUndefined();
     });
 
     it('should reload unit list when key/name/group/state changed', async () => {
@@ -910,10 +905,10 @@ describe('WorkspaceService', () => {
       await service.saveUnitData();
       const afterSave = new Date();
 
-      expect(service.lastChangedMetadata).toBeDefined();
-      expect(service.lastChangedMetadata!.getTime()).toBeGreaterThanOrEqual(beforeSave.getTime());
-      expect(service.lastChangedMetadata!.getTime()).toBeLessThanOrEqual(afterSave.getTime());
-      expect(service.lastChangedMetadataUser).toBe('Test User');
+      const change = service.lastChanges().metadata;
+      expect(change?.at.getTime()).toBeGreaterThanOrEqual(beforeSave.getTime());
+      expect(change?.at.getTime()).toBeLessThanOrEqual(afterSave.getTime());
+      expect(change?.user).toBe('Test User');
     });
 
     it('should use userName when userLongName is not available', async () => {
@@ -932,7 +927,7 @@ describe('WorkspaceService', () => {
 
       await service.saveUnitData();
 
-      expect(service.lastChangedMetadataUser).toBe('testuser');
+      expect(service.lastChanges().metadata?.user).toBe('testuser');
     });
   });
 });

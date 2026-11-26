@@ -14,6 +14,10 @@ import { WorkspaceBackendService } from '../../services/workspace-backend.servic
 import { ModuleService } from '../../../../services/module.service';
 import { BackendService as CommentsBackendService } from '../../../comments/services/backend.service';
 import { InstalledDependenciesService } from '../../services/installed-dependencies.service';
+import { I18nService } from '../../../../services/i18n.service';
+import { UnitLastChanges } from '../../models/unit-last-changes.interface';
+
+type UnitCheckSectionTab = unitCheckUtils.UnitCheckSection['tab'];
 
 const scheme = (variableCodings: unknown[]): string => JSON.stringify({ version: '3.0', variableCodings });
 
@@ -48,6 +52,7 @@ describe('UnitCheckComponent', () => {
   let editors: Record<string, { nameAndVersion: string }>;
   let loadList: jest.Mock;
   let loadInstalledDependencies: jest.Mock;
+  let lastChanges: WritableSignal<UnitLastChanges>;
 
   const element = (): HTMLElement => fixture.nativeElement as HTMLElement;
   const tabs = () => Array.from(
@@ -73,9 +78,11 @@ describe('UnitCheckComponent', () => {
             hiddenRoutes: hiddenRoutesState.asReadonly(),
             settingsLoaded: settingsLoadedState.asReadonly(),
             onCommentsUpdated: commentsUpdated,
-            richNotesChanged$: richNotesChanged
+            richNotesChanged$: richNotesChanged,
+            lastChanges: lastChanges.asReadonly()
           }
         },
+        { provide: I18nService, useValue: { fullLocale: 'en-US', dateTimeFormat: 'dd.MM.yyyy HH:mm' } },
         {
           provide: WorkspaceBackendService,
           useValue: {
@@ -126,6 +133,7 @@ describe('UnitCheckComponent', () => {
     loadList = jest.fn().mockResolvedValue(undefined);
     loadInstalledDependencies = jest.fn(() => of({ packages: ['GeoGebra'], widgets: [] }));
     units = signal({ '': [{ id: 4, key: 'UNIT_04' }] });
+    lastChanges = signal({});
     hasComments = jest.fn(() => of(true));
     hasUnitRichNotes = jest.fn(() => of(false));
     getUnitDefinition = jest.fn(() => of({ definition: '{}', variables: [{ id: '05', alias: '_00a' }] }));
@@ -350,6 +358,25 @@ describe('UnitCheckComponent', () => {
 
       expect(definitionSize()).toEqual({ key: 'unit-check.definition-size.small', params: { size: '7.0 B' } });
     }));
+
+  // where the properties showed it before, now as soon as the part is saved (#2232)
+  it('shows when the definition was last changed, and by whom, under the editor', fakeAsync(() => {
+    create();
+    const lastChangeOf = (tab: UnitCheckSectionTab) => fixture.componentInstance.sections()
+      ?.find(entry => entry.tab === tab)?.lastChanges;
+
+    expect(sectionOf('editor')?.querySelector('[data-cy="unit-check-last-change"]')).toBeNull();
+
+    lastChanges.set({ definition: { at: new Date(2026, 10, 26, 10, 15) }, metadata: { at: new Date(2026, 0, 2) } });
+    fixture.detectChanges();
+
+    expect(sectionOf('editor')?.querySelector('[data-cy="unit-check-last-change"]')?.textContent)
+      .toBe('unit-check.last-changed-definition');
+    expect(lastChangeOf('editor')).toEqual([{
+      key: 'unit-check.last-changed-definition', params: { date: '26.11.2026 10:15', user: 'workspace.unknown' }
+    }]);
+    expect(lastChangeOf('properties')?.[0].key).toBe('unit-check.last-changed-metadata');
+  }));
 
   // what the stored unit needs comes with the summary; once the editor holds the definition, what it reports (#2198)
   it('lists what the stored unit needs, then what the editor reports, unsaved changes included', fakeAsync(() => {

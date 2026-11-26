@@ -24,6 +24,7 @@ import { RichNoteTagsService } from './rich-note-tags.service';
 import { UnitStoresService } from './unit-stores.service';
 import { reconcileItemVariables } from '../utils/item-variables.utils';
 import { isUnitKeyTaken, UNIT_KEY_PATTERN } from '../utils/unit-key.utils';
+import { LastChange, UnitLastChanges } from '../models/unit-last-changes.interface';
 
 /**
  * The state of the workspace currently open: which unit is selected, what the user may do in it,
@@ -84,12 +85,9 @@ export class WorkspaceService {
     return this._userAccessLevel.asObservable();
   }
 
-  lastChangedMetadata?: Date;
-  lastChangedDefinition?: Date;
-  lastChangedScheme?: Date;
-  lastChangedMetadataUser?: string;
-  lastChangedDefinitionUser?: string;
-  lastChangedSchemeUser?: string;
+  private readonly lastChangesState = signal<UnitLastChanges>({});
+  /** Who changed which part of the open unit when: as loaded, and as saved since. */
+  readonly lastChanges = this.lastChangesState.asReadonly();
   isValidFormKey = new BehaviorSubject<boolean>(true);
   private readonly unitKeyRefusedState = signal(false);
   /**
@@ -105,6 +103,9 @@ export class WorkspaceService {
   private runningSave: Promise<boolean> | undefined;
   states: State[] = [];
   dropBoxId: number | null = null;
+  private readonly dropBoxNameState = signal<string | undefined>(undefined);
+  /** The name of the workspace units from here are submitted to, if there is one (#2232). */
+  readonly dropBoxName = this.dropBoxNameState.asReadonly();
   hasDroppedUnits: boolean = false;
 
   get richNoteTags(): UnitRichNoteTagDto[] {
@@ -192,9 +193,7 @@ export class WorkspaceService {
   }
 
   resetUnitData(): void {
-    this.lastChangedMetadata = undefined;
-    this.lastChangedScheme = undefined;
-    this.lastChangedDefinition = undefined;
+    this.lastChangesState.set({});
     // the key checks belong to the unit left; the next one is checked when its properties are shown
     this.isValidFormKey.next(true);
     this.unitKeyRefusedState.set(false);
@@ -251,12 +250,27 @@ export class WorkspaceService {
 
   /** Who changed which part of the unit when, as the server reports it with freshly loaded properties. */
   private setLastChanged(unitData: UnitPropertiesDto): void {
-    this.lastChangedMetadata = unitData.lastChangedMetadata ? new Date(unitData.lastChangedMetadata) : undefined;
-    this.lastChangedMetadataUser = unitData.lastChangedMetadata ? unitData.lastChangedMetadataUser : undefined;
-    this.lastChangedDefinition = unitData.lastChangedDefinition ? new Date(unitData.lastChangedDefinition) : undefined;
-    this.lastChangedDefinitionUser = unitData.lastChangedDefinition ? unitData.lastChangedDefinitionUser : undefined;
-    this.lastChangedScheme = unitData.lastChangedScheme ? new Date(unitData.lastChangedScheme) : undefined;
-    this.lastChangedSchemeUser = unitData.lastChangedScheme ? unitData.lastChangedSchemeUser : undefined;
+    const lastChange = (at: Date | undefined, user: string | undefined): LastChange | undefined => (
+      at ? { at: new Date(at), user } : undefined);
+    this.lastChangesState.set({
+      metadata: lastChange(unitData.lastChangedMetadata, unitData.lastChangedMetadataUser),
+      definition: lastChange(unitData.lastChangedDefinition, unitData.lastChangedDefinitionUser),
+      scheme: lastChange(unitData.lastChangedScheme, unitData.lastChangedSchemeUser)
+    });
+  }
+
+  /** The part was saved just now, by the user logged in. */
+  private setChangedNow(part: keyof UnitLastChanges): void {
+    this.lastChangesState.update(changes => ({
+      ...changes,
+      [part]: { at: new Date(), user: this.getDisplayUserName() }
+    }));
+  }
+
+  /** Sets the drop box of the workspace entered, as the server names it. */
+  setDropBox(id: number | null, name: string | undefined): void {
+    this.dropBoxId = id;
+    this.dropBoxNameState.set(id ? name : undefined);
   }
 
   private getDisplayUserName(): string {
@@ -311,8 +325,7 @@ export class WorkspaceService {
       if (saveOk) {
         reloadUnitList = unitPropertiesStore.isKeyOrNameOrGroupOrStateChanged();
         unitPropertiesStore.applyChanges(changedData);
-        this.lastChangedMetadata = new Date();
-        this.lastChangedMetadataUser = this.getDisplayUserName();
+        this.setChangedNow('metadata');
       }
     }
     const sentMetadata = saveOk ? unitMetadataStore?.getChangedData() : undefined;
@@ -343,8 +356,7 @@ export class WorkspaceService {
         // and has to get it renamed -- else it reports the old names, and the next save writes them back.
         if (sentDefinition.variables) unitSchemeStore?.applyVariables(sentDefinition.variables);
         unitDefinitionStore.applyChanges(sentDefinition);
-        this.lastChangedDefinition = new Date();
-        this.lastChangedDefinitionUser = this.getDisplayUserName();
+        this.setChangedNow('definition');
       }
     }
     if (saveOk && unitSchemeStore && unitSchemeStore.isChanged()) {
@@ -358,8 +370,7 @@ export class WorkspaceService {
       );
       if (saveOk) {
         unitSchemeStore.applyChanges(sentScheme);
-        this.lastChangedScheme = new Date();
-        this.lastChangedSchemeUser = this.getDisplayUserName();
+        this.setChangedNow('scheme');
       }
     }
     if (reloadUnitList) {
@@ -422,8 +433,7 @@ export class WorkspaceService {
     stored: UnitMetadataValues
   ): void {
     unitMetadataStore.applySaved(sent, stored);
-    this.lastChangedMetadata = new Date();
-    this.lastChangedMetadataUser = this.getDisplayUserName();
+    this.setChangedNow('metadata');
     const createdItems = !!sent.items?.some(item => !item.uuid);
     if (createdItems && this.unitStores.metadataStore() === unitMetadataStore) this.unitMetadataReloaded.emit();
   }

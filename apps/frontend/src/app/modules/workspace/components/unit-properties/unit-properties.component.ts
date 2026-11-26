@@ -11,12 +11,11 @@ import {
 } from '@angular/forms';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 import { State, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
-import { DatePipe } from '@angular/common';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import {
@@ -30,28 +29,19 @@ import {
   MatCardTitle,
   MatCardContent
 } from '@angular/material/card';
-import { ActivatedRoute, Router } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatIcon } from '@angular/material/icon';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { ConfirmDialogComponent } from '@studio-lite-lib/iqb-components';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
-import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { SelectModuleComponent } from '../../../../components/select-module/select-module.component';
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitStoresService } from '../../services/unit-stores.service';
 import { ModuleService } from '../../../../services/module.service';
-import { RequestMessageDirective } from '../../directives/request-message.directive';
-import { CanReturnUnitPipe } from '../../pipes/can-return-unit.pipe';
-import { I18nService } from '../../../../services/i18n.service';
 import { UnitCheckComponent } from '../unit-check/unit-check.component';
+import { UnitActionsComponent } from '../unit-actions/unit-actions.component';
 import { UNIT_KEY_MAX_LENGTH, UNIT_KEY_MIN_LENGTH } from '../../utils/unit-key.utils';
 
 /**
  * Everything about a unit that is not its content: name and key, the modules it is opened with, its
- * state and group, its transcript and reference, and beside them the technical validation. The
- * metadata have a tab of their own (#2200).
+ * state and group, its transcript and reference; below them what can be done with the unit as a whole,
+ * and beside them the technical validation (#2232). The metadata have a tab of their own (#2200).
  *
  * The form writes into the unit's stores rather than to the server; saving is a separate act, and
  * leaving the unit with unsaved changes is what the guard asks about.
@@ -79,17 +69,12 @@ import { UNIT_KEY_MAX_LENGTH, UNIT_KEY_MIN_LENGTH } from '../../utils/unit-key.u
     CdkTextareaAutosize,
     SelectModuleComponent,
     MatButton,
-    DatePipe,
     TranslateModule,
-    MatIcon,
-    CanReturnUnitPipe,
-    MatProgressSpinner,
-    UnitCheckComponent
+    UnitCheckComponent,
+    UnitActionsComponent
   ]
 })
-export class UnitPropertiesComponent
-  extends RequestMessageDirective
-  implements OnDestroy {
+export class UnitPropertiesComponent implements OnDestroy {
   @ViewChild('editor') editorSelector: SelectModuleComponent | undefined;
   @ViewChild('player') playerSelector: SelectModuleComponent | undefined;
   @ViewChild('schemer') schemerSelector: SelectModuleComponent | undefined;
@@ -104,7 +89,6 @@ export class UnitPropertiesComponent
   form = new FormGroup({});
   selectedStateId: string | null = null;
   selectedStateColor = '';
-  selectedUnitId = 0;
   initialTranscript = '';
   initialReference = '';
   private readonly propertiesNotLoadedState = signal(false);
@@ -114,18 +98,8 @@ export class UnitPropertiesComponent
     private fb: UntypedFormBuilder,
     public workspaceService: WorkspaceService,
     public unitStores: UnitStoresService,
-    public moduleService: ModuleService,
-    public backendService: WorkspaceBackendService,
-    public router: Router,
-    public route: ActivatedRoute,
-    public snackBar: MatSnackBar,
-    public selectUnitDialog: MatDialog,
-    public uploadReportDialog: MatDialog,
-    private confirmDialog: MatDialog,
-    public translateService: TranslateService,
-    public i18nService: I18nService
+    public moduleService: ModuleService
   ) {
-    super();
     this.unitForm = this.fb.group({
       key: this.fb.control(''),
       name: this.fb.control(''),
@@ -136,13 +110,12 @@ export class UnitPropertiesComponent
       reference: this.fb.control('')
     });
     this.unitIdChangedSubscription =
-      this.workspaceService.selectedUnit$.subscribe(id => {
-        this.readDataForUnitId(id);
+      this.workspaceService.selectedUnit$.subscribe(() => {
+        this.readDataForUnit();
       });
   }
 
-  private readDataForUnitId(unitId: number): void {
-    this.selectedUnitId = unitId;
+  private readDataForUnit(): void {
     this.propertiesNotLoadedState.set(false);
     this.readData();
   }
@@ -326,81 +299,5 @@ export class UnitPropertiesComponent
     if (propertyControl) {
       propertyControl.setValue('');
     }
-  }
-
-  async submitUnit(): Promise<void> {
-    this.confirmDialog
-      .open(ConfirmDialogComponent, {
-        width: '400px',
-        data: {
-          title: this.translateService.instant('workspace.submit-unit'),
-          content: this.translateService.instant(
-            'workspace.submit-unit-confirm'
-          ),
-          confirmButtonLabel: this.translateService.instant(
-            'workspace.submit-units'
-          ),
-          showCancel: true
-        }
-      })
-      .afterClosed()
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(async confirmed => {
-        if (!confirmed) return;
-        const routingOk = await this.selectUnit(0);
-        if (routingOk) {
-          this.backendService
-            .submitUnits(
-              this.workspaceService.selectedWorkspaceId,
-              this.workspaceService.dropBoxId!,
-              [this.selectedUnitId]
-            )
-            .subscribe(uploadStatus => {
-              this.showRequestMessage(
-                uploadStatus,
-                'workspace.unit-not-submitted',
-                'workspace.unit-submitted'
-              );
-            });
-        }
-      });
-  }
-
-  async returnSubmittedUnit(): Promise<void> {
-    this.confirmDialog
-      .open(ConfirmDialogComponent, {
-        width: '400px',
-        data: {
-          title: this.translateService.instant(
-            'workspace.return-submitted-unit'
-          ),
-          content: this.translateService.instant(
-            'workspace.return-submitted-unit-confirm'
-          ),
-          confirmButtonLabel: this.translateService.instant(
-            'workspace.return-submitted-unit'
-          ),
-          showCancel: true
-        }
-      })
-      .afterClosed()
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(async confirmed => {
-        if (!confirmed) return;
-        const routingOk = await this.selectUnit(0);
-        if (routingOk) {
-          this.backendService
-            .returnSubmittedUnits(this.workspaceService.selectedWorkspaceId, [
-              this.selectedUnitId
-            ])
-            .subscribe(uploadStatus => {
-              this.showRequestMessage(
-                uploadStatus,
-                'workspace.unit-not-returned',
-                'workspace.unit-returned'
-              );
-            });
-        }
-      });
   }
 }
