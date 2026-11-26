@@ -71,6 +71,7 @@ declare namespace Cypress {
     updateUnitPropertiesAPI(wsId: string, unitId: string, entry: DefinitionUnit, token: string):
     Chainable<Response>; // 36
     getUnitsByWsAPI(wsId: string, token: string): Chainable<Response>; // 37
+    getUnitsWithSubmissionsAPI(wsId: string, token: string): Chainable<Response>;
     getUserWorkspaceAPI(wsId: string, userId: string, token: string): Chainable<Response>;
     moveToAPI(wsOriginId:string, wsDestinyId: string, unitId:string, token:string):Chainable<Response>; // 38
     renameWsAPI(wsId: string, wsName: string, token: string): Chainable<Response>; // 39

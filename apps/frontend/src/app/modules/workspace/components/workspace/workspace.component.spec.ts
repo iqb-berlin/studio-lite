@@ -66,6 +66,7 @@ class MockWorkspaceService {
   setWorkspaceGroupStates = jest.fn();
   loadRichNoteTags = jest.fn();
   setSettingsLoaded = jest.fn();
+  setDropBox = jest.fn();
   hiddenRoutes = signal<string[]>([]);
 }
 

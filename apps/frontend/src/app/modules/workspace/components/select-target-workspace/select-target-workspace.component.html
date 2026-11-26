@@ -1,0 +1,41 @@
+<h1 mat-dialog-title>{{ data.title }}</h1>
+<mat-dialog-content>
+  <!-- the dialog's content sets its own display: the column needs an element of its own -->
+  <div class="fx-column-start-stretch">
+    <mat-form-field class="target-field">
+      <mat-label>{{ 'workspace.target-workspace' | translate }}</mat-label>
+      <mat-select [value]="targetWorkspaceId()"
+                  (selectionChange)="targetWorkspaceId.set($event.value)"
+                  data-cy="select-target-workspace">
+        @for (workspace of data.workspaces; track workspace.id) {
+          <mat-option [value]="workspace.id">{{ workspace.groupName }}: {{ workspace.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    @if (data.commentsOption) {
+      <mat-checkbox [checked]="copyComments()"
+                    (change)="copyComments.set($event.checked)"
+                    data-cy="select-target-workspace-comments">
+        {{ 'unit-actions.copy-comments' | translate }}
+      </mat-checkbox>
+      @if (copyComments()) {
+        <p class="hint">{{ 'workspace.copy-votes-warning' | translate }}</p>
+      }
+    }
+    @for (hint of data.hints; track hint) {
+      <p class="hint" data-cy="select-target-workspace-hint">{{ hint }}</p>
+    }
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-raised-button
+          color="primary"
+          [disabled]="!targetWorkspaceId()"
+          [mat-dialog-close]="result()"
+          data-cy="select-target-workspace-confirm">
+    {{ data.confirmLabel }}
+  </button>
+  <button mat-raised-button [mat-dialog-close]="undefined">
+    {{ 'cancel' | translate }}
+  </button>
+</mat-dialog-actions>

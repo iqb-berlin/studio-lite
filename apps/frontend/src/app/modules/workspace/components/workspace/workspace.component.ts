@@ -138,7 +138,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   private initWorkspace(workspace: UserWorkspaceFullDto): void {
     this.workspaceService.selectedWorkspaceName = `${workspace.groupName}: ${workspace.name}`;
     this.workspaceService.groupId = workspace.groupId || 0;
-    this.workspaceService.dropBoxId = workspace.dropBoxId;
+    this.workspaceService.setDropBox(workspace.dropBoxId, workspace.dropBoxName);
     this.appService.appConfig.setPageTitle(this.workspaceService.selectedWorkspaceName);
     if (workspace.settings) {
       // The unit list asks for the groups itself, and its answer may be here already. Replaced by

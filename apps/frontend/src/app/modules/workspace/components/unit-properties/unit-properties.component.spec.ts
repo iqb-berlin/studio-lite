@@ -9,7 +9,6 @@ import {
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { By } from '@angular/platform-browser';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { BehaviorSubject, of } from 'rxjs';
 import { createMock } from '@golevelup/ts-jest';
 import { UnitPropertiesDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
@@ -17,13 +16,13 @@ import { UnitPropertiesStore } from '../../classes/unit-properties-store';
 import { ModuleService } from '../../../../services/module.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
-import { I18nService } from '../../../../services/i18n.service';
 import { VeronaModuleClass } from '../../../../models/verona-module.class';
 import { UnitPropertiesComponent } from './unit-properties.component';
 import { environment } from '../../../../../environments/environment';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
 import { SelectModuleComponent } from '../../../../components/select-module/select-module.component';
 import { UnitCheckComponent } from '../unit-check/unit-check.component';
+import { UnitActionsComponent } from '../unit-actions/unit-actions.component';
 
 describe('UnitPropertiesComponent', () => {
   let component: UnitPropertiesComponent;
@@ -47,11 +46,13 @@ describe('UnitPropertiesComponent', () => {
   @Component({ selector: 'studio-lite-unit-check', template: '', standalone: true })
   class MockUnitCheckComponent {}
 
+  @Component({ selector: 'studio-lite-unit-actions', template: '', standalone: true })
+  class MockUnitActionsComponent {}
+
   beforeEach(async () => {
     const workspaceServiceStub = {
       selectedUnit$: new BehaviorSubject<number>(0),
       selectedWorkspaceId: 1,
-      dropBoxId: 1,
       workspaceSettings: {
         defaultEditor: '',
         defaultPlayer: '',
@@ -88,7 +89,6 @@ describe('UnitPropertiesComponent', () => {
         { provide: WorkspaceService, useValue: workspaceServiceStub },
         { provide: ModuleService, useValue: moduleServiceStub },
         { provide: WorkspaceBackendService, useValue: backendServiceStub },
-        { provide: I18nService, useValue: {} },
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl
@@ -96,8 +96,14 @@ describe('UnitPropertiesComponent', () => {
       ]
     })
       .overrideComponent(UnitPropertiesComponent, {
-        remove: { imports: [NewGroupButtonComponent, SelectModuleComponent, UnitCheckComponent] },
-        add: { imports: [MockNewGroupButtonComponent, MockSelectModuleComponent, MockUnitCheckComponent] }
+        remove: {
+          imports: [NewGroupButtonComponent, SelectModuleComponent, UnitCheckComponent, UnitActionsComponent]
+        },
+        add: {
+          imports: [
+            MockNewGroupButtonComponent, MockSelectModuleComponent, MockUnitCheckComponent, MockUnitActionsComponent
+          ]
+        }
       })
       .compileComponents();
 
@@ -106,8 +112,9 @@ describe('UnitPropertiesComponent', () => {
     fixture.detectChanges();
   });
 
-  it('shows the unit check (#2135)', () => {
+  it('shows the unit check (#2135) and what can be done with the unit (#2232)', () => {
     expect(fixture.debugElement.query(By.directive(MockUnitCheckComponent))).toBeTruthy();
+    expect(fixture.debugElement.query(By.directive(MockUnitActionsComponent))).toBeTruthy();
   });
 
   it('clears deprecated properties when requested', () => {
@@ -271,39 +278,5 @@ describe('UnitPropertiesComponent', () => {
 
       expect([chosen, component.selectedStateColor]).toEqual(['red', '']);
     }));
-
-    // Leaving the unit first lets the guard ask about unsaved changes; staying, nothing is sent.
-    // Esc, a click beside the dialog and navigation close it with undefined (#1844).
-    // Not fakeAsync: the view awaits the routing natively, which fakeAsync cannot flush. The view
-    // awaits the same promise as the test, and first, so it has gone on once the test goes on.
-    type UnitAction = 'submitUnit' | 'returnSubmittedUnit';
-    const sentBy: Record<UnitAction, ['submitUnits' | 'returnSubmittedUnits', unknown[]]> = {
-      submitUnit: ['submitUnits', [1, 1, [5]]],
-      returnSubmittedUnit: ['returnSubmittedUnits', [1, [5]]]
-    };
-    it.each<[UnitAction, boolean | undefined, boolean, boolean]>([
-      ['submitUnit', true, true, true],
-      ['submitUnit', true, false, false],
-      ['submitUnit', undefined, true, false],
-      ['returnSubmittedUnit', true, true, true],
-      ['returnSubmittedUnit', true, false, false],
-      ['returnSubmittedUnit', undefined, true, false]
-    ])('%s: confirmed %s, unit left %s → sent %s', async (action, confirmed, left, sent) => {
-      component.workspaceService.selectedUnit$.next(5);
-      jest.spyOn(TestBed.inject(MatDialog), 'open')
-        .mockReturnValue(createMock<MatDialogRef<unknown>>({ afterClosed: () => of(confirmed) }));
-      const leaving = Promise.resolve(left);
-      const selectUnit = jest.spyOn(component, 'selectUnit').mockReturnValue(leaving);
-      jest.spyOn(component.snackBar, 'open').mockImplementation();
-      const [method, args] = sentBy[action];
-      const send = jest.fn().mockReturnValue(of(false));
-      component.backendService[method] = send;
-
-      component[action]();
-      await leaving;
-
-      expect(selectUnit.mock.calls).toEqual(confirmed ? [[0]] : []);
-      expect(send.mock.calls).toEqual(sent ? [args] : []);
-    });
   });
 });

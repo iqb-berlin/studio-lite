@@ -19,6 +19,10 @@ export class UnitInListDto {
   @ApiProperty()
   sourceWorkspaceId?: number;
 
+  /** The name of the workspace the unit was submitted from (#2232). */
+  @ApiProperty()
+  sourceWorkspaceName?: string;
+
   @ApiProperty()
   targetWorkspaceId?: number;
 

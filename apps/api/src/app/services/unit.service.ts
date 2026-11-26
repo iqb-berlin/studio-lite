@@ -29,6 +29,7 @@ import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
 import { UnitNotFoundException } from '../exceptions/unit-not-found.exception';
 import { UnitKeyExistsException } from '../exceptions/unit-key-exists.exception';
 import { assertFitsColumn } from '../utils/column-length';
+import { shownSubmission } from '../utils/shown-submission';
 
 /** The columns of a unit's properties, its metadata aside (#2200). */
 const PROPERTY_COLUMNS = {
@@ -223,25 +224,50 @@ export class UnitService {
       }));
     }
     if (targetWorkspaceId) {
-      units = await Promise.all(units.map(async unit => {
-        const history = await this.unitDropBoxHistoryRepository.findOne({
-          where: [
-            { unitId: unit.id, targetWorkspaceId: targetWorkspaceId },
-            { unitId: unit.id, sourceWorkspaceId: targetWorkspaceId }
-          ]
-        });
+      const unitIds = units.map(unit => unit.id);
+      const submissions = unitIds.length ? await this.unitDropBoxHistoryRepository.find({
+        where: [
+          { unitId: In(unitIds), targetWorkspaceId: targetWorkspaceId },
+          { unitId: In(unitIds), sourceWorkspaceId: targetWorkspaceId }
+        ]
+      }) : [];
+      const submissionsOf = new Map<number, UnitDropBoxHistory[]>();
+      submissions.forEach(submission => submissionsOf.set(
+        submission.unitId,
+        [...(submissionsOf.get(submission.unitId) ?? []), submission]
+      ));
+      units = units.map(unit => {
+        const history = shownSubmission(submissionsOf.get(unit.id) ?? [], targetWorkspaceId);
         return {
           ...unit,
           targetWorkspaceId: history?.targetWorkspaceId || null,
           sourceWorkspaceId: history?.sourceWorkspaceId || null,
           returned: history?.returned || false
         };
-      }));
+      });
+      units = await this.withSourceWorkspaceNames(units);
     }
     if (filterTargetWorkspaceId) {
       units = units.filter(unit => unit.targetWorkspaceId === workspaceId);
     }
     return units;
+  }
+
+  /**
+   * The units with the name of the workspace they were submitted from, which those working in the drop box
+   * need not be able to enter (#2232). Asked once for all of them.
+   */
+  private async withSourceWorkspaceNames(units: UnitInListDto[]): Promise<UnitInListDto[]> {
+    const sourceIds = [...new Set(units.map(unit => unit.sourceWorkspaceId).filter(id => !!id))];
+    if (!sourceIds.length) return units;
+    const sources = await this.workspaceRepository.find({
+      where: { id: In(sourceIds) },
+      select: { id: true, name: true }
+    });
+    const names = new Map(sources.map(source => [source.id, source.name]));
+    return units.map(unit => (unit.sourceWorkspaceId && names.has(unit.sourceWorkspaceId) ?
+      { ...unit, sourceWorkspaceName: names.get(unit.sourceWorkspaceId) } :
+      unit));
   }
 
   private async getLastChangedMetadataUser(unit: Unit, newKey: string, user: User): Promise<string> {

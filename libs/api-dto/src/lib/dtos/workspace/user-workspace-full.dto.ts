@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { WorkspaceSettingsDto } from './workspace-settings.dto';
 
 export class UserWorkspaceFullDto {
@@ -17,8 +17,13 @@ export class UserWorkspaceFullDto {
   @ApiProperty()
   userAccessLevel!: number;
 
+  /** The workspace units from here are submitted to; null where there is none the server accepts (#1805). */
   @ApiProperty()
-  dropBoxId!: number;
+  dropBoxId!: number | null;
+
+  /** Its name, shown beside the button that submits to it (#2232). */
+  @ApiPropertyOptional({ example: 'Abgabe Mathematik' })
+  dropBoxName?: string;
 
   @ApiProperty()
   settings?: WorkspaceSettingsDto;

@@ -1,7 +1,7 @@
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import {
-  checkUnit, DefinitionContent, definitionSummary, UnitCheckInput, UnitCheckSection, withDefinitionSize,
-  withKeyFindings
+  checkUnit, DefinitionContent, definitionSummary, LastChangeLines, UnitCheckInput, UnitCheckSection,
+  withDefinitionSize, withKeyFindings, withLastChanges
 } from './unit-check.utils';
 
 const scheme = (variableCodings: unknown[]): string => JSON.stringify({ version: '3.0', variableCodings });
@@ -603,5 +603,40 @@ describe('withDefinitionSize', () => {
 
     expect(withDefinitionSize(sections, 0)).toBe(sections);
     expect(withDefinitionSize(sections, undefined)).toBe(sections);
+  });
+});
+
+describe('withLastChanges', () => {
+  const lines: LastChangeLines = {
+    metadata: { key: 'unit-check.last-changed-metadata', params: { date: '1', user: 'A' } },
+    definition: { key: 'unit-check.last-changed-definition', params: { date: '2', user: 'B' } },
+    scheme: { key: 'unit-check.last-changed-scheme', params: { date: '3', user: 'C' } }
+  };
+
+  // each change stands in the section of the tab where its part is edited, and leaves the status alone (#2232)
+  it('shows each change under the tab of its part', () => {
+    const sections = withLastChanges(checkUnit(okInput()), lines);
+
+    expect(section(sections, 'properties')?.lastChanges).toEqual([lines.metadata]);
+    expect(section(sections, 'editor')?.lastChanges).toEqual([lines.definition]);
+    expect(section(sections, 'schemer')).toEqual(expect.objectContaining({
+      lastChanges: [lines.scheme], status: 'ok'
+    }));
+  });
+
+  it('shows the changes of a hidden editor and coding under the properties', () => {
+    const input = okInput();
+    input.hiddenRoutes = ['editor', 'schemer'];
+
+    expect(section(withLastChanges(checkUnit(input), lines), 'properties')?.lastChanges)
+      .toEqual([lines.metadata, lines.definition, lines.scheme]);
+  });
+
+  it('shows no line for a part never changed', () => {
+    const sections = withLastChanges(checkUnit(okInput()), { scheme: lines.scheme });
+
+    expect(section(sections, 'properties')?.lastChanges).toBeUndefined();
+    expect(section(sections, 'editor')?.lastChanges).toBeUndefined();
+    expect(section(sections, 'schemer')?.lastChanges).toEqual([lines.scheme]);
   });
 });

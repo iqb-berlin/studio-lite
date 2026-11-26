@@ -1,0 +1,83 @@
+@if (shown()) {
+  <mat-card data-cy="unit-actions">
+    <mat-card-header class="unit-actions-header">
+      <mat-card-title>{{ 'unit-actions.title' | translate }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <!-- disabledInteractive: a greyed-out button still shows its tooltip, on hover and on focus -->
+      <div class="fx-row-start-center fx-gap-20 action-row">
+        @if (canSubmit()) {
+          <button mat-mini-fab
+                  type="button"
+                  color="primary"
+                  disabledInteractive
+                  [matTooltip]="'workspace.submit-unit' | translate"
+                  [attr.aria-label]="'workspace.submit-unit' | translate"
+                  [disabled]="!unit() || !workspaceService.dropBox()"
+                  (click)="submitUnit()"
+                  data-cy="unit-actions-submit">
+            <mat-icon>assignment_turned_in</mat-icon>
+          </button>
+          <button mat-mini-fab
+                  type="button"
+                  color="primary"
+                  disabledInteractive
+                  [matTooltip]="'workspace.return-submitted-unit' | translate"
+                  [attr.aria-label]="'workspace.return-submitted-unit' | translate"
+                  [disabled]="!returnable()"
+                  (click)="returnUnit()"
+                  data-cy="unit-actions-return">
+            <mat-icon>assignment_return</mat-icon>
+          </button>
+        }
+        @if (canCopy()) {
+          <button mat-mini-fab
+                  type="button"
+                  color="primary"
+                  disabledInteractive
+                  [matTooltip]="'unit-actions.copy-tooltip' | translate"
+                  [attr.aria-label]="'unit-actions.copy-tooltip' | translate"
+                  [disabled]="!unit()"
+                  (click)="copyUnit()"
+                  data-cy="unit-actions-copy">
+            <mat-icon>content_copy</mat-icon>
+          </button>
+        }
+        @if (canMove()) {
+          <button mat-mini-fab
+                  type="button"
+                  color="primary"
+                  disabledInteractive
+                  [matTooltip]="'unit-actions.move-tooltip' | translate"
+                  [attr.aria-label]="'unit-actions.move-tooltip' | translate"
+                  [disabled]="!unit()"
+                  (click)="moveUnit()"
+                  data-cy="unit-actions-move">
+            <mat-icon>swap_horiz</mat-icon>
+          </button>
+        }
+        @if (canDelete()) {
+          <button mat-mini-fab
+                  type="button"
+                  color="warn"
+                  disabledInteractive
+                  [matTooltip]="'unit-actions.delete-title' | translate"
+                  [attr.aria-label]="'unit-actions.delete-title' | translate"
+                  [disabled]="!unit()"
+                  (click)="deleteUnit()"
+                  data-cy="unit-actions-delete">
+            <mat-icon>delete</mat-icon>
+          </button>
+        }
+      </div>
+      @if (canSubmit()) {
+        <div class="hint info">
+          <p class="info-line" data-cy="unit-actions-drop-box">{{ dropBoxLine().key | translate: dropBoxLine().params }}</p>
+          @if (sourceLine(); as source) {
+            <p class="info-line" data-cy="unit-actions-source">{{ source.key | translate: source.params }}</p>
+          }
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+}

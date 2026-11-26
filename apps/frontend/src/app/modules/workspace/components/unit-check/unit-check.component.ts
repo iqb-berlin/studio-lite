@@ -1,7 +1,8 @@
 import {
-  Component, computed, OnDestroy, OnInit, signal
+  Component, computed, inject, OnDestroy, OnInit, signal
 } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { DatePipe } from '@angular/common';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
   combineLatest, distinctUntilChanged, filter, forkJoin, from, map, Observable, of, pairwise, startWith, Subject,
   switchMap, takeUntil
@@ -11,7 +12,7 @@ import {
 } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { UnitDefinitionSummaryDto } from '@studio-lite-lib/api-dto';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { sameDependencyLists, sameVariableLists } from '@studio-lite/shared-code';
@@ -21,9 +22,11 @@ import { WorkspaceBackendService } from '../../services/workspace-backend.servic
 import { ModuleService } from '../../../../services/module.service';
 import { BackendService as CommentsBackendService } from '../../../comments/services/backend.service';
 import {
-  checkUnit, DefinitionContent, definitionSummary, isTabShown, ModuleType, UnitCheckFinding, UnitCheckSection,
-  withDefinitionSize, withKeyFindings
+  checkUnit, DefinitionContent, definitionSummary, isTabShown, LastChangeLines, ModuleType, UnitCheckFinding,
+  UnitCheckSection, withDefinitionSize, withKeyFindings, withLastChanges
 } from '../../utils/unit-check.utils';
+import { LastChange } from '../../models/unit-last-changes.interface';
+import { I18nService } from '../../../../services/i18n.service';
 import { byteLength } from '../../utils/definition-size.utils';
 import { checkUnitKey } from '../../utils/unit-key.utils';
 import { InstalledDependencies } from '../../utils/missing-dependencies.utils';
@@ -170,9 +173,34 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
     return data ? byteLength(data.definition) : this.sources()?.definitionSummary?.size;
   });
 
+  private readonly i18nService = inject(I18nService);
+  // as a signal: the language file may arrive after the first check
+  private readonly unknownUser = toSignal(inject(TranslateService).stream('workspace.unknown'), { initialValue: '' });
+
+  // who changed which part when, as the properties showed it before; renewed as soon as a part is saved (#2232)
+  private readonly lastChangeLines = computed((): LastChangeLines => {
+    const changes = this.workspaceService.lastChanges();
+    const datePipe = new DatePipe(this.i18nService.fullLocale);
+    const line = (key: string, change: LastChange | undefined): UnitCheckFinding | undefined => change && {
+      key,
+      params: {
+        date: datePipe.transform(change.at, this.i18nService.dateTimeFormat) ?? '',
+        user: change.user || this.unknownUser()
+      }
+    };
+    return {
+      metadata: line('unit-check.last-changed-metadata', changes.metadata),
+      definition: line('unit-check.last-changed-definition', changes.definition),
+      scheme: line('unit-check.last-changed-scheme', changes.scheme)
+    };
+  });
+
   readonly sections = computed((): UnitCheckSection[] | undefined => {
     const checked = this.checked();
-    return checked && withDefinitionSize(withKeyFindings(checked, this.keyFindings()), this.definitionSize());
+    return checked && withLastChanges(
+      withDefinitionSize(withKeyFindings(checked, this.keyFindings()), this.definitionSize()),
+      this.lastChangeLines()
+    );
   });
 
   // Conflicts stand under the properties only where the coding is hidden; every way to resolve them

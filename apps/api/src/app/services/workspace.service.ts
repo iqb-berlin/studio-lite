@@ -278,11 +278,15 @@ export class WorkspaceService {
       const workspaceGroup = await this.workspaceGroupRepository.findOne({
         where: { id: workspace.groupId }
       });
+      // Only a drop box submissions are accepted for: a deleted workspace stays set as the drop box of
+      // those that submitted to it, and the button to submit was then offered and refused (#2232)
+      const dropBox = await this.dropBoxOf(workspace, workspace.dropBoxId);
       return <UserWorkspaceFullDto>{
         id: workspace.id,
         name: workspace.name,
         groupId: workspace.groupId,
-        dropBoxId: workspace.dropBoxId,
+        dropBoxId: dropBox?.id ?? null,
+        dropBoxName: dropBox?.name,
         groupName: workspaceGroup.name,
         userAccessLevel: userAccessLevel,
         // A rename onto an existing group left its name twice in the settings until #1989
@@ -507,11 +511,17 @@ export class WorkspaceService {
 
   /** A drop box is another workspace of the same group (#1805): asked when it is set and when it is used. */
   private async isDropBoxFor(workspace: Workspace, dropBoxId: number): Promise<boolean> {
+    return !!await this.dropBoxOf(workspace, dropBoxId);
+  }
+
+  /** The workspace `dropBoxId` names, with its name, if it is a drop box for the workspace; else null. */
+  private async dropBoxOf(workspace: Workspace, dropBoxId: number | null): Promise<Workspace | null> {
+    if (!dropBoxId) return null;
     const dropBox = await this.workspacesRepository.findOne({
       where: { id: dropBoxId },
-      select: { id: true, groupId: true }
+      select: { id: true, groupId: true, name: true }
     });
-    return !!dropBox && dropBox.id !== workspace.id && dropBox.groupId === workspace.groupId;
+    return dropBox && dropBox.id !== workspace.id && dropBox.groupId === workspace.groupId ? dropBox : null;
   }
 
   /**

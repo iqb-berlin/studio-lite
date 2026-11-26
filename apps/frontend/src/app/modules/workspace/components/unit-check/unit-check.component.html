@@ -30,6 +30,9 @@
           @if (section.definitionSize; as size) {
             <p class="definition-size" data-cy="unit-check-definition-size">{{ size.key | translate: size.params }}</p>
           }
+          @for (change of section.lastChanges; track change.key) {
+            <p class="last-change" data-cy="unit-check-last-change">{{ change.key | translate: change.params }}</p>
+          }
           @if (section.findings.length) {
             <ul class="findings">
               @for (finding of section.findings; track $index) {

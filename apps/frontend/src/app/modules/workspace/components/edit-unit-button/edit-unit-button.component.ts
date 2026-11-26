@@ -331,10 +331,11 @@ export class EditUnitButtonComponent extends RequestMessageDirective {
 
   async submitUnits(): Promise<void> {
     this.submitUnitsDialog().then((units: number[] | boolean) => {
-      if (typeof units !== 'boolean' && units.length && this.workspaceService.dropBoxId) {
+      const dropBox = this.workspaceService.dropBox();
+      if (typeof units !== 'boolean' && units.length && dropBox) {
         this.backendService.submitUnits(
           this.workspaceService.selectedWorkspaceId,
-          this.workspaceService.dropBoxId,
+          dropBox.id,
           units
         ).subscribe(
           uploadStatus => {
