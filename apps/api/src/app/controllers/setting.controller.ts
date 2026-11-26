@@ -3,11 +3,11 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiHeader, ApiNotAcceptableResponse, ApiOkResponse, ApiQuery, ApiTags,
-  ApiForbiddenResponse
+  ApiForbiddenResponse, ApiBadRequestResponse
 } from '@nestjs/swagger';
 import {
   MissingsProfilesDto, ConfigDto, AppLogoDto, EffectsDto, UnitExportConfigDto, ProfilesRegistryDto,
-  EmailTemplateDto, UnitRichNoteTagDto
+  EmailTemplateDto, UnitRichNoteTagDto, UnitValidationDto
 } from '@studio-lite-lib/api-dto';
 import { SettingService } from '../services/setting.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -15,11 +15,11 @@ import { IsAdminGuard } from '../guards/is-admin.guard';
 import { AppVersionGuard } from '../guards/app-version.guard';
 
 /**
- * `settings` -- the installation-wide settings: the config, the logo, the effects, the export
- * configuration, the profile registry, the mail template, the missings profiles, the rich-note
- * tags. Each is a GET and a PATCH. The tags are read in two forms: `unit-rich-note-tags` answers
- * the tags they resolve to for a group, `unit-rich-note-tags-config` the stored configuration
- * itself, which is also what the PATCH writes.
+ * `settings` -- the installation-wide settings: the config, the logo, the effects, the unit
+ * validation, the export configuration, the profile registry, the mail template, the missings
+ * profiles, the rich-note tags. Each is a GET and a PATCH. The tags are read in two forms:
+ * `unit-rich-note-tags` answers the tags they resolve to for a group, `unit-rich-note-tags-config`
+ * the stored configuration itself, which is also what the PATCH writes.
  *
  * Every PATCH is an administrator's, the GETs are not all. `config`, `app-logo` and `effects` have
  * to answer before anyone has logged in and therefore carry no token guard -- `config` is guarded
@@ -90,6 +90,27 @@ export class SettingController {
   @ApiTags('settings')
   async patchEffects(@Body() effects: EffectsDto) {
     return this.settingService.patchEffects(effects);
+  }
+
+  // read by every signed-in user: the technical validation of a unit in the workspace asks for it (#2229)
+  @Get('unit-validation')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Unit validation settings retrieved successfully.', type: UnitValidationDto })
+  @ApiTags('settings')
+  async findUnitValidation(): Promise<UnitValidationDto> {
+    return this.settingService.findUnitValidation();
+  }
+
+  @Patch('unit-validation')
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiOkResponse({ description: 'Unit validation settings updated successfully.' })
+  @ApiBadRequestResponse({ description: 'Size levels that are no whole numbers above 0 or do not rise.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
+  @ApiBearerAuth()
+  @ApiTags('settings')
+  async patchUnitValidation(@Body() unitValidation: UnitValidationDto) {
+    return this.settingService.patchUnitValidation(unitValidation);
   }
 
   @Get('unit-export-config')

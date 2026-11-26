@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import {
   ConfigDto, AppLogoDto, EffectsDto, UnitExportConfigDto, MissingsProfilesDto,
-  ProfilesRegistryDto, EmailTemplateDto, UnitRichNoteTagDto, MetadataVocabularyDto
+  ProfilesRegistryDto, EmailTemplateDto, UnitRichNoteTagDto, MetadataVocabularyDto, UnitValidationDto
 } from '@studio-lite-lib/api-dto';
 import Setting from '../entities/setting.entity';
 import WorkspaceGroup from '../entities/workspace-group.entity';
@@ -163,6 +163,37 @@ describe('SettingService', () => {
       await service.patchEffects(Object.assign(new EffectsDto(), { snowfall: true, data: 'logo' }));
       expect(settingsRepository.save).toHaveBeenCalledWith(setting);
       expect(JSON.parse(setting.content)).toEqual({ snowfall: true });
+    });
+  });
+
+  describe('findUnitValidation', () => {
+    it('should answer the default size levels while none are stored (#2229)', async () => {
+      settingsRepository.findOne.mockResolvedValue(null);
+      expect(await service.findUnitValidation())
+        .toEqual({ sizeLevels: { mediumFromKb: 200, largeFromKb: 1024, veryLargeFromKb: 5120 } });
+    });
+  });
+
+  describe('patchUnitValidation', () => {
+    const sizeLevels = { mediumFromKb: 100, largeFromKb: 500, veryLargeFromKb: 2000 };
+
+    it('should store the size levels and nothing else a request carries (#2229)', async () => {
+      const setting = { key: 'unit-validation', content: '{}' } as Setting;
+      settingsRepository.findOne.mockResolvedValue(setting);
+      await service.patchUnitValidation(
+        { sizeLevels: { ...sizeLevels, smallFromKb: 1 }, logo: 'x' } as unknown as UnitValidationDto
+      );
+      expect(settingsRepository.save).toHaveBeenCalledWith(setting);
+      expect(JSON.parse(setting.content)).toEqual({ sizeLevels });
+    });
+
+    // stored, they would name the size of every unit by a level nobody set
+    it('should refuse size levels that do not rise, and store nothing (#2229)', async () => {
+      await expect(service.patchUnitValidation({ sizeLevels: { ...sizeLevels, largeFromKb: 100 } }))
+        .rejects.toBeInstanceOf(BadRequestException);
+      await expect(service.patchUnitValidation({} as UnitValidationDto))
+        .rejects.toBeInstanceOf(BadRequestException);
+      expect(settingsRepository.save).not.toHaveBeenCalled();
     });
   });
 

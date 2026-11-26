@@ -336,4 +336,43 @@ describe('Admin settings API tests', () => {
         });
     });
   });
+
+  // where the levels of a unit's size begin, read in the workspace and set by an administrator (#2229)
+  describe('108. GET and PATCH /api/settings/unit-validation', () => {
+    const adminToken = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+    const defaults = { sizeLevels: { mediumFromKb: 200, largeFromKb: 1024, veryLargeFromKb: 5120 } };
+    const sizeLevels = { mediumFromKb: 100, largeFromKb: 500, veryLargeFromKb: 2000 };
+
+    // the settings outlast the reset before each spec: the next one starts with the defaults
+    after(() => {
+      cy.patchSettingUnitValidationAPI(defaults, adminToken()).its('status').should('equal', 200);
+    });
+
+    it('200 positive test: should store the size levels an administrator sets, for every user to read', () => {
+      cy.patchSettingUnitValidationAPI({ sizeLevels }, adminToken()).its('status').should('equal', 200);
+      cy.getSettingUnitValidationAPI(Cypress.expose(`token_${userGroupAdmin.username}`))
+        .then(resp => {
+          expect(resp.status).to.equal(200);
+          expect(resp.body).to.deep.equal({ sizeLevels });
+        });
+    });
+
+    it('400 negative test: should refuse size levels that do not rise, and keep the stored ones', () => {
+      cy.patchSettingUnitValidationAPI(
+        { sizeLevels: { ...sizeLevels, veryLargeFromKb: 400 } },
+        adminToken()
+      ).its('status').should('equal', 400);
+      cy.getSettingUnitValidationAPI(adminToken()).its('body').should('deep.equal', { sizeLevels });
+    });
+
+    it('403 negative test: should deny size level updates to a user without admin privileges', () => {
+      cy.patchSettingUnitValidationAPI(defaults, Cypress.expose(`token_${userGroupAdmin.username}`))
+        .its('status').should('equal', 403);
+    });
+
+    it('401 negative test: should deny reading and updating the size levels without a valid token', () => {
+      cy.getSettingUnitValidationAPI(noId).its('status').should('equal', 401);
+      cy.patchSettingUnitValidationAPI(defaults, noId).its('status').should('equal', 401);
+    });
+  });
 });

@@ -11,6 +11,7 @@ import { UnitExportConfigComponent } from '../unit-export-config/unit-export-con
 import { EmailTemplateComponent } from '../email-template/email-template.component';
 import { UnitRichNoteTagsConfigComponent } from '../unit-rich-note-tags-config/unit-rich-note-tags-config.component';
 import { EffectsConfigComponent } from '../effects-config/effects-config.component';
+import { UnitValidationConfigComponent } from '../unit-validation-config/unit-validation-config.component';
 
 @Component({
   selector: 'studio-lite-settings',
@@ -29,7 +30,8 @@ import { EffectsConfigComponent } from '../effects-config/effects-config.compone
     MatCard,
     MatCardContent,
     EmailTemplateComponent,
-    UnitRichNoteTagsConfigComponent
+    UnitRichNoteTagsConfigComponent,
+    UnitValidationConfigComponent
   ]
 })
 export class SettingsComponent {}

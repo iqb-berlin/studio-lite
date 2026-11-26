@@ -1,23 +1,19 @@
+import { UnitSizeLevels } from '@studio-lite/shared-code';
+
 /** How large a unit's definition is, as the unit check names it (#2197). */
 export type DefinitionSizeLevel = 'small' | 'medium' | 'large' | 'very-large';
 
 const KB = 1024;
-const MB = 1024 * KB;
 
 /**
- * The upper bound of each level but the last, in bytes. No distribution of the units in use was at
- * hand; 26 aspect units were measured instead. An element takes 1.1-1.6 KB and a page next to
- * nothing -- nine pages of 59 elements came to 73 KB --, while what makes a unit large is the media
- * it embeds: 106-199 KB with a few images, 7 MB with many, 16 MB with a video (#2197).
+ * The level of a definition of that many bytes, by where the levels begin: as an administrator set them
+ * in the settings, or the defaults (#2229). A size right at a bound belongs to the level above.
  */
-const UPPER_BOUNDS: [DefinitionSizeLevel, number][] = [
-  ['small', 200 * KB],
-  ['medium', MB],
-  ['large', 5 * MB]
-];
-
-export function definitionSizeLevel(bytes: number): DefinitionSizeLevel {
-  return UPPER_BOUNDS.find(([, bound]) => bytes < bound)?.[0] ?? 'very-large';
+export function definitionSizeLevel(bytes: number, levels: UnitSizeLevels): DefinitionSizeLevel {
+  if (bytes >= levels.veryLargeFromKb * KB) return 'very-large';
+  if (bytes >= levels.largeFromKb * KB) return 'large';
+  if (bytes >= levels.mediumFromKb * KB) return 'medium';
+  return 'small';
 }
 
 const encoder = new TextEncoder();

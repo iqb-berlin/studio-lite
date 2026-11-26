@@ -402,6 +402,7 @@
     "texts": "Texts",
     "logo-and-colors": "Logo and colours",
     "effects": "Animations and effects",
+    "unit-validation": "Unit validation",
     "unit-export-params": "Parameters for the unit export",
     "missings-profiles": "Coding: missings profiles",
     "profiles-registry": "Profile registry",
@@ -439,6 +440,17 @@
     "saved": "Animations and effects saved",
     "not-saved": "Could not save the animations and effects",
     "not-loaded": "The animations and effects could not be loaded."
+  },
+  "unit-validation": {
+    "size-levels": "Size of the units",
+    "medium-from": "Medium from (KB)",
+    "large-from": "Large from (KB)",
+    "very-large-from": "Very large from (KB)",
+    "small-below": "Below this, a unit counts as small.",
+    "size-levels-invalid": "Each limit must be a whole number above 0 and greater than the one before.",
+    "saved": "Unit validation saved",
+    "not-saved": "Could not save the unit validation",
+    "not-loaded": "The settings of the unit validation could not be loaded."
   },
   "email-template": {
     "template-saved": "Email template saved",
@@ -675,7 +687,8 @@
       "small": "Size of the unit: {{size}} (small)",
       "medium": "Size of the unit: {{size}} (medium)",
       "large": "Size of the unit: {{size}} (large)",
-      "very-large": "Size of the unit: {{size}} (very large)"
+      "very-large": "Size of the unit: {{size}} (very large)",
+      "no-level": "Size of the unit: {{size}}"
     },
     "last-changed-metadata": "Properties last changed: {{date}} – {{user}}",
     "last-changed-definition": "Definition last changed: {{date}} – {{user}}",

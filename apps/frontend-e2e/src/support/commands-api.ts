@@ -2491,6 +2491,32 @@ Cypress.Commands.add('patchSettingEffectsAPI', (effects: { snowfall: boolean }, 
   });
 });
 
+// what an administrator sets for the technical validation of units, so far the size levels (#2229)
+Cypress.Commands.add('getSettingUnitValidationAPI', (token: string) => {
+  cy.request({
+    method: 'GET',
+    url: '/api/settings/unit-validation',
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization: `bearer ${token}`
+    },
+    failOnStatusCode: false
+  });
+});
+
+Cypress.Commands.add('patchSettingUnitValidationAPI', (validation: object, token: string) => {
+  cy.request({
+    method: 'PATCH',
+    url: '/api/settings/unit-validation',
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization: `bearer ${token}`
+    },
+    body: validation,
+    failOnStatusCode: false
+  });
+});
+
 // 102
 Cypress.Commands.add('getSettingLogoAPI', (token:string) => {
   const authorization = `bearer ${token}`;

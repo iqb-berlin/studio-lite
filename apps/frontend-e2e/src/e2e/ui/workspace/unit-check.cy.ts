@@ -57,6 +57,11 @@ describe('Workspace Unit Check', () => {
   });
 
   after(() => {
+    // the settings outlast the reset before each spec: the next one starts with the default size levels (#2229)
+    cy.patchSettingUnitValidationAPI(
+      { sizeLevels: { mediumFromKb: 200, largeFromKb: 1024, veryLargeFromKb: 5120 } },
+      base.token
+    ).its('status').should('equal', 200);
     deleteTestBaseAPI();
   });
 
@@ -148,6 +153,25 @@ describe('Workspace Unit Check', () => {
 
     cy.then(() => cy.get('[data-cy="unit-check-editor"] [data-cy="unit-check-definition-size"]')
       .should('have.text', `Größe der Aufgabe: ${(size / 1024).toFixed(1)} KB (klein)`));
+  });
+
+  // where the levels begin, an administrator sets in the settings (#2229)
+  it('names the level of the size by the levels set in the settings', () => {
+    const leveledUnit = { shortname: 'CHECK_LEVEL', name: 'Stufe der Größe', group: '' };
+    cy.then(() => cy.patchSettingUnitValidationAPI(
+      { sizeLevels: { mediumFromKb: 1, largeFromKb: 1024, veryLargeFromKb: 5120 } },
+      base.token
+    ).its('status').should('equal', 200));
+    cy.then(() => cy.createUnitAPI(base.wsId, leveledUnit, base.token).then(response => {
+      expect(response.status, leveledUnit.shortname).to.equal(201);
+      cy.updateUnitDefinitionAPI(String(response.body), base.wsId, base.token).its('status').should('equal', 200);
+    }));
+    cy.visitWs(primaryWorkspace);
+    selectUnit(leveledUnit.shortname);
+    clickIndexTabWorkspace('properties');
+
+    // the definition the command stores takes more than 1 KB, as the test above shows
+    cy.get('[data-cy="unit-check-editor"] [data-cy="unit-check-definition-size"]').should('contain.text', '(mittel)');
   });
 
   // what the editor reported the unit needs, as the server stores it, and what of it the studio lacks (#2198)

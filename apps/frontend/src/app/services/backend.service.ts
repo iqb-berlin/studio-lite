@@ -8,6 +8,7 @@ import {
   ConfigDto,
   AppLogoDto,
   EffectsDto,
+  UnitValidationDto,
   MyDataDto,
   WorkspaceFullDto,
   WorkspaceSettingsDto,
@@ -163,6 +164,16 @@ export class BackendService {
   getEffects(): Observable<EffectsDto | null> {
     return this.http
       .get<EffectsDto>(`${this.serverUrl}settings/effects`, {})
+      .pipe(
+        catchError(() => of(null))
+      );
+  }
+
+  // A failure answers null: the technical validation then shows the size without a level, and the admin
+  // form says it could not load (#2229).
+  getUnitValidation(): Observable<UnitValidationDto | null> {
+    return this.http
+      .get<UnitValidationDto>(`${this.serverUrl}settings/unit-validation`, {})
       .pipe(
         catchError(() => of(null))
       );

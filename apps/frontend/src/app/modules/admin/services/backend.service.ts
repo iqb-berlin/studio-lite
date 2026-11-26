@@ -7,6 +7,7 @@ import {
   ConfigDto,
   AppLogoDto,
   EffectsDto,
+  UnitValidationDto,
   CreateUserDto,
   CreateWorkspaceGroupDto,
   UserFullDto,
@@ -242,6 +243,12 @@ export class BackendService {
   setEffects(effects: EffectsDto): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}settings/effects`, effects)
+      .pipe(succeeded());
+  }
+
+  setUnitValidation(unitValidation: UnitValidationDto): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}settings/unit-validation`, unitValidation)
       .pipe(succeeded());
   }
 

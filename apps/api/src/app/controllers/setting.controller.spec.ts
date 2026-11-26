@@ -14,6 +14,7 @@ describe('SettingController', () => {
     'patchConfig',
     'patchAppLogo',
     'patchEffects',
+    'patchUnitValidation',
     'patchUnitExportConfig',
     'patchProfilesRegistry',
     'findEmailTemplate',
@@ -30,6 +31,7 @@ describe('SettingController', () => {
   );
 
   it.each([
+    'findUnitValidation',
     'findUnitExportConfig',
     'findUnitProfilesRegistry',
     'findMissingsProfiles',

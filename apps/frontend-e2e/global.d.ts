@@ -164,6 +164,8 @@ declare namespace Cypress {
     updateSettingConfigAPI(token:string, hour: number): Chainable<Response>; // 101
     patchSettingConfigAPI(config: object, token: string): Chainable<Response>; // 101
     patchSettingEffectsAPI(effects: { snowfall: boolean }, token: string): Chainable<Response>;
+    getSettingUnitValidationAPI(token: string): Chainable<Response>;
+    patchSettingUnitValidationAPI(validation: object, token: string): Chainable<Response>;
     getSettingLogoAPI(token:string): Chainable<Response>; // 102
     updateSettingLogoAPI(token:string, color: string): Chainable<Response>; // 103
     getSettingUnitExportAPI(token:string): Chainable<Response>; // 104
