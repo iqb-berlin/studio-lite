@@ -10,7 +10,9 @@
 }
 
 // Two cards side by side, row by row in the order of the template; cards in one row are equally high.
+// The padding of admin-tab-content lies within its height, or the scrolling area outgrows the page's box.
 .settings-cards {
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
