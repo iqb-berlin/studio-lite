@@ -1,3 +1,4 @@
+import { DEFAULT_UNIT_SIZE_LEVELS } from '@studio-lite/shared-code';
 import { byteLength, definitionSizeLevel } from './definition-size.utils';
 
 describe('definitionSizeLevel', () => {
@@ -13,8 +14,18 @@ describe('definitionSizeLevel', () => {
     [5 * MB - 1, 'large'],
     [5 * MB, 'very-large'],
     [50 * MB, 'very-large']
-  ])('names %d bytes %s', (bytes, level) => {
-    expect(definitionSizeLevel(bytes)).toBe(level);
+  ])('names %d bytes %s by the default levels', (bytes, level) => {
+    expect(definitionSizeLevel(bytes, DEFAULT_UNIT_SIZE_LEVELS)).toBe(level);
+  });
+
+  // as an administrator set them in the settings (#2229)
+  it.each([
+    [10 * KB - 1, 'small'],
+    [10 * KB, 'medium'],
+    [20 * KB, 'large'],
+    [30 * KB, 'very-large']
+  ])('names %d bytes %s by the levels set', (bytes, level) => {
+    expect(definitionSizeLevel(bytes, { mediumFromKb: 10, largeFromKb: 20, veryLargeFromKb: 30 })).toBe(level);
   });
 });
 

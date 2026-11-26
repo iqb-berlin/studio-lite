@@ -6,6 +6,7 @@ import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import { DEFAULT_UNIT_SIZE_LEVELS } from '@studio-lite/shared-code';
 import { UnitCheckComponent } from './unit-check.component';
 import * as unitCheckUtils from '../../utils/unit-check.utils';
 import { WorkspaceService } from '../../services/workspace.service';
@@ -14,6 +15,7 @@ import { WorkspaceBackendService } from '../../services/workspace-backend.servic
 import { ModuleService } from '../../../../services/module.service';
 import { BackendService as CommentsBackendService } from '../../../comments/services/backend.service';
 import { InstalledDependenciesService } from '../../services/installed-dependencies.service';
+import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import { I18nService } from '../../../../services/i18n.service';
 import { UnitLastChanges } from '../../models/unit-last-changes.interface';
 
@@ -52,6 +54,7 @@ describe('UnitCheckComponent', () => {
   let editors: Record<string, { nameAndVersion: string }>;
   let loadList: jest.Mock;
   let loadInstalledDependencies: jest.Mock;
+  let getUnitValidation: jest.Mock;
   let lastChanges: WritableSignal<UnitLastChanges>;
 
   const element = (): HTMLElement => fixture.nativeElement as HTMLElement;
@@ -83,6 +86,7 @@ describe('UnitCheckComponent', () => {
           }
         },
         { provide: I18nService, useValue: { fullLocale: 'en-US', dateTimeFormat: 'dd.MM.yyyy HH:mm' } },
+        { provide: AppBackendService, useValue: { getUnitValidation } },
         {
           provide: WorkspaceBackendService,
           useValue: {
@@ -132,6 +136,7 @@ describe('UnitCheckComponent', () => {
     editors = { 'iqb-editor-aspect@2.9': { nameAndVersion: 'Editor' } };
     loadList = jest.fn().mockResolvedValue(undefined);
     loadInstalledDependencies = jest.fn(() => of({ packages: ['GeoGebra'], widgets: [] }));
+    getUnitValidation = jest.fn(() => of({ sizeLevels: DEFAULT_UNIT_SIZE_LEVELS }));
     units = signal({ '': [{ id: 4, key: 'UNIT_04' }] });
     lastChanges = signal({});
     hasComments = jest.fn(() => of(true));
@@ -358,6 +363,34 @@ describe('UnitCheckComponent', () => {
 
       expect(definitionSize()).toEqual({ key: 'unit-check.definition-size.small', params: { size: '7.0 B' } });
     }));
+
+  // the levels begin where an administrator set them; read once while the card is shown (#2229)
+  it('names the level of the size by the levels set, and asks for them once', fakeAsync(() => {
+    getUnitValidation.mockReturnValue(of({ sizeLevels: { mediumFromKb: 10, largeFromKb: 100, veryLargeFromKb: 200 } }));
+    getUnitDefinitionSummary.mockReturnValue(of({ hasDefinition: true, size: 150 * 1024 }));
+    create();
+
+    expect(sectionOf('editor')?.querySelector('[data-cy="unit-check-definition-size"]')?.textContent)
+      .toBe('unit-check.definition-size.large');
+
+    TestBed.inject(WorkspaceService).selectedUnit$.next(4);
+    fixture.detectChanges();
+    expect(getUnitValidation).toHaveBeenCalledTimes(1);
+  }));
+
+  // the defaults might name it otherwise than the levels set; the next unit asks again (#2229)
+  it('shows the size without a level where the levels could not be read', fakeAsync(() => {
+    getUnitValidation.mockReturnValue(of(null));
+    getUnitDefinitionSummary.mockReturnValue(of({ hasDefinition: true, size: 150 * 1024 }));
+    create();
+
+    expect(sectionOf('editor')?.querySelector('[data-cy="unit-check-definition-size"]')?.textContent)
+      .toBe('unit-check.definition-size.no-level');
+
+    TestBed.inject(WorkspaceService).selectedUnit$.next(4);
+    fixture.detectChanges();
+    expect(getUnitValidation).toHaveBeenCalledTimes(2);
+  }));
 
   // where the properties showed it before, now as soon as the part is saved (#2232)
   it('shows when the definition was last changed, and by whom, under the editor', fakeAsync(() => {

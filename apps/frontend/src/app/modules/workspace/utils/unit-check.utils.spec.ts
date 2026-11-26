@@ -1,4 +1,5 @@
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import { DEFAULT_UNIT_SIZE_LEVELS } from '@studio-lite/shared-code';
 import {
   checkUnit, DefinitionContent, definitionSummary, LastChangeLines, UnitCheckInput, UnitCheckSection,
   withDefinitionSize, withKeyFindings, withLastChanges
@@ -580,7 +581,7 @@ describe('withKeyFindings', () => {
 describe('withDefinitionSize', () => {
   // the size shows where the content's findings stand, and leaves the status alone: a large unit works (#2197)
   it('shows the size and its level under the editor, which stays in order', () => {
-    const sections = withDefinitionSize(checkUnit(okInput()), 6 * 1024 * 1024);
+    const sections = withDefinitionSize(checkUnit(okInput()), 6 * 1024 * 1024, DEFAULT_UNIT_SIZE_LEVELS);
 
     expect(section(sections, 'editor')).toEqual(expect.objectContaining({
       definitionSize: { key: 'unit-check.definition-size.very-large', params: { size: '6.0 MB' } },
@@ -592,7 +593,7 @@ describe('withDefinitionSize', () => {
   it('shows the size under the properties where the workspace hides the editor', () => {
     const input = okInput();
     input.hiddenRoutes = ['editor'];
-    const sections = withDefinitionSize(checkUnit(input), 150 * 1024);
+    const sections = withDefinitionSize(checkUnit(input), 150 * 1024, DEFAULT_UNIT_SIZE_LEVELS);
 
     expect(section(sections, 'properties')?.definitionSize)
       .toEqual({ key: 'unit-check.definition-size.small', params: { size: '150.0 KB' } });
@@ -601,8 +602,14 @@ describe('withDefinitionSize', () => {
   it('shows no size without a definition, or where it is not known', () => {
     const sections = checkUnit(okInput());
 
-    expect(withDefinitionSize(sections, 0)).toBe(sections);
-    expect(withDefinitionSize(sections, undefined)).toBe(sections);
+    expect(withDefinitionSize(sections, 0, DEFAULT_UNIT_SIZE_LEVELS)).toBe(sections);
+    expect(withDefinitionSize(sections, undefined, DEFAULT_UNIT_SIZE_LEVELS)).toBe(sections);
+  });
+
+  // the defaults might name it otherwise than the levels an administrator set (#2229)
+  it('shows the size without a level where the levels could not be read', () => {
+    expect(section(withDefinitionSize(checkUnit(okInput()), 150 * 1024, null), 'editor')?.definitionSize)
+      .toEqual({ key: 'unit-check.definition-size.no-level', params: { size: '150.0 KB' } });
   });
 });
 

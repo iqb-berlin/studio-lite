@@ -4,8 +4,8 @@ import {
 import { DatePipe } from '@angular/common';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
-  combineLatest, distinctUntilChanged, filter, forkJoin, from, map, Observable, of, pairwise, startWith, Subject,
-  switchMap, takeUntil
+  combineLatest, distinctUntilChanged, filter, forkJoin, from, map, Observable, of, pairwise, shareReplay,
+  startWith, Subject, switchMap, takeUntil, tap
 } from 'rxjs';
 import {
   MatCard, MatCardContent, MatCardHeader, MatCardTitle
@@ -15,12 +15,13 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { UnitDefinitionSummaryDto } from '@studio-lite-lib/api-dto';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
-import { sameDependencyLists, sameVariableLists } from '@studio-lite/shared-code';
+import { sameDependencyLists, sameVariableLists, UnitSizeLevels } from '@studio-lite/shared-code';
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitStoresService } from '../../services/unit-stores.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { ModuleService } from '../../../../services/module.service';
 import { BackendService as CommentsBackendService } from '../../../comments/services/backend.service';
+import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import {
   checkUnit, DefinitionContent, definitionSummary, isTabShown, LastChangeLines, ModuleType, UnitCheckFinding,
   UnitCheckSection, withDefinitionSize, withKeyFindings, withLastChanges
@@ -40,6 +41,8 @@ interface UnitCheckSources {
   definitionSummary: UnitDefinitionSummaryDto | undefined;
   /** The packages and widgets the studio has (#2198); a list that could not be read is null. */
   installedDependencies: InstalledDependencies;
+  /** Where the levels of a unit's size begin, as an administrator set them (#2229); null: not read. */
+  sizeLevels: UnitSizeLevels | null;
 }
 
 /**
@@ -174,6 +177,8 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
   });
 
   private readonly i18nService = inject(I18nService);
+  private readonly appBackendService = inject(AppBackendService);
+  private sizeLevels$?: Observable<UnitSizeLevels | null>;
   // as a signal: the language file may arrive after the first check
   private readonly unknownUser = toSignal(inject(TranslateService).stream('workspace.unknown'), { initialValue: '' });
 
@@ -198,7 +203,11 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
   readonly sections = computed((): UnitCheckSection[] | undefined => {
     const checked = this.checked();
     return checked && withLastChanges(
-      withDefinitionSize(withKeyFindings(checked, this.keyFindings()), this.definitionSize()),
+      withDefinitionSize(
+        withKeyFindings(checked, this.keyFindings()),
+        this.definitionSize(),
+        this.sources()?.sizeLevels ?? null
+      ),
       this.lastChangeLines()
     );
   });
@@ -276,11 +285,32 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
       storedDefinition,
       this.unitStores.loadSchemeStore(workspaceId, unitId),
       // asked whatever the stored unit needs: the editor may report what it needs at any time (#2198)
-      this.installedDependencies.load(workspaceId)
-    ]).pipe(map(([, , summary, , installed]) => ({
+      this.installedDependencies.load(workspaceId),
+      this.loadSizeLevels()
+    ]).pipe(map(([, , summary, , installed, sizeLevels]) => ({
       definitionSummary: summary,
-      installedDependencies: installed
+      installedDependencies: installed,
+      sizeLevels
     })));
+  }
+
+  /**
+   * Where the levels of a unit's size begin (#2229): read once while the card is shown. A failed read
+   * is not kept, so that the next unit asks again rather than showing sizes without levels for the
+   * rest of the visit.
+   */
+  private loadSizeLevels(): Observable<UnitSizeLevels | null> {
+    if (!this.sizeLevels$) {
+      const sizeLevels$ = this.appBackendService.getUnitValidation().pipe(
+        map(validation => validation?.sizeLevels ?? null),
+        tap(levels => {
+          if (!levels && this.sizeLevels$ === sizeLevels$) this.sizeLevels$ = undefined;
+        }),
+        shareReplay(1)
+      );
+      this.sizeLevels$ = sizeLevels$;
+    }
+    return this.sizeLevels$;
   }
 
   /**

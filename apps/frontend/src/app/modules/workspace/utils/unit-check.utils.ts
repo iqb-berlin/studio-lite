@@ -1,8 +1,8 @@
 import { UnitDefinitionDto, UnitDefinitionSummaryDto, UnitSchemeDto } from '@studio-lite-lib/api-dto';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import {
-  findVariableIdConflicts, hasCodingScheme, schemeWithVariables, toVariableInfoV1, VariableIdConflict,
-  VeronaModuleFactory
+  findVariableIdConflicts, hasCodingScheme, schemeWithVariables, toVariableInfoV1, UnitSizeLevels,
+  VariableIdConflict, VeronaModuleFactory
 } from '@studio-lite/shared-code';
 import { BytesPipe } from '@studio-lite-lib/iqb-components';
 import { playerRejectsDefinitionType } from './definition-type-match.utils';
@@ -356,14 +356,21 @@ const bytesPipe = new BytesPipe();
  * editor, or under the properties where the workspace hides the editor (#2197). Added apart from
  * {@link checkUnit}, as the key is: the size changes with every keystroke in the editor. Without a
  * definition, or not known, there is no size to show -- the check says why.
+ *
+ * The levels begin where an administrator set them (#2229). Where they could not be read (null), the
+ * size stands without a level: the defaults might name it otherwise than the levels that were set.
  */
-export function withDefinitionSize(sections: UnitCheckSection[], bytes: number | undefined): UnitCheckSection[] {
+export function withDefinitionSize(
+  sections: UnitCheckSection[],
+  bytes: number | undefined,
+  levels: UnitSizeLevels | null
+): UnitCheckSection[] {
   if (!bytes) return sections;
   const tab: UnitCheckSection['tab'] = sections.some(entry => entry.tab === 'editor') ? 'editor' : 'properties';
   const definitionSize: UnitCheckFinding = {
     // unit-check.definition-size.small, unit-check.definition-size.medium, unit-check.definition-size.large,
-    // unit-check.definition-size.very-large
-    key: `unit-check.definition-size.${definitionSizeLevel(bytes)}`,
+    // unit-check.definition-size.very-large, unit-check.definition-size.no-level
+    key: `unit-check.definition-size.${levels ? definitionSizeLevel(bytes, levels) : 'no-level'}`,
     params: { size: bytesPipe.transform(bytes) }
   };
   return sections.map(entry => (entry.tab === tab ? { ...entry, definitionSize } : entry));

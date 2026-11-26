@@ -412,4 +412,29 @@ describe('Admin Settings Tab Configuration', () => {
       saveAndExpect('PATCH', '/api/settings/unit-rich-note-tags-config', 'resetRichNoteTags', 7);
     });
   });
+
+  // -------------------------------------------------------------------------
+  describe('Unit validation card', () => {
+    const defaults = { sizeLevels: { mediumFromKb: 200, largeFromKb: 1024, veryLargeFromKb: 5120 } };
+
+    // the settings outlast the reset before each spec: the next one starts with the defaults
+    after(() => {
+      cy.loginAPI(Cypress.expose('username'), Cypress.expose('password')).then(session => {
+        cy.patchSettingUnitValidationAPI(defaults, session.body.accessToken).its('status').should('equal', 200);
+      });
+    });
+
+    // where the levels of a unit's size begin (#2229)
+    it('saves where the size levels of the units begin', () => {
+      goToSettings();
+      cy.get('[data-cy="admin-unit-validation-medium-from"]').should('not.be.disabled').clear().type('150');
+      cy.intercept('PATCH', '/api/settings/unit-validation').as('saveUnitValidation');
+      cy.get('[data-cy="admin-unit-validation-save-button"]').click();
+      cy.wait('@saveUnitValidation').its('response.statusCode').should('equal', 200);
+      cy.loginAPI(Cypress.expose('username'), Cypress.expose('password')).then(session => {
+        cy.getSettingUnitValidationAPI(session.body.accessToken)
+          .its('body.sizeLevels.mediumFromKb').should('equal', 150);
+      });
+    });
+  });
 });

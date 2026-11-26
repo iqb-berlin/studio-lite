@@ -1,0 +1,35 @@
+@if (notLoaded()) {
+  <p class="info" data-cy="admin-unit-validation-not-loaded">{{'unit-validation.not-loaded' | translate}}</p>
+} @else if (loaded()) {
+  <form [formGroup]="sizeLevels" class="fx-column-start-stretch" data-cy="admin-unit-validation-size-levels">
+    <h3 class="size-levels-title">{{'unit-validation.size-levels' | translate}}</h3>
+    <mat-form-field>
+      <mat-label>{{'unit-validation.medium-from' | translate}}</mat-label>
+      <input matInput type="number" min="1" step="1" formControlName="mediumFromKb"
+             data-cy="admin-unit-validation-medium-from">
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>{{'unit-validation.large-from' | translate}}</mat-label>
+      <input matInput type="number" min="1" step="1" formControlName="largeFromKb"
+             data-cy="admin-unit-validation-large-from">
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>{{'unit-validation.very-large-from' | translate}}</mat-label>
+      <input matInput type="number" min="1" step="1" formControlName="veryLargeFromKb"
+             data-cy="admin-unit-validation-very-large-from">
+    </mat-form-field>
+    <p class="hint">{{'unit-validation.small-below' | translate}}</p>
+    @if (invalid()) {
+      <p class="error" data-cy="admin-unit-validation-invalid">{{'unit-validation.size-levels-invalid' | translate}}</p>
+    }
+    <div class="fx-row-end-center">
+      <button mat-raised-button
+              color="primary"
+              [disabled]="!dataChanged() || invalid() || save.saving()"
+              (click)="saveData()"
+              data-cy="admin-unit-validation-save-button">
+        {{'save' | translate}}
+      </button>
+    </div>
+  </form>
+}

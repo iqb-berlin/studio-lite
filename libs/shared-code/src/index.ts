@@ -74,3 +74,4 @@ export {
 export {
   SchemeProblem, SchemeProblemType, SchemeValidation, findSchemeProblems
 } from './lib/scheme-problems';
+export { UnitSizeLevels, DEFAULT_UNIT_SIZE_LEVELS, areValidUnitSizeLevels } from './lib/unit-size-levels';

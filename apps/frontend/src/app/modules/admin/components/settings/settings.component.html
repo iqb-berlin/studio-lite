@@ -70,4 +70,14 @@
       <studio-lite-unit-rich-note-tags-config [isGlobal]="true"></studio-lite-unit-rich-note-tags-config>
     </mat-card-content>
   </mat-card>
+
+  <!-- the last card: the e2e specs find the cards before it by the position of their save button -->
+  <mat-card>
+    <mat-card-header class="card-header">
+      <mat-card-title>{{'settings.unit-validation' | translate}}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <studio-lite-unit-validation-config></studio-lite-unit-validation-config>
+    </mat-card-content>
+  </mat-card>
 </div>

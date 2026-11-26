@@ -402,6 +402,7 @@
     "texts": "Texte",
     "logo-and-colors": "Logo und Farben",
     "effects": "Animationen und Effekte",
+    "unit-validation": "Aufgaben-Validierung",
     "unit-export-params": "Parameter für den Unit-Export",
     "missings-profiles": "Kodierung: Missings Profile",
     "profiles-registry": "Profilregistrierung",
@@ -439,6 +440,17 @@
     "saved": "Animationen und Effekte gespeichert",
     "not-saved": "Konnte Animationen und Effekte nicht speichern",
     "not-loaded": "Die Animationen und Effekte konnten nicht geladen werden."
+  },
+  "unit-validation": {
+    "size-levels": "Größe der Aufgaben",
+    "medium-from": "Mittel ab (KB)",
+    "large-from": "Groß ab (KB)",
+    "very-large-from": "Sehr groß ab (KB)",
+    "small-below": "Darunter gilt eine Aufgabe als klein.",
+    "size-levels-invalid": "Jede Grenze muss eine ganze Zahl über 0 und größer als die vorige sein.",
+    "saved": "Aufgaben-Validierung gespeichert",
+    "not-saved": "Konnte die Aufgaben-Validierung nicht speichern",
+    "not-loaded": "Die Einstellungen der Aufgaben-Validierung konnten nicht geladen werden."
   },
   "email-template": {
     "template-saved": "E-Mail-Template gespeichert",
@@ -677,7 +689,8 @@
       "small": "Größe der Aufgabe: {{size}} (klein)",
       "medium": "Größe der Aufgabe: {{size}} (mittel)",
       "large": "Größe der Aufgabe: {{size}} (groß)",
-      "very-large": "Größe der Aufgabe: {{size}} (sehr groß)"
+      "very-large": "Größe der Aufgabe: {{size}} (sehr groß)",
+      "no-level": "Größe der Aufgabe: {{size}}"
     },
     "last-changed-metadata": "Eigenschaften zuletzt geändert: {{date}} – {{user}}",
     "last-changed-definition": "Definition zuletzt geändert: {{date}} – {{user}}",

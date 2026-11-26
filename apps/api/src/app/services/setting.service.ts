@@ -1,12 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
   ConfigDto, AppLogoDto, EffectsDto, UnitExportConfigDto, MissingsProfilesDto,
-  ProfilesRegistryDto, EmailTemplateDto, UnitRichNoteTagDto, TopConcept
+  ProfilesRegistryDto, EmailTemplateDto, UnitRichNoteTagDto, TopConcept, UnitValidationDto
 } from '@studio-lite-lib/api-dto';
 import {
-  LOCALIZED_CONFIG_TEXTS, LOCALIZED_EMAIL_TEMPLATE_TEXTS, ResourcePackageChoice, toLocalizedText
+  areValidUnitSizeLevels, LOCALIZED_CONFIG_TEXTS, LOCALIZED_EMAIL_TEMPLATE_TEXTS, ResourcePackageChoice,
+  toLocalizedText
 } from '@studio-lite/shared-code';
 
 import Setting from '../entities/setting.entity';
@@ -39,8 +40,8 @@ function withLocalizedTexts<T extends object>(setting: T, keys: readonly (keyof 
 
 /**
  * The installation-wide settings, all of them rows of {@link Setting} whose content is JSON kept as
- * text: the config, the logo, the effects, the export configuration, the profile registry, the mail
- * template, the missings profiles, the rich-note tags.
+ * text: the config, the logo, the effects, the unit validation, the export configuration, the profile
+ * registry, the mail template, the missings profiles, the rich-note tags.
  *
  * The rich-note tags are the one setting that is not simply read back: they may be configured as a
  * vocabulary URL, and are then resolved through {@link MetadataVocabularyService} into the tags a
@@ -138,6 +139,43 @@ export class SettingService {
     } else {
       const newSetting = this.settingsRepository.create({ key: 'effects', content });
       await this.settingsRepository.save(newSetting);
+    }
+  }
+
+  /**
+   * What an administrator set for the technical validation, else the defaults (#2229) -- also for
+   * what a later version adds and the stored setting does not hold yet.
+   */
+  async findUnitValidation(): Promise<UnitValidationDto> {
+    this.logger.log('Returning settings unit validation.');
+    const setting = await this.settingsRepository.findOne({ where: { key: 'unit-validation' } });
+    return { ...new UnitValidationDto(), ...(setting ? JSON.parse(setting.content) : {}) };
+  }
+
+  /**
+   * Stores the levels of a unit's size, and nothing else a request carries: no ValidationPipe strips
+   * it. Bounds that do not rise are refused, the form refusing them as well (#2229): stored, they
+   * would name the size of every unit by a level nobody set.
+   */
+  async patchUnitValidation(newValidation: UnitValidationDto): Promise<void> {
+    this.logger.log('Updating settings unit validation.');
+    const sizeLevels = newValidation?.sizeLevels;
+    if (!areValidUnitSizeLevels(sizeLevels)) {
+      throw new BadRequestException('The size levels must be whole numbers of KB above 0, each above the one before.');
+    }
+    const content = JSON.stringify({
+      sizeLevels: {
+        mediumFromKb: sizeLevels.mediumFromKb,
+        largeFromKb: sizeLevels.largeFromKb,
+        veryLargeFromKb: sizeLevels.veryLargeFromKb
+      }
+    });
+    const settingToUpdate = await this.settingsRepository.findOne({ where: { key: 'unit-validation' } });
+    if (settingToUpdate) {
+      settingToUpdate.content = content;
+      await this.settingsRepository.save(settingToUpdate);
+    } else {
+      await this.settingsRepository.save(this.settingsRepository.create({ key: 'unit-validation', content }));
     }
   }
 
