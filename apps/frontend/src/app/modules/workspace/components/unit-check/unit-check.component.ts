@@ -4,7 +4,7 @@ import {
 import { DatePipe } from '@angular/common';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
-  combineLatest, distinctUntilChanged, filter, forkJoin, from, map, Observable, of, pairwise, shareReplay,
+  combineLatest, distinctUntilChanged, EMPTY, filter, forkJoin, from, map, Observable, of, pairwise, shareReplay,
   startWith, Subject, switchMap, takeUntil, tap
 } from 'rxjs';
 import {
@@ -24,8 +24,10 @@ import { BackendService as CommentsBackendService } from '../../../comments/serv
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import {
   checkUnit, DefinitionContent, definitionSummary, isTabShown, LastChangeLines, ModuleType, UnitCheckFinding,
-  UnitCheckSection, withDefinitionSize, withKeyFindings, withLastChanges
+  UnitCheckSection, withDefinitionSize, withKeyFindings, withLastChanges, withMetadataProfiles
 } from '../../utils/unit-check.utils';
+import { MetadataProfiles, metadataProfiles } from '../../utils/metadata-profiles.utils';
+import { MetadataProfilesComponent } from '../metadata-profiles/metadata-profiles.component';
 import { LastChange } from '../../models/unit-last-changes.interface';
 import { I18nService } from '../../../../services/i18n.service';
 import { byteLength } from '../../utils/definition-size.utils';
@@ -96,7 +98,7 @@ const sameModules = (a: Modules | undefined, b: Modules | undefined): boolean =>
   providers: [CommentsBackendService, InstalledDependenciesService],
   imports: [
     MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatIcon, MatProgressSpinner, TranslateModule,
-    VariableIdConflictListComponent, VariableIdConflictFixComponent
+    VariableIdConflictListComponent, VariableIdConflictFixComponent, MetadataProfilesComponent
   ]
 })
 export class UnitCheckComponent implements OnInit, OnDestroy {
@@ -200,7 +202,22 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
     };
   });
 
-  readonly sections = computed((): UnitCheckSection[] | undefined => {
+  // whether the server did not deliver the unit's metadata
+  private readonly metadataNotLoaded = signal(false);
+
+  // the profiles the workspace assigns, and those the unit keeps values of all the same (#2235): read off
+  // the metadata as they are edited, and only once the settings say which profiles the workspace assigns.
+  // undefined: not known yet; null: the metadata were not delivered.
+  private readonly profileUse = computed((): MetadataProfiles | null | undefined => {
+    if (!this.workspaceService.settingsLoaded()) return undefined;
+    const store = this.unitStores.metadataStore();
+    if (store) return metadataProfiles(store.data(), this.workspaceService.metadataProfileIds());
+    return this.metadataNotLoaded() ? null : undefined;
+  });
+
+  // the sections but the metadata's: an edit of the metadata, with every keystroke in their forms, builds
+  // only that one anew
+  private readonly sectionsBesideMetadata = computed((): UnitCheckSection[] | undefined => {
     const checked = this.checked();
     return checked && withLastChanges(
       withDefinitionSize(
@@ -210,6 +227,11 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
       ),
       this.lastChangeLines()
     );
+  });
+
+  readonly sections = computed((): UnitCheckSection[] | undefined => {
+    const sections = this.sectionsBesideMetadata();
+    return sections && withMetadataProfiles(sections, this.profileUse(), this.workspaceService.hiddenRoutes());
   });
 
   // Conflicts stand under the properties only where the coding is hidden; every way to resolve them
@@ -240,6 +262,21 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
         takeUntil(this.ngUnsubscribe)
       )
       .subscribe(sources => this.sources.set(sources));
+    // apart from the rest, which a slow answer would hold up; the store is shared with the metadata tab. Not
+    // asked for where the workspace hides the tab, and asked for once it shows it (#2235); as for the comments,
+    // only once the settings are loaded: the defaults a workspace is entered with hide no tab (#2135)
+    combineLatest([this.workspaceService.selectedUnit$, this.hiddenRoutes$, this.settingsLoaded$])
+      .pipe(
+        filter(([, , settingsLoaded]) => settingsLoaded),
+        switchMap(([unitId, hiddenRoutes]) => {
+          this.metadataNotLoaded.set(false);
+          return unitId > 0 && isTabShown(hiddenRoutes, 'metadata') ?
+            this.unitStores.loadMetadataStore(this.workspaceService.selectedWorkspaceId, unitId) :
+            EMPTY;
+        }),
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe(store => this.metadataNotLoaded.set(!store));
     combineLatest([this.workspaceService.selectedUnit$, this.hiddenRoutes$, this.settingsLoaded$])
       .pipe(
         // the defaults a workspace is entered with would ask for tabs it hides (#2135)

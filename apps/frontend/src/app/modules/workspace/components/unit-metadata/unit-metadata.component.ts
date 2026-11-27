@@ -1,5 +1,5 @@
 import {
-  Component, inject, OnDestroy, OnInit, signal
+  Component, computed, inject, OnDestroy, OnInit, signal
 } from '@angular/core';
 import {
   BehaviorSubject, EMPTY, filter, forkJoin, Observable, of, Subject, switchMap, take, takeUntil, tap
@@ -21,6 +21,8 @@ import { AliasId } from '../../../metadata/models/alias-id.interface';
 import { MetadataBackendService } from '../../../metadata/services/metadata-backend.service';
 import { MetadataService } from '../../../metadata/services/metadata.service';
 import { LanguageService } from '../../../../services/language.service';
+import { MetadataProfiles, metadataProfiles } from '../../utils/metadata-profiles.utils';
+import { MetadataProfilesComponent } from '../metadata-profiles/metadata-profiles.component';
 
 /**
  * The unit's metadata, in a tab of their own beside the properties (#2200): the profile form for the
@@ -39,7 +41,7 @@ import { LanguageService } from '../../../../services/language.service';
   styleUrls: ['./unit-metadata.component.scss'],
   imports: [
     MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatProgressSpinner, TranslateModule,
-    ProfileFormComponent, ItemsComponent
+    ProfileFormComponent, ItemsComponent, MetadataProfilesComponent
   ]
 })
 export class UnitMetadataComponent implements OnInit, OnDestroy {
@@ -62,6 +64,17 @@ export class UnitMetadataComponent implements OnInit, OnDestroy {
   private readonly notLoadedState = signal(false);
   /** The server did not deliver the metadata of the selected unit. */
   readonly notLoaded = this.notLoadedState.asReadonly();
+  /**
+   * Which profiles the workspace assigns, and of which others the unit keeps values that are not used
+   * (#2235); as the metadata are edited, once the forms show the selected unit, and once the settings
+   * say which profiles the workspace assigns: before, every profile would look unused.
+   */
+  readonly profileUse = computed((): MetadataProfiles | undefined => {
+    const store = this.unitStores.metadataStore();
+    if (!store || !this.metadataLoaded() || !this.workspaceService.settingsLoaded()) return undefined;
+    return metadataProfiles(store.data(), this.workspaceService.metadataProfileIds());
+  });
+
   /**
    * The language of the interface, handed to the metadata forms: they show profiles and vocabularies
    * in it where these bring it. The studio translates no metadata (#2204).

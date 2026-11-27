@@ -1,0 +1,39 @@
+.assigned-profile {
+  margin: 0 0 4px;
+}
+
+.unused-title {
+  margin: 4px 0 0;
+  color: #666;
+}
+
+.unused-toggle {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 4px 0 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #666;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.unused-toggle-icon {
+  flex: 0 0 auto;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.unused-hint {
+  margin: 2px 0 0 22px;
+  color: #666;
+}
+
+.unused-profiles {
+  margin: 2px 0 4px;
+  color: #666;
+}

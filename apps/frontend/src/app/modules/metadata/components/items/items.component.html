@@ -32,6 +32,8 @@
   }
 
 </div>
+<!-- what the host shows above the items, below the controls it pulls into its header: the profiles (#2235) -->
+<ng-content></ng-content>
 @if (!isTextOnlyView) {
   <div>
     @for (item of items; track item; let i = $index) {

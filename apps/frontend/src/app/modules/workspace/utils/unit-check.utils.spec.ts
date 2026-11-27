@@ -2,8 +2,9 @@ import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { DEFAULT_UNIT_SIZE_LEVELS } from '@studio-lite/shared-code';
 import {
   checkUnit, DefinitionContent, definitionSummary, LastChangeLines, UnitCheckInput, UnitCheckSection,
-  withDefinitionSize, withKeyFindings, withLastChanges
+  withDefinitionSize, withKeyFindings, withLastChanges, withMetadataProfiles
 } from './unit-check.utils';
+import { MetadataProfiles } from './metadata-profiles.utils';
 
 const scheme = (variableCodings: unknown[]): string => JSON.stringify({ version: '3.0', variableCodings });
 
@@ -645,5 +646,54 @@ describe('withLastChanges', () => {
     expect(section(sections, 'properties')?.lastChanges).toBeUndefined();
     expect(section(sections, 'editor')?.lastChanges).toBeUndefined();
     expect(section(sections, 'schemer')?.lastChanges).toEqual([lines.scheme]);
+  });
+});
+
+describe('withMetadataProfiles', () => {
+  const assignedOnly: MetadataProfiles = {
+    unit: { assigned: 'https://w3id.org/iqb/p12/unit/', unused: [] },
+    items: { assigned: 'https://w3id.org/iqb/p12/item/', unused: [] }
+  };
+  const withUnused: MetadataProfiles = {
+    ...assignedOnly,
+    items: { ...assignedOnly.items, unused: [{ profileId: 'https://w3id.org/iqb/p11/item/', items: 2 }] }
+  };
+
+  // in the order of the tabs, the metadata following the properties (#2235)
+  it('puts the metadata after the properties', () => {
+    const sections = withMetadataProfiles(checkUnit(okInput()), assignedOnly, []);
+
+    expect(sections.map(entry => entry.tab))
+      .toEqual(['properties', 'metadata', 'editor', 'schemer', 'comments', 'notes']);
+    expect(section(sections, 'metadata')?.metadataProfiles).toBe(assignedOnly);
+  });
+
+  it('shows the metadata as in order where no profile but the assigned holds values', () => {
+    expect(section(withMetadataProfiles(checkUnit(okInput()), assignedOnly, []), 'metadata')?.status).toBe('ok');
+  });
+
+  // values kept from another profile fail nothing: something to know
+  it('shows the metadata as information where values of another profile are kept', () => {
+    const metadata = section(withMetadataProfiles(checkUnit(okInput()), withUnused, []), 'metadata');
+
+    expect(metadata?.status).toBe('info');
+    expect(metadata?.findings).toEqual([]);
+  });
+
+  it('leaves the metadata out where the workspace hides their tab', () => {
+    const sections = withMetadataProfiles(checkUnit(okInput()), withUnused, ['metadata']);
+
+    expect(section(sections, 'metadata')).toBeUndefined();
+  });
+
+  it('leaves the metadata out while they are on their way', () => {
+    expect(section(withMetadataProfiles(checkUnit(okInput()), undefined, []), 'metadata')).toBeUndefined();
+  });
+
+  it('says so where the metadata were not delivered', () => {
+    const metadata = section(withMetadataProfiles(checkUnit(okInput()), null, []), 'metadata');
+
+    expect(metadata?.info).toEqual({ key: 'unit-check.not-loaded' });
+    expect(metadata?.metadataProfiles).toBeUndefined();
   });
 });

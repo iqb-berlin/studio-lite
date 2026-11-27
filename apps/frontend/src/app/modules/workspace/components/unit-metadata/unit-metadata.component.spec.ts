@@ -21,6 +21,7 @@ import { MetadataService } from '../../../metadata/services/metadata.service';
 import { LanguageService } from '../../../../services/language.service';
 import { ItemsComponent } from '../../../metadata/components/items/items.component';
 import { AliasId } from '../../../metadata/models/alias-id.interface';
+import { ProfileNamesService } from '../../services/profile-names.service';
 
 @Component({ selector: 'iqb-profile-form', template: '', standalone: true })
 class MockProfileFormComponent {
@@ -74,7 +75,12 @@ describe('UnitMetadataComponent', () => {
         {
           provide: WorkspaceService,
           useValue: {
-            selectedUnit$, selectedWorkspaceId: 1, workspaceSettings, settingsLoaded, unitMetadataReloaded
+            selectedUnit$,
+            selectedWorkspaceId: 1,
+            workspaceSettings,
+            settingsLoaded,
+            unitMetadataReloaded,
+            metadataProfileIds: signal({ unit: 'https://w3id.org/iqb/p12/unit/' }).asReadonly()
           }
         },
         {
@@ -92,7 +98,8 @@ describe('UnitMetadataComponent', () => {
         },
         { provide: MetadataBackendService, useValue: { getMetadataProfile: jest.fn(() => of({})) } },
         { provide: MetadataService, useValue: { loadProfileVocabularies: jest.fn().mockResolvedValue(undefined) } },
-        { provide: LanguageService, useValue: { active: { code: 'de' } } }
+        { provide: LanguageService, useValue: { active: { code: 'de' } } },
+        { provide: ProfileNamesService, useValue: { labels: signal({}).asReadonly(), request: jest.fn() } }
       ]
     }).overrideComponent(UnitMetadataComponent, {
       remove: { imports: [ProfileFormComponent, ItemsComponent] },
@@ -115,6 +122,20 @@ describe('UnitMetadataComponent', () => {
     schemeThere = true;
     pendingSchemeOf = {};
   });
+
+  // which profile the workspace assigns: not known before its settings, when every profile would look unused (#2235)
+  it('tells which profiles the workspace assigns once its settings are loaded', fakeAsync(() => {
+    settingsLoaded.set(false);
+    create();
+    flush();
+
+    expect(component.profileUse()).toBeUndefined();
+
+    settingsLoaded.set(true);
+    fixture.detectChanges();
+    flush();
+    expect(component.profileUse()?.unit).toEqual({ assigned: 'https://w3id.org/iqb/p12/unit/', unused: [] });
+  }));
 
   it('merges changed profiles into the store while preserving items', fakeAsync(() => {
     create();

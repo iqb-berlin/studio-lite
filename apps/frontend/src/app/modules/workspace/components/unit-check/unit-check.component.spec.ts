@@ -18,8 +18,14 @@ import { InstalledDependenciesService } from '../../services/installed-dependenc
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import { I18nService } from '../../../../services/i18n.service';
 import { UnitLastChanges } from '../../models/unit-last-changes.interface';
+import { ProfileNamesService } from '../../services/profile-names.service';
+import { LanguageService } from '../../../../services/language.service';
+import { MetadataProfileIds } from '../../utils/metadata-profiles.utils';
 
 type UnitCheckSectionTab = unitCheckUtils.UnitCheckSection['tab'];
+
+const GERMAN_UNIT = 'https://w3id.org/iqb/p12/unit/';
+const MATH_UNIT = 'https://w3id.org/iqb/p11/unit/';
 
 const scheme = (variableCodings: unknown[]): string => JSON.stringify({ version: '3.0', variableCodings });
 
@@ -56,6 +62,8 @@ describe('UnitCheckComponent', () => {
   let loadInstalledDependencies: jest.Mock;
   let getUnitValidation: jest.Mock;
   let lastChanges: WritableSignal<UnitLastChanges>;
+  let getUnitMetadata: jest.Mock;
+  let metadataProfileIds: WritableSignal<MetadataProfileIds>;
 
   const element = (): HTMLElement => fixture.nativeElement as HTMLElement;
   const tabs = () => Array.from(
@@ -82,9 +90,12 @@ describe('UnitCheckComponent', () => {
             settingsLoaded: settingsLoadedState.asReadonly(),
             onCommentsUpdated: commentsUpdated,
             richNotesChanged$: richNotesChanged,
-            lastChanges: lastChanges.asReadonly()
+            lastChanges: lastChanges.asReadonly(),
+            metadataProfileIds: metadataProfileIds.asReadonly()
           }
         },
+        { provide: ProfileNamesService, useValue: { labels: signal({}).asReadonly(), request: jest.fn() } },
+        { provide: LanguageService, useValue: { active: { code: 'de' } } },
         { provide: I18nService, useValue: { fullLocale: 'en-US', dateTimeFormat: 'dd.MM.yyyy HH:mm' } },
         { provide: AppBackendService, useValue: { getUnitValidation } },
         {
@@ -100,6 +111,7 @@ describe('UnitCheckComponent', () => {
             getUnitDefinition,
             getUnitDefinitionSummary,
             getUnitScheme,
+            getUnitMetadata,
             hasUnitRichNotes
           }
         },
@@ -139,6 +151,8 @@ describe('UnitCheckComponent', () => {
     getUnitValidation = jest.fn(() => of({ sizeLevels: DEFAULT_UNIT_SIZE_LEVELS }));
     units = signal({ '': [{ id: 4, key: 'UNIT_04' }] });
     lastChanges = signal({});
+    metadataProfileIds = signal({ unit: GERMAN_UNIT });
+    getUnitMetadata = jest.fn(() => of({ profiles: [] }));
     hasComments = jest.fn(() => of(true));
     hasUnitRichNotes = jest.fn(() => of(false));
     getUnitDefinition = jest.fn(() => of({ definition: '{}', variables: [{ id: '05', alias: '_00a' }] }));
@@ -153,7 +167,8 @@ describe('UnitCheckComponent', () => {
     create();
 
     expect(tabs()).toEqual([
-      'unit-check-properties', 'unit-check-editor', 'unit-check-schemer', 'unit-check-comments', 'unit-check-notes'
+      'unit-check-properties', 'unit-check-metadata', 'unit-check-editor', 'unit-check-schemer',
+      'unit-check-comments', 'unit-check-notes'
     ]);
     expect(sectionOf('schemer')?.querySelector('[data-cy="unit-check-ok"]')).toBeTruthy();
     expect(sectionOf('comments')?.querySelector('[data-cy="unit-check-info"]')?.textContent)
@@ -189,7 +204,8 @@ describe('UnitCheckComponent', () => {
     hiddenRoutes = ['comments', 'notes'];
     create();
 
-    expect(tabs()).toEqual(['unit-check-properties', 'unit-check-editor', 'unit-check-schemer']);
+    expect(tabs())
+      .toEqual(['unit-check-properties', 'unit-check-metadata', 'unit-check-editor', 'unit-check-schemer']);
     expect(hasComments).not.toHaveBeenCalled();
     expect(hasUnitRichNotes).not.toHaveBeenCalled();
   }));
@@ -206,7 +222,8 @@ describe('UnitCheckComponent', () => {
     flush();
     fixture.detectChanges();
 
-    expect(tabs()).toEqual(['unit-check-properties', 'unit-check-editor', 'unit-check-schemer']);
+    expect(tabs())
+      .toEqual(['unit-check-properties', 'unit-check-metadata', 'unit-check-editor', 'unit-check-schemer']);
     expect(hasComments).not.toHaveBeenCalled();
     expect(hasUnitRichNotes).not.toHaveBeenCalled();
   }));
@@ -219,7 +236,7 @@ describe('UnitCheckComponent', () => {
     fixture.detectChanges();
 
     expect(tabs()).toEqual([
-      'unit-check-properties', 'unit-check-editor', 'unit-check-schemer', 'unit-check-comments'
+      'unit-check-properties', 'unit-check-metadata', 'unit-check-editor', 'unit-check-schemer', 'unit-check-comments'
     ]);
     expect(hasComments).toHaveBeenCalledTimes(1);
     expect(hasUnitRichNotes).toHaveBeenCalledTimes(1);
@@ -300,7 +317,8 @@ describe('UnitCheckComponent', () => {
     }));
     create();
 
-    expect(tabs()).toEqual(['unit-check-properties', 'unit-check-comments', 'unit-check-notes']);
+    expect(tabs())
+      .toEqual(['unit-check-properties', 'unit-check-metadata', 'unit-check-comments', 'unit-check-notes']);
     expect(getUnitScheme).toHaveBeenCalled();
     const properties = sectionOf('properties');
     expect(properties?.querySelector('[data-cy="unit-check-variable-id-conflicts"]')).toBeTruthy();
@@ -322,6 +340,89 @@ describe('UnitCheckComponent', () => {
     expect(sectionOf('properties')?.querySelector('[data-cy="unit-check-fix-elsewhere"]')?.textContent)
       .toBe('unit-check.fix-elsewhere-coding');
   }));
+
+  // values kept from a profile the workspace assigned before, to be known (#2235)
+  it('shows the metadata after the properties, as information while values of another profile are kept',
+    fakeAsync(() => {
+      const mathValue = {
+        profileId: MATH_UNIT,
+        entries: [{ id: 'iqb_author', label: [], valueAsText: [{ lang: 'de', value: 'Elsa Mignon' }] }]
+      };
+      getUnitMetadata.mockReturnValue(of({ profiles: [mathValue] }));
+      create();
+      const metadata = () => fixture.componentInstance.sections()?.find(entry => entry.tab === 'metadata');
+
+      expect(tabs().slice(0, 2)).toEqual(['unit-check-properties', 'unit-check-metadata']);
+      expect(sectionOf('metadata')?.querySelector('.info-icon')).toBeTruthy();
+      expect(metadata()?.metadataProfiles?.unit).toEqual({ assigned: GERMAN_UNIT, unused: [{ profileId: MATH_UNIT }] });
+      expect(sectionOf('metadata')?.querySelector('[data-cy="unit-check-metadata-profiles"]')).toBeTruthy();
+
+      // as they are edited: another profile assigned, or the values gone
+      metadataProfileIds.set({ unit: MATH_UNIT });
+      fixture.detectChanges();
+      expect(metadata()?.status).toBe('ok');
+      metadataProfileIds.set({ unit: GERMAN_UNIT });
+      unitStores.metadataStore()?.setMetadata({ profiles: [] });
+      fixture.detectChanges();
+      expect(metadata()?.status).toBe('ok');
+    }));
+
+  // the defaults a workspace is entered with hide no tab: asked only once its settings say it shows them
+  it('asks for the metadata only once the settings show their tab', fakeAsync(() => {
+    settingsLoaded = false;
+    create();
+    expect(getUnitMetadata).not.toHaveBeenCalled();
+
+    hiddenRoutesState.set(['metadata']);
+    settingsLoadedState.set(true);
+    fixture.detectChanges();
+    flush();
+    fixture.detectChanges();
+
+    expect(getUnitMetadata).not.toHaveBeenCalled();
+    expect(tabs()).not.toContain('unit-check-metadata');
+  }));
+
+  // every keystroke in the metadata forms changes them; the other sections stay as they are
+  it('builds only the metadata section anew when the metadata are edited', fakeAsync(() => {
+    // with a size, the editor's section is a new object whenever the sections are built
+    getUnitDefinitionSummary.mockReturnValue(of({ hasDefinition: true, size: 1024 }));
+    create();
+    const before = fixture.componentInstance.sections();
+
+    unitStores.metadataStore()?.setMetadata({ profiles: [], items: [{ id: 'ITEM_1' }] });
+    fixture.detectChanges();
+    const after = fixture.componentInstance.sections();
+
+    expect(after).not.toBe(before);
+    after?.filter(entry => entry.tab !== 'metadata')
+      .forEach(entry => expect(entry).toBe(before?.find(earlier => earlier.tab === entry.tab)));
+  }));
+
+  it('says so where the metadata were not delivered', fakeAsync(() => {
+    getUnitMetadata.mockReturnValue(of(null));
+    create();
+
+    expect(sectionOf('metadata')?.querySelector('[data-cy="unit-check-info"]')?.textContent)
+      .toBe('unit-check.not-loaded');
+  }));
+
+  it('leaves the metadata out where the workspace hides their tab, and asks for them once it shows it',
+    fakeAsync(() => {
+      hiddenRoutes = ['metadata'];
+      create();
+
+      expect(tabs()).not.toContain('unit-check-metadata');
+      expect(getUnitMetadata).not.toHaveBeenCalled();
+
+      hiddenRoutesState.set([]);
+      fixture.detectChanges();
+      flush();
+      fixture.detectChanges();
+
+      expect(getUnitMetadata).toHaveBeenCalledWith(1, 3);
+      expect(tabs()).toContain('unit-check-metadata');
+    }));
 
   // the definition embeds the unit's media; the check needs only whether there is one and its format (#2135)
   it('asks for a summary of the definition, not for the definition itself', fakeAsync(() => {

@@ -25,6 +25,7 @@ import { UnitStoresService } from './unit-stores.service';
 import { reconcileItemVariables } from '../utils/item-variables.utils';
 import { isUnitKeyTaken, UNIT_KEY_PATTERN } from '../utils/unit-key.utils';
 import { LastChange, UnitLastChanges } from '../models/unit-last-changes.interface';
+import { MetadataProfileIds } from '../utils/metadata-profiles.utils';
 
 /** A workspace units are submitted to, and its name. */
 export interface DropBox {
@@ -57,6 +58,12 @@ export class WorkspaceService {
   });
 
   readonly hiddenRoutes = this.hiddenRoutesState.asReadonly();
+  // The metadata profiles the workspace assigns, for whoever derives from them, as the tabs it hides (#2235)
+  private readonly metadataProfileIdsState = signal<MetadataProfileIds>({}, {
+    equal: (a, b) => a.unit === b.unit && a.item === b.item
+  });
+
+  readonly metadataProfileIds = this.metadataProfileIdsState.asReadonly();
   // whether the settings are the workspace's stored ones, not the defaults it is entered with (#2135)
   private readonly settingsLoadedState = signal(false);
   readonly settingsLoaded = this.settingsLoadedState.asReadonly();
@@ -133,7 +140,7 @@ export class WorkspaceService {
 
   set workspaceSettings(settings: WorkspaceSettingsDto) {
     this.workspaceSettingsValue = settings;
-    this.hiddenRoutesState.set(settings?.hiddenRoutes ?? []);
+    this.settingsDerived();
   }
 
   /** Tells that a rich note of the unit was added or deleted. */
@@ -149,7 +156,18 @@ export class WorkspaceService {
   /** Changes the settings in place -- whoever holds them sees the change -- and what follows from them. */
   updateWorkspaceSettings(changes: Partial<WorkspaceSettingsDto>): void {
     Object.assign(this.workspaceSettingsValue, changes);
-    this.hiddenRoutesState.set(this.workspaceSettingsValue.hiddenRoutes ?? []);
+    this.settingsDerived();
+  }
+
+  // what the signals derived from the settings hold, after the settings were set or changed
+  private settingsDerived(): void {
+    const settings = this.workspaceSettingsValue;
+    this.hiddenRoutesState.set(settings?.hiddenRoutes ?? []);
+    // an empty id, as the settings store "none", is none
+    this.metadataProfileIdsState.set({
+      unit: settings?.unitMDProfile || undefined,
+      item: settings?.itemMDProfile || undefined
+    });
   }
 
   constructor(

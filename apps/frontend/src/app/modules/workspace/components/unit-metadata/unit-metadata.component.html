@@ -14,6 +14,12 @@
                 </mat-card-title>
               </mat-card-header>
               <mat-card-content>
+                @if (profileUse(); as profileUse) {
+                  <studio-lite-metadata-profiles class="metadata-profiles" [unit]="profileUse.unit"
+                                                 [collapsible]="true"
+                                                 data-cy="unit-metadata-unit-profiles">
+                  </studio-lite-metadata-profiles>
+                }
                 <iqb-profile-form
                   [metadataValues]="iqbMetadataValues"
                   [profileData]="unitProfile"
@@ -46,6 +52,12 @@
                   [language]="language"
                   [variablesLoader]="variablesLoader"
                   (metadataChange)="onItemsMetadataChange($event)">
+                  @if (profileUse(); as profileUse) {
+                    <studio-lite-metadata-profiles class="metadata-profiles" [items]="profileUse.items"
+                                                   [collapsible]="true"
+                                                   data-cy="unit-metadata-item-profiles">
+                    </studio-lite-metadata-profiles>
+                  }
                 </studio-lite-items>
               </mat-card-content>
             </mat-card>

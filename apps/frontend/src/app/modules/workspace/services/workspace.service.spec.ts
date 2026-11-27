@@ -178,6 +178,17 @@ describe('WorkspaceService', () => {
       expect(settings.hiddenRoutes).toEqual(['comments', 'notes']);
     });
 
+    // the profiles as well, the empty id the settings store for none taken for none (#2235)
+    it('gives the metadata profiles the settings assign, set or changed in place', () => {
+      expect(service.metadataProfileIds()).toEqual({ unit: undefined, item: undefined });
+
+      service.workspaceSettings = { ...service.workspaceSettings, unitMDProfile: 'https://w3id.org/iqb/p11/unit/' };
+      expect(service.metadataProfileIds()).toEqual({ unit: 'https://w3id.org/iqb/p11/unit/', item: undefined });
+
+      service.updateWorkspaceSettings({ unitMDProfile: '', itemMDProfile: 'https://w3id.org/iqb/p11/item/' });
+      expect(service.metadataProfileIds()).toEqual({ unit: undefined, item: 'https://w3id.org/iqb/p11/item/' });
+    });
+
     // the settings dialog appends what it hides; the same tabs are no change to whoever follows them
     it('takes the same tabs in another order for no change', () => {
       service.workspaceSettings = { ...service.workspaceSettings, hiddenRoutes: ['comments', 'notes'] };
