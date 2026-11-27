@@ -2,8 +2,11 @@
   margin-bottom: 12px;
 }
 
-// an icon button keeps 12px around its icon: the row moves left by that, so the first icon lines up with the title
+// an icon button keeps 12px around its icon: the row moves left by that, so the first icon lines up with the title.
+// Without a background, the 4% circle of the theme hardly shows which button the pointer is on.
 .action-row {
+  --mat-icon-button-hover-state-layer-opacity: 0.1;
+
   flex-wrap: wrap;
   margin-left: -12px;
 }
