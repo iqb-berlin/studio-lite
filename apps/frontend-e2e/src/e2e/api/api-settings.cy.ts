@@ -375,4 +375,154 @@ describe('Admin settings API tests', () => {
       cy.patchSettingUnitValidationAPI(defaults, noId).its('status').should('equal', 401);
     });
   });
+
+  // The texts of the mail a user is sent; each in its own languages, as the config texts (#2186)
+  describe('111. GET and PATCH /api/settings/email-template', () => {
+    const adminToken = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+    let stored: object | undefined;
+
+    before(() => {
+      cy.getEmailTemplateAPI(adminToken()).then(resp => {
+        expect(resp.status).to.equal(200);
+        stored = resp.body;
+      });
+    });
+
+    // Settings outlast the reset before each spec. Only what was read is written back: a PATCH
+    // without a body would store an empty setting in its place.
+    after(() => {
+      if (stored) cy.patchEmailTemplateAPI(stored, adminToken()).its('status').should('equal', 200);
+    });
+
+    it('200 positive test: should hand back the texts an administrator saved', () => {
+      const template = {
+        emailSubject: { de: 'Betreff', en: 'Subject' },
+        emailBody: { de: 'Text', en: 'Text in English' }
+      };
+      cy.patchEmailTemplateAPI(template, adminToken()).its('status').should('equal', 200);
+      cy.getEmailTemplateAPI(adminToken()).then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(resp.body).to.deep.equal(template);
+      });
+    });
+
+    // A frontend from before the texts had languages, still open after the update, sends plain strings
+    it('200 positive test: should store a text sent as a plain string as the German one', () => {
+      cy.patchEmailTemplateAPI({ emailSubject: 'Betreff', emailBody: 'Text' }, adminToken())
+        .its('status').should('equal', 200);
+      cy.getEmailTemplateAPI(adminToken()).then(resp => {
+        expect(resp.body).to.deep.equal({ emailSubject: { de: 'Betreff' }, emailBody: { de: 'Text' } });
+      });
+    });
+
+    it('403 negative test: should keep the template from a user without administrator privileges', () => {
+      const userToken = Cypress.expose(`token_${userGroupAdmin.username}`);
+      cy.getEmailTemplateAPI(userToken).its('status').should('equal', 403);
+      cy.patchEmailTemplateAPI({ emailSubject: { de: 'x' }, emailBody: { de: 'x' } }, userToken)
+        .its('status').should('equal', 403);
+    });
+  });
+
+  // Where the metadata profiles are listed. Every user reads it, only an administrator sets it.
+  describe('112. GET and PATCH /api/settings/profiles-registry', () => {
+    const adminToken = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+    let stored: { csvUrl: string } | undefined;
+
+    before(() => {
+      cy.getProfilesRegistryAPI(adminToken()).then(resp => {
+        expect(resp.status).to.equal(200);
+        stored = resp.body;
+      });
+    });
+
+    after(() => {
+      if (stored) cy.patchProfilesRegistryAPI(stored, adminToken()).its('status').should('equal', 200);
+    });
+
+    it('200 positive test: should give a user without administrator privileges what an administrator set', () => {
+      const registry = { csvUrl: 'https://example.org/registry-2239.csv' };
+      cy.patchProfilesRegistryAPI(registry, adminToken()).its('status').should('equal', 200);
+      cy.getProfilesRegistryAPI(Cypress.expose(`token_${userGroupAdmin.username}`)).then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(resp.body).to.deep.equal(registry);
+      });
+    });
+
+    it('403 negative test: should not let a user without administrator privileges set it', () => {
+      cy.patchProfilesRegistryAPI(
+        { csvUrl: 'https://example.org/other.csv' },
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).its('status').should('equal', 403);
+    });
+
+    it('401 negative test: should not hand it out without a login', () => {
+      cy.getProfilesRegistryAPI(noId).its('status').should('equal', 401);
+    });
+  });
+
+  // The tags of a unit's notes: what a group configures, else what the administrator configured.
+  // Given as tags, not as vocabulary URLs, so that nothing has to be fetched.
+  describe('113./114. /api/settings/unit-rich-note-tags and unit-rich-note-tags-config', () => {
+    const adminToken = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+    const tag = (id: string) => ({ id, label: [{ lang: 'de', value: `Schlagwort ${id}` }] });
+    const globalTags = [tag('global-2239')];
+    const groupTags = [tag('group-2239')];
+    const groups = { withTags: '', withoutTags: '' };
+    let stored: string[] | object[] | undefined;
+
+    before(() => {
+      cy.getRichNoteTagsConfigAPI(adminToken()).then(resp => {
+        expect(resp.status).to.equal(200);
+        stored = resp.body;
+      });
+      cy.createGroupAPI({ id: '', name: 'Gruppe mit Schlagworten' }, adminToken(), { richNoteTags: groupTags })
+        .then(resp => {
+          expect(resp.status).to.equal(201);
+          groups.withTags = String(resp.body);
+        });
+      cy.createGroupAPI({ id: '', name: 'Gruppe ohne Schlagworte' }, adminToken()).then(resp => {
+        expect(resp.status).to.equal(201);
+        groups.withoutTags = String(resp.body);
+      });
+      cy.patchRichNoteTagsConfigAPI(globalTags, adminToken()).its('status').should('equal', 200);
+    });
+
+    after(() => {
+      if (stored) cy.patchRichNoteTagsConfigAPI(stored, adminToken()).its('status').should('equal', 200);
+    });
+
+    it('200 positive test: should hand an administrator back the tags configured', () => {
+      cy.getRichNoteTagsConfigAPI(adminToken()).then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(resp.body).to.deep.equal(globalTags);
+      });
+    });
+
+    it('200 positive test: should give a user the configured tags when no group is named', () => {
+      cy.getRichNoteTagsAPI(Cypress.expose(`token_${userGroupAdmin.username}`)).then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(resp.body).to.deep.equal(globalTags);
+      });
+    });
+
+    it('200 positive test: should give the tags of a group that has its own', () => {
+      cy.getRichNoteTagsAPI(Cypress.expose(`token_${userGroupAdmin.username}`), groups.withTags).then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(resp.body).to.deep.equal(groupTags);
+      });
+    });
+
+    it('200 positive test: should give the configured tags for a group without its own', () => {
+      cy.getRichNoteTagsAPI(Cypress.expose(`token_${userGroupAdmin.username}`), groups.withoutTags).then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(resp.body).to.deep.equal(globalTags);
+      });
+    });
+
+    it('403 negative test: should keep the configuration from a user without administrator privileges', () => {
+      const userToken = Cypress.expose(`token_${userGroupAdmin.username}`);
+      cy.getRichNoteTagsConfigAPI(userToken).its('status').should('equal', 403);
+      cy.patchRichNoteTagsConfigAPI([tag('x')], userToken).its('status').should('equal', 403);
+    });
+  });
 });

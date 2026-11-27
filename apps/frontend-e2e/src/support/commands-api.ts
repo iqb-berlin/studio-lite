@@ -2748,6 +2748,142 @@ Cypress.Commands.add('getWsPackageFileAPI', (wsId: string, path: string) => {
   });
 });
 
+// A request below /api with the headers every route expects, for the commands that follow (#2239)
+function requestAPI(
+  method: string,
+  url: string,
+  token: string,
+  { body, encoding }: { body?: string | object; encoding?: Cypress.Encodings } = {}
+) {
+  return cy.request({
+    method,
+    url: `/api/${url}`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization: `bearer ${token}`
+    },
+    ...(body === undefined ? {} : { body }),
+    ...(encoding ? { encoding } : {}),
+    failOnStatusCode: false
+  });
+}
+
+// 111
+Cypress.Commands.add('getEmailTemplateAPI', (token: string) => requestAPI('GET', 'settings/email-template', token));
+
+// 111
+Cypress.Commands.add('patchEmailTemplateAPI',
+  (template: object, token: string) => requestAPI('PATCH', 'settings/email-template', token, { body: template }));
+
+// 112
+Cypress.Commands.add('getProfilesRegistryAPI',
+  (token: string) => requestAPI('GET', 'settings/profiles-registry', token));
+
+// 112
+Cypress.Commands.add('patchProfilesRegistryAPI',
+  (registry: { csvUrl: string }, token: string) => requestAPI(
+    'PATCH',
+    'settings/profiles-registry',
+    token,
+    { body: registry }
+  ));
+
+// 113: the tags a note may get, for a group if one is given
+Cypress.Commands.add('getRichNoteTagsAPI',
+  (token: string, groupId?: string) => requestAPI(
+    'GET',
+    `settings/unit-rich-note-tags${groupId ? `?workspaceGroupId=${groupId}` : ''}`,
+    token
+  ));
+
+// 114: what the administrator configured: tags, or vocabulary URLs
+Cypress.Commands.add('getRichNoteTagsConfigAPI',
+  (token: string) => requestAPI('GET', 'settings/unit-rich-note-tags-config', token));
+
+// 114
+Cypress.Commands.add('patchRichNoteTagsConfigAPI',
+  (tags: string | string[] | object[], token: string) => requestAPI(
+    'PATCH',
+    'settings/unit-rich-note-tags-config',
+    token,
+    { body: tags }
+  ));
+
+// the session in the token is still in use
+Cypress.Commands.add('postActivityAPI', (token: string) => requestAPI('POST', 'activity', token));
+
+// the units of every workspace of a group, for its group admin
+Cypress.Commands.add('getGroupUnitsAPI',
+  (groupId: string, token: string) => requestAPI('GET', `workspace-groups/${groupId}/units`, token));
+
+// the items of every unit of a group, for its group admin
+Cypress.Commands.add('getGroupUnitItemsAPI',
+  (groupId: string, token: string) => requestAPI('GET', `workspace-groups/${groupId}/unit-items`, token));
+
+// the units given get the group, and the group's other units of the workspace lose it
+Cypress.Commands.add('patchUnitsGroupNameAPI',
+  (wsId: string, name: string, unitIds: string[], token: string) => requestAPI(
+    'PATCH',
+    `workspaces/${wsId}/units/group-name`,
+    token,
+    { body: { name, ids: unitIds.map(Number) } }
+  ));
+
+// The JSON export, kept as a binary string: the zip lists its file names uncompressed
+Cypress.Commands.add('downloadUnitsJsonAPI',
+  (wsId: string, downloadQuery: string, token: string) => requestAPI(
+    'POST',
+    `workspaces/${wsId}/download-units`,
+    token,
+    { body: JSON.parse(downloadQuery), encoding: 'binary' }
+  ));
+
+// the query that declines the metadata of items, or leaves it to the route
+function metadataQuery(withoutMetadata?: boolean): string {
+  return withoutMetadata === undefined ? '' : `?withoutMetadata=${withoutMetadata}`;
+}
+
+// the items of a unit, with their metadata unless asked without
+Cypress.Commands.add('getUnitItemsAPI',
+  (wsId: string, unitId: string, token: string, withoutMetadata?: boolean) => requestAPI(
+    'GET',
+    `workspaces/${wsId}/units/${unitId}/items${metadataQuery(withoutMetadata)}`,
+    token
+  ));
+
+// which comment of a unit is about which of its items
+Cypress.Commands.add('getUnitItemCommentsAPI',
+  (wsId: string, unitId: string, token: string) => requestAPI(
+    'GET',
+    `workspaces/${wsId}/units/${unitId}/items/comments`,
+    token
+  ));
+
+// the review's settings, which updateReviewAPI sends as all switched on
+Cypress.Commands.add('setReviewConfigAPI',
+  (wsId: string, review: ReviewData, reviewConfig: Record<string, boolean>, token: string) => requestAPI(
+    'PATCH',
+    `workspaces/${wsId}/reviews/${review.id}`,
+    token,
+    { body: { id: review.id, name: review.name, settings: { reviewConfig } } }
+  ));
+
+// the items of a unit of a review, with their metadata if the review shows it and it is not declined
+Cypress.Commands.add('getReviewUnitItemsAPI',
+  (reviewId: string, unitId: string, token: string, withoutMetadata?: boolean) => requestAPI(
+    'GET',
+    `reviews/${reviewId}/units/${unitId}/items${metadataQuery(withoutMetadata)}`,
+    token
+  ));
+
+// who voted on a comment, through a review
+Cypress.Commands.add('getReviewCommentVotersAPI',
+  (reviewId: string, unitId: string, commentId: string, token: string) => requestAPI(
+    'GET',
+    `reviews/${reviewId}/units/${unitId}/comments/${commentId}/votes`,
+    token
+  ));
+
 // 400 Bad Request
 // 401 Unauthorized
 // 403 Forbidden

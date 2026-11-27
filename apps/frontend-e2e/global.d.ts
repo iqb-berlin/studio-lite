@@ -185,5 +185,32 @@ declare namespace Cypress {
     getPackageGroupsAPI(token: string): Chainable<Response>; // 110a
     getWsPackageNamesAPI(wsId: string, token: string): Chainable<Response>; // 110a
     getWsPackageFileAPI(wsId: string, path: string): Chainable<Response>; // 110a
+    getEmailTemplateAPI(token: string): Chainable<Response>; // 111
+    patchEmailTemplateAPI(template: object, token: string): Chainable<Response>; // 111
+    getProfilesRegistryAPI(token: string): Chainable<Response>; // 112
+    patchProfilesRegistryAPI(registry: { csvUrl: string }, token: string): Chainable<Response>; // 112
+    getRichNoteTagsAPI(token: string, groupId?: string): Chainable<Response>; // 113
+    getRichNoteTagsConfigAPI(token: string): Chainable<Response>; // 114
+    patchRichNoteTagsConfigAPI(tags: string | string[] | object[], token: string): Chainable<Response>; // 114
+    postActivityAPI(token: string): Chainable<Response>;
+    getGroupUnitsAPI(groupId: string, token: string): Chainable<Response>;
+    getGroupUnitItemsAPI(groupId: string, token: string): Chainable<Response>;
+    patchUnitsGroupNameAPI(wsId: string, name: string, unitIds: string[], token: string): Chainable<Response>;
+    downloadUnitsJsonAPI(wsId: string, downloadQuery: string, token: string): Chainable<Response>;
+    getUnitItemsAPI(wsId: string, unitId: string, token: string, withoutMetadata?: boolean): Chainable<Response>;
+    getUnitItemCommentsAPI(wsId: string, unitId: string, token: string): Chainable<Response>;
+    setReviewConfigAPI(
+      wsId: string,
+      review: ReviewData,
+      reviewConfig: Record<string, boolean>,
+      token: string
+    ): Chainable<Response>;
+    getReviewUnitItemsAPI(
+      reviewId: string,
+      unitId: string,
+      token: string,
+      withoutMetadata?: boolean
+    ): Chainable<Response>;
+    getReviewCommentVotersAPI(reviewId: string, unitId: string, commentId: string, token: string): Chainable<Response>;
   }
 }
