@@ -7,6 +7,11 @@
   z-index: 999;
 }
 
+// left of the language menu, 64px at the right edge of the app's header (#2256)
+:host(.beside-language-menu) .send-comment-button-container {
+  right: 69px;
+}
+
 .send-comment-button {
   min-width: 0;
   padding: 0 6px;

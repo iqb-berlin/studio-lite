@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { ReviewService } from '../../services/review.service';
 import { AppService } from '../../../../services/app.service';
+import { LanguageService } from '../../../../services/language.service';
 import { AddCommentButtonComponent } from '../add-comment-button/add-comment-button.component';
 import { UnitNavComponent } from '../unit-nav/unit-nav.component';
 
@@ -12,6 +13,9 @@ import { UnitNavComponent } from '../unit-nav/unit-nav.component';
   imports: [UnitNavComponent, AddCommentButtonComponent, RouterOutlet]
 })
 export class ReviewComponent implements OnInit {
+  /** The app's header shows its language menu at the right edge, over which the review's header lies (#2256). */
+  readonly besideLanguageMenu = inject(LanguageService).languages.length > 1;
+
   constructor(
     public appService: AppService,
     private route: ActivatedRoute,

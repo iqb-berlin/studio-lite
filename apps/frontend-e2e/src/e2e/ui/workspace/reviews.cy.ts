@@ -242,6 +242,20 @@ describe('Unit Reviews', () => {
     });
   });
 
+  // The comment button lay over the language menu at the right edge of the header (#2256). Cypress
+  // clicks only an element that no other one covers, so no `force` here.
+  it('keeps the language menu beside the comment button', () => {
+    cy.intercept('GET', '/api/reviews/*/units/*/definition').as('getUnitDefinition');
+    cy.visit('/');
+    openReview(review);
+    startReview();
+    waitForSuccess('@getUnitDefinition');
+    cy.get('studio-lite-add-comment-button button').should('be.visible');
+    cy.get('[data-cy="language-menu"]').click();
+    cy.get('[data-cy="language-en"]').should('be.visible');
+    cy.get('body').type('{esc}');
+  });
+
   it('displays unit technical details in the expandable info panel', () => {
     cy.visit('/');
     openReview(review);
@@ -255,6 +269,15 @@ describe('Unit Reviews', () => {
       cy.contains('button', 'chevron_left').click();
       cy.get('.infoPanel').should('be.visible');
       cy.get('.infoPanel h2').should('not.be.empty');
+    });
+
+    // The panel ends above the page navigation, which lay over its last lines (#2257)
+    cy.get('studio-lite-unit-player .page-navigation').then(navigation => {
+      const navigationTop = navigation[0].getBoundingClientRect().top;
+      cy.get('studio-lite-unit-info').then(info => {
+        expect(Math.round(info[0].getBoundingClientRect().bottom), 'bottom of the info panel')
+          .to.be.at.most(Math.round(navigationTop));
+      });
     });
   });
 

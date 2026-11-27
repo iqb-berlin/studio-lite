@@ -22,6 +22,7 @@
   background: #eee;
 }
 
-.with-footer unit-info, .with-footer .unitHost {
+// both end above the page navigation, which lies over the bottom of the unit (#2257)
+.with-footer .unit-info, .with-footer .unitHost {
   height: calc(100% - 50px);
 }
