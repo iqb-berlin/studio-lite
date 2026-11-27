@@ -11,7 +11,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router, ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import {
   RequestReportDto, UnitDownloadSettingsDto, UnitPropertiesDto, UsersInWorkspaceDto, WorkspaceSettingsDto
@@ -252,6 +252,49 @@ describe('EditUnitButtonComponent', () => {
 
       expect(mockAppBackendService.setWorkspaceSettings).not.toHaveBeenCalled();
       expect(mockWorkspaceService.workspaceSettings.itemMDProfile).toBe('profile');
+    });
+
+    // #2243: the unit left for another profile, the workspace is built anew and asks for its settings. Asked
+    // for while they were saved, they came back as they were before.
+    describe('counted as a save of the settings', () => {
+      let saves = 0;
+
+      beforeEach(() => {
+        saves = 0;
+        mockWorkspaceService.beginSettingsSave.mockImplementation(() => { saves += 1; });
+        mockWorkspaceService.endSettingsSave.mockImplementation(() => { saves -= 1; });
+      });
+
+      it('should count from before the unit is left until the save has ended', async () => {
+        const savesOnLeaving: number[] = [];
+        mockRouter.navigate.mockImplementation(() => {
+          savesOnLeaving.push(saves);
+          return Promise.resolve(true);
+        });
+        const answer = new Subject<boolean>();
+        mockAppBackendService.setWorkspaceSettings.mockReturnValue(answer);
+        closeSettingsWith({ ...mockWorkspaceService.workspaceSettings, unitMDProfile: 'other-profile' });
+
+        const settingsDone = component.settings();
+        await settle();
+
+        expect(savesOnLeaving).toEqual([1]);
+        expect(saves).toBe(1);
+        answer.next(true);
+        answer.complete();
+        await settingsDone;
+        expect(saves).toBe(0);
+      });
+
+      it('should end the count when the open unit cannot be left', async () => {
+        mockRouter.navigate.mockResolvedValue(false);
+        closeSettingsWith({ ...mockWorkspaceService.workspaceSettings, unitMDProfile: 'other-profile' });
+
+        await component.settings();
+
+        expect(mockWorkspaceService.beginSettingsSave).toHaveBeenCalledTimes(1);
+        expect(saves).toBe(0);
+      });
     });
 
     it('should say when the backend refuses the settings', async () => {

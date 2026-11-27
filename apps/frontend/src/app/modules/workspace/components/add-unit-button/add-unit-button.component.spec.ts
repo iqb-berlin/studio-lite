@@ -11,7 +11,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
-import { NEVER, Observable, of } from 'rxjs';
+import {
+  NEVER, Observable, of, Subject
+} from 'rxjs';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { CreateUnitDto, RequestReportDto, UnitInListDto } from '@studio-lite-lib/api-dto';
 import { AddUnitButtonComponent } from './add-unit-button.component';
@@ -34,6 +36,8 @@ describe('AddUnitButtonComponent', () => {
     setWorkspaceSettings: jest.Mock<Observable<boolean>, [number, unknown]>;
   };
   let workspaceService: {
+    beginSettingsSave: jest.Mock<void, []>;
+    endSettingsSave: jest.Mock<void, []>;
     selectedWorkspaceId: number;
     workspaceSettings: {
       unitGroups: string[];
@@ -59,6 +63,8 @@ describe('AddUnitButtonComponent', () => {
       setWorkspaceSettings: jest.fn<Observable<boolean>, [number, unknown]>(() => of(true))
     };
     workspaceService = {
+      beginSettingsSave: jest.fn(),
+      endSettingsSave: jest.fn(),
       selectedWorkspaceId: 5,
       workspaceSettings: {
         unitGroups: ['G1'],
@@ -171,6 +177,27 @@ describe('AddUnitButtonComponent', () => {
 
     expect(appBackendService.setWorkspaceSettings).toHaveBeenCalledWith(5, workspaceService.workspaceSettings);
     expect(snackBar.open).toHaveBeenCalledWith('workspace.group-saved', '', { duration: 1000 });
+  }));
+
+  // the new unit is selected while the new group is saved; a workspace built for it asked for the settings
+  // meanwhile and could get the ones without the group (#2243)
+  it('counts the save of the new group as a save of the settings until it has ended', fakeAsync(() => {
+    const answer = new Subject<boolean>();
+    appBackendService.setWorkspaceSettings.mockReturnValue(answer);
+    jest.spyOn(
+      component as unknown as { addUnitDialog: (data: unknown) => Promise<CreateUnitDto | boolean> },
+      'addUnitDialog'
+    ).mockResolvedValue({ key: 'U4', name: 'Unit 4', groupName: 'G3' });
+    jest.spyOn(component, 'updateUnitList').mockImplementation(() => {});
+
+    component.addUnit();
+    flushMicrotasks();
+
+    expect(workspaceService.beginSettingsSave).toHaveBeenCalledTimes(1);
+    expect(workspaceService.endSettingsSave).not.toHaveBeenCalled();
+    answer.next(true);
+    answer.complete();
+    expect(workspaceService.endSettingsSave).toHaveBeenCalledTimes(1);
   }));
 
   it('sorts the new group of a unit in among the others (#1872)', fakeAsync(() => {

@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { NewGroupButtonComponent } from './new-group-button.component';
 import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
@@ -19,7 +19,9 @@ describe('NewGroupButtonComponent', () => {
     workspaceSettings: {
       unitGroups: [] as string[]
     },
-    selectedWorkspaceId: 1
+    selectedWorkspaceId: 1,
+    beginSettingsSave: jest.fn(),
+    endSettingsSave: jest.fn()
   };
 
   const mockBackendService = {
@@ -76,6 +78,21 @@ describe('NewGroupButtonComponent', () => {
     );
     expect(mockSnackBar.open).toHaveBeenCalledWith('workspace.group-saved', '', { duration: 1000 });
     expect(emitSpy).toHaveBeenCalledWith(newGroupName);
+  });
+
+  // a workspace built while the group is saved asked for the settings and could get the ones without it (#2243)
+  it('should count the save of the group as a save of the settings until it has ended', () => {
+    const answer = new Subject<boolean>();
+    mockDialog.open.mockReturnValue({ afterClosed: () => of('Neue Gruppe') });
+    mockBackendService.setWorkspaceSettings.mockReturnValue(answer);
+
+    component.newGroup();
+
+    expect(mockWorkspaceService.beginSettingsSave).toHaveBeenCalledTimes(1);
+    expect(mockWorkspaceService.endSettingsSave).not.toHaveBeenCalled();
+    answer.next(true);
+    answer.complete();
+    expect(mockWorkspaceService.endSettingsSave).toHaveBeenCalledTimes(1);
   });
 
   it('should sort the new group in among the others (#1872)', () => {

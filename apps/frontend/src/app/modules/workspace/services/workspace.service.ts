@@ -2,7 +2,7 @@ import {
   BehaviorSubject, defaultIfEmpty, forkJoin, lastValueFrom, Observable, Subject
 } from 'rxjs';
 import {
-  EventEmitter, Injectable, Output, signal
+  computed, EventEmitter, Injectable, Output, signal
 } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { map } from 'rxjs/operators';
@@ -107,6 +107,13 @@ export class WorkspaceService {
   /** Whether the open unit is being saved; no second save starts meanwhile (#1845). */
   readonly saving = this.savingState.asReadonly();
   private runningSave: Promise<boolean> | undefined;
+  // saves of the workspace settings under way; they may overlap
+  private readonly settingsSavesState = signal(0);
+  /**
+   * Whether the workspace settings are being saved. A workspace built meanwhile asks for its settings only
+   * afterwards: asked for during the save, the server could answer with the ones before it (#2243).
+   */
+  readonly settingsSaving = computed(() => this.settingsSavesState() > 0);
   states: State[] = [];
   private readonly dropBoxState = signal<DropBox | null>(null);
   /** The workspace units from here are submitted to, if there is one the server accepts (#1805, #2232). */
@@ -144,6 +151,16 @@ export class WorkspaceService {
   /** Marks the settings as the workspace's stored ones, or as the defaults it is entered with. */
   setSettingsLoaded(loaded: boolean): void {
     this.settingsLoadedState.set(loaded);
+  }
+
+  /** Counts a save of the workspace settings as under way, until `endSettingsSave` ends it. */
+  beginSettingsSave(): void {
+    this.settingsSavesState.update(saves => saves + 1);
+  }
+
+  /** Ends a save begun with `beginSettingsSave`, whatever its outcome. */
+  endSettingsSave(): void {
+    this.settingsSavesState.update(saves => Math.max(0, saves - 1));
   }
 
   /** Changes the settings in place -- whoever holds them sees the change -- and what follows from them. */

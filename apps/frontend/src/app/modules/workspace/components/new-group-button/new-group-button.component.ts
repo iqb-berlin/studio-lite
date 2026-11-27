@@ -8,6 +8,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
 import { compareText } from '@studio-lite/shared-code';
+import { finalize } from 'rxjs';
 import { InputTextComponent } from '../../../../components/input-text/input-text.component';
 import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
@@ -51,8 +52,12 @@ export class NewGroupButtonComponent {
           this.workspaceService.workspaceSettings.unitGroups.push(result);
           // the group select lists them as the API sorts them (#1872)
           this.workspaceService.workspaceSettings.unitGroups.sort(compareText);
+          // a workspace built meanwhile asks for the settings only once these are saved (#2243)
+          this.workspaceService.beginSettingsSave();
           this.appBackendService.setWorkspaceSettings(
             this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
+          ).pipe(
+            finalize(() => this.workspaceService.endSettingsSave())
           ).subscribe(isOK => {
             if (!isOK) {
               this.snackBar.open(
