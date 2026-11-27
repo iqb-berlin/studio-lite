@@ -41,7 +41,7 @@ describe('Admin settings API tests', () => {
 
     it('200 positive test: should successfully retrieve the configuration ' +
       'text settings for a regular user profile', () => {
-      cy.getSettingConfigAPI(Cypress.expose(`id_${userGroupAdmin.username}`))
+      cy.getSettingConfigAPI(Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
