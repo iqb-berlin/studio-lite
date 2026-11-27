@@ -20,8 +20,6 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { RouterLink } from '@angular/router';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatIcon } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
 import { BackendService } from '../../services/backend.service';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { AppService } from '../../../../services/app.service';
@@ -29,6 +27,7 @@ import { WorkspacesMenuComponent } from '../workspaces-menu/workspaces-menu.comp
 import { I18nService } from '../../../../services/i18n.service';
 import { TextSortTableDataSource } from '../../../../models/text-sort-table-data-source.class';
 import { buildWorkspaceReportFile } from '../../../../utils/workspace-report.utils';
+import { OrderedHiddenRoutesPipe } from '../../../../pipes/ordered-hidden-routes.pipe';
 
 @Component({
   selector: 'studio-lite-workspaces',
@@ -38,15 +37,13 @@ import { buildWorkspaceReportFile } from '../../../../utils/workspace-report.uti
   imports: [
     MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader,
     MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, FormsModule, TranslateModule, SearchFilterComponent, RouterLink,
-    MatPaginator, WorkspacesMenuComponent, MatIcon, MatTooltip
+    MatPaginator, WorkspacesMenuComponent, OrderedHiddenRoutesPipe
   ]
 })
 
 export class WorkspacesComponent implements OnInit, AfterViewInit, OnDestroy {
   dataSource = new TextSortTableDataSource<WorkspaceFullDto>([]);
-  displayedColumns: string[] = [
-    'id', 'name', 'groupId', 'metadata', 'editor', 'preview', 'schemer', 'comments', 'notes'
-  ];
+  displayedColumns: string[] = ['id', 'name', 'groupId', 'hiddenRoutes'];
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -111,13 +108,5 @@ export class WorkspacesComponent implements OnInit, AfterViewInit, OnDestroy {
           saveAs(file, `${thisDate} ${this.translateService.instant('wsg-admin.report-workspaces')}.xlsx`);
         }
       });
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  isRouteHidden(workspace: WorkspaceFullDto, route: string): boolean {
-    if (!workspace.settings || !workspace.settings.hiddenRoutes) {
-      return false; // Routes are visible by default
-    }
-    return workspace.settings.hiddenRoutes.includes(route);
   }
 }

@@ -37,10 +37,11 @@
           {{'user.is-admin' | translate}}
         </mat-header-cell>
         <mat-cell *matCellDef="let element">
-          <mat-icon [color]="element.isAdmin ? 'primary' : ''"
-                    [matTooltip]="(element.isAdmin ? 'user.is-admin' : 'user.is-not-admin') | translate">
-            {{element.isAdmin ? 'how_to_reg' : 'person'}}
-          </mat-icon>
+          @if (element.isAdmin) {
+            <mat-icon color="primary" [matTooltip]="'user.is-admin' | translate">check</mat-icon>
+          } @else {
+            <span class="false-mark" [matTooltip]="'user.is-not-admin' | translate">–</span>
+          }
         </mat-cell>
       </ng-container>
 

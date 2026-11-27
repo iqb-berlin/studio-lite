@@ -1,5 +1,8 @@
 import { addFirstUser, clickIndexTabAdmin } from '../../../support/helpers';
 
+/** The text of a cell as it reads, without the line breaks and indentation of the template. */
+const normalized = (text: string): string => text.replace(/\s+/g, ' ').trim();
+
 describe('Admin Workspaces Management', () => {
   const mockWorkspaces = [
     {
@@ -42,19 +45,19 @@ describe('Admin Workspaces Management', () => {
       cy.get('.cdk-column-id').should('contain', '1');
       cy.get('.cdk-column-name').should('contain', 'Workspace Alpha');
       cy.get('.cdk-column-groupId').should('contain', '101');
-      // Editor should be hidden (directions_off)
-      cy.get('.cdk-column-editor mat-icon').should('contain', 'directions_off');
-      // Preview should be visible (directions)
-      cy.get('.cdk-column-preview mat-icon').should('contain', 'directions');
+      // The hidden routes by name, in the order of the settings dialog (#2251)
+      cy.translate(Cypress.expose('locale')).then(json => {
+        cy.get('.cdk-column-hiddenRoutes').should($cell => expect(normalized($cell.text()))
+          .to.equal(`${json.workspace.routes.editor}, ${json.workspace.routes.schemer}`));
+      });
     });
 
     cy.get('.mat-mdc-row').eq(1).within(() => {
       cy.get('.cdk-column-id').should('contain', '2');
       cy.get('.cdk-column-name').should('contain', 'Workspace Beta');
       cy.get('.cdk-column-groupId').should('contain', '102');
-      // All routes should be visible
-      cy.get('.cdk-column-editor mat-icon').should('contain', 'directions');
-      cy.get('.cdk-column-preview mat-icon').should('contain', 'directions');
+      // Nothing hidden
+      cy.get('.cdk-column-hiddenRoutes').should($cell => expect(normalized($cell.text())).to.equal('–'));
     });
   });
 
