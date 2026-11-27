@@ -40,6 +40,12 @@ export class RolesMatrixComponent {
       functionality: 'unit-create', commenter: false, developer: true, super: true
     },
     {
+      functionality: 'unit-edit', commenter: false, developer: true, super: true
+    },
+    {
+      functionality: 'rich-note-edit', commenter: false, developer: true, super: true
+    },
+    {
       functionality: 'unit-copy', commenter: true, developer: true, super: true
     },
     {
