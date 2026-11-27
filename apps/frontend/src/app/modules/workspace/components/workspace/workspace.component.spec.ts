@@ -68,6 +68,7 @@ class MockWorkspaceService {
   setSettingsLoaded = jest.fn();
   setDropBox = jest.fn();
   hiddenRoutes = signal<string[]>([]);
+  settingsSaving = signal(false);
 }
 
 describe('WorkspaceComponent', () => {
@@ -76,6 +77,7 @@ describe('WorkspaceComponent', () => {
   let appService: MockAppService;
   let appBackendService: DeepMocked<AppBackendService>;
   let snackBar: DeepMocked<MatSnackBar>;
+  let workspaceServiceMock: MockWorkspaceService;
 
   // A plain object: of() would take a createMock proxy, which answers to "schedule", for a scheduler.
   const loadedWorkspace: UserWorkspaceFullDto = {
@@ -84,11 +86,19 @@ describe('WorkspaceComponent', () => {
 
   const configure = async (
     url: string,
-    { userId = 1, workspace = loadedWorkspace, answer = of(workspace) }:
-    { userId?: number, workspace?: UserWorkspaceFullDto | null, answer?: Observable<UserWorkspaceFullDto | null> } = {}
+    {
+      userId = 1, workspace = loadedWorkspace, answer = of(workspace), settingsSaving = false
+    }: {
+      userId?: number,
+      workspace?: UserWorkspaceFullDto | null,
+      answer?: Observable<UserWorkspaceFullDto | null>,
+      settingsSaving?: boolean
+    } = {}
   ): Promise<void> => {
     routerEvents = new Subject<Event>();
     appService = new MockAppService(userId);
+    workspaceServiceMock = new MockWorkspaceService();
+    workspaceServiceMock.settingsSaving.set(settingsSaving);
     appBackendService = createMock<AppBackendService>({
       getUserWorkspaceData: jest.fn().mockReturnValue(answer)
     });
@@ -101,7 +111,7 @@ describe('WorkspaceComponent', () => {
         { provide: ActivatedRoute, useValue: createMock<ActivatedRoute>({ snapshot: { params: { ws: 5 } } }) },
         { provide: AppService, useValue: appService },
         { provide: AppBackendService, useValue: appBackendService },
-        { provide: WorkspaceService, useValue: new MockWorkspaceService() },
+        { provide: WorkspaceService, useValue: workspaceServiceMock },
         { provide: ModuleService, useValue: createMock<ModuleService>() },
         { provide: MatSnackBar, useValue: snackBar }
       ]
@@ -213,6 +223,41 @@ describe('WorkspaceComponent', () => {
     await configure('/a/5/7/editor', { workspace: { ...loadedWorkspace, settings } });
 
     expect(TestBed.inject(WorkspaceService).workspaceSettings.unitGroups).toEqual(['A', 'ä', 'b']);
+  });
+
+  // #2243: saved with another profile, the settings left the unit, and the workspace built anew asked for
+  // them while the save was running. The server answered with the ones before, and they replaced the new.
+  it('should ask for the settings only once a save running meanwhile has ended', async () => {
+    await configure('/a/5', { settingsSaving: true });
+    expect(appBackendService.getUserWorkspaceData).not.toHaveBeenCalled();
+
+    workspaceServiceMock.settingsSaving.set(false);
+    fixture.detectChanges();
+
+    expect(appBackendService.getUserWorkspaceData).toHaveBeenCalledTimes(1);
+  });
+
+  it('should drop an answer when a save begins before it, and ask again once the save has ended', async () => {
+    const answerBeforeSave = new Subject<UserWorkspaceFullDto>();
+    const answerAfterSave = new Subject<UserWorkspaceFullDto>();
+    await configure('/a/5', { answer: answerBeforeSave });
+    const settingsBefore = TestBed.inject(WorkspaceService).workspaceSettings;
+    appBackendService.getUserWorkspaceData.mockReturnValue(answerAfterSave);
+    const saved: WorkspaceSettingsDto = {
+      defaultEditor: 'editor', defaultPlayer: 'player', defaultSchemer: 'schemer', hiddenRoutes: ['notes']
+    };
+
+    workspaceServiceMock.settingsSaving.set(true);
+    fixture.detectChanges();
+    answerBeforeSave.next({ ...loadedWorkspace, settings: { ...saved, hiddenRoutes: [] } });
+    expect(TestBed.inject(WorkspaceService).workspaceSettings).toBe(settingsBefore);
+
+    workspaceServiceMock.settingsSaving.set(false);
+    fixture.detectChanges();
+    answerAfterSave.next({ ...loadedWorkspace, settings: saved });
+
+    expect(appBackendService.getUserWorkspaceData).toHaveBeenCalledTimes(2);
+    expect(TestBed.inject(WorkspaceService).workspaceSettings).toEqual({ ...saved, unitGroups: [] });
   });
 
   it('should say when the workspace could not be loaded', async () => {

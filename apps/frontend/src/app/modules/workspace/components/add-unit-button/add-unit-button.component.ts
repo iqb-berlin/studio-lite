@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 import { CreateUnitDto, UnitInListDto } from '@studio-lite-lib/api-dto';
 import {
-  lastValueFrom, map, Subject, Subscription
+  finalize, lastValueFrom, map, Subject, Subscription
 } from 'rxjs';
 import { UntypedFormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -153,11 +153,15 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
       this.workspaceService.workspaceSettings.unitGroups.push(newGroup);
       // the group select lists them as the API sorts them (#1872)
       this.workspaceService.workspaceSettings.unitGroups.sort(compareText);
+      // the new unit is selected meanwhile, and a workspace built for it asks for the settings only once these
+      // are saved (#2243)
+      this.workspaceService.beginSettingsSave();
       this.appBackendService
         .setWorkspaceSettings(
           this.workspaceService.selectedWorkspaceId,
           this.workspaceService.workspaceSettings
         )
+        .pipe(finalize(() => this.workspaceService.endSettingsSave()))
         .subscribe(isOK => {
           this.changeResult.show(isOK, 'workspace.group-saved', 'workspace.group-not-saved', 'workspace.error');
         });

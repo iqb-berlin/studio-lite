@@ -195,4 +195,62 @@ describe('Workspace Settings – hiddenRoutes', () => {
       cy.get('studio-lite-unit-editor').should('not.exist');
     });
   });
+
+  // -------------------------------------------------------------------------
+  // Another metadata profile leaves the open unit, and the workspace is built anew. It asked for its settings
+  // while they were being saved and got the ones before: a tab just hidden showed again, and the dialog,
+  // saved once more, wrote the old profile back (#2243).
+  describe('Saving another metadata profile from within the workspace', () => {
+    let unitId = '';
+
+    const openSettings = () => {
+      cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
+      cy.get('[data-cy="workspace-edit-unit-settings"]').click();
+    };
+
+    before(() => {
+      cy.createUnitAPI(base.secondaryWsId, { shortname: 'PROFILE1', name: 'Profil', group: '' }, base.token)
+        .then(created => {
+          expect(created.status, 'unit').to.equal(201);
+          unitId = String(created.body);
+        });
+      cy.updateWsSettingsAPI(
+        base.secondaryWsId,
+        { unitMDProfile: 'https://example.org/unit-profile.json', hiddenRoutes: [] },
+        base.token
+      ).its('status').should('equal', 200);
+    });
+
+    it('shows the settings saved, in the tabs and in the dialog opened again', () => {
+      cy.visit(`/#/a/${base.secondaryWsId}/${unitId}/properties`);
+      cy.get('[data-cy="workspace-routes-notes"]', { timeout: FIRST_WORKSPACE_REQUEST_TIMEOUT }).should('exist');
+      // held back on its way to the server, so that a workspace asking for the settings meanwhile is answered first
+      cy.intercept('PATCH', `/api/workspaces/${base.secondaryWsId}/settings`, () => Cypress.Promise.delay(1000))
+        .as('saveSettings');
+      cy.intercept('GET', `/api/workspaces/${base.secondaryWsId}/users/*`).as('loadSettings');
+
+      openSettings();
+      cy.get('[data-cy="edit-workspace-settings-select-unit-profile"]').click();
+      // the empty option: no profile
+      cy.get('mat-option').first().click();
+      setRouteVisibility('notes', false);
+      cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
+      cy.wait('@saveSettings');
+      cy.wait('@loadSettings');
+
+      // Checked before a unit is chosen again: that builds the workspace once more, and it loads the settings
+      // anew, after the save.
+      cy.url().should('match', new RegExp(`/a/${base.secondaryWsId}$`));
+      cy.get('[data-cy="workspace-routes-properties"]').should('exist');
+      cy.get('[data-cy="workspace-routes-notes"]').should('not.exist');
+      openSettings();
+      cy.get('[data-cy="edit-workspace-settings-select-unit-profile"]').should('exist');
+      cy.get('[data-cy="edit-workspace-settings-unit-profile-not-in-group"]').should('not.exist');
+      cy.translate(Cypress.expose('locale')).then(json => {
+        cy.contains('studio-lite-edit-workspace-settings mat-checkbox', json.workspace.routes.notes)
+          .find('input[type="checkbox"]')
+          .should('not.be.checked');
+      });
+    });
+  });
 });

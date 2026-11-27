@@ -5,8 +5,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { UserWorkspaceFullDto } from '@studio-lite-lib/api-dto';
 import {
-  filter, Subject, takeUntil, takeWhile
+  EMPTY, filter, Observable, Subject, switchMap, take, takeUntil, takeWhile
 } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
 import { compareText } from '@studio-lite/shared-code';
 import { ModuleService } from '../../../../services/module.service';
@@ -54,6 +55,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   routingOutlet = 'primary';
   private ngUnsubscribe = new Subject<void>();
   private userId = 0;
+  private readonly settingsSaving$: Observable<boolean>;
 
   constructor(
     public appService: AppService,
@@ -75,6 +77,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       stableModulesOnly: true
     };
     this.workspaceService.setSettingsLoaded(false);
+    this.settingsSaving$ = toObservable(this.workspaceService.settingsSaving);
   }
 
   ngOnInit(): void {
@@ -109,10 +112,17 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   private fetchUserWorkspaceDataForUser(): void {
-    this.appBackendService.getUserWorkspaceData(
-      this.workspaceService.selectedWorkspaceId,
-      this.appService.authData.userId
-    ).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
+    // Saved with another profile, the settings leave the open unit, and the workspace is built anew while
+    // they are being saved. Asked for meanwhile, the server could answer with the ones before (#2243). So the
+    // request waits for a save under way, and a save that begins before the answer drops it and asks again.
+    this.settingsSaving$.pipe(
+      switchMap(saving => (saving ? EMPTY : this.appBackendService.getUserWorkspaceData(
+        this.workspaceService.selectedWorkspaceId,
+        this.appService.authData.userId
+      ))),
+      take(1),
+      takeUntil(this.ngUnsubscribe)
+    ).subscribe(
       wResponse => {
         if (wResponse) {
           this.initWorkspace(wResponse);

@@ -143,8 +143,6 @@ describe('The settings page of a workspace group', () => {
   // it gets over the stored settings (#2010). A group that does not exist fails to load without a faked answer.
   it('offers nothing to save when the group cannot be loaded', () => {
     cy.visit('/#/wsg-admin/999999/settings');
-    // coming from another group's page, the router keeps the page and loads nothing
-    cy.reload();
     cy.get('[data-cy="wsg-admin-settings-not-loaded"]').should('be.visible');
     cy.get('[data-cy="wsg-admin-settings-save-button"]').should('not.exist');
   });

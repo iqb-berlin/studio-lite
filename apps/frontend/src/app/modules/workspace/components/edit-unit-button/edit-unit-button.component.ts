@@ -91,36 +91,34 @@ export class EditUnitButtonComponent extends RequestMessageDirective {
       }
     });
     const result = await lastValueFrom(dialogRef.afterClosed());
-    if (result) {
-      let routingOk: boolean;
-      if ((result.unitMDProfile !== this.workspaceService.workspaceSettings.unitMDProfile) ||
-      (result.itemMDProfile !== this.workspaceService.workspaceSettings.itemMDProfile)) {
-        routingOk = await this.selectUnit(0);
+    if (!result) return;
+    const profileChanged = (result.unitMDProfile !== this.workspaceService.workspaceSettings.unitMDProfile) ||
+      (result.itemMDProfile !== this.workspaceService.workspaceSettings.itemMDProfile);
+    // Another profile leaves the open unit first, and the workspace is built anew without it. Marked before
+    // that, it asks for its settings only once these are saved: asked for during the save, the server could
+    // answer with the ones before, and they replaced the new (#2243).
+    this.workspaceService.beginSettingsSave();
+    try {
+      if (profileChanged && !await this.selectUnit(0)) return;
+      this.workspaceService.updateWorkspaceSettings(result);
+      const isOK = await lastValueFrom(this.appBackendService.setWorkspaceSettings(
+        this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
+      ));
+      if (isOK) {
+        this.snackBar.open(
+          this.translateService.instant('workspace.settings-saved'),
+          '',
+          { duration: 1000 }
+        );
       } else {
-        routingOk = true;
+        this.snackBar.open(
+          this.translateService.instant('workspace.settings-not-saved'),
+          this.translateService.instant('workspace.error'),
+          { duration: 3000 }
+        );
       }
-      if (routingOk) {
-        this.workspaceService.updateWorkspaceSettings(result);
-
-        this.appBackendService.setWorkspaceSettings(
-          this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
-        )
-          .subscribe(isOK => {
-            if (isOK) {
-              this.snackBar.open(
-                this.translateService.instant('workspace.settings-saved'),
-                '',
-                { duration: 1000 }
-              );
-            } else {
-              this.snackBar.open(
-                this.translateService.instant('workspace.settings-not-saved'),
-                this.translateService.instant('workspace.error'),
-                { duration: 3000 }
-              );
-            }
-          });
-      }
+    } finally {
+      this.workspaceService.endSettingsSave();
     }
   }
 

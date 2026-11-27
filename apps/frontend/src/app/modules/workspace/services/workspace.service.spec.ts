@@ -208,6 +208,18 @@ describe('WorkspaceService', () => {
     });
   });
 
+  // A workspace built while the settings are saved asks for them only afterwards (#2243). Saves may
+  // overlap: the first to end must not let it ask while another is still under way.
+  it('counts the settings as being saved until the last of overlapping saves has ended', () => {
+    service.beginSettingsSave();
+    service.beginSettingsSave();
+    service.endSettingsSave();
+    expect(service.settingsSaving()).toBe(true);
+
+    service.endSettingsSave();
+    expect(service.settingsSaving()).toBe(false);
+  });
+
   describe('resetUnitData', () => {
     it('should reset the timestamps and let go of the stores', () => {
       unitStores.propertiesLoaded$.next({
