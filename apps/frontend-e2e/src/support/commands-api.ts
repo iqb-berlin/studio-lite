@@ -2576,10 +2576,11 @@ Cypress.Commands.add('updateSettingUnitExportAPI', (token:string, unitExport: Un
       'app-version': Cypress.expose('version'),
       authorization
     },
+    // as given: a field a stored config lacks stays out, rather than going back as "undefined"
     body: {
-      unitXsdUrl: `${unitExport.unitXsdUrl}`,
-      bookletXsdUrl: `${unitExport.bookletXsdUrl}`,
-      testTakersXsdUrl: `${unitExport.testTakersXsdUrl}`
+      unitXsdUrl: unitExport.unitXsdUrl,
+      bookletXsdUrl: unitExport.bookletXsdUrl,
+      testTakersXsdUrl: unitExport.testTakersXsdUrl
     },
     failOnStatusCode: false
   });

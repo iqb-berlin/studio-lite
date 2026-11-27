@@ -30,6 +30,23 @@ describe('Admin settings API tests', () => {
       });
   });
 
+  // 104 and 105 change the unit export config, which outlasts the reset before each spec: it is
+  // read before them and written back after. Without a stored one, the defaults the API answers are.
+  let storedUnitExport: UnitExport | undefined;
+  before(() => {
+    cy.getSettingUnitExportAPI(Cypress.expose(`token_${Cypress.expose('username')}`)).then(resp => {
+      expect(resp.status, 'stored unit export config').to.equal(200);
+      storedUnitExport = resp.body;
+    });
+  });
+
+  after(() => {
+    if (storedUnitExport) {
+      cy.updateSettingUnitExportAPI(Cypress.expose(`token_${Cypress.expose('username')}`), storedUnitExport)
+        .its('status').should('equal', 200);
+    }
+  });
+
   describe('100. GET /api/settings/config', () => {
     it('200 positive test: should successfully retrieve the current configuration ' +
       'text settings for an administrator', () => {
@@ -194,31 +211,21 @@ describe('Admin settings API tests', () => {
   });
 
   describe('104. GET /api/settings/unit-export-config', () => {
-    const adminToken = () => Cypress.expose(`token_${Cypress.expose('username')}`);
-    let stored: UnitExport | undefined;
+    // a known value, and not the default the API answers when none is stored
+    const known: UnitExport = {
+      unitXsdUrl: 'https://w3id.org/iqb/spec/unit-xml/17.4',
+      bookletXsdUrl: 'https://w3id.org/iqb/spec/testcenter-booklet-xml/18.0',
+      testTakersXsdUrl: 'https://w3id.org/iqb/spec/testcenter-testtaker-xml/18.0'
+    };
 
-    // Settings outlast the reset before each spec: what was stored is written back
     before(() => {
-      cy.getSettingUnitExportAPI(adminToken()).then(resp => {
-        expect(resp.status, 'stored unit export config').to.equal(200);
-        stored = resp.body;
-      });
-    });
-
-    after(() => {
-      if (stored) cy.updateSettingUnitExportAPI(adminToken(), stored).its('status').should('equal', 200);
+      cy.updateSettingUnitExportAPI(Cypress.expose(`token_${Cypress.expose('username')}`), known)
+        .its('status').should('equal', 200);
     });
 
     it('200 positive test: should successfully retrieve unit export ' +
       'configuration parameters for an administrator', () => {
-      // a known value, and not the default the API answers when none is stored
-      const known: UnitExport = {
-        unitXsdUrl: 'https://w3id.org/iqb/spec/unit-xml/17.4',
-        bookletXsdUrl: 'https://w3id.org/iqb/spec/testcenter-booklet-xml/18.0',
-        testTakersXsdUrl: 'https://w3id.org/iqb/spec/testcenter-testtaker-xml/18.0'
-      };
-      cy.updateSettingUnitExportAPI(adminToken(), known).its('status').should('equal', 200);
-      cy.getSettingUnitExportAPI(adminToken())
+      cy.getSettingUnitExportAPI(Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
           expect(resp.body).to.deep.equal(known);
@@ -230,6 +237,7 @@ describe('Admin settings API tests', () => {
       cy.getSettingUnitExportAPI(Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
+          expect(resp.body).to.deep.equal(known);
         });
     });
 
