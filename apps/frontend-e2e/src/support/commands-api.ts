@@ -806,12 +806,14 @@ Cypress.Commands.add('uploadUnitFilesAPI', (wsId: string, fixtures: string[], to
 });
 
 // 44
-// With dependencies, what the editor reports the unit needs to be played and edited (#2198)
+// With dependencies, what the editor reports the unit needs to be played and edited (#2198); with a
+// definition type, the format the editor reports it in (#2199)
 Cypress.Commands.add('updateUnitDefinitionAPI', (
   unitId: string,
   wsId: string,
   token: string,
-  dependencies?: Record<'dependenciesToPlay' | 'dependenciesToEdit', { id: string; type: string }[]>
+  dependencies?: Record<'dependenciesToPlay' | 'dependenciesToEdit', { id: string; type: string }[]>,
+  definitionType?: string
 ) => {
   const authorization = `bearer ${token}`;
 
@@ -1222,7 +1224,8 @@ Cypress.Commands.add('updateUnitDefinitionAPI', (
           valuesComplete: true
         }
       ],
-      ...dependencies
+      ...dependencies,
+      ...(definitionType && { definitionType })
     },
     failOnStatusCode: false
   });

@@ -57,7 +57,8 @@ describe('UnitCheckComponent', () => {
   let units: WritableSignal<{ [group: string]: UnitInListDto[] }>;
   let listLoaded: WritableSignal<boolean>;
   let listVersion: WritableSignal<number>;
-  let editors: Record<string, { nameAndVersion: string }>;
+  let editors: Record<string, unitCheckUtils.InstalledModule>;
+  let players: Record<string, unitCheckUtils.InstalledModule>;
   let loadList: jest.Mock;
   let loadInstalledDependencies: jest.Mock;
   let getUnitValidation: jest.Mock;
@@ -119,7 +120,7 @@ describe('UnitCheckComponent', () => {
           provide: ModuleService,
           useValue: {
             editors,
-            players: { 'iqb-player-aspect@2.9': { nameAndVersion: 'Player' } },
+            players,
             schemers: { 'iqb-schemer@2.5': { nameAndVersion: 'Schemer' } },
             listLoaded: listLoaded.asReadonly(),
             listVersion: listVersion.asReadonly(),
@@ -146,6 +147,7 @@ describe('UnitCheckComponent', () => {
     listLoaded = signal(true);
     listVersion = signal(1);
     editors = { 'iqb-editor-aspect@2.9': { nameAndVersion: 'Editor' } };
+    players = { 'iqb-player-aspect@2.9': { nameAndVersion: 'Player' } };
     loadList = jest.fn().mockResolvedValue(undefined);
     loadInstalledDependencies = jest.fn(() => of({ packages: ['GeoGebra'], widgets: [] }));
     getUnitValidation = jest.fn(() => of({ sizeLevels: DEFAULT_UNIT_SIZE_LEVELS }));
@@ -510,6 +512,33 @@ describe('UnitCheckComponent', () => {
       key: 'unit-check.last-changed-definition', params: { date: '26.11.2026 10:15', user: 'workspace.unknown' }
     }]);
     expect(lastChangeOf('properties')?.[0].key).toBe('unit-check.last-changed-metadata');
+  }));
+
+  // a newer player is recommended once the unit is saved with the older one after it was installed (#2199)
+  it('recommends a newer player once the definition is saved after it was installed', fakeAsync(() => {
+    getUnitDefinitionSummary.mockReturnValue(of({
+      hasDefinition: true, definitionType: 'aspect-unit-definition@4.10.0'
+    }));
+    players = {
+      'iqb-player-aspect@2.9': { nameAndVersion: 'Player 2.9' },
+      'iqb-player-aspect@2.10': {
+        nameAndVersion: 'Player 2.10',
+        fileDateTime: '2026-03-01T10:00:00.000Z',
+        metadata: { model: 'aspect-unit-definition@>=4.0 <=4.13', isStable: true }
+      }
+    };
+    lastChanges.set({ definition: { at: new Date('2026-02-01T10:00:00.000Z') } });
+    create();
+    const findingKeys = () => Array.from(
+      sectionOf('properties')?.querySelectorAll('[data-cy="unit-check-finding-text"]') ?? [],
+      finding => finding.textContent
+    );
+    expect(findingKeys()).toEqual([]);
+
+    lastChanges.set({ definition: { at: new Date('2026-04-01T10:00:00.000Z') } });
+    fixture.detectChanges();
+
+    expect(findingKeys()).toEqual(['unit-check.newer-module']);
   }));
 
   // what the stored unit needs comes with the summary; once the editor holds the definition, what it reports (#2198)

@@ -688,6 +688,8 @@
     "not-installed-editor": "The assigned editor \"{{module}}\" is not installed.",
     "not-installed-player": "The assigned player \"{{module}}\" is not installed.",
     "not-installed-schemer": "The assigned schemer \"{{module}}\" is not installed.",
+    "newer-module": "This unit uses {{used}}. An update to {{newer}} is recommended.",
+    "newer-module-and-player": "This unit uses {{used}} and {{usedPlayer}}. An update to {{newer}} is recommended, together with an update to {{player}}.",
     "key-missing": "The unit has no key.",
     "key-too-short": "The key \"{{key}}\" is shorter than the intended {{min}} characters.",
     "key-too-long": "The key \"{{key}}\" is longer than {{max}} characters and cannot be saved like this.",

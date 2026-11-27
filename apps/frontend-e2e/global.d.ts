@@ -86,7 +86,8 @@ declare namespace Cypress {
       unitId: string,
       wsId: string,
       token: string,
-      dependencies?: Record<'dependenciesToPlay' | 'dependenciesToEdit', { id: string; type: string }[]>
+      dependencies?: Record<'dependenciesToPlay' | 'dependenciesToEdit', { id: string; type: string }[]>,
+      definitionType?: string
     ): Chainable<Response>; // 44
     getUnitDefinitionAPI(unitId: string, wsId: string, token: string): Chainable<Response>; // 45
     getUnitDefinitionSummaryAPI(unitId: string, wsId: string, token: string): Chainable<Response>; // 45a

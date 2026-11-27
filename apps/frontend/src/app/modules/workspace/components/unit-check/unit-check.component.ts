@@ -150,6 +150,8 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
     const definitionStore = this.unitStores.definitionStore();
     const editorDefinition = this.editorDefinition();
     const schemeStore = this.unitStores.schemeStore();
+    // set on loading and renewed on saving: no keystroke checks the unit again for it
+    const lastChanges = this.workspaceService.lastChanges();
     return checkUnit({
       modules: this.modules(),
       installed: this.moduleService.listLoaded() ?
@@ -166,6 +168,7 @@ export class UnitCheckComponent implements OnInit, OnDestroy {
       variables: editorDefinition?.variables || schemeStore?.data().variables,
       scheme: schemeStore?.data(),
       unsaved: { variables: definitionStore?.variablesChanged() ?? false },
+      lastChanged: { definition: lastChanges.definition?.at, scheme: lastChanges.scheme?.at },
       ...presence,
       hiddenRoutes: this.workspaceService.hiddenRoutes()
     });
