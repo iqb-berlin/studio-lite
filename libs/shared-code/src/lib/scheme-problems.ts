@@ -245,8 +245,9 @@ export function findSchemeProblems(
     .filter((problem): problem is NamedProblem => problem.type !== 'VACANT')
     .filter(problem => !(problem.type === 'SOURCE_MISSING' && emptyLeftovers.get(problem.variableId)))
     .filter(problem => !(problem.type === 'ONLY_ONE_SOURCE' && oneSourceUsual.get(problem.variableId)))
+    // by the codings of the name where there are any, else by the element id the validation names
     .filter(problem => !(problem.type === 'INVALID_SOURCE' &&
-      ((elementIdCounts.get(problem.variableId) ?? 0) > 1 || ofDoubledElements.get(problem.variableId))))
+      (ofDoubledElements.get(problem.variableId) ?? (elementIdCounts.get(problem.variableId) ?? 0) > 1)))
     .filter(problem => {
       const key = `${problem.type} ${problem.variableId}`;
       if (seen.has(key)) return false;

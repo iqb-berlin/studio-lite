@@ -305,6 +305,25 @@ describe('findSchemeProblems', () => {
     });
   });
 
+  // what a derived variable of that name does wrong stays: renaming it resolves it, not the elements
+  it('still names a derived variable that takes the name of elements whose id is used twice', () => {
+    const variables: VariableInfoInput[] = [
+      { id: 'text_x', alias: 'text_1', type: 'string' },
+      { id: 'text_x', alias: 'text_2', type: 'string' },
+      { id: 'y', alias: 'y', type: 'string' }
+    ];
+
+    expect(findSchemeProblems(variables, scheme([
+      { id: 'text_x', sourceType: 'BASE', ...coded },
+      {
+        id: 'y', alias: 'y', sourceType: 'BASE', ...coded
+      },
+      {
+        id: 'd_1', alias: 'text_x', sourceType: 'MANUAL', deriveSources: ['y'], ...coded
+      }
+    ])).map(problem => [problem.type, problem.variable])).toContainEqual(['NAME_TWICE', 'text_x']);
+  });
+
   // the schemer allows the pair only as a pair
   it('names a name that two derived variables take from their source as a name used twice', () => {
     const variables: VariableInfoInput[] = [{ id: 'x', type: 'string' }];
