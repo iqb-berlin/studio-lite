@@ -3,7 +3,7 @@ import {
   ComponentFixture, fakeAsync, flushMicrotasks, TestBed
 } from '@angular/core/testing';
 import {
-  Component, Input, Pipe, PipeTransform
+  Component, Input
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -19,7 +19,6 @@ import { I18nService } from '../../../../services/i18n.service';
 import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
-import { WorkspaceNamePipe } from '../../pipes/workspace-name.pipe';
 import { BackendService } from '../../services/backend.service';
 import { WsgAdminService } from '../../services/wsg-admin.service';
 import { RolesHeaderComponent } from '../roles-header/roles-header.component';
@@ -55,12 +54,6 @@ class MockRolesHeaderComponent {
 
 @Component({ selector: 'studio-lite-entries-divider', template: '', standalone: true })
 class MockEntriesDividerComponent {}
-
-@Pipe({ name: 'workspaceName', standalone: true })
-class MockWorkspaceNamePipe implements PipeTransform {
-  // eslint-disable-next-line class-methods-use-this
-  transform(value: string): string { return value; }
-}
 
 describe('WorkspacesComponent', () => {
   let component: WorkspacesComponent;
@@ -141,8 +134,7 @@ describe('WorkspacesComponent', () => {
             WorkspaceMenuComponent,
             SearchFilterComponent,
             RolesHeaderComponent,
-            EntriesDividerComponent,
-            WorkspaceNamePipe
+            EntriesDividerComponent
           ]
         },
         add: {
@@ -150,8 +142,7 @@ describe('WorkspacesComponent', () => {
             MockWorkspaceMenuComponent,
             MockSearchFilterComponent,
             MockRolesHeaderComponent,
-            MockEntriesDividerComponent,
-            MockWorkspaceNamePipe
+            MockEntriesDividerComponent
           ]
         }
       })
@@ -418,36 +409,6 @@ describe('WorkspacesComponent', () => {
     expect(mockAppService.dataLoading).toBe(false);
   });
 
-  describe('Route Visibility Configurations', () => {
-    let ws: WorkspaceInListDto;
-
-    beforeEach(() => {
-      ws = {
-        id: 1,
-        name: 'ws1',
-        groupId: 1,
-        unitsCount: 0,
-        settings: {
-          defaultEditor: '', defaultPlayer: '', defaultSchemer: '', hiddenRoutes: ['preview']
-        }
-      } as WorkspaceInListDto;
-      mockAppBackendService.setWorkspaceSettings = jest.fn().mockReturnValue(of(true));
-      component.workspaces = [ws];
-    });
-
-    it('isRouteHidden should determine correctly', () => {
-      expect(component.isRouteHidden(ws, 'preview')).toBe(true);
-      expect(component.isRouteHidden(ws, 'editor')).toBe(false);
-      expect(component.isRouteHidden(ws, 'notes')).toBe(false);
-
-      ws.settings!.hiddenRoutes!.push('notes');
-      expect(component.isRouteHidden(ws, 'notes')).toBe(true);
-
-      ws.settings = undefined;
-      expect(component.isRouteHidden(ws, 'editor')).toBe(false);
-    });
-  });
-
   describe('onRoleChange and onRoleClick', () => {
     let userEntry: WorkspaceUserChecked;
 
@@ -550,6 +511,22 @@ describe('WorkspacesComponent', () => {
     component.objectsDatasource.filter = filter;
 
     expect(component.objectsDatasource.filteredData.map(ws => ws.name)).toEqual(names);
+  });
+
+  // The column shows the name of the drop box, so it sorts by that name and not by the id (#2251)
+  it('should sort the drop box column by the name it shows', () => {
+    mockBackendService.getWorkspaces.mockReturnValue(of([
+      { ...workspace(1, 'Zebra', 0), dropBoxId: 3 },
+      { ...workspace(2, 'Mitte', 0), dropBoxId: 4 },
+      workspace(3, 'Abgabe Z', 0),
+      workspace(4, 'Abgabe B', 0)
+    ]));
+    fixture.detectChanges();
+
+    component.objectsDatasource.sort!.sort({ id: 'dropBoxId', start: 'asc', disableClear: true });
+
+    expect(component.objectsDatasource.connect().value.map(ws => ws.name))
+      .toEqual(['Abgabe Z', 'Abgabe B', 'Mitte', 'Zebra']);
   });
 
   it('should add up the units of all workspaces of the group', () => {

@@ -12,7 +12,7 @@ import { saveAs } from 'file-saver-es';
 import {
   Component, Input, Output, EventEmitter
 } from '@angular/core';
-import { WorkspaceFullDto, WorkspaceReportDto } from '@studio-lite-lib/api-dto';
+import { WorkspaceReportDto } from '@studio-lite-lib/api-dto';
 import { WorkspacesComponent } from './workspaces.component';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
@@ -91,21 +91,6 @@ describe('WorkspacesComponent', () => {
 
     expect(mockBackendService.getAllWorkspaces).toHaveBeenCalled();
     expect(component.dataSource.data.length).toBe(1);
-    expect(component.displayedColumns).toContain('notes');
-  });
-
-  it('isRouteHidden should determine correctly', () => {
-    const ws = {
-      id: 1,
-      settings: {
-        hiddenRoutes: ['preview']
-      }
-    } as WorkspaceFullDto;
-    expect(component.isRouteHidden(ws, 'preview')).toBe(true);
-    expect(component.isRouteHidden(ws, 'editor')).toBe(false);
-
-    ws.settings = undefined;
-    expect(component.isRouteHidden(ws, 'editor')).toBe(false);
   });
 
   // The API sends the figures, and the file is built here, in the language of the interface (#2181)

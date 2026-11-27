@@ -92,4 +92,10 @@
   justify-content: flex-end;
 }
 
-
+// The "no" of a yes/no column: a grey dash, as wide as the check icon of a "yes" and centred like it (#2251)
+.false-mark {
+  display: inline-block;
+  width: 24px;
+  text-align: center;
+  color: gray;
+}

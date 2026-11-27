@@ -16,11 +16,11 @@
         </mat-icon>
       </th>
       <td mat-cell *matCellDef="let element">
-        <mat-icon color="primary"
-                  [matTooltip]="(element.commenter ? 'access-rights.true' : 'access-rights.false') | translate"
-                  [color]="element.commenter ? 'primary' : 'default'"
-                  [fontIcon]="element.commenter ? 'check_circle' : 'unpublished'">
-        </mat-icon>
+        @if (element.commenter) {
+          <mat-icon color="primary" [matTooltip]="'access-rights.true' | translate" fontIcon="check"></mat-icon>
+        } @else {
+          <span class="false-mark" [matTooltip]="'access-rights.false' | translate">–</span>
+        }
       </td>
     </ng-container>
 
@@ -32,11 +32,11 @@
         </mat-icon>
       </th>
       <td mat-cell *matCellDef="let element">
-          <mat-icon color="primary"
-                    [matTooltip]="(element.developer ? 'access-rights.true' : 'access-rights.false') | translate"
-                    [color]="element.developer ? 'primary' : 'default'"
-                    [fontIcon]="element.developer ? 'check_circle' : 'unpublished'">
-          </mat-icon>
+        @if (element.developer) {
+          <mat-icon color="primary" [matTooltip]="'access-rights.true' | translate" fontIcon="check"></mat-icon>
+        } @else {
+          <span class="false-mark" [matTooltip]="'access-rights.false' | translate">–</span>
+        }
       </td>
     </ng-container>
 
@@ -48,11 +48,11 @@
         </mat-icon>
       </th>
       <td mat-cell *matCellDef="let element">
-        <mat-icon color="primary"
-                  [matTooltip]="(element.super ? 'access-rights.true' : 'access-rights.false') | translate"
-                  [color]="element.super ? 'primary' : 'default'"
-                  [fontIcon]="element.super ? 'check_circle' : 'unpublished'">
-        </mat-icon>
+        @if (element.super) {
+          <mat-icon color="primary" [matTooltip]="'access-rights.true' | translate" fontIcon="check"></mat-icon>
+        } @else {
+          <span class="false-mark" [matTooltip]="'access-rights.false' | translate">–</span>
+        }
       </td>
     </ng-container>
 

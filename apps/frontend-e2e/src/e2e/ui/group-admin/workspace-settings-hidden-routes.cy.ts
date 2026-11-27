@@ -9,6 +9,14 @@ import {
 } from '../../../support/helpers';
 import { createGroupAdminBaseAPI, GroupAdminBase } from '../../../support/helpers/test-base';
 
+/**
+ * The cell of the group admin's table that names the routes the workspace hides. The row is found by the
+ * name column: the drop box column holds names of workspaces as well (#2251).
+ */
+const hiddenRoutesOf = (workspace: string) => cy.contains('mat-cell.mat-column-name', workspace)
+  .parent()
+  .find('.mat-column-hiddenRoutes');
+
 // ===========================================================================
 describe('Workspace Settings – hiddenRoutes', () => {
   let base: GroupAdminBase;
@@ -36,14 +44,14 @@ describe('Workspace Settings – hiddenRoutes', () => {
       cy.get('[data-cy="workspace-routes-comments"]').should('exist');
     });
 
-    it('shows a directions_off icon for the Editor column when the route is hidden', () => {
+    it('names the Editor in the column of hidden routes when the route is hidden', () => {
       cy.visit('/');
       cy.findAdminGroupSettings(baseGroup).click();
       clickIndexTabWsgAdmin('workspaces');
 
-      cy.contains('mat-row', primaryWorkspace)
-        .find('mat-icon:contains("directions_off")')
-        .should('exist');
+      cy.translate(Cypress.expose('locale')).then(json => {
+        hiddenRoutesOf(primaryWorkspace).should('contain', json.workspace.routes.editor);
+      });
     });
 
     it('restores the Editor tab when the route is removed from hiddenRoutes', () => {
@@ -55,15 +63,16 @@ describe('Workspace Settings – hiddenRoutes', () => {
       cy.get('[data-cy="workspace-routes-editor"]').should('exist');
     });
 
-    it('restores the directions icon once the route is made visible again', () => {
+    it('names only what a new workspace hides once the Editor is made visible again', () => {
       cy.visit('/');
       cy.findAdminGroupSettings(baseGroup).click();
       clickIndexTabWsgAdmin('workspaces');
 
-      cy.contains('mat-row', primaryWorkspace)
-        .find('.mat-column-editor mat-icon')
-        .should('contain', 'directions')
-        .and('not.contain', 'directions_off');
+      // a new workspace starts with the supplementary material hidden (WorkspaceService.create)
+      cy.translate(Cypress.expose('locale')).then(json => {
+        hiddenRoutesOf(primaryWorkspace)
+          .should($cell => expect($cell.text().trim()).to.equal(json.workspace.routes.notes));
+      });
     });
   });
 
@@ -110,9 +119,9 @@ describe('Workspace Settings – hiddenRoutes', () => {
       cy.visit('/');
       cy.findAdminGroupSettings(baseGroup).click();
       clickIndexTabWsgAdmin('workspaces');
-      cy.contains('mat-row', primaryWorkspace)
-        .find('.mat-column-metadata mat-icon')
-        .should('contain', 'directions_off');
+      cy.translate(Cypress.expose('locale')).then(json => {
+        hiddenRoutesOf(primaryWorkspace).should('contain', json.workspace.routes.metadata);
+      });
     });
 
     it('restores the Metadata tab when the route is removed from hiddenRoutes', () => {

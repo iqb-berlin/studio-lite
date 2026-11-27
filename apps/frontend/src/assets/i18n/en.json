@@ -569,8 +569,7 @@
     "units-count-info": "This workspace group holds {{unitsCount}} units in total.",
     "backup-workspace-group-limit-reached": "The maximum number of workspaces has been reached.",
     "backup-workspace-group-limit-reached-hint": "The number of workspaces is limited to {{maxWorkspaceCount}}. Please delete workspaces before you create new ones.",
-    "route-hidden": "Not available",
-    "route-visible": "Available",
+    "hidden-routes": "Hidden",
     "unit-items": "Items"
   },
   "workspace-settings": {
@@ -782,8 +781,7 @@
       "preview": "Preview",
       "schemer": "Coding",
       "comments": "Comments",
-      "notes": "Supplementary material",
-      "notes-separated": "Supple\u00admentary material"
+      "notes": "Supplementary material"
     },
     "title": "Workspace",
     "workspace-not-loaded": "Could not load data for the workspace",

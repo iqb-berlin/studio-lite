@@ -183,7 +183,8 @@ export function grantRemovePrivilegeAtUser(user: string, wss: string[], rights: 
  */
 export function configureDropBox(sourceWs: string, targetWs: string): void {
   clickIndexTabWsgAdmin('workspaces');
-  cy.contains('mat-row', sourceWs).click();
+  // by the name column: the drop box column holds names of workspaces as well (#2251)
+  cy.contains('mat-cell.mat-column-name', sourceWs).click();
   // Click the select-drop-box button (folder_special icon)
   cy.get('button[mat-button], button[mat-mdc-button]')
     .find('mat-icon')
@@ -198,11 +199,12 @@ export function configureDropBox(sourceWs: string, targetWs: string): void {
       .contains(json.save)
       .click();
   });
-  // Verify check_circle icon appears in the row
-  cy.contains('mat-row', sourceWs)
-    .find('mat-icon')
-    .contains('check_circle')
-    .should('exist');
+  // The drop box by name in the row of the workspace, found by its name column: the drop box column holds
+  // names of workspaces as well (#2251)
+  cy.contains('mat-cell.mat-column-name', sourceWs)
+    .parent()
+    .find('.mat-column-dropBoxId')
+    .should('contain', targetWs);
 }
 
 /**

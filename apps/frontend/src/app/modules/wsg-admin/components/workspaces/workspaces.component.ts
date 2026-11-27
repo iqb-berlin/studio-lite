@@ -38,7 +38,8 @@ import { WorkspaceUserToCheckCollection } from '../../models/workspace-users-to-
 import { WorkspaceUserChecked } from '../../models/workspace-user-checked.class';
 import { ACCESS_LEVELS } from '../../models/access-levels';
 import { RolesHeaderComponent } from '../roles-header/roles-header.component';
-import { WorkspaceNamePipe } from '../../pipes/workspace-name.pipe';
+import { DropBoxNamePipe, dropBoxName } from '../../pipes/drop-box-name.pipe';
+import { OrderedHiddenRoutesPipe } from '../../../../pipes/ordered-hidden-routes.pipe';
 import { I18nService } from '../../../../services/i18n.service';
 import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
 import { ChangeResultService } from '../../../../services/change-result.service';
@@ -56,15 +57,13 @@ import { buildWorkspaceReportFile } from '../../../../utils/workspace-report.uti
   imports: [WorkspaceMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef,
     MatHeaderCell, MatRadioButton, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
     MatTooltip, FormsModule, EntriesDividerComponent,
-    IsSelectedIdPipe, TranslateModule, MatIcon, RolesHeaderComponent, WorkspaceNamePipe, MatIconButton, MatFabButton,
-    RouterLink]
+    IsSelectedIdPipe, TranslateModule, MatIcon, RolesHeaderComponent, DropBoxNamePipe, OrderedHiddenRoutesPipe,
+    MatIconButton, MatFabButton, RouterLink]
 })
 export class WorkspacesComponent implements OnInit, OnDestroy {
   objectsDatasource = new TextSortTableDataSource<WorkspaceInListDto>([]);
   workspaces: WorkspaceInListDto[] = [];
-  displayedColumns = [
-    'id', 'name', 'unitsCount', 'metadata', 'editor', 'preview', 'schemer', 'comments', 'notes', 'dropBoxId', 'delete'
-  ];
+  displayedColumns = ['id', 'name', 'unitsCount', 'hiddenRoutes', 'dropBoxId', 'delete'];
 
   tableSelectionRow = new SelectionModel <WorkspaceInListDto>(false, []);
   selectedWorkspaceId = 0;
@@ -226,6 +225,11 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
           .toString()
           .toLowerCase()
           .includes(filter));
+    // The column shows the name of the drop box, not its id
+    const sortingDataAccessor = this.objectsDatasource.sortingDataAccessor;
+    this.objectsDatasource.sortingDataAccessor = (workspace, column) => (column === 'dropBoxId' ?
+      dropBoxName(workspace.dropBoxId, workspace.id, workspaces) :
+      sortingDataAccessor(workspace, column));
     this.objectsDatasource.sort = this.sort;
   }
 
@@ -383,14 +387,6 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
           'wsg-admin.workspace-settings-not-changed'
         );
       });
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  isRouteHidden(workspace: WorkspaceInListDto, route: string): boolean {
-    if (!workspace.settings || !workspace.settings.hiddenRoutes) {
-      return false; // Routes are visible by default
-    }
-    return workspace.settings.hiddenRoutes.includes(route);
   }
 
   onWorkspaceNotLoaded(): void {
