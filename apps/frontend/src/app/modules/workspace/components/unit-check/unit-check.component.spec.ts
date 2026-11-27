@@ -441,7 +441,7 @@ describe('UnitCheckComponent', () => {
     fixture.detectChanges();
 
     expect(Array.from(
-      sectionOf('editor')?.querySelectorAll('[data-cy="unit-check-finding"]') ?? [],
+      sectionOf('editor')?.querySelectorAll('[data-cy="unit-check-finding-text"]') ?? [],
       finding => finding.textContent
     )).toEqual(['unit-check.no-definition']);
   }));
@@ -540,7 +540,7 @@ describe('UnitCheckComponent', () => {
 
     expect(entries('edit')).toEqual(['unit-check.dependency.widget-missing']);
     expect(Array.from(
-      sectionOf('editor')?.querySelectorAll('[data-cy="unit-check-finding"]') ?? [],
+      sectionOf('editor')?.querySelectorAll('[data-cy="unit-check-finding-text"]') ?? [],
       finding => finding.textContent
     )).toEqual(['unit-check.dependencies-missing-to-edit-widgets', 'workspace.dependencies-missing-install-hint']);
   }));
@@ -587,6 +587,24 @@ describe('UnitCheckComponent', () => {
     expect(sectionOf('schemer')?.querySelector('[data-cy="unit-check-ok"]')).toBeTruthy();
   }));
 
+  // what fails stands apart from what is only worth knowing, at the section and beside each finding (#2135)
+  it('shows a section by its weightiest finding, and each finding with the sign of its level', fakeAsync(() => {
+    create();
+    const statusIcon = () => sectionOf('properties')?.querySelector('.status-icon')?.textContent?.trim();
+
+    unitStores.propertiesStore()?.setEditor('');
+    fixture.detectChanges();
+    expect(statusIcon()).toBe('info');
+
+    unitStores.propertiesStore()?.setPlayer('');
+    fixture.detectChanges();
+    expect(statusIcon()).toBe('error');
+    expect(Array.from(
+      sectionOf('properties')?.querySelectorAll('[data-cy="unit-check-finding"]') ?? [],
+      finding => [finding.getAttribute('data-level'), finding.querySelector('.finding-icon')?.textContent?.trim()]
+    )).toEqual([['hint', 'info'], ['error', 'error']]);
+  }));
+
   it('names a module the unit lost before it is saved', fakeAsync(() => {
     create();
 
@@ -594,7 +612,7 @@ describe('UnitCheckComponent', () => {
     fixture.detectChanges();
 
     expect(Array.from(
-      sectionOf('properties')?.querySelectorAll('[data-cy="unit-check-finding"]') ?? [],
+      sectionOf('properties')?.querySelectorAll('[data-cy="unit-check-finding-text"]') ?? [],
       finding => finding.textContent
     )).toEqual(['unit-check.no-player']);
   }));
@@ -608,7 +626,7 @@ describe('UnitCheckComponent', () => {
     fixture.detectChanges();
 
     expect(Array.from(
-      sectionOf('properties')?.querySelectorAll('[data-cy="unit-check-finding"]') ?? [],
+      sectionOf('properties')?.querySelectorAll('[data-cy="unit-check-finding-text"]') ?? [],
       finding => finding.textContent
     )).toEqual(['unit-check.key-format']);
   }));
@@ -623,13 +641,13 @@ describe('UnitCheckComponent', () => {
     fixture.detectChanges();
 
     expect(Array.from(
-      sectionOf('properties')?.querySelectorAll('[data-cy="unit-check-finding"]') ?? [],
+      sectionOf('properties')?.querySelectorAll('[data-cy="unit-check-finding-text"]') ?? [],
       finding => finding.textContent
     )).toEqual(['unit-check.key-taken']);
   }));
 
   const propertyFindings = () => Array.from(
-    sectionOf('properties')?.querySelectorAll('[data-cy="unit-check-finding"]') ?? [],
+    sectionOf('properties')?.querySelectorAll('[data-cy="unit-check-finding-text"]') ?? [],
     finding => finding.textContent
   );
 

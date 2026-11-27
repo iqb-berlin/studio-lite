@@ -59,7 +59,7 @@ describe('checkDependencies', () => {
     expect(findings).toEqual([
       { key: 'workspace.dependencies-missing-packages', params: { names: 'GeoGebra.itcr.zip, Videos.itcr.zip' } },
       { key: 'workspace.dependencies-missing-widgets', params: { names: 'PERIODIC_TABLE' } },
-      { key: 'workspace.dependencies-missing-install-hint', hint: true }
+      { key: 'workspace.dependencies-missing-install-hint', level: 'hint' }
     ]);
   });
 
@@ -73,10 +73,12 @@ describe('checkDependencies', () => {
 
     expect(findings).toEqual([
       { key: 'workspace.dependencies-missing-packages', params: { names: 'GeoGebra.itcr.zip' } },
-      { key: 'unit-check.dependencies-missing-to-edit-packages', params: { names: 'GeoGebra.itcr.zip' }, hint: true },
-      { key: 'unit-check.dependencies-missing-to-edit-widgets', params: { names: 'PERIODIC_TABLE' }, hint: true },
-      { key: 'unit-check.dependencies-missing-to-edit-files', params: { names: 'sheet.pdf' }, hint: true },
-      { key: 'workspace.dependencies-missing-install-hint', hint: true }
+      {
+        key: 'unit-check.dependencies-missing-to-edit-packages', params: { names: 'GeoGebra.itcr.zip' }, level: 'hint'
+      },
+      { key: 'unit-check.dependencies-missing-to-edit-widgets', params: { names: 'PERIODIC_TABLE' }, level: 'hint' },
+      { key: 'unit-check.dependencies-missing-to-edit-files', params: { names: 'sheet.pdf' }, level: 'hint' },
+      { key: 'workspace.dependencies-missing-install-hint', level: 'hint' }
     ]);
   });
 
@@ -89,12 +91,12 @@ describe('checkDependencies', () => {
     ]);
     expect(toPlay.findings).toEqual([
       { key: 'workspace.dependencies-missing-files', params: { names: 'sheet.pdf' } },
-      { key: 'unit-check.dependencies-not-checked' }
+      { key: 'unit-check.dependencies-not-checked', level: 'hint' }
     ]);
 
-    // what is needed only to be edited is a hint, also when it could not be checked
+    // what could not be checked is not known to be missing, to be played or edited
     expect(checkDependencies({ toPlay: [service], toEdit: [calc] }, unread, true).findings)
-      .toEqual([{ key: 'unit-check.dependencies-not-checked', hint: true }]);
+      .toEqual([{ key: 'unit-check.dependencies-not-checked', level: 'hint' }]);
   });
 
   // the preview and the export need it all the same, also for a module without an editor
@@ -111,7 +113,7 @@ describe('checkDependencies', () => {
       }],
       findings: [
         { key: 'workspace.dependencies-missing-widgets', params: { names: 'PERIODIC_TABLE' } },
-        { key: 'workspace.dependencies-missing-install-hint', hint: true }
+        { key: 'workspace.dependencies-missing-install-hint', level: 'hint' }
       ]
     });
     expect(checkDependencies({ toPlay: [], toEdit: [geogebra] }, unread, false).findings).toEqual([]);

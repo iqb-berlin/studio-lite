@@ -77,12 +77,97 @@ describe('findSchemeProblems', () => {
       }
     ]))).toEqual([
       {
-        type: 'SOURCE_MISSING', variable: 'sum', breaking: true, baseVariable: false
+        type: 'SOURCE_MISSING',
+        variable: 'sum',
+        breaking: true,
+        baseVariable: false,
+        sources: ['01', 'gone'],
+        missingSources: ['gone']
       },
       {
-        type: 'MORE_THAN_ONE_SOURCE', variable: 'copy', breaking: false, baseVariable: false
+        type: 'MORE_THAN_ONE_SOURCE', variable: 'copy', breaking: false, baseVariable: false, sources: ['01', '01']
       }
     ]);
+  });
+
+  // the card names them, so that what to change can be found in the coding (#2135)
+  it('names the sources of a derived variable by their names, in their order, the missing ones apart', () => {
+    const variables: VariableInfoInput[] = [
+      { id: 'drop_1', alias: '01', type: 'string' }, { id: 'drop_2', type: 'string' }
+    ];
+
+    const problems = findSchemeProblems(variables, scheme([
+      {
+        id: 'drop_1', alias: '01', sourceType: 'BASE', ...coded
+      },
+      {
+        id: 'drop_2', sourceType: 'BASE', ...coded
+      },
+      {
+        id: 'sum_1', alias: 'sum', sourceType: 'SUM_SCORE', deriveSources: ['drop_1', 'drop_2'], codes: []
+      },
+      {
+        id: 'copy_1', alias: 'copy', sourceType: 'COPY_VALUE', deriveSources: ['sum_1'], codes: []
+      },
+      {
+        id: 'none_1', alias: 'none', sourceType: 'SUM_CODE', deriveSources: [], codes: []
+      },
+      {
+        id: 'gone_1', alias: 'gone', sourceType: 'CONCAT_CODE', deriveSources: ['drop_1', 'x_1', 'x_2'], codes: []
+      }
+    ]));
+
+    // a coding by its alias, an element without one by its id; a source neither has, by the id it is given by
+    expect(problems.filter(problem => problem.type === 'VALUE_COPY_NOT_FROM_BASE'))
+      .toEqual([expect.objectContaining({ variable: 'copy', sources: ['sum'] })]);
+    expect(problems.filter(problem => problem.type === 'SOURCE_MISSING')).toEqual([
+      expect.objectContaining({ variable: 'none', sources: [] }),
+      expect.objectContaining({ variable: 'gone', sources: ['01', 'x_1', 'x_2'], missingSources: ['x_1', 'x_2'] })
+    ]);
+    // the other problems are not about sources
+    expect(findSchemeProblems(variables, scheme([
+      {
+        id: 'drop_1', alias: 'same', sourceType: 'BASE', ...coded
+      },
+      {
+        id: 'drop_2', alias: 'same', sourceType: 'BASE', ...coded
+      }
+    ]))[0]).not.toHaveProperty('sources');
+  });
+
+  // a formula converting a number entered, a manual coding of one answer: one source is usual there (#2135)
+  it('names a sum of one source, but not a formula or a manual coding of one', () => {
+    const variables: VariableInfoInput[] = [{ id: 'drop_1', alias: '01', type: 'string' }];
+    const ofOne = (id: string, sourceType: string) => ({
+      id, alias: id, sourceType, deriveSources: ['drop_1'], codes: []
+    });
+
+    expect(findSchemeProblems(variables, scheme([
+      {
+        id: 'drop_1', alias: '01', sourceType: 'BASE', ...coded
+      },
+      ofOne('sum', 'SUM_SCORE'),
+      ofOne('formula', 'SOLVER'),
+      ofOne('manual', 'MANUAL')
+    ])).filter(problem => problem.type === 'ONLY_ONE_SOURCE')).toEqual([
+      {
+        type: 'ONLY_ONE_SOURCE', variable: 'sum', breaking: false, baseVariable: false, sources: ['01']
+      }
+    ]);
+  });
+
+  // a formula may take the name of the base variable it derives from, its only source (#2135)
+  it('does not name a formula of one source that takes the name of that source', () => {
+    const variables: VariableInfoInput[] = [{ id: 'x', alias: 'x', type: 'string' }];
+
+    expect(findSchemeProblems(variables, scheme([
+      {
+        id: 'x', alias: 'x', sourceType: 'BASE', ...coded
+      },
+      {
+        id: 'd_1', alias: 'x', sourceType: 'SOLVER', deriveSources: ['x'], codes: []
+      }
+    ])).filter(problem => problem.type === 'ONLY_ONE_SOURCE')).toEqual([]);
   });
 
   // an element deleted in the editor, whose coding stayed behind: it is deleted in the coding (#2135)

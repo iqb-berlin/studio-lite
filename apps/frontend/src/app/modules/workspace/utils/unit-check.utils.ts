@@ -55,15 +55,24 @@ export interface UnitCheckInput {
   hiddenRoutes: string[];
 }
 
+/**
+ * How much a finding weighs, below an error -- something fails: the preview, the export, the test, the
+ * save or the coding.
+ * - warning: nothing fails, but the unit is not finished or most likely not what was meant: it has no
+ *   content yet, has answers but no scheme, or a coding the coding gets through but whose result is
+ *   unlikely to be the one meant -- a sum of one source, a copy of several.
+ * - hint: worth knowing, nothing to be done: a unit key in an older format, which the forms deliberately
+ *   let through (#1842), a unit without its editor or schemer, or what could not be checked -- not known
+ *   is not failing.
+ */
+export type UnitCheckLevel = 'warning' | 'hint';
+
 /** A finding: an i18n key and the values it is filled with. */
 export interface UnitCheckFinding {
   key: string;
   params?: Record<string, string>;
-  /**
-   * Worth knowing, but nothing fails for it: no preview, export, test or coding. A unit key in an
-   * older format, say, which the forms deliberately let through (#1842).
-   */
-  hint?: boolean;
+  /** Without one, the finding is an error, see {@link UnitCheckLevel}. */
+  level?: UnitCheckLevel;
 }
 
 export interface UnitCheckSection {
@@ -74,10 +83,11 @@ export interface UnitCheckSection {
   /** Ids the export would write twice; listed apart, since the card shows how to resolve them. */
   variableIdConflicts: VariableIdConflict[];
   /**
-   * What the section shows itself as: a warning where something fails -- a finding that is no hint, or
-   * an id written twice -- else something to know (hints, information), else in order.
+   * What the section shows itself as, by its weightiest finding: an error where something fails -- an
+   * error found, or an id written twice; else a warning; else something to know (hints, information);
+   * else in order.
    */
-  status: 'warning' | 'info' | 'ok';
+  status: 'error' | 'warning' | 'info' | 'ok';
   /**
    * Not a finding: whether there are comments and rich notes, neither of which is required, or
    * that the unit has nothing to code.
@@ -149,7 +159,7 @@ function installedModule(
 
 function checkProperties(input: UnitCheckInput): UnitCheckFinding[] {
   const modules = input.modules;
-  if (!modules) return [{ key: 'unit-check.not-loaded' }];
+  if (!modules) return [{ key: 'unit-check.not-loaded', level: 'hint' }];
   const installed = input.installed;
   const codingNeeded = needsCoding(input);
   const findings = MODULE_TYPES
@@ -159,18 +169,20 @@ function checkProperties(input: UnitCheckInput): UnitCheckFinding[] {
     .filter(moduleType => moduleType === 'player' ||
       (isTabShown(input.hiddenRoutes, moduleType) && (moduleType !== 'schemer' || codingNeeded)))
     .map((moduleType): UnitCheckFinding | undefined => {
-      // without its editor the unit cannot be edited, but it is previewed, exported and coded all the same
-      const hint = moduleType === 'editor' ? { hint: true } : {};
+      // Without its editor or its schemer the unit or its coding cannot be edited, but it is previewed,
+      // exported, tested and coded all the same: the coding does without the schemer, and the testcenter
+      // does not read it (#1990). Without its player nothing is shown.
+      const level: Pick<UnitCheckFinding, 'level'> = moduleType === 'player' ? {} : { level: 'hint' };
       const key = modules[moduleType];
       // unit-check.no-editor, unit-check.no-player, unit-check.no-schemer
-      if (!key) return { key: `unit-check.no-${moduleType}`, ...hint };
+      if (!key) return { key: `unit-check.no-${moduleType}`, ...level };
       // without the lists, whether a module is installed is not known
       if (!installed || installedModule(key, installed[moduleType])) return undefined;
       // unit-check.not-installed-editor, unit-check.not-installed-player, unit-check.not-installed-schemer
-      return { key: `unit-check.not-installed-${moduleType}`, params: { module: key }, ...hint };
+      return { key: `unit-check.not-installed-${moduleType}`, params: { module: key }, ...level };
     })
     .filter((finding): finding is UnitCheckFinding => !!finding);
-  return installed ? findings : [{ key: 'unit-check.modules-not-loaded' }, ...findings];
+  return installed ? findings : [{ key: 'unit-check.modules-not-loaded', level: 'hint' }, ...findings];
 }
 
 /**
@@ -200,13 +212,14 @@ function checkUnitDependencies(
 }
 
 function checkEditor(input: UnitCheckInput): UnitCheckFinding[] {
-  if (!input.definition) return [{ key: 'unit-check.definition-not-loaded' }];
-  if (!input.definition.hasDefinition) return [{ key: 'unit-check.no-definition' }];
+  if (!input.definition) return [{ key: 'unit-check.definition-not-loaded', level: 'hint' }];
+  // a unit not written yet is not finished, rather than broken
+  if (!input.definition.hasDefinition) return [{ key: 'unit-check.no-definition', level: 'warning' }];
   const definitionType = input.definition.definitionType;
   // without the lists, what the player says it reads is not known: no finding would pass for a pass.
   // A unit that names no format is not asked, lists or not.
   if (!input.installed && input.modules?.player && definitionType) {
-    return [{ key: 'unit-check.definition-type-not-checked' }];
+    return [{ key: 'unit-check.definition-type-not-checked', level: 'hint' }];
   }
   const player = installedModule(input.modules?.player, input.installed?.player);
   if (player && playerRejectsDefinitionType(definitionType, player)) {
@@ -224,7 +237,9 @@ type Checked = Pick<UnitCheckSection, 'findings' | 'variableIdConflicts' | 'info
 function checkIdConflicts(input: UnitCheckInput): Checked {
   // without the scheme a conflict cannot be seen, and none found means nothing; the base variables
   // come with it, or from the editor
-  if (!input.scheme) return { findings: [{ key: 'unit-check.scheme-not-loaded' }], variableIdConflicts: [] };
+  if (!input.scheme) {
+    return { findings: [{ key: 'unit-check.scheme-not-loaded', level: 'hint' }], variableIdConflicts: [] };
+  }
   return {
     findings: [],
     variableIdConflicts: findVariableIdConflicts(input.variables, input.scheme.scheme)
@@ -238,11 +253,8 @@ interface CheckedScheme {
 }
 
 function checkScheme(input: UnitCheckInput, editorShown: boolean): CheckedScheme {
-  const only = (key: string): CheckedScheme => ({
-    schemer: { findings: [{ key }], variableIdConflicts: [] }, editor: []
-  });
-  if (!input.scheme) return only('unit-check.scheme-not-loaded');
   const idConflicts = checkIdConflicts(input);
+  if (!input.scheme) return { schemer: idConflicts, editor: [] };
   // Without a scheme the schemer finds nothing, but the export writes the base variables all the same:
   // two elements of one internal id are written twice, as the export dialog says (#2119). A unit with
   // nothing to code, an information unit, needs no scheme.
@@ -250,7 +262,7 @@ function checkScheme(input: UnitCheckInput, editorShown: boolean): CheckedScheme
     const variableIdConflicts = idConflicts.variableIdConflicts;
     return {
       schemer: needsCoding(input) ?
-        { findings: [{ key: 'unit-check.no-scheme' }], variableIdConflicts } :
+        { findings: [{ key: 'unit-check.no-scheme', level: 'warning' }], variableIdConflicts } :
         { findings: [], variableIdConflicts, info: { key: 'unit-check.nothing-to-code' } },
       editor: []
     };
@@ -285,8 +297,8 @@ function checkScheme(input: UnitCheckInput, editorShown: boolean): CheckedScheme
  * whether an id would be written twice, where the coding is -- a scheme may come with an import.
  * Having no scheme is no finding there.
  *
- * What fails nothing -- a unit without its editor -- is a hint, and leaves its section in order. A unit
- * with nothing to code, an information unit, needs neither a scheme nor a schemer.
+ * Each finding weighs as an error, a warning or a hint, see {@link UnitCheckLevel}. A unit with nothing
+ * to code, an information unit, needs neither a scheme nor a schemer.
  */
 export function checkUnit(input: UnitCheckInput): UnitCheckSection[] {
   const section = (
@@ -337,9 +349,10 @@ export function checkUnit(input: UnitCheckInput): UnitCheckSection[] {
 
 /** A section with how it shows itself, see {@link UnitCheckSection.status}. */
 function withStatus(entry: Omit<UnitCheckSection, 'status'>): UnitCheckSection {
-  const fails = entry.findings.some(finding => !finding.hint) || entry.variableIdConflicts.length > 0;
+  const fails = entry.findings.some(finding => !finding.level) || entry.variableIdConflicts.length > 0;
   let status: UnitCheckSection['status'] = 'ok';
-  if (fails) status = 'warning';
+  if (fails) status = 'error';
+  else if (entry.findings.some(finding => finding.level === 'warning')) status = 'warning';
   else if (entry.info || entry.findings.length) status = 'info';
   return { ...entry, status };
 }
