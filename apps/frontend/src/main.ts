@@ -10,7 +10,9 @@ import {
   TranslateService, TranslateParser
 } from '@ngx-translate/core';
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
-import { provideRouter, UrlSerializer, withRouterConfig } from '@angular/router';
+import {
+  provideRouter, RouteReuseStrategy, UrlSerializer, withRouterConfig
+} from '@angular/router';
 import { DEFAULT_UI_LANGUAGE } from '@studio-lite/shared-code';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -45,6 +47,7 @@ import { createTranslateLoader } from './app/services/translation-loader';
 import { LanguageService } from './app/services/language.service';
 import { LanguageUrlSerializer } from './app/services/language-url-serializer';
 import { UI_LOCALE_DATA } from './app/services/ui-locale-data';
+import { AreaRouteReuseStrategy } from './app/classes/area-route-reuse-strategy.class';
 // Named, not the whole file: esbuild then keeps just the version string in the bundle -- a default
 // import would ship all of package.json, dependency list included, to the browser.
 import { version as appVersion } from '../../../package.json';
@@ -57,6 +60,8 @@ bootstrapApplication(AppComponent, {
   providers: [
     provideZoneChangeDetection(), provideRouter(APP_ROUTES, withRouterConfig({ onSameUrlNavigation: 'reload' })),
     { provide: UrlSerializer, useClass: LanguageUrlSerializer },
+    // another workspace, group or review by its address is built anew, as from the start page (#2242)
+    { provide: RouteReuseStrategy, useClass: AreaRouteReuseStrategy },
     provideHttpClient(withInterceptorsFromDi()),
     importProvidersFrom(
       ApplicationModule,
