@@ -368,7 +368,7 @@
     "unit-title": "Metadaten (Aufgabe)",
     "items-title": "Metadaten (Items)",
     "assigned-profile": "Profil: {{name}}",
-    "no-profile": "Kein Profil zugewiesen. Es wird in den Einstellungen des Arbeitsbereichs gewählt.",
+    "no-profile": "Kein Profil zugewiesen.",
     "assigned-unit-profile": "Profil für die Aufgabe: {{name}}",
     "no-unit-profile": "Kein Profil für die Aufgabe zugewiesen.",
     "assigned-item-profile": "Profil für die Items: {{name}}",

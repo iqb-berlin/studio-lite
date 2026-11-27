@@ -368,7 +368,7 @@
     "unit-title": "Metadata (unit)",
     "items-title": "Metadata (items)",
     "assigned-profile": "Profile: {{name}}",
-    "no-profile": "No profile assigned. It is chosen in the workspace settings.",
+    "no-profile": "No profile assigned.",
     "assigned-unit-profile": "Profile for the unit: {{name}}",
     "no-unit-profile": "No profile assigned for the unit.",
     "assigned-item-profile": "Profile for the items: {{name}}",
