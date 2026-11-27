@@ -1,5 +1,6 @@
 <div [class.with-header]="reviewService.bookletConfig.unitScreenHeader !== 'OFF'"
-  [class.with-title]="reviewService.bookletConfig.unitTitle === 'ON'">
+  [class.with-title]="reviewService.bookletConfig.unitTitle === 'ON'"
+  [class.beside-language-menu]="besideLanguageMenu">
   @if (reviewService.bookletConfig.unitTitle === 'ON') {
     <div
       class="unit-title fx-column-center-center">
@@ -20,6 +21,7 @@
   }
   @if (reviewService.reviewConfig.canComment) {
     <studio-lite-add-comment-button
+      [class.beside-language-menu]="besideLanguageMenu"
       [showOthersComments]="reviewService.reviewConfig.showOthersComments || false"
       [unitDbId]="reviewService.unitDbId">
     </studio-lite-add-comment-button>

@@ -60,3 +60,8 @@ h1 {
   padding-right: 60px;
   pointer-events: none;
 }
+
+// room for the language menu as well, 64px at the right edge of the app's header (#2256)
+.beside-language-menu .header {
+  padding-right: 124px;
+}

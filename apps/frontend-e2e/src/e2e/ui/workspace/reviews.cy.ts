@@ -242,6 +242,20 @@ describe('Unit Reviews', () => {
     });
   });
 
+  // The comment button lay over the language menu at the right edge of the header (#2256). Cypress
+  // clicks only an element that no other one covers, so no `force` here.
+  it('keeps the language menu beside the comment button', () => {
+    cy.intercept('GET', '/api/reviews/*/units/*/definition').as('getUnitDefinition');
+    cy.visit('/');
+    openReview(review);
+    startReview();
+    waitForSuccess('@getUnitDefinition');
+    cy.get('studio-lite-add-comment-button button').should('be.visible');
+    cy.get('[data-cy="language-menu"]').click();
+    cy.get('[data-cy="language-en"]').should('be.visible');
+    cy.get('body').type('{esc}');
+  });
+
   it('displays unit technical details in the expandable info panel', () => {
     cy.visit('/');
     openReview(review);
