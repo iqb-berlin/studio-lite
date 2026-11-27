@@ -5,7 +5,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatMiniFabButton } from '@angular/material/button';
+import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import {
@@ -54,7 +54,7 @@ interface TextLine {
   templateUrl: './unit-actions.component.html',
   styleUrls: ['./unit-actions.component.scss'],
   imports: [
-    MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatMiniFabButton, MatTooltip, MatIcon, TranslateModule
+    MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatIconButton, MatTooltip, MatIcon, TranslateModule
   ]
 })
 export class UnitActionsComponent extends RequestMessageDirective implements OnDestroy {

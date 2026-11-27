@@ -2,9 +2,10 @@
   margin-bottom: 12px;
 }
 
+// an icon button keeps 12px around its icon: the row moves left by that, so the first icon lines up with the title
 .action-row {
   flex-wrap: wrap;
-  padding: 4px 0;
+  margin-left: -12px;
 }
 
 .hint {
@@ -12,7 +13,7 @@
 }
 
 .info {
-  margin-top: 28px;
+  margin-top: 16px;
 }
 
 .info-line {

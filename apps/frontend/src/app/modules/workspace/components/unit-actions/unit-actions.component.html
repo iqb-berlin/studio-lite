@@ -5,9 +5,9 @@
     </mat-card-header>
     <mat-card-content>
       <!-- disabledInteractive: a greyed-out button still shows its tooltip, on hover and on focus -->
-      <div class="fx-row-start-center fx-gap-20 action-row">
+      <div class="fx-row-start-center fx-gap-10 action-row">
         @if (canSubmit()) {
-          <button mat-mini-fab
+          <button mat-icon-button
                   type="button"
                   color="primary"
                   disabledInteractive
@@ -18,7 +18,7 @@
                   data-cy="unit-actions-submit">
             <mat-icon>assignment_turned_in</mat-icon>
           </button>
-          <button mat-mini-fab
+          <button mat-icon-button
                   type="button"
                   color="primary"
                   disabledInteractive
@@ -31,7 +31,7 @@
           </button>
         }
         @if (canCopy()) {
-          <button mat-mini-fab
+          <button mat-icon-button
                   type="button"
                   color="primary"
                   disabledInteractive
@@ -44,7 +44,7 @@
           </button>
         }
         @if (canMove()) {
-          <button mat-mini-fab
+          <button mat-icon-button
                   type="button"
                   color="primary"
                   disabledInteractive
@@ -57,7 +57,7 @@
           </button>
         }
         @if (canDelete()) {
-          <button mat-mini-fab
+          <button mat-icon-button
                   type="button"
                   color="warn"
                   disabledInteractive
