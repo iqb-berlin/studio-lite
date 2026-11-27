@@ -270,6 +270,15 @@ describe('Unit Reviews', () => {
       cy.get('.infoPanel').should('be.visible');
       cy.get('.infoPanel h2').should('not.be.empty');
     });
+
+    // The panel ends above the page navigation, which lay over its last lines (#2257)
+    cy.get('studio-lite-unit-player .page-navigation').then(navigation => {
+      const navigationTop = navigation[0].getBoundingClientRect().top;
+      cy.get('studio-lite-unit-info').then(info => {
+        expect(Math.round(info[0].getBoundingClientRect().bottom), 'bottom of the info panel')
+          .to.be.at.most(Math.round(navigationTop));
+      });
+    });
   });
 
   it('shows the finish page upon completion and allows returning to the review', () => {
