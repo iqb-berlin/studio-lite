@@ -7,7 +7,8 @@ import { createTestBaseAPI, deleteTestBaseAPI, TestBase } from '../../../support
  * (#2135). Its questions are answered in unit-check.utils.spec.ts; what only the running studio
  * shows is that the card asks them of the unit the server delivers -- here an id the export would
  * write twice (#2119), and the same unit once the derived variable has been renamed, the size of
- * the content (#2197) and what it needs besides the modules (#2198).
+ * the content (#2197), what it needs besides the modules (#2198) and the update to a newer player it
+ * recommends (#2199).
  */
 describe('Workspace Unit Check', () => {
   const unit = { shortname: 'CHECK_ID05', name: 'Doppelte ID', group: '' };
@@ -206,5 +207,39 @@ describe('Workspace Unit Check', () => {
         'Zum Abspielen braucht diese Aufgabe Pakete, die im Studio nicht installiert sind: E2E-Fehlt.itcr.zip.'
       ).should('be.visible');
     });
+  });
+
+  // a newer player that declares that it reads the unit is recommended once the unit is saved with the older one
+  // after it was installed (#2199); the install date comes from the API as text
+  it('recommends a newer player once the unit is saved after it was installed', () => {
+    const playedUnit = {
+      shortname: 'CHECK_NEWER', name: 'Neuere Version', group: '', player: 'verona-test-player@2.0'
+    };
+    const format = 'verona-test-definition@1.0.0';
+    const hint = 'Diese Aufgabe verwendet Verona-Testplayer 2.0.0. Ein Update auf Verona-Testplayer 2.1.0 ' +
+      'wird empfohlen.';
+    let playedId = '';
+    cy.then(() => cy.addModuleAPI('verona-test-player-2.0.0.html', base.token).its('status').should('equal', 201));
+    cy.then(() => cy.createUnitAPI(base.wsId, playedUnit, base.token).then(response => {
+      expect(response.status, playedUnit.shortname).to.equal(201);
+      playedId = String(response.body);
+      cy.updateUnitDefinitionAPI(playedId, base.wsId, base.token, undefined, format)
+        .its('status').should('equal', 200);
+    }));
+    cy.then(() => cy.addModuleAPI('verona-test-player-2.1.0.html', base.token).its('status').should('equal', 201));
+    cy.visitWs(primaryWorkspace);
+    selectUnit(playedUnit.shortname);
+    clickIndexTabWorkspace('properties');
+
+    // last saved before the newer version was installed: made with the version it names
+    cy.get('[data-cy="unit-check-editor"] [data-cy="unit-check-last-change"]').should('be.visible');
+    cy.get('[data-cy="unit-check-properties"]').should('not.contain.text', hint);
+
+    cy.then(() => cy.updateUnitDefinitionAPI(playedId, base.wsId, base.token, undefined, format)
+      .its('status').should('equal', 200));
+    cy.reload();
+    cy.get('[data-cy="unit-check-properties"]')
+      .contains('[data-cy="unit-check-finding"]', hint)
+      .should('be.visible');
   });
 });

@@ -11,6 +11,7 @@ import { definitionSizeLevel } from './definition-size.utils';
 import { InstalledDependencies } from './missing-dependencies.utils';
 import { CheckedDependencies, checkDependencies, UnitDependencyList } from './dependency-check.utils';
 import { hasUnusedProfiles, MetadataProfiles } from './metadata-profiles.utils';
+import { ModuleVersion, newerModule } from './newer-module.utils';
 
 export type ModuleType = 'editor' | 'player' | 'schemer';
 
@@ -20,11 +21,11 @@ export type ModuleType = 'editor' | 'player' | 'schemer';
  */
 export type DefinitionContent = Omit<UnitDefinitionSummaryDto, 'size'>;
 
-/** What the check needs to know of an installed module. */
-export interface InstalledModule {
-  nameAndVersion: string;
-  metadata?: { model?: string };
-}
+/**
+ * What the check needs to know of an installed module: its name and version, the formats it reads, and
+ * whether a newer one is worth naming (#2199).
+ */
+export type InstalledModule = ModuleVersion;
 
 export interface UnitCheckInput {
   /** The modules the unit names, as entered, saved or not; undefined: not loaded. */
@@ -49,6 +50,11 @@ export interface UnitCheckInput {
    * stored scheme and in one the schemer reported (#2135).
    */
   unsaved: { variables: boolean };
+  /**
+   * When the definition and the scheme were last saved (#2199): a newer module is named only where the
+   * unit was saved with the older one after the newer was installed. Unsaved changes do not count.
+   */
+  lastChanged: { definition?: Date; scheme?: Date };
   /** undefined: not known (yet). */
   hasComments: boolean | undefined;
   hasRichNotes: boolean | undefined;
@@ -61,9 +67,9 @@ export interface UnitCheckInput {
  * - warning: nothing fails, but the unit is not finished or most likely not what was meant: it has no
  *   content yet, has answers but no scheme, or a coding the coding gets through but whose result is
  *   unlikely to be the one meant -- a sum of one source, a copy of several.
- * - hint: worth knowing, nothing to be done: a unit key in an older format, which the forms deliberately
- *   let through (#1842), a unit without its editor or schemer, or what could not be checked -- not known
- *   is not failing.
+ * - hint: worth knowing, nothing that has to be done: a unit key in an older format, which the forms
+ *   deliberately let through (#1842), a unit without its editor or schemer, an update to a newer module
+ *   that is recommended (#2199), or what could not be checked -- not known is not failing.
  */
 export type UnitCheckLevel = 'warning' | 'hint';
 
@@ -148,13 +154,53 @@ function needsCoding(input: UnitCheckInput): boolean {
   return !input.scheme || hasCodingScheme(input.scheme.scheme) || !hasNothingToCode(input.variables);
 }
 
-/** The installed module a unit's module key opens with: the key itself, or a later minor version. */
+/** The key of the installed module a unit's module key opens with: the key itself, or a later minor version. */
+function installedKey(key: string | undefined, installed: Record<string, InstalledModule> | undefined): string {
+  if (!key || !installed) return '';
+  return VeronaModuleFactory.getBestMatch(key, Object.keys(installed));
+}
+
+/** The installed module a unit's module key opens with, see {@link installedKey}. */
 function installedModule(
   key: string | undefined,
   installed: Record<string, InstalledModule> | undefined
 ): InstalledModule | undefined {
-  if (!key || !installed) return undefined;
-  return installed[VeronaModuleFactory.getBestMatch(key, Object.keys(installed))];
+  return installed?.[installedKey(key, installed)];
+}
+
+/**
+ * A newer version of a module than the unit is opened with, where the unit was saved with the older one
+ * after the newer was installed (#2199). A hint: the unit works with the module it has.
+ */
+function newerModuleHint(
+  moduleType: ModuleType,
+  usedKey: string,
+  input: UnitCheckInput,
+  installed: Record<ModuleType, Record<string, InstalledModule>>
+): UnitCheckFinding[] {
+  const ofScheme = moduleType === 'schemer';
+  const newer = newerModule({
+    usedKey,
+    installed: installed[moduleType],
+    format: ofScheme ? input.scheme?.schemeType : input.definition?.definitionType,
+    lastChanged: ofScheme ? input.lastChanged.scheme : input.lastChanged.definition,
+    // what the editor writes, the unit's player has to read
+    ...(moduleType === 'editor' && {
+      players: { usedKey: installedKey(input.modules?.player, installed.player), installed: installed.player }
+    }),
+    // each schemer version carries on the one before it, on the same responses
+    ...(ofScheme && { successive: true })
+  });
+  if (!newer) return [];
+  return [{
+    key: newer.player ? 'unit-check.newer-module-and-player' : 'unit-check.newer-module',
+    params: {
+      used: newer.used,
+      newer: newer.newer,
+      ...(newer.player && { usedPlayer: newer.player.used, player: newer.player.newer })
+    },
+    level: 'hint'
+  }];
 }
 
 function checkProperties(input: UnitCheckInput): UnitCheckFinding[] {
@@ -168,20 +214,21 @@ function checkProperties(input: UnitCheckInput): UnitCheckFinding[] {
     // whether the preview is shown or not.
     .filter(moduleType => moduleType === 'player' ||
       (isTabShown(input.hiddenRoutes, moduleType) && (moduleType !== 'schemer' || codingNeeded)))
-    .map((moduleType): UnitCheckFinding | undefined => {
+    .flatMap((moduleType): UnitCheckFinding[] => {
       // Without its editor or its schemer the unit or its coding cannot be edited, but it is previewed,
       // exported, tested and coded all the same: the coding does without the schemer, and the testcenter
       // does not read it (#1990). Without its player nothing is shown.
       const level: Pick<UnitCheckFinding, 'level'> = moduleType === 'player' ? {} : { level: 'hint' };
       const key = modules[moduleType];
       // unit-check.no-editor, unit-check.no-player, unit-check.no-schemer
-      if (!key) return { key: `unit-check.no-${moduleType}`, ...level };
+      if (!key) return [{ key: `unit-check.no-${moduleType}`, ...level }];
       // without the lists, whether a module is installed is not known
-      if (!installed || installedModule(key, installed[moduleType])) return undefined;
+      if (!installed) return [];
+      const usedKey = installedKey(key, installed[moduleType]);
+      if (usedKey) return newerModuleHint(moduleType, usedKey, input, installed);
       // unit-check.not-installed-editor, unit-check.not-installed-player, unit-check.not-installed-schemer
-      return { key: `unit-check.not-installed-${moduleType}`, params: { module: key }, ...level };
-    })
-    .filter((finding): finding is UnitCheckFinding => !!finding);
+      return [{ key: `unit-check.not-installed-${moduleType}`, params: { module: key }, ...level }];
+    });
   return installed ? findings : [{ key: 'unit-check.modules-not-loaded', level: 'hint' }, ...findings];
 }
 
@@ -283,13 +330,13 @@ function checkScheme(input: UnitCheckInput, editorShown: boolean): CheckedScheme
 }
 
 /**
- * The state of the unit, tab by tab (#2135): whether its modules are assigned and installed, whether
- * it has content in a format its player reads, what that content needs besides the modules and
- * whether the studio has it (#2198), whether it has a coding scheme, what the schemer finds
- * wrong with it, and whether the export can write its variables without writing an id twice, and
- * whether it has comments and rich notes. What the schemer finds is asked only where the coding is
- * shown: it is fixed there, and unlike a doubled id it does not stop the export. Where its cause is an
- * element -- two of the same name -- it is named under the editor instead, if shown.
+ * The state of the unit, tab by tab (#2135): whether its modules are assigned and installed, and newer
+ * versions of them worth knowing of (#2199), whether it has content in a format its player reads, what
+ * that content needs besides the modules and whether the studio has it (#2198), whether it has a coding
+ * scheme, what the schemer finds wrong with it, and whether the export can write its variables without
+ * writing an id twice, and whether it has comments and rich notes. What the schemer finds is asked only
+ * where the coding is shown: it is fixed there, and unlike a doubled id it does not stop the export.
+ * Where its cause is an element -- two of the same name -- it is named under the editor instead, if shown.
  *
  * A tab the workspace hides gets no section, and its module is not asked for. What the preview and
  * the export need all the same is asked under the properties instead: whether there is content, the
@@ -297,8 +344,9 @@ function checkScheme(input: UnitCheckInput, editorShown: boolean): CheckedScheme
  * whether an id would be written twice, where the coding is -- a scheme may come with an import.
  * Having no scheme is no finding there.
  *
- * Each finding weighs as an error, a warning or a hint, see {@link UnitCheckLevel}. A unit with nothing
- * to code, an information unit, needs neither a scheme nor a schemer.
+ * Each finding weighs as an error, a warning or a hint, see {@link UnitCheckLevel}; an update to a newer
+ * module is a hint (#2199). A unit with nothing to code, an information unit, needs neither a scheme nor
+ * a schemer.
  */
 export function checkUnit(input: UnitCheckInput): UnitCheckSection[] {
   const section = (

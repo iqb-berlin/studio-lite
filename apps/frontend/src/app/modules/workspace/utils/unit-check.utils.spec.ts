@@ -47,6 +47,7 @@ const okInput = (): UnitCheckInput => ({
     schemeType: 'iqb-standard@3.0'
   },
   unsaved: { variables: false },
+  lastChanged: {},
   hasComments: false,
   hasRichNotes: true,
   hiddenRoutes: []
@@ -151,6 +152,86 @@ describe('checkUnit', () => {
         findings: [{ key: 'unit-check.no-editor', level: 'hint' }, { key: 'unit-check.no-player' }],
         status: 'error'
       }));
+    });
+
+    describe('newer modules (#2199)', () => {
+      const april = new Date('2026-04-01T10:00:00.000Z');
+      // installed in March, after the versions the unit names
+      const newer = (nameAndVersion: string, model?: string) => ({
+        nameAndVersion, fileDateTime: '2026-03-01T10:00:00.000Z', metadata: { model, isStable: true }
+      });
+      // editor and player declare what they read; the schemer declares nothing, as the IQB schemer does
+      const newerInput = (editorModel = 'aspect-unit-definition@>=4.0 <=4.12'): UnitCheckInput => {
+        const input = okInput();
+        input.installed = {
+          editor: {
+            'iqb-editor-aspect@2.9': { nameAndVersion: 'Aspect Editor 2.9' },
+            'iqb-editor-aspect@2.10': newer('Aspect Editor 2.10', editorModel)
+          },
+          player: {
+            ...okInput().installed?.player,
+            'iqb-player-aspect@2.10': newer('Aspect Player 2.10', 'aspect-unit-definition@>=4.0 <=4.13')
+          },
+          schemer: {
+            'iqb-schemer@2.5': { nameAndVersion: 'Schemer 2.5' },
+            'iqb-schemer@2.6': newer('Schemer 2.6')
+          }
+        };
+        input.lastChanged = { definition: april, scheme: april };
+        return input;
+      };
+      // what the hints on newer versions under the properties name
+      const newerNamed = (input: UnitCheckInput) => section(checkUnit(input), 'properties')?.findings
+        .filter(finding => finding.key.startsWith('unit-check.newer'))
+        .map(finding => finding.params);
+
+      it('names newer versions of the modules as hints, each against the part it reads', () => {
+        const input = newerInput();
+        expect(section(checkUnit(input), 'properties')).toEqual(expect.objectContaining({
+          findings: [
+            {
+              key: 'unit-check.newer-module',
+              params: { used: 'Aspect Editor 2.9', newer: 'Aspect Editor 2.10' },
+              level: 'hint'
+            },
+            {
+              key: 'unit-check.newer-module',
+              params: { used: 'Aspect Player 2.9', newer: 'Aspect Player 2.10' },
+              level: 'hint'
+            },
+            { key: 'unit-check.newer-module', params: { used: 'Schemer 2.5', newer: 'Schemer 2.6' }, level: 'hint' }
+          ],
+          status: 'info'
+        }));
+
+        // the definition last saved before the newer versions were installed, the scheme after
+        input.lastChanged = { definition: new Date('2026-02-01T10:00:00.000Z'), scheme: april };
+        expect(newerNamed(input)).toEqual([{ used: 'Schemer 2.5', newer: 'Schemer 2.6' }]);
+      });
+
+      it('names the player that reads what a newer editor writes, where the unit\'s does not', () => {
+        const input = newerInput('aspect-unit-definition@>=4.0 <=4.13');
+
+        expect(section(checkUnit(input), 'properties')?.findings[0]).toEqual({
+          key: 'unit-check.newer-module-and-player',
+          params: {
+            used: 'Aspect Editor 2.9',
+            newer: 'Aspect Editor 2.10',
+            usedPlayer: 'Aspect Player 2.9',
+            player: 'Aspect Player 2.10'
+          },
+          level: 'hint'
+        });
+      });
+
+      it('names none for a module not asked for: of a hidden tab, or a schemer with nothing to code', () => {
+        const input = newerInput();
+        input.hiddenRoutes = ['editor'];
+        input.variables = [{ id: 'text_1', alias: 'text_1', type: 'no-value' } as VariableInfo];
+        input.scheme = { scheme: '', schemeType: 'iqb-standard@3.0' };
+
+        expect(newerNamed(input)).toEqual([{ used: 'Aspect Player 2.9', newer: 'Aspect Player 2.10' }]);
+      });
     });
   });
 

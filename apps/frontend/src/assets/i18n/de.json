@@ -693,6 +693,8 @@
     "not-installed-editor": "Der zugewiesene Editor „{{module}}“ ist nicht installiert.",
     "not-installed-player": "Der zugewiesene Player „{{module}}“ ist nicht installiert.",
     "not-installed-schemer": "Der zugewiesene Schemer „{{module}}“ ist nicht installiert.",
+    "newer-module": "Diese Aufgabe verwendet {{used}}. Ein Update auf {{newer}} wird empfohlen.",
+    "newer-module-and-player": "Diese Aufgabe verwendet {{used}} und {{usedPlayer}}. Ein Update auf {{newer}} wird empfohlen, zusammen mit einem Update auf {{player}}.",
     "key-missing": "Die Aufgabe hat keinen Kurznamen.",
     "key-too-short": "Der Kurzname „{{key}}“ ist kürzer als die vorgesehenen {{min}} Zeichen.",
     "key-too-long": "Der Kurzname „{{key}}“ ist länger als {{max}} Zeichen und lässt sich so nicht speichern.",
