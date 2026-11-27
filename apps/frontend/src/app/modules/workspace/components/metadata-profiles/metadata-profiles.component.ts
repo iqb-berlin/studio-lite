@@ -1,6 +1,7 @@
 import {
-  Component, computed, effect, inject, input
+  Component, computed, effect, inject, input, signal
 } from '@angular/core';
+import { MatIcon } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
 import { MetadataResolver } from '@iqb/metadata-resolver';
 import { MetadataProfileUse } from '../../utils/metadata-profiles.utils';
@@ -16,6 +17,8 @@ interface ProfileLine {
 interface ProfileLines {
   assigned: ProfileLine[];
   unused: ProfileLine[];
+  /** What the toggle of the unused profiles is filled with: how many there are. */
+  unusedCount: Record<string, string>;
 }
 
 /**
@@ -28,7 +31,7 @@ interface ProfileLines {
   selector: 'studio-lite-metadata-profiles',
   templateUrl: './metadata-profiles.component.html',
   styleUrls: ['./metadata-profiles.component.scss'],
-  imports: [TranslateModule]
+  imports: [MatIcon, TranslateModule]
 })
 export class MetadataProfilesComponent {
   /** The profiles of the unit; none given, none shown. */
@@ -37,6 +40,15 @@ export class MetadataProfilesComponent {
   readonly items = input<MetadataProfileUse>();
   /** Whether the assigned profiles say whether they are the unit's or the items': where both stand together. */
   readonly withTarget = input(false);
+  /**
+   * Whether the unused profiles are listed only on request, below a line that says how many there are: above
+   * the forms, which they would push down, rather than in the unit check.
+   */
+  readonly collapsible = input(false);
+
+  private readonly expandedState = signal(false);
+  /** Whether the unused profiles are listed, where they are only on request. */
+  readonly expanded = this.expandedState.asReadonly();
 
   private readonly profileNames = inject(ProfileNamesService);
   private readonly language = inject(LanguageService).active.code;
@@ -64,24 +76,31 @@ export class MetadataProfilesComponent {
     };
     const unit = this.unit();
     const items = this.items();
+    const unused = [
+      ...(unit?.unused ?? []).map(profile => ({
+        key: 'metadata.unused-unit-profile', params: { name: name(profile.profileId) }
+      })),
+      ...(items?.unused ?? []).map(profile => ({
+        key: profile.items === 1 ? 'metadata.unused-item-profile-one' : 'metadata.unused-item-profile',
+        params: { name: name(profile.profileId), count: String(profile.items ?? 0) }
+      }))
+    ];
     return {
       assigned: [
         ...(unit ? [assignedLine(unit, 'unit')] : []),
         ...(items ? [assignedLine(items, 'item')] : [])
       ],
-      unused: [
-        ...(unit?.unused ?? []).map(profile => ({
-          key: 'metadata.unused-unit-profile', params: { name: name(profile.profileId) }
-        })),
-        ...(items?.unused ?? []).map(profile => ({
-          key: profile.items === 1 ? 'metadata.unused-item-profile-one' : 'metadata.unused-item-profile',
-          params: { name: name(profile.profileId), count: String(profile.items ?? 0) }
-        }))
-      ]
+      unused,
+      unusedCount: { count: String(unused.length) }
     };
   });
 
   constructor() {
     effect(() => this.profileNames.request(this.profileIds()));
+  }
+
+  /** Lists the unused profiles, or no longer, where they are listed only on request. */
+  toggleUnused(): void {
+    this.expandedState.update(expanded => !expanded);
   }
 }

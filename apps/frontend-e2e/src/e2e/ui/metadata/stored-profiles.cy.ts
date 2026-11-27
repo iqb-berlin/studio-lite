@@ -61,12 +61,16 @@ describe('Metadata of a profile the workspace no longer assigns', () => {
 
     cy.get('[data-cy="unit-metadata-unit-profiles"]').within(() => {
       cy.contains('[data-cy="metadata-profiles-assigned"]', 'IQB Deutsch Primar - Aufgabe');
+      // above the form only on request
+      cy.get('[data-cy="metadata-profiles-unused"]').should('not.exist');
+      cy.get('[data-cy="metadata-profiles-unused-toggle"]').should('contain', '(1)').click();
       cy.get('[data-cy="metadata-profiles-unused"]')
         .should('have.length', 1)
         .and('contain', 'IQB Mathematik Primar - Aufgabe');
     });
     cy.get('[data-cy="unit-metadata-item-profiles"]').within(() => {
       cy.contains('[data-cy="metadata-profiles-assigned"]', 'IQB Deutsch Primar - Item');
+      cy.get('[data-cy="metadata-profiles-unused-toggle"]').click();
       cy.get('[data-cy="metadata-profiles-unused"]')
         .should('have.length', 1)
         .and('contain', 'IQB Mathematik Primar - Item')

@@ -374,6 +374,8 @@
     "assigned-item-profile": "Profil für die Items: {{name}}",
     "no-item-profile": "Kein Profil für die Items zugewiesen.",
     "unused-profiles": "Nur gespeichert, nicht genutzt – dem Arbeitsbereich nicht zugewiesen:",
+    "unused-profiles-toggle": "Nicht genutzte Profile ({{count}})",
+    "unused-profiles-hint": "Nur gespeichert, dem Arbeitsbereich nicht zugewiesen:",
     "unused-unit-profile": "{{name}}",
     "unused-item-profile": "{{name}} (bei {{count}} Items)",
     "unused-item-profile-one": "{{name}} (bei 1 Item)",

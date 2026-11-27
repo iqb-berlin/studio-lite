@@ -16,7 +16,9 @@ describe('MetadataProfilesComponent', () => {
   let request: jest.Mock;
   const labels = signal<Record<string, TextWithLanguage[]>>({});
 
-  const create = (inputs: { unit?: MetadataProfileUse; items?: MetadataProfileUse; withTarget?: boolean }) => {
+  const create = (inputs: {
+    unit?: MetadataProfileUse; items?: MetadataProfileUse; withTarget?: boolean; collapsible?: boolean
+  }) => {
     request = jest.fn();
     TestBed.configureTestingModule({
       imports: [MetadataProfilesComponent, TranslateModule.forRoot()],
@@ -42,7 +44,8 @@ describe('MetadataProfilesComponent', () => {
 
     expect(fixture.componentInstance.lines()).toEqual({
       assigned: [{ key: 'metadata.assigned-profile', params: { name: 'IQB German - Unit' } }],
-      unused: [{ key: 'metadata.unused-unit-profile', params: { name: MATH_UNIT } }]
+      unused: [{ key: 'metadata.unused-unit-profile', params: { name: MATH_UNIT } }],
+      unusedCount: { count: '1' }
     });
     expect(request).toHaveBeenCalledWith([GERMAN_UNIT, MATH_UNIT]);
     expect(fixture.nativeElement.querySelectorAll('[data-cy="metadata-profiles-unused"]')).toHaveLength(1);
@@ -58,9 +61,36 @@ describe('MetadataProfilesComponent', () => {
 
     expect(fixture.componentInstance.lines()).toEqual({
       assigned: [{ key: 'metadata.no-unit-profile' }, { key: 'metadata.no-item-profile' }],
-      unused: [{ key: 'metadata.unused-item-profile-one', params: { name: MATH_ITEM, count: '1' } }]
+      unused: [{ key: 'metadata.unused-item-profile-one', params: { name: MATH_ITEM, count: '1' } }],
+      unusedCount: { count: '1' }
     });
     expect(fixture.nativeElement.querySelector('[data-cy="metadata-profiles-unused-title"]')).toBeTruthy();
+  });
+
+  // above the forms of the metadata tab, which a long list would push down: listed only on request
+  it('lists the unused profiles only on request where asked to', () => {
+    create({
+      unit: { assigned: GERMAN_UNIT, unused: [{ profileId: MATH_UNIT }, { profileId: MATH_ITEM }] },
+      collapsible: true
+    });
+    const element = fixture.nativeElement as HTMLElement;
+    const toggle = () => element.querySelector('[data-cy="metadata-profiles-unused-toggle"]') as HTMLButtonElement;
+
+    expect(toggle().getAttribute('aria-expanded')).toBe('false');
+    expect(fixture.componentInstance.lines().unusedCount).toEqual({ count: '2' });
+    expect(element.querySelector('[data-cy="metadata-profiles-unused-title"]')).toBeNull();
+    expect(element.querySelector('[data-cy="metadata-profiles-unused-hint"]')).toBeNull();
+    expect(element.querySelectorAll('[data-cy="metadata-profiles-unused"]')).toHaveLength(0);
+
+    toggle().click();
+    fixture.detectChanges();
+    expect(toggle().getAttribute('aria-expanded')).toBe('true');
+    expect(element.querySelector('[data-cy="metadata-profiles-unused-hint"]')).toBeTruthy();
+    expect(element.querySelectorAll('[data-cy="metadata-profiles-unused"]')).toHaveLength(2);
+
+    toggle().click();
+    fixture.detectChanges();
+    expect(element.querySelectorAll('[data-cy="metadata-profiles-unused"]')).toHaveLength(0);
   });
 
   // every edit of the metadata hands in new values; a profile not delivered is not asked for with each

@@ -374,6 +374,8 @@
     "assigned-item-profile": "Profile for the items: {{name}}",
     "no-item-profile": "No profile assigned for the items.",
     "unused-profiles": "Only stored, not used – not assigned to the workspace:",
+    "unused-profiles-toggle": "Unused profiles ({{count}})",
+    "unused-profiles-hint": "Only stored, not assigned to the workspace:",
     "unused-unit-profile": "{{name}}",
     "unused-item-profile": "{{name}} (in {{count}} items)",
     "unused-item-profile-one": "{{name}} (in 1 item)",

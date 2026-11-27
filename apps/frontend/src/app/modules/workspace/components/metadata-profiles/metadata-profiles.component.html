@@ -2,10 +2,25 @@
   <p class="assigned-profile" data-cy="metadata-profiles-assigned">{{ line.key | translate: line.params }}</p>
 }
 @if (lines().unused.length) {
-  <p class="unused-title" data-cy="metadata-profiles-unused-title">{{ 'metadata.unused-profiles' | translate }}</p>
-  <ul class="unused-profiles">
-    @for (line of lines().unused; track $index) {
-      <li data-cy="metadata-profiles-unused">{{ line.key | translate: line.params }}</li>
+  @if (collapsible()) {
+    <button type="button" class="unused-toggle" data-cy="metadata-profiles-unused-toggle"
+            [attr.aria-expanded]="expanded()" (click)="toggleUnused()">
+      <mat-icon class="unused-toggle-icon">{{ expanded() ? 'expand_more' : 'chevron_right' }}</mat-icon>
+      <span>{{ 'metadata.unused-profiles-toggle' | translate: lines().unusedCount }}</span>
+    </button>
+  } @else {
+    <p class="unused-title" data-cy="metadata-profiles-unused-title">{{ 'metadata.unused-profiles' | translate }}</p>
+  }
+  @if (!collapsible() || expanded()) {
+    @if (collapsible()) {
+      <p class="unused-hint" data-cy="metadata-profiles-unused-hint">
+        {{ 'metadata.unused-profiles-hint' | translate }}
+      </p>
     }
-  </ul>
+    <ul class="unused-profiles">
+      @for (line of lines().unused; track $index) {
+        <li data-cy="metadata-profiles-unused">{{ line.key | translate: line.params }}</li>
+      }
+    </ul>
+  }
 }
