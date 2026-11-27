@@ -41,13 +41,13 @@ export function checkUnitKey(
     findings.push({
       key: 'unit-check.key-too-short',
       params: { ...params, min: String(UNIT_KEY_MIN_LENGTH) },
-      hint: true
+      level: 'hint'
     });
   }
   if (key.length > UNIT_KEY_MAX_LENGTH) {
     findings.push({ key: 'unit-check.key-too-long', params: { ...params, max: String(UNIT_KEY_MAX_LENGTH) } });
   }
-  if (!UNIT_KEY_REGEXP.test(key)) findings.push({ key: 'unit-check.key-format', params, hint: true });
+  if (!UNIT_KEY_REGEXP.test(key)) findings.push({ key: 'unit-check.key-format', params, level: 'hint' });
   if (isUnitKeyTaken(key, unitId, unitList)) findings.push({ key: 'unit-check.key-taken', params });
   return findings;
 }

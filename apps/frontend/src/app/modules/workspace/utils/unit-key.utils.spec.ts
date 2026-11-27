@@ -23,7 +23,7 @@ describe('checkUnitKey', () => {
   // a short key is saved all the same, as older units have them (#1842): a hint
   it('names a key too short as a hint, with the limit', () => {
     expect(checkUnitKey('AB', 9, unitList)).toEqual([
-      { key: 'unit-check.key-too-short', params: { key: 'AB', min: '3' }, hint: true }
+      { key: 'unit-check.key-too-short', params: { key: 'AB', min: '3' }, level: 'hint' }
     ]);
     expect(findingKeys('ABC')).toEqual([]);
   });
@@ -39,7 +39,7 @@ describe('checkUnitKey', () => {
   // a key the form marks is saved all the same, and older units have such keys (#1842): a hint
   it('names a key that does not start with a letter as a hint', () => {
     expect(checkUnitKey('00_INVALID_NAME', 9, unitList)).toEqual([
-      { key: 'unit-check.key-format', params: { key: '00_INVALID_NAME' }, hint: true }
+      { key: 'unit-check.key-format', params: { key: '00_INVALID_NAME' }, level: 'hint' }
     ]);
   });
 

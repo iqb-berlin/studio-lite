@@ -1,8 +1,8 @@
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { DEFAULT_UNIT_SIZE_LEVELS } from '@studio-lite/shared-code';
 import {
-  checkUnit, DefinitionContent, definitionSummary, LastChangeLines, UnitCheckInput, UnitCheckSection,
-  withDefinitionSize, withKeyFindings, withLastChanges, withMetadataProfiles
+  checkUnit, DefinitionContent, definitionSummary, LastChangeLines, UnitCheckFinding, UnitCheckInput,
+  UnitCheckSection, withDefinitionSize, withKeyFindings, withLastChanges, withMetadataProfiles
 } from './unit-check.utils';
 import { MetadataProfiles } from './metadata-profiles.utils';
 
@@ -86,14 +86,16 @@ describe('checkUnit', () => {
       const input = okInput();
       input.modules = { ...input.modules, schemer: '' };
 
-      expect(section(checkUnit(input), 'properties')?.findings).toEqual([{ key: 'unit-check.no-schemer' }]);
+      expect(section(checkUnit(input), 'properties')?.findings)
+        .toEqual([{ key: 'unit-check.no-schemer', level: 'hint' }]);
     });
 
     it('says so when the properties could not be loaded', () => {
       const input = okInput();
       input.modules = undefined;
 
-      expect(section(checkUnit(input), 'properties')?.findings).toEqual([{ key: 'unit-check.not-loaded' }]);
+      expect(section(checkUnit(input), 'properties')?.findings)
+        .toEqual([{ key: 'unit-check.not-loaded', level: 'hint' }]);
     });
 
     it('names a module that is not installed', () => {
@@ -112,7 +114,7 @@ describe('checkUnit', () => {
       input.modules = { ...input.modules, schemer: undefined };
 
       expect(section(checkUnit(input), 'properties')?.findings).toEqual([
-        { key: 'unit-check.modules-not-loaded' }, { key: 'unit-check.no-schemer' }
+        { key: 'unit-check.modules-not-loaded', level: 'hint' }, { key: 'unit-check.no-schemer', level: 'hint' }
       ]);
     });
 
@@ -123,27 +125,31 @@ describe('checkUnit', () => {
       expect(section(checkUnit(input), 'properties')?.findings).toEqual([]);
     });
 
-    // without its editor a unit cannot be edited, but preview, export and coding work all the same
-    it('names a missing or uninstalled editor as a hint, and the properties as in order', () => {
-      const input = okInput();
-      input.modules = { ...input.modules, editor: '' };
-      expect(section(checkUnit(input), 'properties')).toEqual(expect.objectContaining({
-        findings: [{ key: 'unit-check.no-editor', hint: true }], status: 'info'
-      }));
+    // Without its editor or its schemer a unit or its coding cannot be edited, but preview, export, test and
+    // coding work all the same: the testcenter does not read the schemer (#1990)
+    it.each(['editor', 'schemer'] as const)('names a missing or uninstalled %s as a hint, the properties as in order',
+      moduleType => {
+        const input = okInput();
+        input.modules = { ...input.modules, [moduleType]: '' };
+        expect(section(checkUnit(input), 'properties')).toEqual(expect.objectContaining({
+          findings: [{ key: `unit-check.no-${moduleType}`, level: 'hint' }], status: 'info'
+        }));
 
-      input.modules = { ...input.modules, editor: 'iqb-editor-other@1.0' };
-      expect(section(checkUnit(input), 'properties')?.findings).toEqual([{
-        key: 'unit-check.not-installed-editor', params: { module: 'iqb-editor-other@1.0' }, hint: true
-      }]);
-    });
+        input.modules = { ...input.modules, [moduleType]: `iqb-${moduleType}-other@1.0` };
+        expect(section(checkUnit(input), 'properties')?.findings).toEqual([{
+          key: `unit-check.not-installed-${moduleType}`,
+          params: { module: `iqb-${moduleType}-other@1.0` },
+          level: 'hint'
+        }]);
+      });
 
     it('shows a missing player as a problem, hints beside it or not', () => {
       const input = okInput();
       input.modules = { editor: '', player: '', schemer: input.modules?.schemer };
 
       expect(section(checkUnit(input), 'properties')).toEqual(expect.objectContaining({
-        findings: [{ key: 'unit-check.no-editor', hint: true }, { key: 'unit-check.no-player' }],
-        status: 'warning'
+        findings: [{ key: 'unit-check.no-editor', level: 'hint' }, { key: 'unit-check.no-player' }],
+        status: 'error'
       }));
     });
   });
@@ -155,7 +161,7 @@ describe('checkUnit', () => {
       input.installed = undefined;
 
       expect(section(checkUnit(input), 'editor')?.findings)
-        .toEqual([{ key: 'unit-check.definition-type-not-checked' }]);
+        .toEqual([{ key: 'unit-check.definition-type-not-checked', level: 'hint' }]);
     });
 
     it('does not say so for a unit that names no format, as there would be nothing to check', () => {
@@ -166,11 +172,14 @@ describe('checkUnit', () => {
       expect(section(checkUnit(input), 'editor')?.findings).toEqual([]);
     });
 
-    it('names a unit without content', () => {
+    // a unit not written yet is unfinished rather than broken
+    it('warns of a unit without content', () => {
       const input = okInput();
       input.definition = content({ hasDefinition: false });
 
-      expect(section(checkUnit(input), 'editor')?.findings).toEqual([{ key: 'unit-check.no-definition' }]);
+      expect(section(checkUnit(input), 'editor')).toEqual(expect.objectContaining({
+        findings: [{ key: 'unit-check.no-definition', level: 'warning' }], status: 'warning'
+      }));
     });
 
     it('names a format the player says it does not read', () => {
@@ -194,16 +203,20 @@ describe('checkUnit', () => {
       const input = okInput();
       input.definition = undefined;
 
-      expect(section(checkUnit(input), 'editor')?.findings).toEqual([{ key: 'unit-check.definition-not-loaded' }]);
+      expect(section(checkUnit(input), 'editor')?.findings)
+        .toEqual([{ key: 'unit-check.definition-not-loaded', level: 'hint' }]);
     });
   });
 
   describe('schemer', () => {
-    it('names a unit without coding scheme', () => {
+    // answers without a scheme are not coded: unfinished rather than broken
+    it('warns of a unit without coding scheme', () => {
       const input = okInput();
       input.scheme = { scheme: '', schemeType: '' };
 
-      expect(section(checkUnit(input), 'schemer')?.findings).toEqual([{ key: 'unit-check.no-scheme' }]);
+      expect(section(checkUnit(input), 'schemer')).toEqual(expect.objectContaining({
+        findings: [{ key: 'unit-check.no-scheme', level: 'warning' }], status: 'warning'
+      }));
     });
 
     // the export dialog warns of them, scheme or not; the card has to say the same
@@ -215,8 +228,10 @@ describe('checkUnit', () => {
       ];
 
       const schemer = section(checkUnit(input), 'schemer');
-      expect(schemer?.findings).toEqual([{ key: 'unit-check.no-scheme' }]);
+      expect(schemer?.findings).toEqual([{ key: 'unit-check.no-scheme', level: 'warning' }]);
       expect(schemer?.variableIdConflicts.map(conflict => conflict.id)).toEqual(['text_x']);
+      // the id written twice fails the import into the testcenter, the missing scheme fails nothing
+      expect(schemer?.status).toBe('error');
     });
 
     describe('a unit with nothing to code', () => {
@@ -251,7 +266,7 @@ describe('checkUnit', () => {
         ];
 
         const schemer = section(checkUnit(input), 'schemer');
-        expect(schemer).toEqual(expect.objectContaining({ status: 'warning' }));
+        expect(schemer).toEqual(expect.objectContaining({ status: 'error' }));
         expect(schemer?.variableIdConflicts.map(conflict => conflict.id)).toEqual(['text_x']);
       });
 
@@ -263,8 +278,8 @@ describe('checkUnit', () => {
         ];
         const sections = checkUnit(input);
 
-        expect(section(sections, 'schemer')?.findings).toEqual([{ key: 'unit-check.no-scheme' }]);
-        expect(section(sections, 'properties')?.findings).toEqual([{ key: 'unit-check.no-schemer' }]);
+        expect(section(sections, 'schemer')?.findings).toEqual([{ key: 'unit-check.no-scheme', level: 'warning' }]);
+        expect(section(sections, 'properties')?.findings).toEqual([{ key: 'unit-check.no-schemer', level: 'hint' }]);
       });
 
       // a new unit has no elements yet: nothing says it is an information unit
@@ -273,19 +288,21 @@ describe('checkUnit', () => {
         input.variables = [];
         const sections = checkUnit(input);
 
-        expect(section(sections, 'schemer')?.findings).toEqual([{ key: 'unit-check.no-scheme' }]);
-        expect(section(sections, 'properties')?.findings).toEqual([{ key: 'unit-check.no-schemer' }]);
+        expect(section(sections, 'schemer')?.findings).toEqual([{ key: 'unit-check.no-scheme', level: 'warning' }]);
+        expect(section(sections, 'properties')?.findings).toEqual([{ key: 'unit-check.no-schemer', level: 'hint' }]);
       });
 
       // what is not known is not nothing: without the variables, or without the scheme, which may exist
       it('is not one while the variables or the scheme are not known', () => {
         const withoutVariables = infoInput();
         withoutVariables.variables = undefined;
-        expect(section(checkUnit(withoutVariables), 'schemer')?.findings).toEqual([{ key: 'unit-check.no-scheme' }]);
+        expect(section(checkUnit(withoutVariables), 'schemer')?.findings)
+          .toEqual([{ key: 'unit-check.no-scheme', level: 'warning' }]);
 
         const withoutScheme = infoInput();
         withoutScheme.scheme = undefined;
-        expect(section(checkUnit(withoutScheme), 'properties')?.findings).toEqual([{ key: 'unit-check.no-schemer' }]);
+        expect(section(checkUnit(withoutScheme), 'properties')?.findings)
+          .toEqual([{ key: 'unit-check.no-schemer', level: 'hint' }]);
       });
 
       // the scheme of an information unit is checked as any other: it may derive variables
@@ -296,7 +313,8 @@ describe('checkUnit', () => {
           schemeType: 'iqb-standard@3.0'
         };
 
-        expect(section(checkUnit(input), 'properties')?.findings).toEqual([{ key: 'unit-check.no-schemer' }]);
+        expect(section(checkUnit(input), 'properties')?.findings)
+          .toEqual([{ key: 'unit-check.no-schemer', level: 'hint' }]);
         expect(section(checkUnit(input), 'schemer')?.info).toBeUndefined();
       });
     });
@@ -310,7 +328,7 @@ describe('checkUnit', () => {
       };
 
       const schemer = section(checkUnit(input), 'schemer');
-      expect(schemer?.status).toBe('warning');
+      expect(schemer?.status).toBe('error');
       expect(schemer?.variableIdConflicts).toEqual([{
         id: '05',
         variables: [
@@ -320,23 +338,36 @@ describe('checkUnit', () => {
       }]);
     });
 
-    it('names what the schemer finds wrong with the coding, with how to fix it (#2135)', () => {
+    // what breaks the coding is an error; what it gets through, but most likely not as meant, a warning
+    it('names what the schemer finds wrong with the coding, with how to fix it, by its weight (#2135)', () => {
       const input = okInput();
+      const sumOfOne = {
+        id: 'single', sourceType: 'SUM_SCORE', deriveSources: ['text_1'], codes: [code]
+      };
       input.scheme = {
         scheme: scheme([
           { id: 'text_1', sourceType: 'BASE', codes: [code] },
           {
             id: 'sum', sourceType: 'SUM_SCORE', deriveSources: ['text_1', 'gone'], codes: [code]
-          }
+          },
+          sumOfOne
         ]),
         schemeType: 'iqb-standard@3.0'
       };
 
       const schemer = section(checkUnit(input), 'schemer');
-      expect(schemer?.status).toBe('warning');
+      expect(schemer?.status).toBe('error');
       expect(schemer?.findings).toEqual([
-        { key: 'unit-check.scheme-problem.SOURCE_MISSING', params: { variable: 'sum' } }
+        { key: 'unit-check.scheme-problem-detail.SOURCE_MISSING_ONE', params: { variable: 'sum', source: 'gone' } },
+        {
+          key: 'unit-check.scheme-problem-detail.ONLY_ONE_SOURCE',
+          params: { variable: 'single', source: 'text_1' },
+          level: 'warning'
+        }
       ]);
+
+      input.scheme.scheme = scheme([{ id: 'text_1', sourceType: 'BASE', codes: [code] }, sumOfOne]);
+      expect(section(checkUnit(input), 'schemer')?.status).toBe('warning');
     });
 
     // where it is fixed: elements copied with their names are renamed in the editor (#2135)
@@ -344,7 +375,7 @@ describe('checkUnit', () => {
       const sections = checkUnit(nameTwiceInput());
 
       expect(section(sections, 'editor')).toEqual(expect.objectContaining({
-        status: 'warning',
+        status: 'error',
         findings: [{ key: 'unit-check.element-problem.NAME_TWICE', params: { variable: 'text_1' } }]
       }));
       expect(section(sections, 'schemer')).toEqual(expect.objectContaining({ status: 'ok', findings: [] }));
@@ -466,7 +497,7 @@ describe('checkUnit', () => {
       };
 
       const properties = section(checkUnit(input), 'properties');
-      expect(properties?.status).toBe('warning');
+      expect(properties?.status).toBe('error');
       expect(properties?.variableIdConflicts.map(conflict => conflict.id)).toEqual(['05']);
     });
 
@@ -494,7 +525,8 @@ describe('checkUnit', () => {
       input.hiddenRoutes = ['schemer'];
       input.scheme = undefined;
 
-      expect(section(checkUnit(input), 'properties')?.findings).toEqual([{ key: 'unit-check.scheme-not-loaded' }]);
+      expect(section(checkUnit(input), 'properties')?.findings)
+        .toEqual([{ key: 'unit-check.scheme-not-loaded', level: 'hint' }]);
     });
 
     it('still names a missing player, which the export needs whether the preview is shown or not', () => {
@@ -514,7 +546,7 @@ describe('checkUnit', () => {
       const properties = section(checkUnit(input), 'properties');
       expect(properties?.findings).toEqual([
         { key: 'workspace.dependencies-missing-packages', params: { names: 'GeoGebra.itcr.zip' } },
-        { key: 'workspace.dependencies-missing-install-hint', hint: true }
+        { key: 'workspace.dependencies-missing-install-hint', level: 'hint' }
       ]);
       expect(properties?.dependencies?.map(list => list.purpose)).toEqual(['play']);
     });
@@ -527,7 +559,7 @@ describe('checkUnit', () => {
       input.definition = content({ dependenciesToPlay: [geogebra, sheet], dependenciesToEdit: [geogebra] });
 
       const editor = section(checkUnit(input), 'editor');
-      expect(editor?.status).toBe('warning');
+      expect(editor?.status).toBe('error');
       expect(editor?.findings.map(finding => finding.key)).toEqual([
         'workspace.dependencies-missing-packages',
         'workspace.dependencies-missing-files',
@@ -553,7 +585,7 @@ describe('withKeyFindings', () => {
 
   // a key in an older format is saved all the same (#1842)
   it('leaves the properties in order with a hint about the key, and shows it', () => {
-    const hint = { key: 'unit-check.key-format', params: { key: '00_INVALID_NAME' }, hint: true };
+    const hint: UnitCheckFinding = { key: 'unit-check.key-format', params: { key: '00_INVALID_NAME' }, level: 'hint' };
 
     expect(section(withKeyFindings(checkUnit(okInput()), [hint]), 'properties')).toEqual(expect.objectContaining({
       findings: [hint], status: 'info'
@@ -567,7 +599,7 @@ describe('withKeyFindings', () => {
 
     expect(section(sections, 'properties')).toEqual(expect.objectContaining({
       findings: [keyFinding, { key: 'unit-check.no-player' }],
-      status: 'warning'
+      status: 'error'
     }));
     expect(section(sections, 'editor')?.status).toBe('ok');
   });

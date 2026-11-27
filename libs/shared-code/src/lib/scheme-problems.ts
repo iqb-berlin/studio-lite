@@ -8,6 +8,9 @@ import type {
  * NAME_TWICE, the most common cause of an invalid source, and UNREADABLE, a scheme the validation
  * cannot read at all. VACANT, a variable without codes, is left out: such a variable is mostly not
  * meant to be coded -- the storage area of a drag-and-drop task, say -- and is not worth a warning.
+ * So is ONLY_ONE_SOURCE of a formula or a manual coding, for which one source is usual: a formula
+ * that converts a number entered, a manual coding of one answer, and INVALID_SOURCE of elements whose
+ * id is used twice, which the id conflicts name (#2119).
  */
 export type SchemeProblemType = Exclude<CodingSchemeProblemType, 'VACANT'> | 'NAME_TWICE' | 'UNREADABLE';
 
@@ -25,6 +28,56 @@ export interface SchemeProblem {
    * that a derived variable or an orphaned coding shares is fixed in the coding.
    */
   baseVariable: boolean;
+  /**
+   * For a derived variable with one of the problems of its sources -- one missing, too many or too few, a
+   * copy of a derived one: the variables it is derived from, by name, in their order. A base variable
+   * whose element is gone has none (#2135).
+   */
+  sources?: string[];
+  /** Of the sources, the ones the unit has neither as an element nor as a derived variable. */
+  missingSources?: string[];
+}
+
+/** The problems that are about the sources of a derived variable. */
+const SOURCE_PROBLEMS: SchemeProblemType[] = [
+  'SOURCE_MISSING', 'MORE_THAN_ONE_SOURCE', 'ONLY_ONE_SOURCE', 'VALUE_COPY_NOT_FROM_BASE'
+];
+
+const isDerived = (coding: VariableCodingData): boolean => coding.sourceType !== 'BASE' &&
+  coding.sourceType !== 'BASE_NO_VALUE';
+
+/**
+ * The sources of the derived variable of each name, as the schemer names them: a coding by its alias,
+ * an element by its alias, else by the id the source is given by. A source is missing where the
+ * unit has neither an element nor a derived variable of its id, as the validation counts it.
+ */
+function sourcesByName(
+  elements: readonly VariableInfoInput[],
+  codings: VariableCodingData[]
+): (name: string) => Pick<SchemeProblem, 'sources' | 'missingSources'> {
+  const codingById = new Map(codings.map(coding => [coding.id, coding]));
+  const elementById = new Map(elements.map(element => [element.id, element]));
+  const nameOf = (id: string): string => {
+    const coding = codingById.get(id);
+    return (coding ? coding.alias || coding.id : elementById.get(id)?.alias) || id;
+  };
+  const possible = new Set([
+    ...elements.map(element => element.id),
+    ...codings.filter(isDerived).map(coding => coding.id)
+  ]);
+  const derivedByName = new Map<string, VariableCodingData>();
+  codings.filter(isDerived).forEach(coding => {
+    const name = coding.alias || coding.id;
+    if (!derivedByName.has(name)) derivedByName.set(name, coding);
+  });
+  return name => {
+    const derived = derivedByName.get(name);
+    if (!derived) return {};
+    const ids = (Array.isArray(derived.deriveSources) ? derived.deriveSources : [])
+      .filter((id): id is string => typeof id === 'string');
+    const missing = ids.filter(id => !possible.has(id));
+    return { sources: ids.map(nameOf), ...(missing.length && { missingSources: missing.map(nameOf) }) };
+  };
 }
 
 /**
@@ -143,6 +196,14 @@ export function findSchemeProblems(
   // lose nothing when deleted and fail no coding -- the save drops those of elements without value
   // itself (#2135). One coding of the name that does code keeps its problem.
   const emptyLeftovers = new Map<string, boolean>();
+  // whether all codings of a name are formulas or manual codings, which are usually derived from one source
+  const oneSourceUsual = new Map<string, boolean>();
+  // whether all codings of a name belong to elements whose id is used twice: the export writes that id
+  // twice, and the id conflicts name it with how to resolve it -- an invalid source says the same, worse
+  const ofDoubledElements = new Map<string, boolean>();
+  // names with a coding of an element that is gone and that codes: a missing source under such a name is
+  // that element first, whatever a derived variable of the name derives from
+  const orphaned = new Set<string>();
   const codingById = new Map(codings.map(coding => [coding.id, coding]));
   // a derived variable may take the name of the base variable it derives from: the schemer allows it
   // as long as no other coding takes that name as well (#2135)
@@ -168,11 +229,25 @@ export function findSchemeProblems(
     baseByName.set(name, (baseByName.get(name) ?? true) && base && withElement);
     const leftover = base && !elementCount && !coding.codes?.length;
     emptyLeftovers.set(name, (emptyLeftovers.get(name) ?? true) && leftover);
+    ofDoubledElements.set(name, (ofDoubledElements.get(name) ?? true) && elementCount > 1);
+    if (coding.sourceType === 'BASE' && !elementCount && coding.codes?.length) orphaned.add(name);
+    // a base coding the derived variable takes its name from has no say: one source is its only source
+    if (!base) {
+      oneSourceUsual.set(
+        name,
+        (oneSourceUsual.get(name) ?? true) && (coding.sourceType === 'SOLVER' || coding.sourceType === 'MANUAL')
+      );
+    }
   });
   const seen = new Set<string>();
+  const sourcesOf = sourcesByName(elements, codings);
   return problems
     .filter((problem): problem is NamedProblem => problem.type !== 'VACANT')
     .filter(problem => !(problem.type === 'SOURCE_MISSING' && emptyLeftovers.get(problem.variableId)))
+    .filter(problem => !(problem.type === 'ONLY_ONE_SOURCE' && oneSourceUsual.get(problem.variableId)))
+    // by the codings of the name where there are any, else by the element id the validation names
+    .filter(problem => !(problem.type === 'INVALID_SOURCE' &&
+      (ofDoubledElements.get(problem.variableId) ?? (elementIdCounts.get(problem.variableId) ?? 0) > 1)))
     .filter(problem => {
       const key = `${problem.type} ${problem.variableId}`;
       if (seen.has(key)) return false;
@@ -181,12 +256,17 @@ export function findSchemeProblems(
     })
     // a stable sort: the breaking ones first, each kind in the order the validation found them
     .sort((a, b) => Number(b.breaking) - Number(a.breaking))
-    .map(problem => ({
-      type: problem.type === 'INVALID_SOURCE' && nameUsedTwice(problem.variableId) ?
+    .map((problem): SchemeProblem => {
+      const type = problem.type === 'INVALID_SOURCE' && nameUsedTwice(problem.variableId) ?
         'NAME_TWICE' :
-        problem.type,
-      variable: problem.variableId,
-      breaking: problem.breaking,
-      baseVariable: baseByName.get(problem.variableId) ?? false
-    }));
+        problem.type;
+      return {
+        type,
+        variable: problem.variableId,
+        breaking: problem.breaking,
+        baseVariable: baseByName.get(problem.variableId) ?? false,
+        ...(SOURCE_PROBLEMS.includes(type) && !(type === 'SOURCE_MISSING' && orphaned.has(problem.variableId)) &&
+          sourcesOf(problem.variableId))
+      };
+    });
 }

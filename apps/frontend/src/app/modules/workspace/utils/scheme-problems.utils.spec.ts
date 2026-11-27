@@ -73,7 +73,7 @@ describe('schemeProblemFindings', () => {
       id: 'input_1', alias: '01', sourceType: 'BASE', ...codeWithRule({ method: 'IS_EMPTY' })
     }]), true)).toEqual({
       editor: [],
-      schemer: [{ key: 'unit-check.scheme-problem.SOURCE_MISSING', params: { variable: '01' } }]
+      schemer: [{ key: 'unit-check.scheme-problem-detail.SOURCE_MISSING_ELEMENT', params: { variable: '01' } }]
     });
   });
 
@@ -90,7 +90,59 @@ describe('schemeProblemFindings', () => {
       }
     ]), true)).toEqual({
       editor: [],
-      schemer: [{ key: 'unit-check.scheme-problem.SOURCE_MISSING', params: { variable: 'sum' } }]
+      schemer: [{
+        key: 'unit-check.scheme-problem-detail.SOURCE_MISSING_ONE', params: { variable: 'sum', source: 'gone' }
+      }]
     });
+  });
+
+  // what to change in the coding, by name (#2135)
+  it('names the sources a problem is about: those missing, those of a copy, the only one', () => {
+    const variables: VariableInfoInput[] = [
+      { id: 'input_1', alias: '01', type: 'string' }, { id: 'input_2', alias: '02', type: 'string' },
+      { id: 'input_3', alias: '03', type: 'string' }
+    ];
+    const coded = codeWithRule({ method: 'IS_EMPTY' });
+    const derived = (id: string, sourceType: string, deriveSources: string[]) => ({
+      id, alias: id, sourceType, deriveSources, codes: []
+    });
+
+    const { schemer } = schemeProblemFindings(variables, scheme([
+      {
+        id: 'input_1', alias: '01', sourceType: 'BASE', ...coded
+      },
+      {
+        id: 'input_2', alias: '02', sourceType: 'BASE', ...coded
+      },
+      {
+        id: 'input_3', alias: '03', sourceType: 'BASE', ...coded
+      },
+      derived('copy', 'COPY_VALUE', ['input_1', 'input_2']),
+      derived('copies', 'COPY_VALUE', ['input_1', 'input_2', 'input_3']),
+      derived('again', 'COPY_VALUE', ['input_1', 'input_1']),
+      derived('sum', 'SUM_SCORE', ['input_1']),
+      derived('copy_of_sum', 'COPY_VALUE', ['sum']),
+      derived('none', 'SUM_CODE', []),
+      derived('lost', 'SUM_CODE', ['input_1', 'x', 'y'])
+    ]), true);
+
+    const detail = 'unit-check.scheme-problem-detail';
+    expect(schemer).toEqual(expect.arrayContaining([
+      { key: `${detail}.SOURCE_MISSING_NONE`, params: { variable: 'none' } },
+      { key: `${detail}.SOURCE_MISSING_MANY`, params: { variable: 'lost', sources: 'x, y' } },
+      // which value a copy takes follows the order of the responses: all sources are named, none as the one
+      { key: `${detail}.MORE_THAN_ONE_SOURCE`, params: { variable: 'copy', sources: '01, 02' }, level: 'warning' },
+      {
+        key: `${detail}.MORE_THAN_ONE_SOURCE`, params: { variable: 'copies', sources: '01, 02, 03' }, level: 'warning'
+      },
+      { key: `${detail}.ONLY_ONE_SOURCE`, params: { variable: 'sum', source: '01' }, level: 'warning' },
+      {
+        key: `${detail}.VALUE_COPY_NOT_FROM_BASE`, params: { variable: 'copy_of_sum', source: 'sum' }, level: 'warning'
+      }
+    ]));
+    // the same source twice is one: the general text stands
+    expect(schemer).toContainEqual(
+      { key: 'unit-check.scheme-problem.MORE_THAN_ONE_SOURCE', params: { variable: 'again' }, level: 'warning' }
+    );
   });
 });

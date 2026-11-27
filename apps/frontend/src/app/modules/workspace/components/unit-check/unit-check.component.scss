@@ -30,6 +30,10 @@
   color: #2e7d32;
 }
 
+.error-icon {
+  color: #b3261e;
+}
+
 .warning-icon {
   color: #e65100;
 }
@@ -40,6 +44,23 @@
 
 .findings {
   margin: 4px 0 0 32px;
+  padding: 0;
+  list-style: none;
+}
+
+.finding {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 2px 0;
+}
+
+.finding-icon {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  margin-top: 1px;
 }
 
 .definition-size,

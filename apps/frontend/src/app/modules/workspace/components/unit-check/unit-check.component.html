@@ -8,20 +8,27 @@
       @for (section of checked; track section.tab) {
         <div class="section" [attr.data-cy]="'unit-check-' + section.tab">
           <div class="section-header">
+            <!-- the signs are named for screen readers: they alone say how much a section or a finding weighs -->
             @switch (section.status) {
+              @case ('error') {
+                <mat-icon class="status-icon error-icon" aria-hidden="false"
+                          [attr.aria-label]="'unit-check.level.error' | translate">error</mat-icon>
+              }
               @case ('warning') {
-                <mat-icon class="status-icon warning-icon">warning</mat-icon>
+                <mat-icon class="status-icon warning-icon" aria-hidden="false"
+                          [attr.aria-label]="'unit-check.level.warning' | translate">warning</mat-icon>
               }
               @case ('info') {
-                <mat-icon class="status-icon info-icon">info</mat-icon>
+                <mat-icon class="status-icon info-icon" aria-hidden="false"
+                          [attr.aria-label]="'unit-check.level.hint' | translate">info</mat-icon>
               }
               @default {
                 <mat-icon class="status-icon ok-icon">check_circle</mat-icon>
               }
             }
             <span class="section-title">{{ 'workspace.routes.' + section.tab | translate }}</span>
-            <!-- information beside a warning would contradict it: nothing to code, but an id written twice -->
-            @if (section.info && section.status !== 'warning') {
+            <!-- information beside an error or a warning would contradict it: nothing to code, but a doubled id -->
+            @if (section.info && section.status === 'info') {
               <span data-cy="unit-check-info">{{ section.info.key | translate }}</span>
             } @else if (section.status === 'ok') {
               <span data-cy="unit-check-ok">{{ 'unit-check.ok' | translate }}</span>
@@ -41,9 +48,25 @@
           @if (section.findings.length) {
             <ul class="findings">
               @for (finding of section.findings; track $index) {
-                <!-- a hint fails nothing: set apart from the problems beside it -->
-                <li data-cy="unit-check-finding"
-                    [class.hint-finding]="finding.hint">{{ finding.key | translate: finding.params }}</li>
+                <!-- each finding with the sign of its level: in a section of several, what fails stands out -->
+                <li class="finding" data-cy="unit-check-finding" [attr.data-level]="finding.level ?? 'error'"
+                    [class.hint-finding]="finding.level === 'hint'">
+                  @switch (finding.level) {
+                    @case ('warning') {
+                      <mat-icon class="finding-icon warning-icon" aria-hidden="false"
+                                [attr.aria-label]="'unit-check.level.warning' | translate">warning</mat-icon>
+                    }
+                    @case ('hint') {
+                      <mat-icon class="finding-icon info-icon" aria-hidden="false"
+                                [attr.aria-label]="'unit-check.level.hint' | translate">info</mat-icon>
+                    }
+                    @default {
+                      <mat-icon class="finding-icon error-icon" aria-hidden="false"
+                                [attr.aria-label]="'unit-check.level.error' | translate">error</mat-icon>
+                    }
+                  }
+                  <span data-cy="unit-check-finding-text">{{ finding.key | translate: finding.params }}</span>
+                </li>
               }
             </ul>
           }
@@ -63,7 +86,11 @@
           }
           @if (section.variableIdConflicts.length) {
             <div class="conflicts" data-cy="unit-check-variable-id-conflicts">
-              <p>{{ 'unit-check.variable-id-conflicts' | translate }}</p>
+              <p class="finding">
+                <mat-icon class="finding-icon error-icon" aria-hidden="false"
+                          [attr.aria-label]="'unit-check.level.error' | translate">error</mat-icon>
+                <span>{{ 'unit-check.variable-id-conflicts' | translate }}</span>
+              </p>
               <studio-lite-variable-id-conflict-list [conflicts]="section.variableIdConflicts">
               </studio-lite-variable-id-conflict-list>
               @if (section.tab === 'schemer') {

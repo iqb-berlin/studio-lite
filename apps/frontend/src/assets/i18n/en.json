@@ -744,9 +744,23 @@
       "RULE_NUMERIC_RANGE_INVALID": "In the coding of \"{{variable}}\", a range rule has invalid limits: a limit is missing or not a number, or the lower one is above the upper one. Correct the limits in the rule.",
       "RULESET_VALUE_ARRAY_POS_INVALID": "In the coding of \"{{variable}}\", a rule set names a position in the value that does not exist. Correct the position in the rule set."
     },
+    "level": {
+      "error": "Error",
+      "warning": "Warning",
+      "hint": "Hint"
+    },
+    "scheme-problem-detail": {
+      "SOURCE_MISSING_ELEMENT": "\"{{variable}}\" codes an element that is no longer in the unit. Delete the variable in coding.",
+      "SOURCE_MISSING_NONE": "No source variable is selected for \"{{variable}}\". In coding, select the source variables of \"{{variable}}\", or delete the variable.",
+      "SOURCE_MISSING_ONE": "The source variable \"{{source}}\" of \"{{variable}}\" is not in the unit. In coding, select the source variables of \"{{variable}}\" again, or delete the variable.",
+      "SOURCE_MISSING_MANY": "Source variables of \"{{variable}}\" are not in the unit: {{sources}}. In coding, select the source variables of \"{{variable}}\" again, or delete the variable.",
+      "MORE_THAN_ONE_SOURCE": "\"{{variable}}\" copies a value but has several source variables: {{sources}}. Only one of the values is taken. In coding, select only one source variable for \"{{variable}}\", or choose another derivation if all of them are to count.",
+      "ONLY_ONE_SOURCE": "\"{{variable}}\" is derived from \"{{source}}\" only. In coding, select the missing source variables for \"{{variable}}\", or choose to copy the value if only this one is meant.",
+      "VALUE_COPY_NOT_FROM_BASE": "\"{{variable}}\" copies the value of the derived variable \"{{source}}\". In coding, select a base variable as the source variable of \"{{variable}}\"."
+    },
     "element-problem": {
       "NAME_TWICE": "Two elements are named \"{{variable}}\". Give one of them another ID in the editor.",
-      "INVALID_SOURCE": "The element \"{{variable}}\" does not match its coding: its ID appears twice, or it has a value but is coded as a variable without a value, or the other way round. Give the element a unique ID in the editor; if it already has one, check the variable in coding."
+      "INVALID_SOURCE": "The element \"{{variable}}\" does not match its coding: it has a value but is coded as a variable without a value, or the other way round. Check the variable in coding."
     },
     "comments-present": "Comments present",
     "comments-absent": "No comments",

@@ -49,11 +49,11 @@ const isMissing = (entry: CheckedDependency): boolean => entry.state === 'missin
 /** One finding per kind of which something is missing, naming all of that kind. */
 function missingFindings({ purpose, entries }: Checked): UnitCheckFinding[] {
   // without what its editor needs the unit cannot be edited in full, but it is played all the same
-  const hint = purpose === 'edit' ? { hint: true } : {};
+  const level: Pick<UnitCheckFinding, 'level'> = purpose === 'edit' ? { level: 'hint' } : {};
   return (['package', 'widget', 'file'] as const).flatMap(kind => {
     const names = entries.filter(entry => entry.kind === kind && isMissing(entry)).map(entry => entry.id);
     return names.length ?
-      [{ key: MISSING_KEYS[purpose][kind], params: { names: names.join(', ') }, ...hint }] :
+      [{ key: MISSING_KEYS[purpose][kind], params: { names: names.join(', ') }, ...level }] :
       [];
   });
 }
@@ -78,9 +78,9 @@ function toList({ purpose, entries }: Checked): UnitDependencyList {
 /**
  * What a unit needs to be played and to be edited, and what of it the studio lacks (#2198), checked
  * as the preview checks it. What is missing to be played fails the preview, the export and the test,
- * and is a finding; what is missing only to be edited is a hint, as a missing editor is. That
+ * and is an error; what is missing only to be edited is a hint, as a missing editor is. That
  * packages and widgets can be installed is said once, after them. Where what is installed could not
- * be read, that is said instead of a finding -- unknown is not missing.
+ * be read, that is said as a hint -- unknown is not missing.
  *
  * Where the editor is hidden, only what is needed to be played is checked and listed: the preview
  * and the export need it all the same. A unit of a module without an editor -- its lists come with
@@ -104,14 +104,9 @@ export function checkDependencies(
     .some(entry => entry.state === 'missing' && (entry.kind === 'package' || entry.kind === 'widget')));
   const findings: UnitCheckFinding[] = [
     ...checked.flatMap(missingFindings),
-    // a hint where only what is needed to be edited could not be checked
-    ...(unknown.length ?
-      [{
-        key: 'unit-check.dependencies-not-checked',
-        ...(unknown.every(({ purpose }) => purpose === 'edit') && { hint: true })
-      }] :
-      []),
-    ...(installable ? [{ key: 'workspace.dependencies-missing-install-hint', hint: true }] : [])
+    // what could not be checked is not known to be missing
+    ...(unknown.length ? [{ key: 'unit-check.dependencies-not-checked', level: 'hint' as const }] : []),
+    ...(installable ? [{ key: 'workspace.dependencies-missing-install-hint', level: 'hint' as const }] : [])
   ];
   return { lists: checked.map(toList), findings };
 }
