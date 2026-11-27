@@ -9,7 +9,8 @@ import type {
  * cannot read at all. VACANT, a variable without codes, is left out: such a variable is mostly not
  * meant to be coded -- the storage area of a drag-and-drop task, say -- and is not worth a warning.
  * So is ONLY_ONE_SOURCE of a formula or a manual coding, for which one source is usual: a formula
- * that converts a number entered, a manual coding of one answer.
+ * that converts a number entered, a manual coding of one answer, and INVALID_SOURCE of elements whose
+ * id is used twice, which the id conflicts name (#2119).
  */
 export type SchemeProblemType = Exclude<CodingSchemeProblemType, 'VACANT'> | 'NAME_TWICE' | 'UNREADABLE';
 
@@ -197,6 +198,12 @@ export function findSchemeProblems(
   const emptyLeftovers = new Map<string, boolean>();
   // whether all codings of a name are formulas or manual codings, which are usually derived from one source
   const oneSourceUsual = new Map<string, boolean>();
+  // whether all codings of a name belong to elements whose id is used twice: the export writes that id
+  // twice, and the id conflicts name it with how to resolve it -- an invalid source says the same, worse
+  const ofDoubledElements = new Map<string, boolean>();
+  // names with a coding of an element that is gone and that codes: a missing source under such a name is
+  // that element first, whatever a derived variable of the name derives from
+  const orphaned = new Set<string>();
   const codingById = new Map(codings.map(coding => [coding.id, coding]));
   // a derived variable may take the name of the base variable it derives from: the schemer allows it
   // as long as no other coding takes that name as well (#2135)
@@ -222,6 +229,8 @@ export function findSchemeProblems(
     baseByName.set(name, (baseByName.get(name) ?? true) && base && withElement);
     const leftover = base && !elementCount && !coding.codes?.length;
     emptyLeftovers.set(name, (emptyLeftovers.get(name) ?? true) && leftover);
+    ofDoubledElements.set(name, (ofDoubledElements.get(name) ?? true) && elementCount > 1);
+    if (coding.sourceType === 'BASE' && !elementCount && coding.codes?.length) orphaned.add(name);
     // a base coding the derived variable takes its name from has no say: one source is its only source
     if (!base) {
       oneSourceUsual.set(
@@ -236,6 +245,8 @@ export function findSchemeProblems(
     .filter((problem): problem is NamedProblem => problem.type !== 'VACANT')
     .filter(problem => !(problem.type === 'SOURCE_MISSING' && emptyLeftovers.get(problem.variableId)))
     .filter(problem => !(problem.type === 'ONLY_ONE_SOURCE' && oneSourceUsual.get(problem.variableId)))
+    .filter(problem => !(problem.type === 'INVALID_SOURCE' &&
+      ((elementIdCounts.get(problem.variableId) ?? 0) > 1 || ofDoubledElements.get(problem.variableId))))
     .filter(problem => {
       const key = `${problem.type} ${problem.variableId}`;
       if (seen.has(key)) return false;
@@ -253,7 +264,8 @@ export function findSchemeProblems(
         variable: problem.variableId,
         breaking: problem.breaking,
         baseVariable: baseByName.get(problem.variableId) ?? false,
-        ...(SOURCE_PROBLEMS.includes(type) && sourcesOf(problem.variableId))
+        ...(SOURCE_PROBLEMS.includes(type) && !(type === 'SOURCE_MISSING' && orphaned.has(problem.variableId)) &&
+          sourcesOf(problem.variableId))
       };
     });
 }

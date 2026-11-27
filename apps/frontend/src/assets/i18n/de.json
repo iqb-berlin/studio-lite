@@ -746,6 +746,11 @@
       "RULE_NUMERIC_RANGE_INVALID": "In der Kodierung von „{{variable}}“ hat eine Bereichsregel ungültige Grenzen: Eine Grenze fehlt oder ist keine Zahl, oder die untere liegt über der oberen. Die Grenzen in der Regel korrigieren.",
       "RULESET_VALUE_ARRAY_POS_INVALID": "In der Kodierung von „{{variable}}“ nennt ein Regelsatz eine Position im Wert, die es nicht gibt. Die Position im Regelsatz korrigieren."
     },
+    "level": {
+      "error": "Fehler",
+      "warning": "Warnung",
+      "hint": "Hinweis"
+    },
     "scheme-problem-detail": {
       "SOURCE_MISSING_ELEMENT": "„{{variable}}“ kodiert ein Element, das es in der Aufgabe nicht mehr gibt. In der Kodierung die Variable löschen.",
       "SOURCE_MISSING_NONE": "Für „{{variable}}“ ist keine Quellvariable ausgewählt. In der Kodierung bei „{{variable}}“ die Quellvariablen auswählen oder die Variable löschen.",
@@ -757,7 +762,7 @@
     },
     "element-problem": {
       "NAME_TWICE": "Zwei Elemente heißen „{{variable}}“. Im Editor einem von ihnen eine andere ID geben.",
-      "INVALID_SOURCE": "Das Element „{{variable}}“ passt nicht zu seiner Kodierung: Seine ID kommt doppelt vor, oder es hat einen Wert, ist aber als Variable ohne Wert kodiert, oder umgekehrt. Im Editor dem Element eine eindeutige ID geben. Ist sie schon eindeutig, in der Kodierung die Variable prüfen."
+      "INVALID_SOURCE": "Das Element „{{variable}}“ passt nicht zu seiner Kodierung: Es hat einen Wert, ist aber als Variable ohne Wert kodiert, oder umgekehrt. In der Kodierung die Variable prüfen."
     },
     "comments-present": "Kommentare vorhanden",
     "comments-absent": "Keine Kommentare",

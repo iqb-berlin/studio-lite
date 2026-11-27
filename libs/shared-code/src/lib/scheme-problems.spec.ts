@@ -1,5 +1,6 @@
 import { CodingSchemeFactory, VariableInfoInput } from '@iqb/responses';
 import { findSchemeProblems as findWith } from './scheme-problems';
+import { findVariableIdConflicts } from './variable-id-conflicts';
 
 // the validation the schemer runs, as the callers hand it in
 const findSchemeProblems = (
@@ -181,6 +182,20 @@ describe('findSchemeProblems', () => {
     }]);
   });
 
+  // the element gone first: a derived variable that took its name derives from it and fails with it (#2135)
+  it('takes a missing source under the name of an element that is gone for that element', () => {
+    expect(findSchemeProblems([], scheme([
+      {
+        id: 'x', alias: 'x', sourceType: 'BASE', ...coded
+      },
+      {
+        id: 'd_1', alias: 'x', sourceType: 'COPY_VALUE', deriveSources: ['x'], codes: []
+      }
+    ])).filter(problem => problem.type === 'SOURCE_MISSING')).toEqual([{
+      type: 'SOURCE_MISSING', variable: 'x', breaking: true, baseVariable: false
+    }]);
+  });
+
   // a video replaced in the editor: its old coding has no codes, and deleting it loses nothing (#2135)
   it('leaves out a coding whose element is gone when it codes nothing', () => {
     const variables: VariableInfoInput[] = [{ id: 'video_new', alias: 'video_1', type: 'number' }];
@@ -208,21 +223,6 @@ describe('findSchemeProblems', () => {
       { id: 'text_old', alias: 'text_1', sourceType: 'BASE_NO_VALUE' },
       { id: 'text_new', alias: 'text_1', sourceType: 'BASE_NO_VALUE' }
     ])).filter(problem => problem.baseVariable)).toEqual([]);
-  });
-
-  // the editor shows them by their aliases, not by the internal id they share (#2135)
-  it('takes two elements of the same internal id for base variables by their names only', () => {
-    const variables: VariableInfoInput[] = [
-      { id: 'text_x', alias: 'text_1', type: 'no-value' },
-      { id: 'text_x', alias: 'text_2', type: 'no-value' }
-    ];
-
-    expect(findSchemeProblems(variables, scheme([
-      { id: 'text_x', alias: 'text_1', sourceType: 'BASE_NO_VALUE' },
-      { id: 'text_x', alias: 'text_2', sourceType: 'BASE_NO_VALUE' }
-    ])).map(problem => [problem.variable, problem.baseVariable]).sort()).toEqual([
-      ['text_1', true], ['text_2', true], ['text_x', false]
-    ]);
   });
 
   // renaming the derived variable in the coding resolves it, not the element
@@ -253,14 +253,56 @@ describe('findSchemeProblems', () => {
 
   // the schemer allows the pair; what it finds wrong under the name lies elsewhere
   it('does not take a derived variable that has the name of its own source for a name used twice', () => {
-    const variables: VariableInfoInput[] = [{ id: 'x', type: 'string' }, { id: 'x', type: 'string' }];
+    const variables: VariableInfoInput[] = [{ id: 'x', type: 'string' }];
 
     expect(findSchemeProblems(variables, scheme([
       { id: 'x', sourceType: 'BASE', ...coded },
       {
         id: 'd_1', alias: 'x', sourceType: 'COPY_VALUE', deriveSources: ['x'], ...coded
       }
-    ])).map(problem => problem.type)).toEqual(['INVALID_SOURCE']);
+    ]))).toEqual([]);
+  });
+
+  // the export writes their id twice, and the id conflicts name it with how to resolve it (#2119); an
+  // invalid source beside it would say the same, and point to the coding
+  it('leaves elements whose id is used twice to the id conflicts, however they are coded', () => {
+    const elements = (alias1: string, alias2: string): VariableInfoInput[] => [
+      { id: 'text_x', alias: alias1, type: 'string' }, { id: 'text_x', alias: alias2, type: 'string' }
+    ];
+    const cases: [VariableInfoInput[], string][] = [
+      // by their names, each coded
+      [elements('text_1', 'text_2'), scheme([
+        {
+          id: 'text_x', alias: 'text_1', sourceType: 'BASE', ...coded
+        },
+        {
+          id: 'text_x', alias: 'text_2', sourceType: 'BASE', ...coded
+        }
+      ])],
+      // one coding for both
+      [elements('text_1', 'text_2'), scheme([{
+        id: 'text_x', alias: 'text_1', sourceType: 'BASE', ...coded
+      }])],
+      // copied with their names as well
+      [elements('x', 'x'), scheme([
+        {
+          id: 'text_x', alias: 'x', sourceType: 'BASE', ...coded
+        },
+        {
+          id: 'text_x', alias: 'x', sourceType: 'BASE', ...coded
+        }
+      ])],
+      // deactivated in the schemer
+      [elements('_00a', '_00a'), scheme([
+        { id: 'text_x', alias: '_00a', sourceType: 'BASE_NO_VALUE' },
+        { id: 'text_x', alias: '_00a', sourceType: 'BASE_NO_VALUE' }
+      ])]
+    ];
+
+    cases.forEach(([variables, withScheme]) => {
+      expect(findSchemeProblems(variables, withScheme)).toEqual([]);
+      expect(findVariableIdConflicts(variables, withScheme).map(conflict => conflict.id)).toEqual(['text_x']);
+    });
   });
 
   // the schemer allows the pair only as a pair
@@ -290,20 +332,6 @@ describe('findSchemeProblems', () => {
     }]);
   });
 
-  // as elements copied with their id: the id is made unique in the editor
-  it('takes a coding that occurs as often as its element for a base variable', () => {
-    const variables: VariableInfoInput[] = [
-      { id: 'x', alias: 'x', type: 'string' }, { id: 'x', alias: 'x', type: 'string' }
-    ];
-    const twice = {
-      id: 'x', alias: 'x', sourceType: 'BASE', ...coded
-    };
-
-    expect(findSchemeProblems(variables, scheme([twice, twice]))).toEqual([{
-      type: 'INVALID_SOURCE', variable: 'x', breaking: true, baseVariable: true
-    }]);
-  });
-
   // as the source lists of a drag-and-drop the schemer deactivated: its "Deaktivieren" codes an element
   // that has a value as one without, and the coding skips it (#2135)
   it('finds nothing wrong with an element the schemer deactivated', () => {
@@ -318,20 +346,6 @@ describe('findSchemeProblems', () => {
         id: 'drop-list_2', alias: '03', sourceType: 'BASE', ...coded
       }
     ]))).toEqual([]);
-  });
-
-  it('still names an element the schemer deactivated when its id is used twice', () => {
-    const variables: VariableInfoInput[] = [
-      { id: 'text_x', alias: '_00a', type: 'string' },
-      { id: 'text_x', alias: '_00a', type: 'string' }
-    ];
-
-    expect(findSchemeProblems(variables, scheme([
-      { id: 'text_x', alias: '_00a', sourceType: 'BASE_NO_VALUE' },
-      { id: 'text_x', alias: '_00a', sourceType: 'BASE_NO_VALUE' }
-    ])).map(problem => [problem.type, problem.variable]).sort()).toEqual([
-      ['INVALID_SOURCE', '_00a'], ['INVALID_SOURCE', 'text_x']
-    ]);
   });
 
   describe('the position -1 in a rule set, which older schemers wrote for "no position" (#2135)', () => {

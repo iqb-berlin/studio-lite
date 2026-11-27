@@ -603,6 +603,13 @@ describe('UnitCheckComponent', () => {
       sectionOf('properties')?.querySelectorAll('[data-cy="unit-check-finding"]') ?? [],
       finding => [finding.getAttribute('data-level'), finding.querySelector('.finding-icon')?.textContent?.trim()]
     )).toEqual([['hint', 'info'], ['error', 'error']]);
+    // the sign alone tells the level: a screen reader names it
+    expect(sectionOf('properties')?.querySelector('.status-icon')?.getAttribute('aria-label'))
+      .toBe('unit-check.level.error');
+    expect(Array.from(
+      sectionOf('properties')?.querySelectorAll('.finding-icon') ?? [],
+      icon => [icon.getAttribute('aria-hidden'), icon.getAttribute('aria-label')]
+    )).toEqual([['false', 'unit-check.level.hint'], ['false', 'unit-check.level.error']]);
   }));
 
   it('names a module the unit lost before it is saved', fakeAsync(() => {
